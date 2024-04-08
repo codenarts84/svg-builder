@@ -24,7 +24,7 @@
 
         <v-list-item @click="() => console.log('Hi')">
           <v-list-item-title>
-            <AddAlignTools />
+            <AddAlignTools :textR="textR" :textL="textL" :textC="textC" />
           </v-list-item-title>
         </v-list-item>
       </v-list>
@@ -46,6 +46,9 @@ const props = defineProps({
   addEllipse: Function,
   addTextField: Function,
   onImportClick: Function,
+  textR: Function,
+  textL: Function,
+  textC: Function,
 });
 
 const onImport = () => props.onImportClick();

@@ -10,17 +10,17 @@
         </v-list-item-title>
       </v-list-item> -->
 
-      <v-list-item @click="onClick">
+      <v-list-item @click="onAlignHorizonCenter">
         <v-list-item-title>
           <ObjAlignCenterHorizentalIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
-      <v-list-item @click="onClick">
+      <v-list-item @click="onAlignHorizonLeft">
         <v-list-item-title>
           <ObjAlignLeftIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
-      <v-list-item @click="onClick">
+      <v-list-item @click="onAlignHorizonRight">
         <v-list-item-title>
           <ObjAlignRightIcon width="20px" height="20px" />
         </v-list-item-title>
@@ -58,6 +58,17 @@ import FlipVertIcon from "@/assets/svgs/menuIcons/FlipVertIcon.vue";
 import FlipHoriIcon from "@/assets/svgs/menuIcons/FlipHoriIcon.vue";
 import DistHoriIcon from "@/assets/svgs/menuIcons/DistHoriIcon.vue";
 import DistVertIcon from "@/assets/svgs/menuIcons/DistVertIcon.vue";
+
+import { defineProps } from "vue";
+const props = defineProps({
+  textR: Function,
+  textC: Function,
+  textL: Function,
+});
+
+const onAlignHorizonRight = () => props.textR();
+const onAlignHorizonLeft = () => props.textL();
+const onAlignHorizonCenter = () => props.textC();
 
 const onClick = () => alert("Not set yet");
 </script>
