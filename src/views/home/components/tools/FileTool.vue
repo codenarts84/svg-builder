@@ -1,7 +1,7 @@
 <template>
   <v-toolbar-items class="border-both">
     <v-btn id="menu-activator" color="primary" style="margin-left: 10px"
-      ><v-icon color="green-darken-2" icon="mdi-file" size="large"></v-icon
+      ><v-icon color="black" icon="mdi-file" size="large"></v-icon
     ></v-btn>
 
     <v-menu activator="#menu-activator">
@@ -14,18 +14,14 @@
 
         <v-list-item @click="onAddTextField">
           <v-list-item-title>
-            <v-icon
-              color="green-darken-2"
-              icon="mdi-pen-plus"
-              size="large"
-            ></v-icon>
+            <v-icon color="black" icon="mdi-pen-plus" size="large"></v-icon>
           </v-list-item-title>
         </v-list-item>
 
         <v-list-item @click="onAddRectangle">
           <v-list-item-title>
             <v-icon
-              color="green-darken-2"
+              color="black"
               icon="mdi-shape-rectangle-plus"
               size="large"
             ></v-icon>
@@ -35,7 +31,7 @@
         <v-list-item @click="onAddEllipse">
           <v-list-item-title>
             <v-icon
-              color="green-darken-2"
+              color="black"
               icon="mdi-shape-circle-plus"
               size="large"
             ></v-icon>
@@ -44,7 +40,7 @@
       </v-list>
     </v-menu>
     <v-btn class="btn" @click="onImport">
-      <v-icon color="green-darken-2" icon="mdi-folder" size="large"></v-icon
+      <v-icon color="black" icon="mdi-folder" size="large"></v-icon
     ></v-btn>
   </v-toolbar-items>
 </template>

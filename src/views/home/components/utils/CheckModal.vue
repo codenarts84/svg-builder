@@ -1,10 +1,6 @@
 <template>
   <v-btn class="btn" @click="dialog = true"
-    ><v-icon
-      color="green-darken-2"
-      icon="mdi-check-circle"
-      size="large"
-    ></v-icon>
+    ><v-icon color="black" icon="mdi-check-circle" size="large"></v-icon>
   </v-btn>
   <div class="text-center">
     <v-dialog v-model="dialog" width="400">

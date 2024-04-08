@@ -1,6 +1,6 @@
 <template>
   <v-icon
-    color="green-darken-2"
+    color="black"
     icon="mdi-seat"
     size="large"
     id="chair-dropdown"
@@ -9,31 +9,23 @@
     <v-list style="left: 20px">
       <v-list-item @click="onClick">
         <v-list-item-title>
-          <v-icon
-            color="green-darken-2"
-            icon="mdi-sofa-single"
-            size="large"
-          ></v-icon>
+          <v-icon color="black" icon="mdi-sofa-single" size="large"></v-icon>
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
-          <v-icon color="green-darken-2" icon="mdi-sofa" size="large"></v-icon>
+          <v-icon color="black" icon="mdi-sofa" size="large"></v-icon>
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
-          <v-icon
-            color="green-darken-2"
-            icon="mdi-chair-rolling"
-            size="large"
-          ></v-icon>
+          <v-icon color="black" icon="mdi-chair-rolling" size="large"></v-icon>
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
           <v-icon
-            color="green-darken-2"
+            color="black"
             icon="mdi-table-furniture"
             size="large"
           ></v-icon>

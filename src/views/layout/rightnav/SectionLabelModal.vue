@@ -9,7 +9,7 @@
       size="small"
       variant="standard"
       style="padding: 0px"
-      ><v-icon color="green-darken-2" icon="mdi-plus" size="large"></v-icon>
+      ><v-icon color="black" icon="mdi-plus" size="large"></v-icon>
     </v-btn>
   </div>
 

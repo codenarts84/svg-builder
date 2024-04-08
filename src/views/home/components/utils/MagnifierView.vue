@@ -1,18 +1,10 @@
 <template>
   <v-btn class="btn" @click="increaseZoom">
-    <v-icon
-      color="green-darken-2"
-      icon="mdi-magnify-plus"
-      size="large"
-    ></v-icon>
+    <v-icon color="black" icon="mdi-magnify-plus" size="large"></v-icon>
   </v-btn>
   <v-btn>{{ zoomPercent }}%</v-btn>
   <v-btn class="btn" @click="decreaseZoom">
-    <v-icon
-      color="green-darken-2"
-      icon="mdi-magnify-minus"
-      size="large"
-    ></v-icon>
+    <v-icon color="black" icon="mdi-magnify-minus" size="large"></v-icon>
   </v-btn>
 </template>
 
