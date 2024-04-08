@@ -47,6 +47,7 @@
 <script setup>
 import { defineProps } from "vue";
 import AddChairTools from "./AddChairTools.vue";
+// import ImportIcon from "@/assets/svgs/menuIcons/ImportIcon.vue";
 
 const props = defineProps({
   addRectangle: Function,
