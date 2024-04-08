@@ -3,7 +3,7 @@
     <DrawSquareIcon width="20px" height="20px" />
   </div>
   <v-menu location="end" activator="#items-dropdown">
-    <v-list style="left: 20px">
+    <v-list style="left: 20px; top: -10px">
       <v-list-item @click="onAddTextField">
         <v-list-item-title>
           <v-icon color="black" icon="mdi-pen-plus" size="large"></v-icon>

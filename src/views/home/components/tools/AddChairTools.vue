@@ -3,7 +3,7 @@
     <SeatBuilderIcon width="20px" height="20px" />
   </div>
   <v-menu location="end" activator="#chair-dropdown">
-    <v-list style="left: 20px">
+    <v-list style="left: 20px; top: -15px">
       <v-list-item @click="onClick">
         <v-list-item-title>
           <RowSingleIcon width="20px" height="20px" />
