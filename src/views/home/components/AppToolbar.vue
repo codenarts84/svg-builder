@@ -10,21 +10,21 @@
     <v-toolbar-items class="border-both">
       <v-btn class="btn" @click="$emit('textL')"
         ><v-icon
-          color="green-darken-2"
+          color="black"
           icon="mdi-format-align-left"
           size="large"
         ></v-icon>
       </v-btn>
       <v-btn class="btn" @click="$emit('textC')">
         <v-icon
-          color="green-darken-2"
+          color="black"
           icon="mdi-format-align-center"
           size="large"
         ></v-icon>
       </v-btn>
       <v-btn class="btn" @click="$emit('textR')"
         ><v-icon
-          color="green-darken-2"
+          color="black"
           icon="mdi-format-align-right"
           size="large"
         ></v-icon>

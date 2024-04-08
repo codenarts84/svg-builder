@@ -1,7 +1,6 @@
 <template>
   <v-btn class="btn" @click="dialog = true"
-    ><v-icon color="green-darken-2" icon="mdi-download" size="large"></v-icon
-    >Export
+    ><v-icon color="black" icon="mdi-download" size="large"></v-icon>Export
   </v-btn>
   <div class="text-center">
     <v-dialog v-model="dialog" width="400">
