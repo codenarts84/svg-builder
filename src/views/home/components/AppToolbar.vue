@@ -1,5 +1,5 @@
 <template>
-  <v-toolbar flat style="position: fixed; opacity: 1">
+  <v-toolbar flat style="position: fixed; opacity: 1; height: 50px">
     <FileTool
       :addTextField="addTextField"
       :addEllipse="addEllipse"
@@ -60,6 +60,9 @@ const props = defineProps({
   padding: 10px;
   display: flex;
   gap: 10px;
+}
+.v-toolbar__content {
+  height: 50px !important;
 }
 .border-both {
   border-right: 2px solid rgba(255, 255, 255, 0.5);

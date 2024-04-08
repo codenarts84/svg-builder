@@ -1,6 +1,7 @@
 <template>
-  <div id="align-dropdown" style="width: 100%; height: 100%">
+  <div id="align-dropdown" class="arrow-menu">
     <ObjAlignCenterVertical width="20px" height="20px" />
+    <div>{{ ">" }}</div>
   </div>
   <v-menu location="end" activator="#align-dropdown">
     <v-list style="left: 20px; top: -10px">

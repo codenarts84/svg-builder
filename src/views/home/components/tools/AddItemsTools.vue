@@ -1,6 +1,7 @@
 <template>
-  <div id="items-dropdown" style="width: 100%; height: 100%">
+  <div id="items-dropdown" class="arrow-menu">
     <DrawSquareIcon width="20px" height="20px" />
+    <div>{{ ">" }}</div>
   </div>
   <v-menu location="end" activator="#items-dropdown">
     <v-list style="left: 20px; top: -10px">

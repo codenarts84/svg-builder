@@ -1,6 +1,7 @@
 <template>
-  <div id="chair-dropdown" style="width: 100%; height: 100%">
+  <div id="chair-dropdown" class="arrow-menu">
     <SeatBuilderIcon width="20px" height="20px" />
+    <div>{{ ">" }}</div>
   </div>
   <v-menu location="end" activator="#chair-dropdown">
     <v-list style="left: 20px; top: -15px">
@@ -49,3 +50,11 @@ import TableRectIcon from "@/assets/svgs/menuIcons/TableRectIcon.vue";
 
 const onClick = () => alert("Not set yet");
 </script>
+
+<style>
+.arrow-menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+</style>

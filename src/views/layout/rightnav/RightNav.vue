@@ -1,7 +1,7 @@
 <template>
   <v-navigation-drawer
     location="right"
-    style="top: 64px; width: 300px; padding-bottom: 64px"
+    style="top: 50px; width: 300px; padding-bottom: 50px"
   >
     <RowComponent />
     <v-divider></v-divider>
