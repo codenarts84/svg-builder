@@ -3,18 +3,15 @@
     <v-btn>
       <SelectionArrowIcon width="20px" height="20px" />
     </v-btn>
-
     <v-btn>
       <DirectSelectionArrowIcon width="20px" height="20px" />
     </v-btn>
-
     <v-btn>
       <CloneIcon width="20px" height="20px" />
     </v-btn>
     <v-btn>
       <UndoIcon width="20px" height="20px" />
     </v-btn>
-
     <v-btn>
       <HandRockIcon width="20px" height="20px" />
     </v-btn>
