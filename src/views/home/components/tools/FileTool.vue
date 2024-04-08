@@ -12,29 +12,19 @@
           </v-list-item-title>
         </v-list-item>
 
-        <v-list-item @click="onAddTextField">
+        <v-list-item @click="() => console.log('Hi')">
           <v-list-item-title>
-            <v-icon color="black" icon="mdi-pen-plus" size="large"></v-icon>
+            <AddItemsTools
+              :addTextField="addTextField"
+              :addEllipse="addEllipse"
+              :addRectangle="addRectangle"
+            />
           </v-list-item-title>
         </v-list-item>
 
-        <v-list-item @click="onAddRectangle">
+        <v-list-item @click="() => console.log('Hi')">
           <v-list-item-title>
-            <v-icon
-              color="black"
-              icon="mdi-shape-rectangle-plus"
-              size="large"
-            ></v-icon>
-          </v-list-item-title>
-        </v-list-item>
-
-        <v-list-item @click="onAddEllipse">
-          <v-list-item-title>
-            <v-icon
-              color="black"
-              icon="mdi-shape-circle-plus"
-              size="large"
-            ></v-icon>
+            <AddAlignTools />
           </v-list-item-title>
         </v-list-item>
       </v-list>
@@ -47,6 +37,8 @@
 <script setup>
 import { defineProps } from "vue";
 import AddChairTools from "./AddChairTools.vue";
+import AddItemsTools from "./AddItemsTools.vue";
+import AddAlignTools from "./AddAlignTools.vue";
 // import ImportIcon from "@/assets/svgs/menuIcons/ImportIcon.vue";
 
 const props = defineProps({
@@ -56,8 +48,5 @@ const props = defineProps({
   onImportClick: Function,
 });
 
-const onAddRectangle = () => props.addRectangle();
-const onAddEllipse = () => props.addEllipse();
-const onAddTextField = () => props.addTextField();
 const onImport = () => props.onImportClick();
 </script>

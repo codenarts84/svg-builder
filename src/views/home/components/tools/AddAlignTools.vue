@@ -1,12 +1,12 @@
 <template>
-  <div id="chair-dropdown" style="width: 100%; height: 100%">
-    <SeatBuilderIcon width="20px" height="20px" />
+  <div id="align-dropdown" style="width: 100%; height: 100%">
+    <ObjAlignCenterVertical width="20px" height="20px" />
   </div>
-  <v-menu location="end" activator="#chair-dropdown">
+  <v-menu location="end" activator="#align-dropdown">
     <v-list style="left: 20px">
       <v-list-item @click="onClick">
         <v-list-item-title>
-          <SeatBuilderIcon width="20px" height="20px" />
+          <ObjAlignCenterVertical width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
@@ -33,7 +33,7 @@
 </template>
 
 <script setup>
-import SeatBuilderIcon from "@/assets/svgs/menuIcons/SeatBuilderIcon.vue";
+import ObjAlignCenterVertical from "@/assets/svgs/menuIcons/ObjAlignCenterVertical.vue";
 
 const onClick = () => alert("Not set yet");
 </script>
