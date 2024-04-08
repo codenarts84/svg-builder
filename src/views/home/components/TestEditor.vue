@@ -1,19 +1,19 @@
 <template>
-  <div class="demo-container">
+  <div class="demo-container" style="margin-top: 150px">
     <div class="colorpicker" v-show="showcolors">
       <Sketch v-model="colors" @change-color="onChange" />
     </div>
 
     <v-file-input
+      id="custom-file-input"
       label="Upload your svg file"
       prepend-icon="mdi-svg"
       variant="filled"
       type="file"
       accept=".svg"
       @change="importSVG"
-      style="width: 300px; padding: 20px"
+      style="width: 300px; padding: 20px; display: none"
     ></v-file-input>
-    <!-- <input type="file" @change="$emit('importSVG')" accept=".svg" /> -->
     <div class="canvas">
       <svg
         ref="svgBoard"
@@ -122,10 +122,6 @@
     </div>
 
     <div>
-      <input type="text" v-model="boardName" placeholder="Board Name" />
-      <input type="number" v-model.number="boardWidth" placeholder="Width" />
-      <input type="number" v-model.number="boardHeight" placeholder="Height" />
-      <button @click="applyBoardChanges">Save Board Changes</button>
       <div v-if="activeItem !== -1">
         <input
           type="text"
@@ -152,13 +148,18 @@ import {
   onUnmounted,
   watch,
   defineExpose,
+  computed,
 } from "vue";
 import { saveAs } from "file-saver";
+import { useSvgStore, useBoardStore } from "../../../stores/svgStore";
+const svgStore = useSvgStore();
+const boardStore = useBoardStore();
 
 const svgBoard = ref(null);
 const boardName = ref("My SVG Board");
-const boardWidth = ref(800);
-const boardHeight = ref(500);
+const scale = ref(computed(() => svgStore.magnifier_init));
+const boardWidth = ref(computed(() => boardStore.width));
+const boardHeight = ref(computed(() => boardStore.height));
 const activeItem = ref(-1);
 
 // import Sketch from "vue-color/src/components/Sketch.vue";
@@ -187,14 +188,14 @@ const tools = {
 // const tools = reactive({ squaresize: 8, min_height: 10 });
 let movetarget = ref(null);
 let activeItemIndex = ref(null);
-const scale = ref(1);
 
 const viewBox = ref(`0 0 ${boardWidth.value} ${boardHeight.value}`);
 
 watch(
-  [boardWidth, boardHeight],
+  [boardWidth, boardHeight, scale],
   () => {
     viewBox.value = `0 0 ${boardWidth.value} ${boardHeight.value}`;
+    updateViewBox();
   },
   { immediate: true }
 );
@@ -212,6 +213,7 @@ function zoomOut() {
 function updateViewBox() {
   const newWidth = boardWidth.value * scale.value;
   const newHeight = boardHeight.value * scale.value;
+  // console.log("HERE", scale.value, newWidth, newHeight);
   const newX = (boardWidth.value - newWidth) / 2;
   const newY = (boardHeight.value - newHeight) / 2;
   viewBox.value = `${newX} ${newY} ${newWidth} ${newHeight}`;
@@ -231,6 +233,12 @@ function importSVG(event) {
     alert("Please select a valid SVG file.");
   }
 }
+
+const onImportClick = () => {
+  const temp = document.getElementById("custom-file-input");
+  temp.click();
+  console.log(temp);
+};
 
 const addTextField = () => {
   const newID = items.value.length + 1;
@@ -293,12 +301,12 @@ function onClickItem(event, item) {
 
   if (item.id) {
     activeItem.value = item.id - 1;
-    console.log(
-      item.id - 1,
-      items.value[item.id - 1],
-      "+++",
-      items.value[item.id - 1].color
-    );
+    //   console.log(
+    //     item.id - 1,
+    //     items.value[item.id - 1],
+    //     "+++",
+    //     items.value[item.id - 1].color
+    //   );
   }
   // select item if not selected
   deactivateItems();
@@ -515,12 +523,6 @@ const onKeyUp = (event) => {
   }
 };
 
-function applyBoardChanges() {
-  boardWidth.value = Math.max(100, boardWidth.value);
-  boardHeight.value = Math.max(100, boardHeight.value);
-  viewBox.value = `0 0 ${boardWidth.value} ${boardHeight.value}`;
-}
-
 defineExpose({
   importSVG,
   downloadSVG,
@@ -532,6 +534,7 @@ defineExpose({
   toggleColor,
   textAlign,
   deleteItem,
+  onImportClick,
 });
 </script>
 
