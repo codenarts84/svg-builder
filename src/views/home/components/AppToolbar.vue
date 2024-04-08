@@ -5,31 +5,11 @@
       :addEllipse="addEllipse"
       :addRectangle="addRectangle"
       :onImportClick="onImportClick"
+      :textR="textR"
+      :textL="textL"
+      :textC="textC"
     />
     <MainTools :removeItem="removeItem" />
-    <v-toolbar-items class="border-both">
-      <v-btn class="btn" @click="$emit('textL')"
-        ><v-icon
-          color="black"
-          icon="mdi-format-align-left"
-          size="large"
-        ></v-icon>
-      </v-btn>
-      <v-btn class="btn" @click="$emit('textC')">
-        <v-icon
-          color="black"
-          icon="mdi-format-align-center"
-          size="large"
-        ></v-icon>
-      </v-btn>
-      <v-btn class="btn" @click="$emit('textR')"
-        ><v-icon
-          color="black"
-          icon="mdi-format-align-right"
-          size="large"
-        ></v-icon>
-      </v-btn>
-    </v-toolbar-items>
     <v-spacer></v-spacer>
     <v-toolbar-items class="border-both">
       <MagnifierComponent :initial-zoom="initscale" />
@@ -68,6 +48,9 @@ const props = defineProps({
   addEllipse: Function,
   addRectangle: Function,
   onImportClick: Function,
+  textR: Function,
+  textL: Function,
+  textC: Function,
 });
 </script>
 
