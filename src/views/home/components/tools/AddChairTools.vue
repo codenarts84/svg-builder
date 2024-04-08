@@ -6,26 +6,32 @@
     <v-list style="left: 20px">
       <v-list-item @click="onClick">
         <v-list-item-title>
-          <SeatBuilderIcon width="20px" height="20px" />
+          <RowSingleIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
-          <v-icon color="black" icon="mdi-sofa" size="large"></v-icon>
+          <RowMultiIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
-          <v-icon color="black" icon="mdi-chair-rolling" size="large"></v-icon>
+          <RowStaggedIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
-          <v-icon
-            color="black"
-            icon="mdi-table-furniture"
-            size="large"
-          ></v-icon>
+          <GaSquareIcon width="20px" height="20px" />
+        </v-list-item-title>
+      </v-list-item>
+      <v-list-item @click="onClick">
+        <v-list-item-title>
+          <TableRoundIcon width="20px" height="20px" />
+        </v-list-item-title>
+      </v-list-item>
+      <v-list-item @click="onClick">
+        <v-list-item-title>
+          <TableRectIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
     </v-list>
@@ -34,6 +40,12 @@
 
 <script setup>
 import SeatBuilderIcon from "@/assets/svgs/menuIcons/SeatBuilderIcon.vue";
+import RowSingleIcon from "@/assets/svgs/menuIcons/RowSingleIcon.vue";
+import RowMultiIcon from "@/assets/svgs/menuIcons/RowMultiIcon.vue";
+import RowStaggedIcon from "@/assets/svgs/menuIcons/RowStaggedIcon.vue";
+import GaSquareIcon from "@/assets/svgs/menuIcons/GaSquareIcon.vue";
+import TableRoundIcon from "@/assets/svgs/menuIcons/TableRoundIcon.vue";
+import TableRectIcon from "@/assets/svgs/menuIcons/TableRectIcon.vue";
 
 const onClick = () => alert("Not set yet");
 </script>
