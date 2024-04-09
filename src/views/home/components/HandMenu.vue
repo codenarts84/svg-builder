@@ -1,5 +1,8 @@
 <template>
-  <v-list style="position: fixed; top: 55px; left: 5px">
+  <v-list
+    style="position: fixed; top: 55px; left: 5px; z-index: 999"
+    id="hand-menu"
+  >
     <v-list-item @click="() => console.log('Hi')">
       <v-list-item-title>
         <AddChairTools />
@@ -45,3 +48,10 @@ const props = defineProps({
 
 console.log(props);
 </script>
+
+<style>
+#hand-menu {
+  background-color: #eeeeee;
+  border-radius: 10px;
+}
+</style>

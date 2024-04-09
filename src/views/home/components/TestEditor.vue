@@ -1,8 +1,8 @@
 <template>
   <div class="demo-container">
-    <div class="colorpicker" v-show="showcolors">
+    <!-- <div class="colorpicker" v-show="showcolors">
       <Sketch v-model="colors" @change-color="onChange" />
-    </div>
+    </div> -->
 
     <v-file-input
       id="custom-file-input"
@@ -12,102 +12,105 @@
       type="file"
       accept=".svg"
       @change="importSVG"
-      style="width: 300px; padding: 20px; display: none"
+      style="display: none"
     ></v-file-input>
     <div class="canvas">
-      <svg
-        ref="svgBoard"
-        @mousemove="onMouseMove($event)"
-        @mouseup="onMouseUp($event)"
-        @click="onClickItem($event, {})"
-        :width="boardWidth"
-        :height="boardHeight"
-        :viewBox="viewBox"
-      >
+      <svg style="width: 100%; height: 100%" ref="svgBoard" id="mysvg">
         <g
-          v-for="item in items"
-          :transform="'translate(' + item.x + ', ' + item.y + ')'"
-          :key="item"
+          @mousemove="onMouseMove($event)"
+          @mouseup="onMouseUp($event)"
+          @click="onClickItem($event, {})"
+          :width="boardWidth"
+          :height="boardHeight"
+          :viewBox="viewBox"
+          :transform="newTransform"
         >
-          <text
-            v-if="item.type == 'text'"
-            :x="getTextXPos(item)"
-            :y="item.height * 0.9"
-            :_width="item.width"
-            :_height="item.height"
-            :font-size="item.height"
-            :font-family="item.font"
-            :fill="item.color"
-            :text-anchor="item.textAnchor"
-            @click="onClickItem($event, item)"
+          <rect :width="boardWidth" :height="boardHeight" fill="white"></rect>
+          <g
+            v-for="item in items"
+            :transform="'translate(' + item.x + ', ' + item.y + ')'"
+            :key="item"
           >
-            {{ item.text }}
-          </text>
+            <text
+              v-if="item.type == 'text'"
+              :x="getTextXPos(item)"
+              :y="item.height * 0.9"
+              :_width="item.width"
+              :_height="item.height"
+              :font-size="item.height"
+              :font-family="item.font"
+              :fill="item.color"
+              :text-anchor="item.textAnchor"
+              @click="onClickItem($event, item)"
+            >
+              {{ item.text }}
+            </text>
 
-          <rect
-            v-if="item.type == 'rect'"
-            :x="0"
-            :y="0"
-            :width="item.width"
-            :height="item.height"
-            :fill="item.color"
-            @click="onClickItem($event, item)"
-          ></rect>
-
-          <ellipse
-            v-if="item.type == 'ellipse'"
-            :cx="item.width / 2"
-            :cy="item.height / 2"
-            :rx="item.width / 2"
-            :ry="item.height / 2"
-            :fill="item.color"
-            @click="onClickItem($event, item)"
-          ></ellipse>
-
-          <g v-if="item.active">
             <rect
+              v-if="item.type == 'rect'"
               :x="0"
               :y="0"
               :width="item.width"
               :height="item.height"
-              class="ctrl-bounds"
+              :fill="item.color"
               @click="onClickItem($event, item)"
-              @_mouseout="onMouseUpRegion($event, item)"
-              @mousedown="onMouseDownRegion($event, item)"
-            />
-            <g @mousedown="onMouseDownHandles($event, item)">
+            ></rect>
+
+            <ellipse
+              v-if="item.type == 'ellipse'"
+              :cx="item.width / 2"
+              :cy="item.height / 2"
+              :rx="item.width / 2"
+              :ry="item.height / 2"
+              :fill="item.color"
+              @click="onClickItem($event, item)"
+            ></ellipse>
+
+            <g v-if="item.active">
               <rect
-                class="ctrl-rect"
-                :width="tools.squaresize"
-                :height="tools.squaresize"
-                data-handleid="1"
-                :x="0 - tools.squaresize / 2"
-                :y="0 - tools.squaresize / 2"
+                :x="0"
+                :y="0"
+                :width="item.width"
+                :height="item.height"
+                class="ctrl-bounds"
+                @click="onClickItem($event, item)"
+                @_mouseout="onMouseUpRegion($event, item)"
+                @mousedown="onMouseDownRegion($event, item)"
               />
-              <rect
-                class="ctrl-rect"
-                :width="tools.squaresize"
-                :height="tools.squaresize"
-                data-handleid="3"
-                :x="item.width - tools.squaresize / 2"
-                :y="0 - tools.squaresize / 2"
-              />
-              <rect
-                class="ctrl-rect"
-                :width="tools.squaresize"
-                :height="tools.squaresize"
-                data-handleid="7"
-                :x="0 - tools.squaresize / 2"
-                :y="item.height - tools.squaresize / 2"
-              />
-              <rect
-                class="ctrl-rect"
-                :width="tools.squaresize"
-                :height="tools.squaresize"
-                data-handleid="9"
-                :x="item.width - tools.squaresize / 2"
-                :y="item.height - tools.squaresize / 2"
-              />
+              <g @mousedown="onMouseDownHandles($event, item)">
+                <rect
+                  class="ctrl-rect"
+                  :width="tools.squaresize"
+                  :height="tools.squaresize"
+                  data-handleid="1"
+                  :x="0 - tools.squaresize / 2"
+                  :y="0 - tools.squaresize / 2"
+                />
+                <rect
+                  class="ctrl-rect"
+                  :width="tools.squaresize"
+                  :height="tools.squaresize"
+                  data-handleid="3"
+                  :x="item.width - tools.squaresize / 2"
+                  :y="0 - tools.squaresize / 2"
+                />
+                <rect
+                  class="ctrl-rect"
+                  :width="tools.squaresize"
+                  :height="tools.squaresize"
+                  data-handleid="7"
+                  :x="0 - tools.squaresize / 2"
+                  :y="item.height - tools.squaresize / 2"
+                />
+                <rect
+                  class="ctrl-rect"
+                  :width="tools.squaresize"
+                  :height="tools.squaresize"
+                  data-handleid="9"
+                  :x="item.width - tools.squaresize / 2"
+                  :y="item.height - tools.squaresize / 2"
+                />
+              </g>
             </g>
           </g>
         </g>
@@ -168,12 +171,13 @@ const scale = ref(computed(() => svgStore.magnifier_init));
 const boardWidth = ref(computed(() => boardStore.width));
 const boardHeight = ref(computed(() => boardStore.height));
 const activeItem = ref(-1);
+const newTransform = ref("scale(" + svgStore.magnifier_init + ")");
 
 // import Sketch from "vue-color/src/components/Sketch.vue";
 
 let items = ref([]);
 let colors = reactive({ hex: "#999999", a: 1 });
-const showColors = ref(false);
+// const showColors = ref(false);
 // let onChangeColorListener = ref(() => {});
 // console.log(onChangeColorListener());
 var defaultProps = {
@@ -202,6 +206,19 @@ watch(
   [boardWidth, boardHeight, scale],
   () => {
     viewBox.value = `0 0 ${boardWidth.value} ${boardHeight.value}`;
+    const Fullwidth = window.innerWidth - 300 - 17;
+    const FullHeight = window.innerHeight - 50;
+    const topPadding = (FullHeight - boardHeight.value * scale.value) / 2;
+    const leftPadding = (Fullwidth - boardWidth.value * scale.value) / 2;
+    newTransform.value =
+      "translate(" +
+      leftPadding +
+      ", " +
+      topPadding +
+      ") scale(" +
+      scale.value +
+      ")";
+    console.log(topPadding, Fullwidth);
     updateViewBox();
   },
   { immediate: true }
@@ -285,9 +302,9 @@ const addEllipse = () => {
   });
 };
 
-const toggleColor = () => {
-  showColors.value = !showColors.value;
-};
+// const toggleColor = () => {
+//   showColors.value = !showColors.value;
+// };
 
 function onClickItem(event, item) {
   event.stopPropagation(); //prevent parent from firing
@@ -356,6 +373,7 @@ console.log(removeActiveItem);
 
 function onMouseDownRegion(event, item) {
   if (item.active) {
+    console.log(event, item);
     item.drag = {
       type: "MOVE",
       x: item.x,
@@ -374,72 +392,73 @@ function onMouseUp(event, element) {
 
 function onMouseMove(event) {
   if (movetarget.value == null) return;
+  console.log("MOVE?", movetarget);
   var item = movetarget.value;
   var t = tools;
   // console.log("MouseMove", item);
   if (item.active && item.drag != undefined) {
     if (item.drag.type == "MOVE") {
-      item.x = event.x - item.drag.mx + item.drag.x;
-      item.y = event.y - item.drag.my + item.drag.y;
+      item.x = (event.x - item.drag.mx) / scale.value + item.drag.x;
+      item.y = (event.y - item.drag.my) / scale.value + item.drag.y;
     }
     if (item.drag.type == "SCALE") {
       if (item.drag.handleID == "1") {
         // TL resize handler
         item.x = Math.min(
-          event.x - item.drag.mx + item.drag.x,
+          (event.x - item.drag.mx) / scale.value + item.drag.x,
           item.drag.x + (item.drag.w - t.min_height)
         );
         item.y = Math.min(
-          event.y - item.drag.my + item.drag.y,
+          (event.y - item.drag.my) / scale.value + item.drag.y,
           item.drag.y + (item.drag.h - t.min_height)
         ); // with y constraint
         item.width = Math.max(
-          item.drag.w - event.x + item.drag.mx,
+          item.drag.w + (item.drag.mx - event.x) / scale.value,
           t.min_height
         );
         item.height = Math.max(
-          item.drag.h - event.y + item.drag.my,
+          item.drag.h + (item.drag.my - event.y) / scale.value,
           t.min_height
         );
       }
       if (item.drag.handleID == "3") {
         // TR resize handler
         item.y = Math.min(
-          event.y - item.drag.my + item.drag.y,
+          (event.y - item.drag.my) / scale.value + item.drag.y,
           item.drag.y + (item.drag.h - t.min_height)
         ); // with y constraint
         item.width = Math.max(
-          item.drag.w + event.x - item.drag.mx,
+          item.drag.w + (event.x - item.drag.mx) / scale.value,
           t.min_height
         );
         item.height = Math.max(
-          item.drag.h - event.y + item.drag.my,
+          item.drag.h + (item.drag.my - event.y) / scale.value,
           t.min_height
         );
       }
       if (item.drag.handleID == "7") {
         // BL
         item.x = Math.min(
-          event.x - item.drag.mx + item.drag.x,
+          (event.x - item.drag.mx) / scale.value + item.drag.x,
           item.drag.x + (item.drag.w - t.min_height)
         );
         item.width = Math.max(
-          item.drag.w - event.x + item.drag.mx,
+          item.drag.w + (item.drag.mx - event.x) / scale.value,
           t.min_height
         );
         item.height = Math.max(
-          item.drag.h + event.y - item.drag.my,
+          item.drag.h + (event.y - item.drag.my) / scale.value,
           t.min_height
         );
       }
       if (item.drag.handleID == "9") {
         // BR
         item.width = Math.max(
-          item.drag.w + event.x - item.drag.mx,
+          item.drag.w + (event.x - item.drag.mx) / scale.value,
           t.min_height
         );
         item.height = Math.max(
-          item.drag.h + event.y - item.drag.my,
+          item.drag.h + (event.y - item.drag.my) / scale.value,
           t.min_height
         );
       }
@@ -447,11 +466,11 @@ function onMouseMove(event) {
   }
 }
 
-const onChange = (val) => {
-  if (activeItemIndex.value !== null) {
-    items.value[activeItemIndex.value].color = val;
-  }
-};
+// const onChange = (val) => {
+//   if (activeItemIndex.value !== null) {
+//     items.value[activeItemIndex.value].color = val;
+//   }
+// };
 
 function textAlign(val) {
   var i = items.value[activeItemIndex.value];
@@ -526,7 +545,7 @@ defineExpose({
   addTextField,
   addRectangle,
   addEllipse,
-  toggleColor,
+  // toggleColor,
   textAlign,
   deleteItem,
   onImportClick,
@@ -573,13 +592,21 @@ svg .ctrl-bounds {
   stroke-dasharray: 2, 4;
 }
 
+.canvas {
+  width: 100%;
+  height: 99%;
+  align-content: center;
+}
+
 .canvas svg {
-  background: #fff;
+  background: #f8f9fa;
 }
 
 .demo-container {
-  padding-top: 150px;
   overflow-x: auto;
   overflow-y: auto;
+  width: 100%;
+  height: 100%;
+  align-content: center;
 }
 </style>

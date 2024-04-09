@@ -1,5 +1,8 @@
 <template>
-  <v-toolbar flat style="position: fixed; opacity: 1; height: 50px">
+  <v-toolbar
+    flat
+    style="position: fixed; opacity: 1; height: 50px; z-index: 999"
+  >
     <FileTool
       :addTextField="addTextField"
       :addEllipse="addEllipse"
@@ -12,7 +15,7 @@
     <MainTools :removeItem="removeItem" />
     <v-spacer></v-spacer>
     <v-toolbar-items class="border-both">
-      <MagnifierComponent :initial-zoom="initscale" />
+      <MagnifierComponent />
     </v-toolbar-items>
 
     <v-toolbar-title>{{ boardName }}</v-toolbar-title>
