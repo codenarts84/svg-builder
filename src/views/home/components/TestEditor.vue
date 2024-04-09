@@ -14,11 +14,12 @@
       @change="importSVG"
       style="display: none"
     ></v-file-input>
-    <div class="canvas">
+    <div class="canvas" @mouseup="onHandUp">
       <svg style="width: 100%; height: 100%" ref="svgBoard" id="mysvg">
         <g
           @mousemove="onMouseMove($event)"
           @mouseup="onMouseUp($event)"
+          @mousedown="onMouseDown($event)"
           @click="onClickItem($event, {})"
           :width="boardWidth"
           :height="boardHeight"
@@ -168,10 +169,27 @@ const boardStore = useBoardStore();
 const svgBoard = ref(null);
 const boardName = ref("My SVG Board");
 const scale = ref(computed(() => svgStore.magnifier_init));
+const hand_selected = ref(computed(() => boardStore.hand_selected));
 const boardWidth = ref(computed(() => boardStore.width));
 const boardHeight = ref(computed(() => boardStore.height));
 const activeItem = ref(-1);
 const newTransform = ref("scale(" + svgStore.magnifier_init + ")");
+const PaddingTop = ref(
+  (window.innerWidth - 300 - 17 - boardWidth.value * scale.value) / 2
+);
+const PaddingLeft = ref(
+  (window.innerHeight - 50 - boardHeight.value * scale.value) / 2
+);
+const handposition = ref({
+  x: 0,
+  y: 0,
+  sx: PaddingTop.value,
+  sy: PaddingLeft.value,
+  active: false,
+});
+const handdx = ref(0);
+const handdy = ref(0);
+// const onHand = () => boardStore.set_hand_false();
 
 // import Sketch from "vue-color/src/components/Sketch.vue";
 
@@ -203,23 +221,64 @@ let activeItemIndex = ref(null);
 const viewBox = ref(`0 0 ${boardWidth.value} ${boardHeight.value}`);
 
 watch(
-  [boardWidth, boardHeight, scale],
+  [boardWidth, boardHeight],
   () => {
     viewBox.value = `0 0 ${boardWidth.value} ${boardHeight.value}`;
     const Fullwidth = window.innerWidth - 300 - 17;
     const FullHeight = window.innerHeight - 50;
-    const topPadding = (FullHeight - boardHeight.value * scale.value) / 2;
-    const leftPadding = (Fullwidth - boardWidth.value * scale.value) / 2;
+    PaddingTop.value = (FullHeight - boardHeight.value * scale.value) / 2;
+    PaddingLeft.value = (Fullwidth - boardWidth.value * scale.value) / 2;
     newTransform.value =
       "translate(" +
-      leftPadding +
+      PaddingTop.value +
       ", " +
-      topPadding +
+      PaddingLeft.value +
       ") scale(" +
       scale.value +
       ")";
-    console.log(topPadding, Fullwidth);
     updateViewBox();
+  },
+  { immediate: true }
+);
+
+watch(
+  [scale],
+  () => {
+    console.log("before", PaddingLeft.value, PaddingTop.value);
+    PaddingLeft.value = PaddingLeft.value / scale.value;
+    PaddingTop.value = PaddingTop.value / scale.value;
+    newTransform.value =
+      "translate(" +
+      PaddingTop.value +
+      ", " +
+      PaddingLeft.value +
+      ") scale(" +
+      scale.value +
+      ")";
+    console.log(
+      "after",
+      newTransform.value,
+      PaddingLeft.value,
+      PaddingTop.value
+    );
+  },
+  { immediate: true }
+);
+
+watch(
+  [handdx, handdy],
+  () => {
+    PaddingLeft.value = handposition.value.sy + handdy.value;
+    PaddingTop.value = handposition.value.sx + handdx.value;
+    newTransform.value =
+      "translate(" +
+      PaddingTop.value +
+      ", " +
+      PaddingLeft.value +
+      ") scale(" +
+      scale.value +
+      ")";
+    console.log("HERE", PaddingLeft.value, PaddingTop.value);
   },
   { immediate: true }
 );
@@ -306,6 +365,19 @@ const addEllipse = () => {
 //   showColors.value = !showColors.value;
 // };
 
+const onMouseDown = (event) => {
+  if (hand_selected.value) {
+    handposition.value = {
+      x: event.clientX,
+      y: event.clientY,
+      sx: PaddingTop.value,
+      sy: PaddingLeft.value,
+      active: true,
+    };
+    console.log("UAK", event, handposition.value);
+  }
+};
+
 function onClickItem(event, item) {
   event.stopPropagation(); //prevent parent from firing
 
@@ -386,81 +458,103 @@ function onMouseDownRegion(event, item) {
 }
 
 function onMouseUp(event, element) {
-  console.log(event, element);
+  console.log("Up", event, element, handposition.value);
+  // onHand();
   movetarget.value = null;
+  console.log("MU", PaddingLeft.value, PaddingTop.value);
+}
+
+function onHandUp() {
+  console.log("!!!!!");
+  handposition.value = {
+    x: 0,
+    y: 0,
+    sx: 0,
+    sy: 0,
+    active: false,
+  };
+  console.log("MU2", PaddingLeft.value, PaddingTop.value);
 }
 
 function onMouseMove(event) {
-  if (movetarget.value == null) return;
-  console.log("MOVE?", movetarget);
-  var item = movetarget.value;
-  var t = tools;
-  // console.log("MouseMove", item);
-  if (item.active && item.drag != undefined) {
-    if (item.drag.type == "MOVE") {
-      item.x = (event.x - item.drag.mx) / scale.value + item.drag.x;
-      item.y = (event.y - item.drag.my) / scale.value + item.drag.y;
-    }
-    if (item.drag.type == "SCALE") {
-      if (item.drag.handleID == "1") {
-        // TL resize handler
-        item.x = Math.min(
-          (event.x - item.drag.mx) / scale.value + item.drag.x,
-          item.drag.x + (item.drag.w - t.min_height)
-        );
-        item.y = Math.min(
-          (event.y - item.drag.my) / scale.value + item.drag.y,
-          item.drag.y + (item.drag.h - t.min_height)
-        ); // with y constraint
-        item.width = Math.max(
-          item.drag.w + (item.drag.mx - event.x) / scale.value,
-          t.min_height
-        );
-        item.height = Math.max(
-          item.drag.h + (item.drag.my - event.y) / scale.value,
-          t.min_height
-        );
+  if (hand_selected.value && handposition.value.active) {
+    const tempX = event.clientX;
+    const tempY = event.clientY;
+    handdx.value = tempX - handposition.value.x;
+    handdy.value = tempY - handposition.value.y;
+    console.log("MOVE", handdx.value, handdy.value);
+  } else {
+    if (movetarget.value == null) return;
+
+    var item = movetarget.value;
+    var t = tools;
+    // console.log("MouseMove", item);
+    if (item.active && item.drag != undefined) {
+      if (item.drag.type == "MOVE") {
+        item.x = (event.x - item.drag.mx) / scale.value + item.drag.x;
+        item.y = (event.y - item.drag.my) / scale.value + item.drag.y;
       }
-      if (item.drag.handleID == "3") {
-        // TR resize handler
-        item.y = Math.min(
-          (event.y - item.drag.my) / scale.value + item.drag.y,
-          item.drag.y + (item.drag.h - t.min_height)
-        ); // with y constraint
-        item.width = Math.max(
-          item.drag.w + (event.x - item.drag.mx) / scale.value,
-          t.min_height
-        );
-        item.height = Math.max(
-          item.drag.h + (item.drag.my - event.y) / scale.value,
-          t.min_height
-        );
-      }
-      if (item.drag.handleID == "7") {
-        // BL
-        item.x = Math.min(
-          (event.x - item.drag.mx) / scale.value + item.drag.x,
-          item.drag.x + (item.drag.w - t.min_height)
-        );
-        item.width = Math.max(
-          item.drag.w + (item.drag.mx - event.x) / scale.value,
-          t.min_height
-        );
-        item.height = Math.max(
-          item.drag.h + (event.y - item.drag.my) / scale.value,
-          t.min_height
-        );
-      }
-      if (item.drag.handleID == "9") {
-        // BR
-        item.width = Math.max(
-          item.drag.w + (event.x - item.drag.mx) / scale.value,
-          t.min_height
-        );
-        item.height = Math.max(
-          item.drag.h + (event.y - item.drag.my) / scale.value,
-          t.min_height
-        );
+      if (item.drag.type == "SCALE") {
+        if (item.drag.handleID == "1") {
+          // TL resize handler
+          item.x = Math.min(
+            (event.x - item.drag.mx) / scale.value + item.drag.x,
+            item.drag.x + (item.drag.w - t.min_height)
+          );
+          item.y = Math.min(
+            (event.y - item.drag.my) / scale.value + item.drag.y,
+            item.drag.y + (item.drag.h - t.min_height)
+          ); // with y constraint
+          item.width = Math.max(
+            item.drag.w + (item.drag.mx - event.x) / scale.value,
+            t.min_height
+          );
+          item.height = Math.max(
+            item.drag.h + (item.drag.my - event.y) / scale.value,
+            t.min_height
+          );
+        }
+        if (item.drag.handleID == "3") {
+          // TR resize handler
+          item.y = Math.min(
+            (event.y - item.drag.my) / scale.value + item.drag.y,
+            item.drag.y + (item.drag.h - t.min_height)
+          ); // with y constraint
+          item.width = Math.max(
+            item.drag.w + (event.x - item.drag.mx) / scale.value,
+            t.min_height
+          );
+          item.height = Math.max(
+            item.drag.h + (item.drag.my - event.y) / scale.value,
+            t.min_height
+          );
+        }
+        if (item.drag.handleID == "7") {
+          // BL
+          item.x = Math.min(
+            (event.x - item.drag.mx) / scale.value + item.drag.x,
+            item.drag.x + (item.drag.w - t.min_height)
+          );
+          item.width = Math.max(
+            item.drag.w + (item.drag.mx - event.x) / scale.value,
+            t.min_height
+          );
+          item.height = Math.max(
+            item.drag.h + (event.y - item.drag.my) / scale.value,
+            t.min_height
+          );
+        }
+        if (item.drag.handleID == "9") {
+          // BR
+          item.width = Math.max(
+            item.drag.w + (event.x - item.drag.mx) / scale.value,
+            t.min_height
+          );
+          item.height = Math.max(
+            item.drag.h + (event.y - item.drag.my) / scale.value,
+            t.min_height
+          );
+        }
       }
     }
   }
