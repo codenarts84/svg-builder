@@ -114,20 +114,34 @@
       </svg>
     </div>
 
-    <div>
-      <div v-if="activeItem !== -1">
-        <input
+    <div style="position: fixed; bottom: 0">
+      <div
+        v-if="activeItem !== -1"
+        style="display: flex; justify-content: center"
+      >
+        <v-text-field
+          label="Name"
           type="text"
           v-model="items[activeItem].name"
           placeholder="Circle Name"
+          density="compact"
+          style="width: 200px"
         />
-        <input
-          type="number"
+        <v-text-field
+          label="Id"
+          type="text"
           v-model.number="items[activeItem].id"
-          min="1"
           placeholder="Radius"
+          density="compact"
+          style="width: 200px"
         />
-        <input type="color" v-model="items[activeItem].color" />
+        <v-text-field
+          label="Color"
+          type="color"
+          v-model="items[activeItem].color"
+          density="compact"
+          style="width: 100px"
+        />
       </div>
     </div>
   </div>
