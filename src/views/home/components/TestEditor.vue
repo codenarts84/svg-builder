@@ -1,5 +1,5 @@
 <template>
-  <div class="demo-container" style="margin-top: 150px">
+  <div class="demo-container">
     <div class="colorpicker" v-show="showcolors">
       <Sketch v-model="colors" @change-color="onChange" />
     </div>
@@ -17,20 +17,18 @@
     <div class="canvas">
       <svg
         ref="svgBoard"
-        :width="boardWidth"
-        :height="boardHeight"
-        :viewBox="viewBox"
         @mousemove="onMouseMove($event)"
         @mouseup="onMouseUp($event)"
         @click="onClickItem($event, {})"
+        :width="boardWidth"
+        :height="boardHeight"
+        :viewBox="viewBox"
       >
         <g
           v-for="item in items"
           :transform="'translate(' + item.x + ', ' + item.y + ')'"
           :key="item"
         >
-          <!-- item -->
-
           <text
             v-if="item.type == 'text'"
             :x="getTextXPos(item)"
@@ -66,11 +64,6 @@
             @click="onClickItem($event, item)"
           ></ellipse>
 
-          <!-- controls 
-        <g v-for="item in items"
-          :transform="'translate('+item.x+', '+item.y+')'"
-          v-if="item.active"
-        >-->
           <g v-if="item.active">
             <rect
               :x="0"
@@ -199,16 +192,6 @@ watch(
   },
   { immediate: true }
 );
-
-function zoomIn() {
-  scale.value *= 0.9;
-  updateViewBox();
-}
-
-function zoomOut() {
-  scale.value *= 1.1;
-  updateViewBox();
-}
 
 function updateViewBox() {
   const newWidth = boardWidth.value * scale.value;
@@ -526,8 +509,6 @@ const onKeyUp = (event) => {
 defineExpose({
   importSVG,
   downloadSVG,
-  zoomIn,
-  zoomOut,
   addTextField,
   addRectangle,
   addEllipse,
@@ -580,5 +561,11 @@ svg .ctrl-bounds {
 
 .canvas svg {
   background: #fff;
+}
+
+.demo-container {
+  padding-top: 150px;
+  overflow-x: auto;
+  overflow-y: auto;
 }
 </style>

@@ -17,6 +17,14 @@
         :initscale="initscale"
         :onImportClick="onImportClick"
       />
+      <HandMenu
+        :addTextField="addTextField"
+        :addEllipse="addEllipse"
+        :addRectangle="addRectangle"
+        :textR="textR"
+        :textL="textL"
+        :textC="textC"
+      />
       <TestEditor ref="TestEdt" :initscale="initscale" />
     </v-main>
   </v-layout>
@@ -26,6 +34,7 @@ import { ref } from "vue";
 import AppToolbar from "./components/AppToolbar.vue";
 import TestEditor from "./components/TestEditor.vue";
 import RightNav from "../layout/rightnav/RightNav.vue";
+import HandMenu from "./components/HandMenu.vue";
 
 const TestEdt = ref(null);
 const initscale = ref(1);
