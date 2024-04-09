@@ -1,22 +1,28 @@
 <template>
-  <v-layout>
+  <AppToolbar
+    :importSVG="importSVG"
+    @zoomIn="zoomIn"
+    @zoomOut="zoomOut"
+    :textL="textL"
+    :textR="textR"
+    :textC="textC"
+    :addTextField="addTextField"
+    :addRectangle="addRectangle"
+    :addEllipse="addEllipse"
+    :removeItem="removeItem"
+    :downloadSVG="handleDownloadSVG"
+    :onImportClick="onImportClick"
+  />
+  <v-layout
+    style="
+      height: calc(100vh - 50px);
+      top: 50px;
+      position: absolute;
+      width: calc(100% - 300px);
+    "
+  >
     <RightNav />
-    <v-main style="padding-right: 300px">
-      <AppToolbar
-        :importSVG="importSVG"
-        @zoomIn="zoomIn"
-        @zoomOut="zoomOut"
-        :textL="textL"
-        :textR="textR"
-        :textC="textC"
-        :addTextField="addTextField"
-        :addRectangle="addRectangle"
-        :addEllipse="addEllipse"
-        :removeItem="removeItem"
-        :downloadSVG="handleDownloadSVG"
-        :initscale="initscale"
-        :onImportClick="onImportClick"
-      />
+    <div style="width: 100%">
       <HandMenu
         :addTextField="addTextField"
         :addEllipse="addEllipse"
@@ -25,8 +31,8 @@
         :textL="textL"
         :textC="textC"
       />
-      <TestEditor ref="TestEdt" :initscale="initscale" />
-    </v-main>
+      <TestEditor ref="TestEdt" />
+    </div>
   </v-layout>
 </template>
 <script setup>
@@ -37,7 +43,6 @@ import RightNav from "../layout/rightnav/RightNav.vue";
 import HandMenu from "./components/HandMenu.vue";
 
 const TestEdt = ref(null);
-const initscale = ref(1);
 
 const zoomIn = () => {
   TestEdt.value.zoomIn();
