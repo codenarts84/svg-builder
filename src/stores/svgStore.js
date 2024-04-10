@@ -20,12 +20,16 @@ export const useBoardStore = defineStore("myboard", () => {
   const width = ref(800);
   const height = ref(550);
   const hand_selected = ref(false);
+  const gird = ref(false);
 
   const set_name = (new_name) => (board_name.value = new_name);
   const set_width = (v) => (width.value = v);
   const set_height = (v) => (height.value = v);
   const set_hand = () => (hand_selected.value = !hand_selected.value);
   const set_hand_false = () => (hand_selected.value = false);
+  const gird_toggle = () => {
+    gird.value = !gird.value;
+  };
 
   return {
     board_name,
@@ -37,5 +41,7 @@ export const useBoardStore = defineStore("myboard", () => {
     hand_selected,
     set_hand,
     set_hand_false,
+    gird,
+    gird_toggle,
   };
 });

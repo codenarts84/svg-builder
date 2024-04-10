@@ -13,13 +13,16 @@
       :textC="textC"
     />
     <MainTools :removeItem="removeItem" />
-    <v-spacer></v-spacer>
-    <v-toolbar-items class="border-both">
-      <MagnifierComponent />
-    </v-toolbar-items>
+    <!-- <v-spacer></v-spacer> -->
 
     <v-toolbar-title>{{ boardName }}</v-toolbar-title>
 
+    <v-toolbar-items class="border-both">
+      <MagnifierComponent />
+    </v-toolbar-items>
+    <v-toolbar-items class="border-both">
+      <GridView />
+    </v-toolbar-items>
     <v-toolbar-items class="border-both">
       <SettingModal />
       <CheckModal />
@@ -38,6 +41,7 @@ import CheckModal from "./utils/CheckModal.vue";
 import ExportModal from "./utils/ExportModal.vue";
 import MainTools from "./tools/MainTools.vue";
 import FileTool from "./tools/FileTool.vue";
+import GridView from "./utils/GridView.vue";
 
 const boardStore = useBoardStore();
 const boardName = ref(computed(() => boardStore.board_name));

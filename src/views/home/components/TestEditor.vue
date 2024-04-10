@@ -16,6 +16,35 @@
     ></v-file-input>
     <div class="canvas" @mouseup="onHandUp">
       <svg style="width: 100%; height: 100%" ref="svgBoard" id="mysvg">
+        <defs>
+          <pattern
+            id="smallGrid"
+            width="10"
+            height="10"
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              d="M 10 0 L 0 0 0 10"
+              fill="none"
+              stroke="#ddd"
+              stroke-width="0.5"
+            ></path>
+          </pattern>
+          <pattern
+            id="grid"
+            width="100"
+            height="100"
+            patternUnits="userSpaceOnUse"
+          >
+            <rect width="100" height="100" fill="url(#smallGrid)"></rect>
+            <path
+              d="M 100 0 L 0 0 0 100"
+              fill="none"
+              stroke="#ccc"
+              stroke-width="1"
+            ></path>
+          </pattern>
+        </defs>
         <g
           @mousemove="onMouseMove($event)"
           @mouseup="onMouseUp($event)"
@@ -27,6 +56,12 @@
           :transform="newTransform"
         >
           <rect :width="boardWidth" :height="boardHeight" fill="white"></rect>
+          <rect
+            v-if="grid"
+            :width="boardWidth"
+            :height="boardHeight"
+            :fill="`url(#grid)`"
+          ></rect>
           <g
             v-for="item in items"
             :transform="'translate(' + item.x + ', ' + item.y + ')'"
@@ -180,7 +215,7 @@ import { saveAs } from "file-saver";
 import { useSvgStore, useBoardStore } from "../../../stores/svgStore";
 const svgStore = useSvgStore();
 const boardStore = useBoardStore();
-
+const grid = ref(computed(() => boardStore.gird));
 const svgBoard = ref(null);
 const boardName = ref("My SVG Board");
 const scale = ref(computed(() => svgStore.magnifier_init));
@@ -200,6 +235,7 @@ const handposition = ref({
 });
 const handdx = ref(0);
 const handdy = ref(0);
+
 // const onHand = () => boardStore.set_hand_false();
 
 // import Sketch from "vue-color/src/components/Sketch.vue";
@@ -698,7 +734,7 @@ svg .ctrl-bounds {
 }
 
 .canvas svg {
-  background: #f8f9fa;
+  background: #97a2b6;
 }
 
 .demo-container {

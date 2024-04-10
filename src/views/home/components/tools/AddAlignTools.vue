@@ -4,7 +4,7 @@
     <div>{{ ">" }}</div>
   </div>
   <v-menu location="end" activator="#align-dropdown">
-    <v-list style="left: 20px; top: -10px">
+    <v-list style="left: 22px; top: -10px; width: 60px; border-radius: 10px">
       <!-- <v-list-item @click="onClick">
         <v-list-item-title>
           <ObjAlignCenterVertical width="20px" height="20px" />
