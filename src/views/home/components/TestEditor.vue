@@ -247,14 +247,17 @@ watch(
     // PaddingLeft.value = PaddingLeft.value / scale.value;
     // PaddingTop.value = PaddingTop.value / scale.value;
 
-    // const Fullwidth = window.innerWidth - 300 - 17;
-    // const FullHeight = window.innerHeight - 50;
-    // PaddingLeft.value = (FullHeight - boardHeight.value * scale.value) / 2;
-    // PaddingTop.value = (Fullwidth - boardWidth.value * scale.value) / 2;
+    let tempL = PaddingLeft.value / scale.value;
+    let tempT = PaddingTop.value / scale.value;
 
-    const tempL = PaddingLeft.value / scale.value;
-    const tempT = PaddingTop.value / scale.value;
-
+    if (scale.value == 1) {
+      const Fullwidth = window.innerWidth - 300 - 17;
+      const FullHeight = window.innerHeight - 50;
+      PaddingLeft.value = (FullHeight - boardHeight.value) / 2;
+      PaddingTop.value = (Fullwidth - boardWidth.value) / 2;
+      tempL = PaddingLeft.value;
+      tempT = PaddingTop.value;
+    }
     newTransform.value =
       "translate(" + tempT + ", " + tempL + ") scale(" + scale.value + ")";
     console.log(

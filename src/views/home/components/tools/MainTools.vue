@@ -1,22 +1,28 @@
 <template>
   <v-toolbar-items class="border-left">
     <v-btn>
+      <v-tooltip activator="parent" location="bottom">Select</v-tooltip>
       <SelectionArrowIcon width="20px" height="20px" />
     </v-btn>
     <v-btn>
+      <v-tooltip activator="parent" location="bottom">Direct Select</v-tooltip>
       <DirectSelectionArrowIcon width="20px" height="20px" />
     </v-btn>
     <v-btn>
+      <v-tooltip activator="parent" location="bottom">Clip</v-tooltip>
       <CloneIcon width="20px" height="20px" />
     </v-btn>
     <v-btn>
+      <v-tooltip activator="parent" location="bottom">Undo</v-tooltip>
       <UndoIcon width="20px" height="20px" />
     </v-btn>
     <v-btn @click="onHand">
+      <v-tooltip activator="parent" location="bottom">Hand</v-tooltip>
       <HandRockIcon v-if="hand_selected == true" width="20px" height="20px" />
       <HandIcon v-if="hand_selected == false" width="20px" height="20px" />
     </v-btn>
     <v-btn class="btn" @click="onDelete">
+      <v-tooltip activator="parent" location="bottom">Delete</v-tooltip>
       <TrashIcon width="20px" height="20px"
     /></v-btn>
   </v-toolbar-items>

@@ -1,6 +1,7 @@
 <template>
   <v-btn class="btn" @click="dialog = true"
     ><v-icon color="black" icon="mdi-check-circle" size="large"></v-icon>
+    <v-tooltip activator="parent" location="bottom">Validation</v-tooltip>
   </v-btn>
   <div class="text-center">
     <v-dialog v-model="dialog" width="400">
@@ -15,11 +16,11 @@
             280 element(s) without section.
           </v-chip>
 
-          <v-chip class="ma-2" color="cyan" closable label>
+          <v-chip class="ma-2" color="green" closable label>
             <v-icon icon="mdi-check" start></v-icon>
             All elements contain label
           </v-chip>
-          <v-chip class="ma-2" color="cyan" closable label>
+          <v-chip class="ma-2" color="green" closable label>
             <v-icon icon="mdi-check" start></v-icon>
             All elements contain abbreviation
           </v-chip>

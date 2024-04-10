@@ -1,11 +1,13 @@
 <template>
   <v-toolbar-items class="border-both">
     <v-btn color="primary" style="margin-left: 10px"
-      ><v-icon color="black" icon="mdi-file" size="large"></v-icon
-    ></v-btn>
+      ><v-icon color="black" icon="mdi-file" size="large"></v-icon>
+      <v-tooltip activator="parent" location="bottom">New</v-tooltip>
+    </v-btn>
     <v-btn class="btn" @click="onImport">
-      <v-icon color="black" icon="mdi-folder" size="large"></v-icon
-    ></v-btn>
+      <v-icon color="black" icon="mdi-folder" size="large"></v-icon>
+      <v-tooltip activator="parent" location="bottom">Import</v-tooltip>
+    </v-btn>
   </v-toolbar-items>
 </template>
 <script setup>
