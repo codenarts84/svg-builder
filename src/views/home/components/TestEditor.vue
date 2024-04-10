@@ -55,7 +55,14 @@
           :viewBox="viewBox"
           :transform="newTransform"
         >
-          <rect :width="boardWidth" :height="boardHeight" fill="white"></rect>
+          <rect
+            :width="boardWidth"
+            :height="boardHeight"
+            fill="white"
+            :style="
+              hand_selected == true ? customCursorStyle : normalCursorStyle
+            "
+          ></rect>
           <rect
             v-if="grid"
             :width="boardWidth"
@@ -236,6 +243,43 @@ const handposition = ref({
 const handdx = ref(0);
 const handdy = ref(0);
 
+const svgCursor = `data:image/svg+xml;base64,${btoa(
+  `<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="24pt" height="24pt" viewBox="0 0 64.000000 64.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,64.000000) scale(0.100000,-0.100000)" fill="#000000" stroke="none"><path d="M300 580 c-6 -11 -17 -17 -24 -14 -8 3 -24 1 -35 -6 -20 -10 -21 -19 -21 -136 l0 -125 -29 17 c-32 19 -78 13 -88 -11 -7 -21 107 -224 141 -249 23 -18 42 -21 120 -21 101 0 134 11 163 54 15 22 19 55 21 214 3 163 2 191 -13 213 -12 19 -23 25 -40 22 -14 -3 -26 2 -34 14 -7 11 -23 18 -41 18 -18 0 -33 6 -36 15 -9 23 -71 20 -84 -5z m70 -120 c0 -148 18 -162 22 -17 3 101 3 102 28 102 25 0 25 -1 28 -102 3 -125 22 -139 22 -18 0 67 3 87 15 91 8 4 22 1 30 -6 12 -10 15 -44 15 -179 0 -259 -11 -276 -166 -276 -76 0 -96 3 -113 19 -28 26 -133 214 -126 226 11 18 45 11 71 -15 14 -14 29 -25 34 -25 5 0 11 64 12 143 3 134 4 142 23 142 19 0 20 -8 23 -102 4 -141 22 -133 22 10 0 63 3 117 7 120 3 4 17 7 30 7 23 0 23 -1 23 -120z"/></g></svg>`
+)}`;
+
+const svgRockCursor = `data:image/svg+xml;base64,${btoa(`<svg
+    version="1.0"
+    xmlns="http://www.w3.org/2000/svg"
+    width="24pt"
+    height="24pt"
+    viewBox="0 0 64.000000 64.000000"
+    preserveAspectRatio="xMidYMid meet"
+  >
+    <g
+      transform="translate(0.000000,64.000000) scale(0.100000,-0.100000)"
+      fill="#000000"
+      stroke="none"
+    >
+      <path
+        d="M266 507 c-10 -8 -29 -12 -41 -9 -37 7 -65 -30 -65 -85 0 -37 -7 -57
+-30 -87 -42 -55 -39 -83 15 -150 55 -67 89 -80 203 -75 140 7 172 49 172 227
+0 100 -2 114 -21 133 -11 11 -30 19 -42 18 -12 -2 -33 3 -46 10 -12 7 -31 11
+-40 8 -10 -2 -26 2 -36 9 -24 18 -46 18 -69 1z m52 -70 c2 -28 8 -37 22 -37
+13 0 20 8 22 28 2 16 9 27 18 27 9 0 16 -11 18 -27 4 -34 37 -39 45 -7 3 12
+12 19 19 17 18 -6 23 -201 7 -241 -18 -42 -56 -57 -150 -57 l-82 0 -49 49
+c-36 36 -49 56 -46 73 2 19 8 22 30 20 l27 -3 3 88 c2 70 6 88 18 88 9 0 16
+-11 18 -27 2 -20 9 -28 23 -28 15 0 19 7 19 33 0 61 33 63 38 4z"
+      />
+    </g>
+  </svg>`)}`;
+
+const customCursorStyle = ref({
+  cursor: `url('${svgCursor}'), auto`,
+});
+const normalCursorStyle = {
+  cursor: "auto",
+};
+
 // const onHand = () => boardStore.set_hand_false();
 
 // import Sketch from "vue-color/src/components/Sketch.vue";
@@ -415,6 +459,9 @@ const onMouseDown = (event) => {
       sy: PaddingLeft.value,
       active: true,
     };
+    customCursorStyle.value = {
+      cursor: `url('${svgRockCursor}'), auto`,
+    };
     console.log("UAK", event, handposition.value);
   }
 };
@@ -513,6 +560,10 @@ function onHandUp() {
     sx: 0,
     sy: 0,
     active: false,
+  };
+
+  customCursorStyle.value = {
+    cursor: `url('${svgCursor}'), auto`,
   };
   console.log("MU2", PaddingLeft.value, PaddingTop.value);
 }
