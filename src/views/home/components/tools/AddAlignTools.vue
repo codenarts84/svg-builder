@@ -13,36 +13,51 @@
 
       <v-list-item @click="onAlignHorizonCenter">
         <v-list-item-title>
+          <v-tooltip activator="parent" location="right">Center</v-tooltip>
           <ObjAlignCenterHorizentalIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onAlignHorizonLeft">
         <v-list-item-title>
+          <v-tooltip activator="parent" location="right">Left</v-tooltip>
           <ObjAlignLeftIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onAlignHorizonRight">
         <v-list-item-title>
+          <v-tooltip activator="parent" location="right">Right</v-tooltip>
           <ObjAlignRightIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
+          <v-tooltip activator="parent" location="right"
+            >Flip Vertical</v-tooltip
+          >
           <FlipVertIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
+          <v-tooltip activator="parent" location="right"
+            >Flip Horizental</v-tooltip
+          >
           <FlipHoriIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
+          <v-tooltip activator="parent" location="right"
+            >Distribute Horizental</v-tooltip
+          >
           <DistHoriIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
+          <v-tooltip activator="parent" location="right"
+            >Distribute Vertical</v-tooltip
+          >
           <DistVertIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>

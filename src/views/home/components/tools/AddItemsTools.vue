@@ -2,12 +2,14 @@
   <v-list v-if="props.opened" id="item-tools">
     <v-list-item @click="onAddTextField">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Text</v-tooltip>
         <v-icon color="black" icon="mdi-pen-plus" size="large"></v-icon>
       </v-list-item-title>
     </v-list-item>
 
     <v-list-item @click="onAddRectangle">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Rectangle</v-tooltip>
         <v-icon
           color="black"
           icon="mdi-shape-rectangle-plus"
@@ -18,6 +20,8 @@
 
     <v-list-item @click="onAddEllipse">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Circle</v-tooltip>
+
         <v-icon
           color="black"
           icon="mdi-shape-circle-plus"

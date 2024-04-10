@@ -2,36 +2,47 @@
   <v-list v-if="props.opened" id="seat-tools">
     <v-list-item @click="onClick">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right">One Row</v-tooltip>
         <RowSingleIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
     <v-list-item @click="onClick">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Multi Rows</v-tooltip>
         <RowMultiIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
     <v-list-item @click="onClick">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right"
+          >Multi Staggered Rows</v-tooltip
+        >
         <RowStaggedIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
     <v-list-item @click="onClick">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right">GA Square</v-tooltip>
         <GaSquareIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
     <v-list-item @click="onClick">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right">GA Circle</v-tooltip>
         <GaCircleIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
     <v-list-item @click="onClick">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Round Table</v-tooltip>
         <TableRoundIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
     <v-list-item @click="onClick">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right"
+          >Rectangle Table</v-tooltip
+        >
         <TableRectIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>

@@ -5,6 +5,7 @@
   >
     <v-list-item @click="onSeatToggle">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Seat</v-tooltip>
         <div class="arrow-menu">
           <SeatBuilderIcon width="20px" height="20px" />
           <div>{{ ">" }}</div>
@@ -14,6 +15,7 @@
 
     <v-list-item @click="onItemToggle">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Shape</v-tooltip>
         <div class="arrow-menu">
           <DrawSquareIcon width="20px" height="20px" />
           <div>{{ ">" }}</div>
@@ -23,6 +25,7 @@
 
     <v-list-item @click="() => {}">
       <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Alignment</v-tooltip>
         <AddAlignTools
           :textR="textR"
           :textL="textL"

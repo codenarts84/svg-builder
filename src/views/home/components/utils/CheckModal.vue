@@ -1,11 +1,22 @@
 <template>
   <v-btn class="btn" @click="dialog = true"
-    ><v-icon color="black" icon="mdi-check-circle" size="large"></v-icon>
+    ><v-icon
+      v-if="status == true"
+      color="green"
+      icon="mdi-check-circle"
+      size="large"
+    ></v-icon>
+    <v-icon
+      v-if="status == false"
+      color="red"
+      icon="mdi-close-circle"
+      size="large"
+    ></v-icon>
     <v-tooltip activator="parent" location="bottom">Validation</v-tooltip>
   </v-btn>
   <div class="text-center">
     <v-dialog v-model="dialog" width="400">
-      <v-card prepend-icon="mdi-check-circle" title="Chart Validation">
+      <v-card title="Chart Validation">
         <v-card-text>
           <v-chip class="ma-2" color="red" label>
             <v-icon icon="mdi-close" start></v-icon>
@@ -43,4 +54,5 @@ import { ref } from "vue";
 
 // const boardStore = useBoardStore();
 const dialog = ref(false);
+const status = ref(false);
 </script>
