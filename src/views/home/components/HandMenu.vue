@@ -3,36 +3,71 @@
     style="position: fixed; top: 55px; left: 5px; z-index: 999"
     id="hand-menu"
   >
-    <v-list-item @click="() => console.log('Hi')">
+    <v-list-item @click="onSeatToggle">
       <v-list-item-title>
-        <AddChairTools />
+        <div class="arrow-menu">
+          <SeatBuilderIcon width="20px" height="20px" />
+          <div>{{ ">" }}</div>
+        </div>
       </v-list-item-title>
     </v-list-item>
 
-    <v-list-item @click="() => console.log('Hi')">
+    <v-list-item @click="onItemToggle">
       <v-list-item-title>
-        <AddItemsTools
-          :addTextField="addTextField"
-          :addEllipse="addEllipse"
-          :addRectangle="addRectangle"
+        <div class="arrow-menu">
+          <DrawSquareIcon width="20px" height="20px" />
+          <div>{{ ">" }}</div>
+        </div>
+      </v-list-item-title>
+    </v-list-item>
+
+    <v-list-item @click="() => {}">
+      <v-list-item-title>
+        <AddAlignTools
+          :textR="textR"
+          :textL="textL"
+          :textC="textC"
+          :onItemToggle="onAlignToggle"
         />
       </v-list-item-title>
     </v-list-item>
-
-    <v-list-item @click="() => console.log('Hi')">
-      <v-list-item-title>
-        <AddAlignTools :textR="textR" :textL="textL" :textC="textC" />
-      </v-list-item-title>
-    </v-list-item>
   </v-list>
+  <AddChairTools :opened="seatopened" />
+  <AddItemsTools
+    :addTextField="addTextField"
+    :addEllipse="addEllipse"
+    :addRectangle="addRectangle"
+    :opened="itemopened"
+  />
 </template>
 
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, ref } from "vue";
 
 import AddChairTools from "./tools/AddChairTools.vue";
 import AddItemsTools from "./tools/AddItemsTools.vue";
 import AddAlignTools from "./tools/AddAlignTools.vue";
+
+import SeatBuilderIcon from "@/assets/svgs/menuIcons/SeatBuilderIcon.vue";
+import DrawSquareIcon from "@/assets/svgs/menuIcons/DrawSquareIcon.vue";
+
+const seatopened = ref(false);
+const itemopened = ref(false);
+
+const onSeatToggle = () => {
+  seatopened.value = !seatopened.value;
+  itemopened.value = false;
+};
+
+const onItemToggle = () => {
+  itemopened.value = !itemopened.value;
+  seatopened.value = false;
+};
+
+const onAlignToggle = () => {
+  itemopened.value = false;
+  seatopened.value = false;
+};
 
 // import ImportIcon from "@/assets/svgs/menuIcons/ImportIcon.vue";
 

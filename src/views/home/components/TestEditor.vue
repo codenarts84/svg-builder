@@ -118,7 +118,22 @@
       </svg>
     </div>
 
-    <div style="position: fixed; bottom: 0">
+    <div
+      style="
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 39px;
+        background-color: white;
+        border-top: 1px solid #e3e3e3;
+        z-index: 9999;
+        display: flex;
+        justify-content: space-between;
+      "
+    >
+      <div style="align-content: center; padding-left: 10px">
+        <p>This is the context panel</p>
+      </div>
       <div
         v-if="activeItem !== -1"
         style="display: flex; justify-content: center"
@@ -174,12 +189,8 @@ const boardWidth = ref(computed(() => boardStore.width));
 const boardHeight = ref(computed(() => boardStore.height));
 const activeItem = ref(-1);
 const newTransform = ref("scale(" + svgStore.magnifier_init + ")");
-const PaddingTop = ref(
-  (window.innerWidth - 300 - 17 - boardWidth.value * scale.value) / 2
-);
-const PaddingLeft = ref(
-  (window.innerHeight - 50 - boardHeight.value * scale.value) / 2
-);
+const PaddingTop = ref((window.innerWidth - 300 - 17 - boardWidth.value) / 2);
+const PaddingLeft = ref((window.innerHeight - 50 - boardHeight.value) / 2);
 const handposition = ref({
   x: 0,
   y: 0,
@@ -224,18 +235,6 @@ watch(
   [boardWidth, boardHeight],
   () => {
     viewBox.value = `0 0 ${boardWidth.value} ${boardHeight.value}`;
-    const Fullwidth = window.innerWidth - 300 - 17;
-    const FullHeight = window.innerHeight - 50;
-    PaddingTop.value = (FullHeight - boardHeight.value * scale.value) / 2;
-    PaddingLeft.value = (Fullwidth - boardWidth.value * scale.value) / 2;
-    newTransform.value =
-      "translate(" +
-      PaddingTop.value +
-      ", " +
-      PaddingLeft.value +
-      ") scale(" +
-      scale.value +
-      ")";
     updateViewBox();
   },
   { immediate: true }
@@ -245,16 +244,19 @@ watch(
   [scale],
   () => {
     console.log("before", PaddingLeft.value, PaddingTop.value);
-    PaddingLeft.value = PaddingLeft.value / scale.value;
-    PaddingTop.value = PaddingTop.value / scale.value;
+    // PaddingLeft.value = PaddingLeft.value / scale.value;
+    // PaddingTop.value = PaddingTop.value / scale.value;
+
+    // const Fullwidth = window.innerWidth - 300 - 17;
+    // const FullHeight = window.innerHeight - 50;
+    // PaddingLeft.value = (FullHeight - boardHeight.value * scale.value) / 2;
+    // PaddingTop.value = (Fullwidth - boardWidth.value * scale.value) / 2;
+
+    const tempL = PaddingLeft.value / scale.value;
+    const tempT = PaddingTop.value / scale.value;
+
     newTransform.value =
-      "translate(" +
-      PaddingTop.value +
-      ", " +
-      PaddingLeft.value +
-      ") scale(" +
-      scale.value +
-      ")";
+      "translate(" + tempT + ", " + tempL + ") scale(" + scale.value + ")";
     console.log(
       "after",
       newTransform.value,

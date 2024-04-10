@@ -1,50 +1,59 @@
 <template>
-  <div id="items-dropdown" class="arrow-menu">
-    <DrawSquareIcon width="20px" height="20px" />
-    <div>{{ ">" }}</div>
-  </div>
-  <v-menu location="end" activator="#items-dropdown">
-    <v-list style="left: 20px; top: -10px">
-      <v-list-item @click="onAddTextField">
-        <v-list-item-title>
-          <v-icon color="black" icon="mdi-pen-plus" size="large"></v-icon>
-        </v-list-item-title>
-      </v-list-item>
+  <v-list v-if="props.opened" id="item-tools">
+    <v-list-item @click="onAddTextField">
+      <v-list-item-title>
+        <v-icon color="black" icon="mdi-pen-plus" size="large"></v-icon>
+      </v-list-item-title>
+    </v-list-item>
 
-      <v-list-item @click="onAddRectangle">
-        <v-list-item-title>
-          <v-icon
-            color="black"
-            icon="mdi-shape-rectangle-plus"
-            size="large"
-          ></v-icon>
-        </v-list-item-title>
-      </v-list-item>
+    <v-list-item @click="onAddRectangle">
+      <v-list-item-title>
+        <v-icon
+          color="black"
+          icon="mdi-shape-rectangle-plus"
+          size="large"
+        ></v-icon>
+      </v-list-item-title>
+    </v-list-item>
 
-      <v-list-item @click="onAddEllipse">
-        <v-list-item-title>
-          <v-icon
-            color="black"
-            icon="mdi-shape-circle-plus"
-            size="large"
-          ></v-icon>
-        </v-list-item-title>
-      </v-list-item>
-    </v-list>
-  </v-menu>
+    <v-list-item @click="onAddEllipse">
+      <v-list-item-title>
+        <v-icon
+          color="black"
+          icon="mdi-shape-circle-plus"
+          size="large"
+        ></v-icon>
+      </v-list-item-title>
+    </v-list-item>
+  </v-list>
 </template>
 
 <script setup>
 import { defineProps } from "vue";
-import DrawSquareIcon from "@/assets/svgs/menuIcons/DrawSquareIcon.vue";
 
 const props = defineProps({
   addRectangle: Function,
   addEllipse: Function,
   addTextField: Function,
   onImportClick: Function,
+  opened: Boolean,
 });
 const onAddRectangle = () => props.addRectangle();
 const onAddEllipse = () => props.addEllipse();
 const onAddTextField = () => props.addTextField();
 </script>
+<style>
+#item-tools {
+  position: absolute;
+  width: 60px;
+  left: 70px;
+  top: 65px;
+  /* background-color: #f3f3f3; */
+  border-radius: 10px;
+  box-shadow: 0px 5px 5px -3px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)),
+    0px 8px 10px 1px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)),
+    0px 3px 14px 2px var(--v-shadow-key-ambient-opacity, rgba(0, 0, 0, 0.12));
+  transition: all 1s;
+  /* border: 1px dashed #e3e3e3; */
+}
+</style>

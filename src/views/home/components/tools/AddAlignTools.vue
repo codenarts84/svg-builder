@@ -1,5 +1,5 @@
 <template>
-  <div id="align-dropdown" class="arrow-menu">
+  <div id="align-dropdown" class="arrow-menu" @click="onItemToggle">
     <ObjAlignCenterVertical width="20px" height="20px" />
     <div>{{ ">" }}</div>
   </div>
@@ -65,11 +65,13 @@ const props = defineProps({
   textR: Function,
   textC: Function,
   textL: Function,
+  onItemToggle: Function,
 });
 
 const onAlignHorizonRight = () => props.textR();
 const onAlignHorizonLeft = () => props.textL();
 const onAlignHorizonCenter = () => props.textC();
+const onItemToggle = () => props.onItemToggle();
 
 const onClick = () => alert("Not set yet");
 </script>
