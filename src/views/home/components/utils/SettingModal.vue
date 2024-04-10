@@ -1,6 +1,7 @@
 <template>
   <v-btn class="btn" @click="dialog = true"
     ><v-icon color="black" icon="mdi-cog" size="large"></v-icon>
+    <v-tooltip activator="parent" location="bottom">Settings</v-tooltip>
   </v-btn>
   <div class="text-center">
     <v-dialog v-model="dialog" width="400">

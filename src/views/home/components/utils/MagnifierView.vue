@@ -1,10 +1,12 @@
 <template>
   <v-btn class="btn" @click="increaseZoom">
-    <v-icon color="black" icon="mdi-magnify-minus" size="large"></v-icon>
+    <v-tooltip activator="parent" location="bottom">Zoom Out</v-tooltip>
+    <v-icon color="black" icon="mdi-minus" size="large"></v-icon>
   </v-btn>
-  <v-btn>{{ zoomPercent }}%</v-btn>
+  <v-btn @click="initzoom">{{ zoomPercent }}%</v-btn>
   <v-btn class="btn" @click="decreaseZoom">
-    <v-icon color="black" icon="mdi-magnify-plus" size="large"></v-icon>
+    <v-tooltip activator="parent" location="bottom">Zoom In</v-tooltip>
+    <v-icon color="black" icon="mdi-plus" size="large"></v-icon>
   </v-btn>
 </template>
 
@@ -25,7 +27,8 @@ function increaseZoom() {
 }
 
 function decreaseZoom() {
-  // Prevent zooming out too much
   svgStore.zoom_up(); // Decrease zoom by 10%
 }
+
+const initzoom = () => svgStore.init_zoom();
 </script>

@@ -10,7 +10,9 @@ export const useSvgStore = defineStore("svgStore", () => {
     magnifier_init.value -= 0.1;
   }
 
-  return { magnifier_init, zoom_up, zoom_in };
+  const init_zoom = () => (magnifier_init.value = 1);
+
+  return { magnifier_init, zoom_up, zoom_in, init_zoom };
 });
 
 export const useBoardStore = defineStore("myboard", () => {
