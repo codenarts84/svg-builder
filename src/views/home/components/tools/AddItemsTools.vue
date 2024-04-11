@@ -52,12 +52,11 @@ const onAddTextField = () => props.addTextField();
   width: 60px;
   left: 70px;
   top: 65px;
-  /* background-color: #f3f3f3; */
   border-radius: 10px;
   box-shadow: 0px 5px 5px -3px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)),
     0px 8px 10px 1px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)),
     0px 3px 14px 2px var(--v-shadow-key-ambient-opacity, rgba(0, 0, 0, 0.12));
   transition: all 1s;
-  /* border: 1px dashed #e3e3e3; */
+  z-index: 9999;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <v-toolbar-items class="border-both">
+  <v-toolbar-items class="border-left">
     <v-btn color="primary" style="margin-left: 10px"
       ><v-icon color="black" icon="mdi-file" size="large"></v-icon>
       <v-tooltip activator="parent" location="bottom">New</v-tooltip>

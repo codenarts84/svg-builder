@@ -14,8 +14,20 @@
       @change="importSVG"
       style="display: none"
     ></v-file-input>
-    <div class="canvas" @mouseup="onHandUp">
-      <svg style="width: 100%; height: 100%" ref="svgBoard" id="mysvg">
+    <div class="canvas" @mouseup="onHandUp" style="background-color: #97a2b6">
+      <svg
+        ref="svgBoard"
+        id="mysvg"
+        :width="boardWidth"
+        :height="boardHeight"
+        :viewBox="viewBox"
+        :transform="newTransform"
+        @mousemove="onMouseMove($event)"
+        @mouseup="onMouseUp($event)"
+        @mousedown="onMouseDown($event)"
+        @click="onClickItem($event, {})"
+        :style="hand_selected == true ? customCursorStyle : normalCursorStyle"
+      >
         <defs>
           <pattern
             id="smallGrid"
@@ -45,115 +57,97 @@
             ></path>
           </pattern>
         </defs>
-        <g
-          @mousemove="onMouseMove($event)"
-          @mouseup="onMouseUp($event)"
-          @mousedown="onMouseDown($event)"
-          @click="onClickItem($event, {})"
+        <rect :width="boardWidth" :height="boardHeight" fill="white"></rect>
+        <rect
+          v-if="grid"
           :width="boardWidth"
           :height="boardHeight"
-          :viewBox="viewBox"
-          :transform="newTransform"
+          :fill="`url(#grid)`"
+        ></rect>
+        <g
+          v-for="item in items"
+          :transform="'translate(' + item.x + ', ' + item.y + ')'"
+          :key="item"
         >
-          <rect
-            :width="boardWidth"
-            :height="boardHeight"
-            fill="white"
-            :style="
-              hand_selected == true ? customCursorStyle : normalCursorStyle
-            "
-          ></rect>
-          <rect
-            v-if="grid"
-            :width="boardWidth"
-            :height="boardHeight"
-            :fill="`url(#grid)`"
-          ></rect>
-          <g
-            v-for="item in items"
-            :transform="'translate(' + item.x + ', ' + item.y + ')'"
-            :key="item"
+          <text
+            v-if="item.type == 'text'"
+            :x="getTextXPos(item)"
+            :y="item.height * 0.9"
+            :_width="item.width"
+            :_height="item.height"
+            :font-size="item.height"
+            :font-family="item.font"
+            :fill="item.color"
+            :text-anchor="item.textAnchor"
+            @click="onClickItem($event, item)"
           >
-            <text
-              v-if="item.type == 'text'"
-              :x="getTextXPos(item)"
-              :y="item.height * 0.9"
-              :_width="item.width"
-              :_height="item.height"
-              :font-size="item.height"
-              :font-family="item.font"
-              :fill="item.color"
-              :text-anchor="item.textAnchor"
-              @click="onClickItem($event, item)"
-            >
-              {{ item.text }}
-            </text>
+            {{ item.text }}
+          </text>
 
+          <rect
+            v-if="item.type == 'rect'"
+            :x="0"
+            :y="0"
+            :width="item.width"
+            :height="item.height"
+            :fill="item.color"
+            @click="onClickItem($event, item)"
+          ></rect>
+
+          <ellipse
+            v-if="item.type == 'ellipse'"
+            :cx="item.width / 2"
+            :cy="item.height / 2"
+            :rx="item.width / 2"
+            :ry="item.height / 2"
+            :fill="item.color"
+            @click="onClickItem($event, item)"
+          ></ellipse>
+
+          <g v-if="item.active">
             <rect
-              v-if="item.type == 'rect'"
               :x="0"
               :y="0"
               :width="item.width"
               :height="item.height"
-              :fill="item.color"
+              class="ctrl-bounds"
               @click="onClickItem($event, item)"
-            ></rect>
-
-            <ellipse
-              v-if="item.type == 'ellipse'"
-              :cx="item.width / 2"
-              :cy="item.height / 2"
-              :rx="item.width / 2"
-              :ry="item.height / 2"
-              :fill="item.color"
-              @click="onClickItem($event, item)"
-            ></ellipse>
-
-            <g v-if="item.active">
+              @_mouseout="onMouseUpRegion($event, item)"
+              @mousedown="onMouseDownRegion($event, item)"
+            />
+            <g @mousedown="onMouseDownHandles($event, item)">
               <rect
-                :x="0"
-                :y="0"
-                :width="item.width"
-                :height="item.height"
-                class="ctrl-bounds"
-                @click="onClickItem($event, item)"
-                @_mouseout="onMouseUpRegion($event, item)"
-                @mousedown="onMouseDownRegion($event, item)"
+                class="ctrl-rect"
+                :width="tools.squaresize"
+                :height="tools.squaresize"
+                data-handleid="1"
+                :x="0 - tools.squaresize / 2"
+                :y="0 - tools.squaresize / 2"
               />
-              <g @mousedown="onMouseDownHandles($event, item)">
-                <rect
-                  class="ctrl-rect"
-                  :width="tools.squaresize"
-                  :height="tools.squaresize"
-                  data-handleid="1"
-                  :x="0 - tools.squaresize / 2"
-                  :y="0 - tools.squaresize / 2"
-                />
-                <rect
-                  class="ctrl-rect"
-                  :width="tools.squaresize"
-                  :height="tools.squaresize"
-                  data-handleid="3"
-                  :x="item.width - tools.squaresize / 2"
-                  :y="0 - tools.squaresize / 2"
-                />
-                <rect
-                  class="ctrl-rect"
-                  :width="tools.squaresize"
-                  :height="tools.squaresize"
-                  data-handleid="7"
-                  :x="0 - tools.squaresize / 2"
-                  :y="item.height - tools.squaresize / 2"
-                />
-                <rect
-                  class="ctrl-rect"
-                  :width="tools.squaresize"
-                  :height="tools.squaresize"
-                  data-handleid="9"
-                  :x="item.width - tools.squaresize / 2"
-                  :y="item.height - tools.squaresize / 2"
-                />
-              </g>
+              <rect
+                class="ctrl-rect"
+                :width="tools.squaresize"
+                :height="tools.squaresize"
+                data-handleid="3"
+                :x="item.width - tools.squaresize / 2"
+                :y="0 - tools.squaresize / 2"
+              />
+              <rect
+                class="ctrl-rect"
+                :width="tools.squaresize"
+                :height="tools.squaresize"
+                data-handleid="7"
+                :x="0 - tools.squaresize / 2"
+                :y="item.height - tools.squaresize / 2"
+              />
+              <rect
+                class="ctrl-rect"
+                :width="tools.squaresize"
+                :height="tools.squaresize"
+                data-handleid="9"
+                :x="item.width - tools.squaresize / 2"
+                :y="item.height - tools.squaresize / 2"
+              />
             </g>
           </g>
         </g>
@@ -164,7 +158,7 @@
       style="
         position: fixed;
         bottom: 0;
-        width: 100%;
+        width: calc(100% - 300px);
         height: 39px;
         background-color: white;
         border-top: 1px solid #e3e3e3;
@@ -222,7 +216,7 @@ import { saveAs } from "file-saver";
 import { useSvgStore, useBoardStore } from "../../../stores/svgStore";
 const svgStore = useSvgStore();
 const boardStore = useBoardStore();
-const grid = ref(computed(() => boardStore.gird));
+const grid = ref(computed(() => boardStore.grid));
 const svgBoard = ref(null);
 const boardName = ref("My SVG Board");
 const scale = ref(computed(() => svgStore.magnifier_init));
@@ -231,8 +225,8 @@ const boardWidth = ref(computed(() => boardStore.width));
 const boardHeight = ref(computed(() => boardStore.height));
 const activeItem = ref(-1);
 const newTransform = ref("scale(" + svgStore.magnifier_init + ")");
-const PaddingTop = ref((window.innerWidth - 300 - 17 - boardWidth.value) / 2);
-const PaddingLeft = ref((window.innerHeight - 50 - boardHeight.value) / 2);
+const PaddingTop = ref(0); //ref((window.innerWidth - 300 - 17 - boardWidth.value) / 2);
+const PaddingLeft = ref(0); //ref((window.innerHeight - 50 - boardHeight.value) / 2);
 const handposition = ref({
   x: 0,
   y: 0,
@@ -244,7 +238,7 @@ const handdx = ref(0);
 const handdy = ref(0);
 
 const svgCursor = `data:image/svg+xml;base64,${btoa(
-  `<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="24pt" height="24pt" viewBox="0 0 64.000000 64.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,64.000000) scale(0.100000,-0.100000)" fill="#000000" stroke="none"><path d="M300 580 c-6 -11 -17 -17 -24 -14 -8 3 -24 1 -35 -6 -20 -10 -21 -19 -21 -136 l0 -125 -29 17 c-32 19 -78 13 -88 -11 -7 -21 107 -224 141 -249 23 -18 42 -21 120 -21 101 0 134 11 163 54 15 22 19 55 21 214 3 163 2 191 -13 213 -12 19 -23 25 -40 22 -14 -3 -26 2 -34 14 -7 11 -23 18 -41 18 -18 0 -33 6 -36 15 -9 23 -71 20 -84 -5z m70 -120 c0 -148 18 -162 22 -17 3 101 3 102 28 102 25 0 25 -1 28 -102 3 -125 22 -139 22 -18 0 67 3 87 15 91 8 4 22 1 30 -6 12 -10 15 -44 15 -179 0 -259 -11 -276 -166 -276 -76 0 -96 3 -113 19 -28 26 -133 214 -126 226 11 18 45 11 71 -15 14 -14 29 -25 34 -25 5 0 11 64 12 143 3 134 4 142 23 142 19 0 20 -8 23 -102 4 -141 22 -133 22 10 0 63 3 117 7 120 3 4 17 7 30 7 23 0 23 -1 23 -120z"/></g></svg>`
+  `<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="24pt" height="24pt" viewBox="0 0 64.000000 64.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,64.000000) scale(0.100000,-0.100000)" fill="green" stroke="none"><path d="M300 580 c-6 -11 -17 -17 -24 -14 -8 3 -24 1 -35 -6 -20 -10 -21 -19 -21 -136 l0 -125 -29 17 c-32 19 -78 13 -88 -11 -7 -21 107 -224 141 -249 23 -18 42 -21 120 -21 101 0 134 11 163 54 15 22 19 55 21 214 3 163 2 191 -13 213 -12 19 -23 25 -40 22 -14 -3 -26 2 -34 14 -7 11 -23 18 -41 18 -18 0 -33 6 -36 15 -9 23 -71 20 -84 -5z m70 -120 c0 -148 18 -162 22 -17 3 101 3 102 28 102 25 0 25 -1 28 -102 3 -125 22 -139 22 -18 0 67 3 87 15 91 8 4 22 1 30 -6 12 -10 15 -44 15 -179 0 -259 -11 -276 -166 -276 -76 0 -96 3 -113 19 -28 26 -133 214 -126 226 11 18 45 11 71 -15 14 -14 29 -25 34 -25 5 0 11 64 12 143 3 134 4 142 23 142 19 0 20 -8 23 -102 4 -141 22 -133 22 10 0 63 3 117 7 120 3 4 17 7 30 7 23 0 23 -1 23 -120z"/></g></svg>`
 )}`;
 
 const svgRockCursor = `data:image/svg+xml;base64,${btoa(`<svg
@@ -257,8 +251,8 @@ const svgRockCursor = `data:image/svg+xml;base64,${btoa(`<svg
   >
     <g
       transform="translate(0.000000,64.000000) scale(0.100000,-0.100000)"
-      fill="#000000"
-      stroke="none"
+      fill="green"
+      stroke="red"
     >
       <path
         d="M266 507 c-10 -8 -29 -12 -41 -9 -37 7 -65 -30 -65 -85 0 -37 -7 -57
@@ -275,8 +269,11 @@ c-36 36 -49 56 -46 73 2 19 8 22 30 20 l27 -3 3 88 c2 70 6 88 18 88 9 0 16
 
 const customCursorStyle = ref({
   cursor: `url('${svgCursor}'), auto`,
+  color: "red",
+  zIndex: "9999",
 });
 const normalCursorStyle = {
+  zIndex: "9999",
   cursor: "auto",
 };
 
@@ -742,7 +739,6 @@ defineExpose({
 html {
   font: 100%/1.5 Lato, Helvetica Neue, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  background-image: linear-gradient(#c5c7cb, #f8f9fa);
   min-height: 100%;
   text-align: center;
 }
@@ -780,12 +776,13 @@ svg .ctrl-bounds {
 
 .canvas {
   width: 100%;
-  height: 99%;
+  height: 100%;
   align-content: center;
 }
 
 .canvas svg {
   background: #97a2b6;
+  z-index: 0;
 }
 
 .demo-container {
@@ -794,5 +791,6 @@ svg .ctrl-bounds {
   width: 100%;
   height: 100%;
   align-content: center;
+  background: #97a2b6;
 }
 </style>
