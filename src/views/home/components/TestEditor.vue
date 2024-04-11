@@ -327,14 +327,6 @@ watch(
     let tempL = PaddingLeft.value / scale.value;
     let tempT = PaddingTop.value / scale.value;
 
-    if (scale.value == 1) {
-      const Fullwidth = window.innerWidth - 300 - 17;
-      const FullHeight = window.innerHeight - 50;
-      PaddingLeft.value = (FullHeight - boardHeight.value) / 2;
-      PaddingTop.value = (Fullwidth - boardWidth.value) / 2;
-      tempL = PaddingLeft.value;
-      tempT = PaddingTop.value;
-    }
     newTransform.value =
       "translate(" + tempT + ", " + tempL + ") scale(" + scale.value + ")";
     console.log(
@@ -778,6 +770,7 @@ svg .ctrl-bounds {
   width: 100%;
   height: 100%;
   align-content: center;
+  overflow: hidden;
 }
 
 .canvas svg {
