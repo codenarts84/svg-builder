@@ -15,15 +15,17 @@
     <MainTools :removeItem="removeItem" />
     <!-- <v-spacer></v-spacer> -->
 
-    <v-toolbar-title>{{ boardName }}</v-toolbar-title>
+    <v-toolbar-title :style="toolbarTitleStyle">{{
+      boardName
+    }}</v-toolbar-title>
 
-    <v-toolbar-items class="border-both">
+    <v-toolbar-items class="border-left">
       <MagnifierComponent />
     </v-toolbar-items>
-    <v-toolbar-items class="border-both">
+    <v-toolbar-items class="border-left">
       <GridView />
     </v-toolbar-items>
-    <v-toolbar-items class="border-both">
+    <v-toolbar-items class="border-left">
       <SettingModal />
       <CheckModal />
       <ExportModal :export="exportSVG" />
@@ -59,6 +61,21 @@ const props = defineProps({
   textL: Function,
   textC: Function,
 });
+
+const toolbarTitleStyle = computed(() => {
+  return {
+    fontSize: "16px",
+    fontWeight: "bold",
+    lineHeight: "1.2",
+    height: boardName.value.length < 50 ? "20px" : "38.4px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    display: "-webkit-box",
+    WebkitLineClamp: "2",
+    WebkitBoxOrient: "vertical",
+    whiteSpace: "normal",
+  };
+});
 </script>
 
 <style>
@@ -77,5 +94,17 @@ const props = defineProps({
 }
 .border-left {
   border-left: 2px solid rgb(255, 255, 255, 0.5);
+}
+.v-toolbar-title__placeholder {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.2;
+  height: 38.4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
 }
 </style>

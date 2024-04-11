@@ -12,6 +12,8 @@
     "core-js": "^3.8.3",
     "file-saver": "^2.0.5",
     "pinia": "^2.1.7",
+    "sass": "^1.74.1",
+    "sass-loader": "^14.1.1",
     "vue": "^3.2.13",
     "vue-color": "^2.8.1",
     "vue-router": "^4.3.0",

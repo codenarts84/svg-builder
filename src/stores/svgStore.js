@@ -11,8 +11,9 @@ export const useSvgStore = defineStore("svgStore", () => {
   }
 
   const init_zoom = () => (magnifier_init.value = 1);
+  const set_zoom = (v) => (magnifier_init.value = v);
 
-  return { magnifier_init, zoom_up, zoom_in, init_zoom };
+  return { magnifier_init, zoom_up, zoom_in, init_zoom, set_zoom };
 });
 
 export const useBoardStore = defineStore("myboard", () => {
@@ -20,16 +21,18 @@ export const useBoardStore = defineStore("myboard", () => {
   const width = ref(800);
   const height = ref(550);
   const hand_selected = ref(false);
-  const gird = ref(false);
+  const select_selected = ref(false);
+  const dselect_selected = ref(true);
+  const grid = ref(false);
 
   const set_name = (new_name) => (board_name.value = new_name);
   const set_width = (v) => (width.value = v);
   const set_height = (v) => (height.value = v);
   const set_hand = () => (hand_selected.value = !hand_selected.value);
   const set_hand_false = () => (hand_selected.value = false);
-  const gird_toggle = () => {
-    gird.value = !gird.value;
-  };
+  const grid_toggle = () => (grid.value = !grid.value);
+  const select_toggle = (v) => (select_selected.value = v);
+  const dselect_toggle = (v) => (dselect_selected.value = v);
 
   return {
     board_name,
@@ -41,7 +44,11 @@ export const useBoardStore = defineStore("myboard", () => {
     hand_selected,
     set_hand,
     set_hand_false,
-    gird,
-    gird_toggle,
+    grid,
+    grid_toggle,
+    select_selected,
+    dselect_selected,
+    select_toggle,
+    dselect_toggle,
   };
 });

@@ -84,5 +84,6 @@ const props = defineProps({
     0px 8px 10px 1px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)),
     0px 3px 14px 2px var(--v-shadow-key-ambient-opacity, rgba(0, 0, 0, 0.12));
   transition: all 1s;
+  z-index: 9999;
 }
 </style>
