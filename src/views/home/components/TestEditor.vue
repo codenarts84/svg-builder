@@ -14,6 +14,7 @@
       @change="importSVG"
       style="display: none"
     ></v-file-input>
+    <v-btn @click="addCircle"> Add circle </v-btn>
     <div class="canvas" @mouseup="onHandUp" style="background-color: #97a2b6">
       <svg
         ref="svgBoard"
@@ -103,6 +104,15 @@
             :fill="item.color"
             @click="onClickItem($event, item)"
           ></ellipse>
+
+          <circle
+            v-if="item.type == 'circle'"
+            :cx="item.width / 2"
+            :cy="item.height / 2"
+            :r="item.width / 2"
+            :fill="item.color"
+            @click="onClickItem($event, item)"
+          ></circle>
 
           <g v-if="item.active">
             <rect
@@ -238,7 +248,7 @@ const handdx = ref(0);
 const handdy = ref(0);
 
 const svgCursor = `data:image/svg+xml;base64,${btoa(
-  `<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="24pt" height="24pt" viewBox="0 0 64.000000 64.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,64.000000) scale(0.100000,-0.100000)" fill="green" stroke="none"><path d="M300 580 c-6 -11 -17 -17 -24 -14 -8 3 -24 1 -35 -6 -20 -10 -21 -19 -21 -136 l0 -125 -29 17 c-32 19 -78 13 -88 -11 -7 -21 107 -224 141 -249 23 -18 42 -21 120 -21 101 0 134 11 163 54 15 22 19 55 21 214 3 163 2 191 -13 213 -12 19 -23 25 -40 22 -14 -3 -26 2 -34 14 -7 11 -23 18 -41 18 -18 0 -33 6 -36 15 -9 23 -71 20 -84 -5z m70 -120 c0 -148 18 -162 22 -17 3 101 3 102 28 102 25 0 25 -1 28 -102 3 -125 22 -139 22 -18 0 67 3 87 15 91 8 4 22 1 30 -6 12 -10 15 -44 15 -179 0 -259 -11 -276 -166 -276 -76 0 -96 3 -113 19 -28 26 -133 214 -126 226 11 18 45 11 71 -15 14 -14 29 -25 34 -25 5 0 11 64 12 143 3 134 4 142 23 142 19 0 20 -8 23 -102 4 -141 22 -133 22 10 0 63 3 117 7 120 3 4 17 7 30 7 23 0 23 -1 23 -120z"/></g></svg>`
+  `<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="24pt" height="24pt" viewBox="0 0 64.000000 64.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,64.000000) scale(0.100000,-0.100000)" fill="black" stroke="none"><path d="M300 580 c-6 -11 -17 -17 -24 -14 -8 3 -24 1 -35 -6 -20 -10 -21 -19 -21 -136 l0 -125 -29 17 c-32 19 -78 13 -88 -11 -7 -21 107 -224 141 -249 23 -18 42 -21 120 -21 101 0 134 11 163 54 15 22 19 55 21 214 3 163 2 191 -13 213 -12 19 -23 25 -40 22 -14 -3 -26 2 -34 14 -7 11 -23 18 -41 18 -18 0 -33 6 -36 15 -9 23 -71 20 -84 -5z m70 -120 c0 -148 18 -162 22 -17 3 101 3 102 28 102 25 0 25 -1 28 -102 3 -125 22 -139 22 -18 0 67 3 87 15 91 8 4 22 1 30 -6 12 -10 15 -44 15 -179 0 -259 -11 -276 -166 -276 -76 0 -96 3 -113 19 -28 26 -133 214 -126 226 11 18 45 11 71 -15 14 -14 29 -25 34 -25 5 0 11 64 12 143 3 134 4 142 23 142 19 0 20 -8 23 -102 4 -141 22 -133 22 10 0 63 3 117 7 120 3 4 17 7 30 7 23 0 23 -1 23 -120z"/></g></svg>`
 )}`;
 
 const svgRockCursor = `data:image/svg+xml;base64,${btoa(`<svg
@@ -251,7 +261,7 @@ const svgRockCursor = `data:image/svg+xml;base64,${btoa(`<svg
   >
     <g
       transform="translate(0.000000,64.000000) scale(0.100000,-0.100000)"
-      fill="green"
+      fill="black"
       stroke="red"
     >
       <path
@@ -435,6 +445,21 @@ const addEllipse = () => {
   });
 };
 
+const addCircle = () => {
+  const newID = items.value.length + 1;
+  items.value.push({
+    type: "circle",
+    active: false,
+    x: 240,
+    y: items.value.length * 60 + 60,
+    width: 100,
+    height: 100,
+    color: colors.hex,
+    id: newID,
+    name: newID + " - circle",
+  });
+};
+
 // const toggleColor = () => {
 //   showColors.value = !showColors.value;
 // };
@@ -522,7 +547,6 @@ console.log(removeActiveItem);
 
 function onMouseDownRegion(event, item) {
   if (item.active) {
-    console.log(event, item);
     item.drag = {
       type: "MOVE",
       x: item.x,
@@ -594,6 +618,28 @@ function onMouseMove(event) {
             item.drag.h + (item.drag.my - event.y) / scale.value,
             t.min_height
           );
+
+          if (item.type == "circle") {
+            item.width = Math.max(
+              item.drag.w + (item.drag.mx - event.x) / scale.value,
+              t.min_height
+            );
+            item.height = Math.max(
+              item.drag.h + (item.drag.my - event.y) / scale.value,
+              t.min_height
+            );
+            // if (item.width > item.height)
+
+            item.y = Math.min(
+              (event.y - item.drag.my) / scale.value + item.drag.y,
+              item.drag.y + item.drag.h - t.min_height
+            ); // with y constraint
+            console.log(item.width, item.height, item.drag);
+            console.log(event.y, item.drag.my, item.drag.y);
+
+            item.height = item.width;
+            console.log("after", item.width, item.height);
+          }
         }
         if (item.drag.handleID == "3") {
           // TR resize handler
@@ -609,6 +655,10 @@ function onMouseMove(event) {
             item.drag.h + (item.drag.my - event.y) / scale.value,
             t.min_height
           );
+
+          if (item.type == "circle") {
+            item.width = item.height;
+          }
         }
         if (item.drag.handleID == "7") {
           // BL
@@ -624,6 +674,14 @@ function onMouseMove(event) {
             item.drag.h + (event.y - item.drag.my) / scale.value,
             t.min_height
           );
+
+          if (item.type == "circle") {
+            item.height = Math.max(
+              item.drag.h - item.drag.my / scale.value,
+              t.min_height
+            );
+            if (item.width > item.height) item.height = item.width;
+          }
         }
         if (item.drag.handleID == "9") {
           // BR
@@ -635,6 +693,12 @@ function onMouseMove(event) {
             item.drag.h + (event.y - item.drag.my) / scale.value,
             t.min_height
           );
+
+          if (item.type == "circle") {
+            const temp = Math.max(item.height, item.width);
+            item.width = temp;
+            item.height = temp;
+          }
         }
       }
     }

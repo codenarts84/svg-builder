@@ -31,16 +31,28 @@
         :textL="textL"
         :textC="textC"
       />
-      <TestEditor ref="TestEdt" />
+      <MainZone style="padding: 100px"></MainZone>
+      <!-- <TestEditor ref="TestEdt" /> -->
     </div>
   </v-layout>
 </template>
 <script setup>
 import { ref } from "vue";
 import AppToolbar from "./components/AppToolbar.vue";
-import TestEditor from "./components/TestEditor.vue";
+// import TestEditor from "./components/TestEditor.vue";
 import RightNav from "../layout/rightnav/RightNav.vue";
 import HandMenu from "./components/HandMenu.vue";
+import MainZone from "./MainZone.vue";
+
+import { useMainStore } from "@/stores";
+import sampleplan from "@/sampleplan";
+
+const store = useMainStore();
+store.loadPlan(
+  localStorage.getItem("frontrow2.editor.plan")
+    ? JSON.parse(localStorage.getItem("frontrow2.editor.plan"))
+    : sampleplan.sampleplan
+);
 
 const TestEdt = ref(null);
 
