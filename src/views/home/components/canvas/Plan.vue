@@ -1705,304 +1705,294 @@ export default {
 };
 </script>
 <template>
-  <div class="c-plan">
-    <svg
-      :width="plan.size.width"
-      :height="plan.size.height"
-      preserveAspectRatio="none"
-      v-if="plan.size"
-      ref="svg"
-      @mousemove="mousemove"
-      @mouseup="mouseup"
-      @mousedown="mousedown"
-    >
-      <g :transform="zoomTransform.toString()" :class="mainclasses">
-        <rect
-          :width="plan.size.width"
-          :height="plan.size.height"
-          fill="#fcfcfc"
-          :cursor="cursor"
-        ></rect>
-        <image
-          v-if="background"
-          :width="backgroundWidth"
-          :height="backgroundHeight"
-          :href="background"
-          :opacity="backgroundOpacity / 100"
-          :x="backgroundX"
-          :y="backgroundY"
-        ></image>
-        <defs>
-          <pattern
-            id="smallGrid"
-            width="10"
-            height="10"
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M 10 0 L 0 0 0 10"
-              fill="none"
-              stroke="#ddd"
-              stroke-width="0.5"
-            ></path>
-          </pattern>
-          <pattern
-            id="grid"
-            width="100"
-            height="100"
-            patternUnits="userSpaceOnUse"
-          >
-            <rect width="100" height="100" fill="url(#smallGrid)"></rect>
-            <path
-              d="M 100 0 L 0 0 0 100"
-              fill="none"
-              stroke="#ccc"
-              stroke-width="1"
-            ></path>
-          </pattern>
-        </defs>
-        <rect
-          v-if="grid"
-          :width="plan.size.width"
-          :height="plan.size.height"
-          fill="url(#grid)"
-          :cursor="cursor"
-        ></rect>
-        <ZoneComponent
-          v-for="z in plan.zones"
-          :zone="z"
-          :key="z.uuid"
-          :startDragging="startDragging"
-          :startDraggingPolygonPoint="startDraggingPolygonPoint"
-        ></ZoneComponent>
-        <rect
-          class="selection-box"
-          v-for="b in selectionBoxesVisible"
-          :x="b.x - 1.5"
-          :y="b.y - 1.5"
-          :width="b.width + 3"
-          :height="b.height + 3"
-          :key="b"
-          fill="none"
-        ></rect>
+  <svg
+    :width="plan.size.width"
+    :height="plan.size.height"
+    preserveAspectRatio="none"
+    v-if="plan.size"
+    ref="svg"
+    @mousemove="mousemove"
+    @mouseup="mouseup"
+    @mousedown="mousedown"
+  >
+    <g :transform="zoomTransform.toString()" :class="mainclasses">
+      <rect
+        :width="plan.size.width"
+        :height="plan.size.height"
+        fill="#fcfcfc"
+        :cursor="cursor"
+      ></rect>
+      <image
+        v-if="background"
+        :width="backgroundWidth"
+        :height="backgroundHeight"
+        :href="background"
+        :opacity="backgroundOpacity / 100"
+        :x="backgroundX"
+        :y="backgroundY"
+      ></image>
+      <defs>
+        <pattern
+          id="smallGrid"
+          width="10"
+          height="10"
+          patternUnits="userSpaceOnUse"
+        >
+          <path
+            d="M 10 0 L 0 0 0 10"
+            fill="none"
+            stroke="#ddd"
+            stroke-width="0.5"
+          ></path>
+        </pattern>
+        <pattern
+          id="grid"
+          width="100"
+          height="100"
+          patternUnits="userSpaceOnUse"
+        >
+          <rect width="100" height="100" fill="url(#smallGrid)"></rect>
+          <path
+            d="M 100 0 L 0 0 0 100"
+            fill="none"
+            stroke="#ccc"
+            stroke-width="1"
+          ></path>
+        </pattern>
+      </defs>
+      <rect
+        v-if="grid"
+        :width="plan.size.width"
+        :height="plan.size.height"
+        fill="url(#grid)"
+        :cursor="cursor"
+      ></rect>
+      <ZoneComponent
+        v-for="z in plan.zones"
+        :zone="z"
+        :key="z.uuid"
+        :startDragging="startDragging"
+        :startDraggingPolygonPoint="startDraggingPolygonPoint"
+      ></ZoneComponent>
+      <rect
+        class="selection-box"
+        v-for="b in selectionBoxesVisible"
+        :x="b.x - 1.5"
+        :y="b.y - 1.5"
+        :width="b.width + 3"
+        :height="b.height + 3"
+        :key="b"
+        fill="none"
+      ></rect>
+      <line
+        class="selection-rotate-handle-connector"
+        v-if="selection.length && selectionBoundary"
+        :x1="rotateHandle.x"
+        :y1="rotateHandle.y"
+        :x2="
+          rotatingOriginX
+            ? rotatingOriginX
+            : selectionBoundary.x + selectionBoundary.width / 2
+        "
+        :y2="
+          rotatingOriginY
+            ? rotatingOriginY
+            : selectionBoundary.y + selectionBoundary.height / 2
+        "
+      ></line>
+      <circle
+        class="selection-rotate-handle"
+        v-if="selection.length && selectionBoundary"
+        :cx="rotateHandle.x"
+        :cy="rotateHandle.y"
+        r="5"
+        @mousedown="startRotating"
+      ></circle>
+      <circle
+        class="selection-rotate-handle-end"
+        v-if="selection.length && selectionBoundary"
+        :cx="
+          rotatingOriginX
+            ? rotatingOriginX
+            : selectionBoundary.x + selectionBoundary.width / 2
+        "
+        :cy="
+          rotatingOriginY
+            ? rotatingOriginY
+            : selectionBoundary.y + selectionBoundary.height / 2
+        "
+        r="5"
+      ></circle>
+      <rect
+        class="selection-boundary"
+        v-if="selection.length && selectionBoundary"
+        :x="selectionBoundary.x - 1.5"
+        :y="selectionBoundary.y - 1.5"
+        :width="selectionBoundary.width + 3"
+        :height="selectionBoundary.height + 3"
+        fill="none"
+      ></rect>
+      <rect
+        class="selection-resize-handle-nw"
+        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
+        :x="selectionBoundary.x - 4.5"
+        :y="selectionBoundary.y - 4.5"
+        :width="6"
+        :height="6"
+        @mousedown="startResizing($event, 'nw')"
+      ></rect>
+      <rect
+        class="selection-resize-handle-ne"
+        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
+        :x="selectionBoundary.x + selectionBoundary.width - 1.5"
+        :y="selectionBoundary.y - 4.5"
+        :width="6"
+        :height="6"
+        @mousedown="startResizing($event, 'ne')"
+      ></rect>
+      <rect
+        class="selection-resize-handle-sw"
+        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
+        :x="selectionBoundary.x - 4.5"
+        :y="selectionBoundary.y + selectionBoundary.height - 1.5"
+        :width="6"
+        :height="6"
+        @mousedown="startResizing($event, 'sw')"
+      ></rect>
+      <rect
+        class="selection-resize-handle-se"
+        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
+        :x="selectionBoundary.x + selectionBoundary.width - 1.5"
+        :y="selectionBoundary.y + selectionBoundary.height - 1.5"
+        :width="6"
+        :height="6"
+        fill="none"
+        @mousedown="startResizing($event, 'se')"
+      ></rect>
+      <rect
+        class="preview"
+        v-if="tool == 'rectangle' && drawing"
+        :x="Math.min(drawingStartX, drawingCurrentX)"
+        :y="Math.min(drawingStartY, drawingCurrentY)"
+        :width="Math.abs(drawingStartX - drawingCurrentX)"
+        :height="Math.abs(drawingStartY - drawingCurrentY)"
+      ></rect>
+      <circle
+        class="preview"
+        v-if="tool == 'circle' && drawing"
+        :cx="drawingStartX"
+        :cy="drawingStartY"
+        :r="
+          Math.sqrt(
+            Math.pow(drawingStartX - drawingCurrentX, 2) +
+              Math.pow(drawingStartY - drawingCurrentY, 2)
+          )
+        "
+      ></circle>
+      <ellipse
+        class="preview"
+        v-if="tool == 'ellipse' && drawing"
+        :cx="drawingStartX"
+        :cy="drawingStartY"
+        :rx="Math.abs(drawingStartX - drawingCurrentX)"
+        :ry="Math.abs(drawingStartY - drawingCurrentY)"
+      ></ellipse>
+      <polygon
+        class="preview"
+        v-if="tool === 'polygon' && polygonDrawing"
+        x="0"
+        y="0"
+        :points="polygonPreviewPoints"
+      ></polygon>
+      <g
+        class="row-circle-preview"
+        v-if="tool === 'rowCircle' || tool === 'rowCircleFixedCenter'"
+      >
+        <circle
+          class="preview"
+          v-for="circ in rowCirclePreviews"
+          :r="circ.radius"
+          :cx="circ.cx"
+          :cy="circ.cy"
+          :key="circ"
+        ></circle>
+        <circle
+          class="preview-center"
+          v-for="circ in rowCirclePreviews"
+          :r="2"
+          :cx="circ.cx"
+          :cy="circ.cy"
+          :key="circ"
+        ></circle>
+      </g>
+      <g class="row-preview" v-if="tool === 'row' && rowDrawing">
         <line
-          class="selection-rotate-handle-connector"
-          v-if="selection.length && selectionBoundary"
-          :x1="rotateHandle.x"
-          :y1="rotateHandle.y"
-          :x2="
-            rotatingOriginX
-              ? rotatingOriginX
-              : selectionBoundary.x + selectionBoundary.width / 2
-          "
-          :y2="
-            rotatingOriginY
-              ? rotatingOriginY
-              : selectionBoundary.y + selectionBoundary.height / 2
-          "
+          class="preview"
+          :x1="drawingStartX"
+          :y1="drawingStartY"
+          :x2="drawingCurrentX"
+          :y2="drawingCurrentY"
+        ></line>
+        <line
+          class="auxline"
+          :x1="drawingStartX - (drawingCurrentX - drawingStartX) * 1000"
+          :y1="drawingStartY - (drawingCurrentY - drawingStartY) * 1000"
+          :x2="drawingCurrentX + (drawingCurrentX - drawingStartX) * 1000"
+          :y2="drawingCurrentY + (drawingCurrentY - drawingStartY) * 1000"
         ></line>
         <circle
-          class="selection-rotate-handle"
-          v-if="selection.length && selectionBoundary"
-          :cx="rotateHandle.x"
-          :cy="rotateHandle.y"
-          r="5"
-          @mousedown="startRotating"
+          class="seat-preview"
+          v-for="(s, sid) in rowDrawingSeats"
+          :key="sid"
+          :cx="s.x"
+          :cy="s.y"
+          r="10"
         ></circle>
-        <circle
-          class="selection-rotate-handle-end"
-          v-if="selection.length && selectionBoundary"
-          :cx="
-            rotatingOriginX
-              ? rotatingOriginX
-              : selectionBoundary.x + selectionBoundary.width / 2
-          "
-          :cy="
-            rotatingOriginY
-              ? rotatingOriginY
-              : selectionBoundary.y + selectionBoundary.height / 2
-          "
-          r="5"
-        ></circle>
-        <rect
-          class="selection-boundary"
-          v-if="selection.length && selectionBoundary"
-          :x="selectionBoundary.x - 1.5"
-          :y="selectionBoundary.y - 1.5"
-          :width="selectionBoundary.width + 3"
-          :height="selectionBoundary.height + 3"
-          fill="none"
-        ></rect>
-        <rect
-          class="selection-resize-handle-nw"
-          v-if="
-            selection.length && selectionBoundary && selectionIncludesNoSeats
-          "
-          :x="selectionBoundary.x - 4.5"
-          :y="selectionBoundary.y - 4.5"
-          :width="6"
-          :height="6"
-          @mousedown="startResizing($event, 'nw')"
-        ></rect>
-        <rect
-          class="selection-resize-handle-ne"
-          v-if="
-            selection.length && selectionBoundary && selectionIncludesNoSeats
-          "
-          :x="selectionBoundary.x + selectionBoundary.width - 1.5"
-          :y="selectionBoundary.y - 4.5"
-          :width="6"
-          :height="6"
-          @mousedown="startResizing($event, 'ne')"
-        ></rect>
-        <rect
-          class="selection-resize-handle-sw"
-          v-if="
-            selection.length && selectionBoundary && selectionIncludesNoSeats
-          "
-          :x="selectionBoundary.x - 4.5"
-          :y="selectionBoundary.y + selectionBoundary.height - 1.5"
-          :width="6"
-          :height="6"
-          @mousedown="startResizing($event, 'sw')"
-        ></rect>
-        <rect
-          class="selection-resize-handle-se"
-          v-if="
-            selection.length && selectionBoundary && selectionIncludesNoSeats
-          "
-          :x="selectionBoundary.x + selectionBoundary.width - 1.5"
-          :y="selectionBoundary.y + selectionBoundary.height - 1.5"
-          :width="6"
-          :height="6"
-          fill="none"
-          @mousedown="startResizing($event, 'se')"
-        ></rect>
-        <rect
-          class="preview"
-          v-if="tool == 'rectangle' && drawing"
-          :x="Math.min(drawingStartX, drawingCurrentX)"
-          :y="Math.min(drawingStartY, drawingCurrentY)"
-          :width="Math.abs(drawingStartX - drawingCurrentX)"
-          :height="Math.abs(drawingStartY - drawingCurrentY)"
-        ></rect>
-        <circle
-          class="preview"
-          v-if="tool == 'circle' && drawing"
-          :cx="drawingStartX"
-          :cy="drawingStartY"
-          :r="
-            Math.sqrt(
-              Math.pow(drawingStartX - drawingCurrentX, 2) +
-                Math.pow(drawingStartY - drawingCurrentY, 2)
-            )
-          "
-        ></circle>
-        <ellipse
-          class="preview"
-          v-if="tool == 'ellipse' && drawing"
-          :cx="drawingStartX"
-          :cy="drawingStartY"
-          :rx="Math.abs(drawingStartX - drawingCurrentX)"
-          :ry="Math.abs(drawingStartY - drawingCurrentY)"
-        ></ellipse>
-        <polygon
-          class="preview"
-          v-if="tool === 'polygon' && polygonDrawing"
-          x="0"
-          y="0"
-          :points="polygonPreviewPoints"
-        ></polygon>
-        <g
-          class="row-circle-preview"
-          v-if="tool === 'rowCircle' || tool === 'rowCircleFixedCenter'"
-        >
-          <circle
-            class="preview"
-            v-for="circ in rowCirclePreviews"
-            :r="circ.radius"
-            :cx="circ.cx"
-            :cy="circ.cy"
-            :key="circ"
-          ></circle>
-          <circle
-            class="preview-center"
-            v-for="circ in rowCirclePreviews"
-            :r="2"
-            :cx="circ.cx"
-            :cy="circ.cy"
-            :key="circ"
-          ></circle>
-        </g>
-        <g class="row-preview" v-if="tool === 'row' && rowDrawing">
-          <line
-            class="preview"
-            :x1="drawingStartX"
-            :y1="drawingStartY"
-            :x2="drawingCurrentX"
-            :y2="drawingCurrentY"
-          ></line>
-          <line
-            class="auxline"
-            :x1="drawingStartX - (drawingCurrentX - drawingStartX) * 1000"
-            :y1="drawingStartY - (drawingCurrentY - drawingStartY) * 1000"
-            :x2="drawingCurrentX + (drawingCurrentX - drawingStartX) * 1000"
-            :y2="drawingCurrentY + (drawingCurrentY - drawingStartY) * 1000"
-          ></line>
+      </g>
+      <g
+        class="rows-preview"
+        v-if="tool === 'rows' && rowBlockDrawing"
+        :transform="rowBlockTransform"
+      >
+        <g v-for="rid in rowBlockRows" :key="rid">
           <circle
             class="seat-preview"
-            v-for="(s, sid) in rowDrawingSeats"
+            v-for="sid in rowBlockSeats"
             :key="sid"
-            :cx="s.x"
-            :cy="s.y"
+            :cx="rowSeatSpacing * (sid - 1)"
+            :cy="rowSpacing * (rid - 1)"
             r="10"
           ></circle>
         </g>
-        <g
-          class="rows-preview"
-          v-if="tool === 'rows' && rowBlockDrawing"
-          :transform="rowBlockTransform"
-        >
-          <g v-for="rid in rowBlockRows" :key="rid">
-            <circle
-              class="seat-preview"
-              v-for="sid in rowBlockSeats"
-              :key="sid"
-              :cx="rowSeatSpacing * (sid - 1)"
-              :cy="rowSpacing * (rid - 1)"
-              r="10"
-            ></circle>
-          </g>
-          <rect
-            v-if="rowBlockSeats + rowBlockRows >= 7"
-            :x="(rowSeatSpacing * rowBlockSeats) / 2 - 25 - 12.5"
-            :y="(rowSpacing * rowBlockRows) / 2 - 25"
-            width="50"
-            height="25"
-            fill="#00c"
-          ></rect>
-          <text
-            v-if="rowBlockSeats + rowBlockRows >= 7"
-            :x="(rowSeatSpacing * rowBlockSeats) / 2 - 12.5"
-            :y="(rowSpacing * rowBlockRows) / 2 - 12.5"
-            text-anchor="middle"
-            fill="#fff"
-            dy=".3em"
-          >
-            {{ rowBlockRows }} × {{ rowBlockSeats }}
-          </text>
-        </g>
         <rect
-          class="selection-area"
-          v-if="(tool == 'select' || tool == 'seatselect') && selecting"
-          :x="Math.min(selectingStartX, selectingCurrentX)"
-          :y="Math.min(selectingStartY, selectingCurrentY)"
-          :width="Math.abs(selectingStartX - selectingCurrentX)"
-          :height="Math.abs(selectingStartY - selectingCurrentY)"
+          v-if="rowBlockSeats + rowBlockRows >= 7"
+          :x="(rowSeatSpacing * rowBlockSeats) / 2 - 25 - 12.5"
+          :y="(rowSpacing * rowBlockRows) / 2 - 25"
+          width="50"
+          height="25"
+          fill="#00c"
         ></rect>
+        <text
+          v-if="rowBlockSeats + rowBlockRows >= 7"
+          :x="(rowSeatSpacing * rowBlockSeats) / 2 - 12.5"
+          :y="(rowSpacing * rowBlockRows) / 2 - 12.5"
+          text-anchor="middle"
+          fill="#fff"
+          dy=".3em"
+        >
+          {{ rowBlockRows }} × {{ rowBlockSeats }}
+        </text>
       </g>
-    </svg>
-  </div>
+      <rect
+        class="selection-area"
+        v-if="(tool == 'select' || tool == 'seatselect') && selecting"
+        :x="Math.min(selectingStartX, selectingCurrentX)"
+        :y="Math.min(selectingStartY, selectingCurrentY)"
+        :width="Math.abs(selectingStartX - selectingCurrentX)"
+        :height="Math.abs(selectingStartY - selectingCurrentY)"
+      ></rect>
+    </g>
+  </svg>
 </template>
 <style>
 .c-plan {
@@ -2024,83 +2014,83 @@ export default {
   user-select: none;
 }
 
-.c-plan svg .selection-area {
+svg .selection-area {
   stroke-width: 1.5px;
   fill: rgba(0, 0, 204, 0.3);
   stroke: rgba(0, 0, 204, 0.5);
 }
 
-.c-plan svg .selection-box {
+svg .selection-box {
   stroke-width: 1.5px;
   stroke: #00c;
 }
 
-.c-plan svg .selection-resize-handle-nw {
+svg .selection-resize-handle-nw {
   fill: #00c;
   cursor: nw-resize;
 }
 
-.c-plan svg .selection-resize-handle-ne {
+svg .selection-resize-handle-ne {
   fill: #00c;
   cursor: ne-resize;
 }
 
-.c-plan svg .selection-resize-handle-sw {
+svg .selection-resize-handle-sw {
   fill: #00c;
   cursor: sw-resize;
 }
 
-.c-plan svg .selection-resize-handle-se {
+svg .selection-resize-handle-se {
   fill: #00c;
   cursor: se-resize;
 }
 
-.c-plan svg .selection-rotate-handle {
+svg .selection-rotate-handle {
   fill: #00c;
   cursor: grab;
 }
 
-.c-plan svg .selection-rotate-handle-connector,
-.c-plan svg .selection-rotate-handle-end {
+svg .selection-rotate-handle-connector,
+svg .selection-rotate-handle-end {
   fill: #fff;
   stroke-width: 1.5px;
   stroke: #00c;
   pointer-events: none;
 }
 
-.c-plan svg .selection-boundary {
+svg .selection-boundary {
   box-shadow: 0 0 5px 5px #00c;
   stroke: #00c;
   stroke-width: 1.5px;
   stroke-dasharray: 3, 3;
 }
 
-.c-plan svg .preview {
+svg .preview {
   stroke: #00c;
   stroke-width: 2px;
   fill: rgba(0, 0, 204, 0.3);
 }
 
-.c-plan svg .auxline {
+svg .auxline {
   stroke: #00c;
   stroke-width: 1px;
   opacity: 0.5;
   fill: rgba(0, 0, 204, 0.3);
 }
 
-.c-plan svg .seat-preview {
+svg .seat-preview {
   stroke: #00c;
   stroke-width: 1px;
   fill: rgba(0, 0, 204, 0.3);
 }
 
-.c-plan svg .row-circle-preview circle.preview {
+svg .row-circle-preview circle.preview {
   fill: rgba(0, 0, 204, 0.1);
   stroke-width: 2px;
   opacity: 0.5;
 }
 
-.c-plan svg .row-circle-preview circle.preview-center {
+svg .row-circle-preview circle.preview-center {
   fill: rgba(0, 0, 204, 0.8);
   stroke-width: 0;
   opacity: 0.5;
