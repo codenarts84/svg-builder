@@ -1,13 +1,19 @@
 <template>
   <v-list v-if="props.opened" id="item-tools">
-    <v-list-item @click="onAddTextField">
+    <v-list-item
+      @click="changeTool('text')"
+      :class="tool == 'text' ? 'current-tool' : ''"
+    >
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Text</v-tooltip>
         <v-icon color="black" icon="mdi-pen-plus" size="large"></v-icon>
       </v-list-item-title>
     </v-list-item>
 
-    <v-list-item @click="onAddRectangle">
+    <v-list-item
+      @click="changeTool('rectangle')"
+      :class="tool == 'rectangle' ? 'current-tool' : ''"
+    >
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Rectangle</v-tooltip>
         <v-icon
@@ -18,7 +24,10 @@
       </v-list-item-title>
     </v-list-item>
 
-    <v-list-item @click="onAddEllipse">
+    <v-list-item
+      @click="changeTool('circle')"
+      :class="tool == 'circle' ? 'current-tool' : ''"
+    >
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Circle</v-tooltip>
 
@@ -29,12 +38,38 @@
         ></v-icon>
       </v-list-item-title>
     </v-list-item>
+
+    <v-list-item
+      @click="changeTool('ellipse')"
+      :class="tool == 'ellipse' ? 'current-tool' : ''"
+    >
+      <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Ellipse</v-tooltip>
+
+        <v-icon color="black" icon="mdi-ellipse-outline" size="large"></v-icon>
+      </v-list-item-title>
+    </v-list-item>
+
+    <v-list-item
+      @click="changeTool('polygon')"
+      :class="tool == 'polygon' ? 'current-tool' : ''"
+    >
+      <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Polygon</v-tooltip>
+
+        <v-icon
+          color="black"
+          icon="mdi-shape-polygon-plus"
+          size="large"
+        ></v-icon>
+      </v-list-item-title>
+    </v-list-item>
   </v-list>
 </template>
 
 <script setup>
-import { defineProps } from "vue";
-
+import { defineProps, ref, computed } from "vue";
+import { useMainStore } from "@/stores";
 const props = defineProps({
   addRectangle: Function,
   addEllipse: Function,
@@ -45,6 +80,11 @@ const props = defineProps({
 const onAddRectangle = () => props.addRectangle();
 const onAddEllipse = () => props.addEllipse();
 const onAddTextField = () => props.addTextField();
+
+const store = useMainStore();
+const tool = ref(computed(() => store.tool));
+
+const changeTool = (tool) => store.changeTool(tool);
 </script>
 <style>
 #item-tools {

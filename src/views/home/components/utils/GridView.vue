@@ -24,8 +24,13 @@
 import { ref, computed } from "vue";
 import { useBoardStore } from "../../../../stores/svgStore";
 import SnapToGridIcon from "../../../../assets/svgs/menuIcons/SnapToGridIcon.vue";
+import { useMainStore } from "@/stores";
 
 const boardStore = useBoardStore();
-const grid = ref(computed(() => boardStore.grid));
-const toggleGrid = () => boardStore.grid_toggle();
+// const grid = ref(computed(() => boardStore.grid));
+const grid = ref(computed(() => store.grid));
+
+// const toggleGrid = () => boardStore.grid_toggle();
+const store = useMainStore();
+const toggleGrid = () => store.toggleGrid();
 </script>

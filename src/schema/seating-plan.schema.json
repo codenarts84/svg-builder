@@ -1,0 +1,248 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Seating Plan",
+  "description": "Seating plan for venues",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "zones": {
+      "type": "array",
+      "description": "List of zones",
+      "items": { "$ref": "#/definitions/zone" }
+    },
+    "categories": {
+      "type": "array",
+      "description": "List of categories",
+      "items": { "$ref": "#/definitions/category" }
+    },
+    "size": {
+      "type": "object",
+      "description": "Size of the entire plan (in pixels)",
+      "properties": {
+        "width": { "type": "integer" },
+        "height": { "type": "integer" }
+      },
+      "required": ["width", "height"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["zones", "name", "categories", "size"],
+  "additionalProperties": false,
+  "definitions": {
+    "zone": {
+      "type": "object",
+      "description": "Zone represents the parent entity that groups all other entities. Examples of different zones would be 'main area', 'balcony', etc.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the zone"
+        },
+        "zone_id": {
+          "type": "string",
+          "description": "Internal ID of the zone. Currently not used in any way during plan rendering, but only to auto-generate seat GUIDs. May be missing since previous versions of the schema did not include this, in which case a fallback to the name is expected."
+        },
+        "uuid": {
+          "type": "string",
+          "description": "Unique ID of this object. May not under any circumstances be duplicate, not even between different object types. Should be an UUID-4. May be missing since previous versions of the schema did not include this."
+        },
+        "position": { "$ref": "#/definitions/position" },
+        "rows": {
+          "type": "array",
+          "description": "List of rows",
+          "items": { "$ref": "#/definitions/row" }
+        },
+        "areas": {
+          "type": "array",
+          "description": "List of areas",
+          "items": { "$ref": "#/definitions/area" }
+        }
+      },
+      "required": ["position", "rows"],
+      "additionalProperties": false
+    },
+    "row": {
+      "type": "object",
+      "description": "Row is simply a collection of seats with some additional information that simplifies working with seats.",
+      "properties": {
+        "row_number": {
+          "type": "string",
+          "description": "Row number or name by which it can be identified"
+        },
+        "row_label": {
+          "type": ["string", "null"],
+          "description": "Human-readable name for the row. Not used for rendering the plan, but for describing the seats in text."
+        },
+        "seat_label": {
+          "type": ["string", "null"],
+          "description": "Human-readable name for the seats in this. May include %s as a placeholder for the seat_number values. Not used for rendering the plan, but for describing the seats in text."
+        },
+        "uuid": {
+          "type": "string",
+          "description": "Unique ID of this object. May not under any circumstances be duplicate, not even between different object types. Should be an UUID-4. May be missing since previous versions of the schema did not include this."
+        },
+        "seats": {
+          "type": "array",
+          "description": "List of seats in this row",
+          "items": { "$ref": "#/definitions/seat" }
+        },
+        "row_number_position": {
+          "type": ["string", "null"],
+          "enum": ["start", "end", "both", null],
+          "description": "Should the row numbers be shown?"
+        },
+        "position": {
+          "$ref": "#/definitions/position"
+        }
+      },
+      "required": ["seats", "row_number"],
+      "additionalProperties": false
+    },
+    "seat": {
+      "type": "object",
+      "description": "Individual seat that can be reserved.",
+      "properties": {
+        "seat_guid": {
+          "type": "string",
+          "description": "Seat global ID by which it can be identified. It should be globally unique (not just per row). It doesn't have to be pretty since it won't be shown to the user."
+        },
+        "seat_number": {
+          "type": "string",
+          "description": "Human-readable seat number."
+        },
+        "uuid": {
+          "type": "string",
+          "description": "Unique ID of this object. May not under any circumstances be duplicate, not even between different object types. Should be an UUID-4. May be missing since previous versions of the schema did not include this."
+        },
+        "start_direction": {
+          "type": ["string", "null"],
+          "description": "Declares this seat as a start point for ordered booking in its row. Can contain '<', '>' or '<>'."
+        },
+        "radius": {
+          "type": "number",
+          "description": "Defaults to 10"
+        },
+        "position": { "$ref": "#/definitions/position" },
+        "category": {
+          "type": "string",
+          "description": "What category does this seat belong to? This needs to refer to the name of a category defined on the top level of the file. Keep in mind that there is no way to enfore this requirement with this version of JSON schema."
+        }
+      },
+      "required": ["seat_guid", "seat_number", "position", "category"],
+      "additionalProperties": false
+    },
+    "area": {
+      "type": "object",
+      "description": "Area can represent anything from general admission area, to stage, bar or even tables.",
+      "properties": {
+        "color": { "type": "string" },
+        "border_color": { "type": "string" },
+        "rotation": {
+          "type": "number",
+          "description": "Rotation of the shape in degrees clockwise around the point specified in position."
+        },
+        "position": {
+          "$ref": "#/definitions/position"
+        },
+        "uuid": {
+          "type": "string",
+          "description": "Unique ID of this object. May not under any circumstances be duplicate, not even between different object types. Should be an UUID-4. May be missing since previous versions of the schema did not include this."
+        },
+        "shape": {
+          "type": "string",
+          "enum": ["polygon", "rectangle", "ellipse", "circle", "text"]
+        },
+        "polygon": {
+          "type": "object",
+          "properties": {
+            "points": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/position" }
+            }
+          },
+          "required": ["points"],
+          "additionalProperties": false
+        },
+        "rectangle": {
+          "type": "object",
+          "properties": {
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            }
+          },
+          "required": ["width", "height"],
+          "additionalProperties": false
+        },
+        "ellipse": {
+          "type": "object",
+          "properties": {
+            "radius": { "$ref": "#/definitions/position" }
+          },
+          "required": ["radius"],
+          "additionalProperties": false
+        },
+        "circle": {
+          "type": "object",
+          "properties": {
+            "radius": {
+              "type": "number"
+            }
+          },
+          "required": ["radius"],
+          "additionalProperties": false
+        },
+        "text": {
+          "type": "object",
+          "properties": {
+            "text": { "type": "string" },
+            "color": { "type": "string" },
+            "size": {
+              "type": "number",
+              "description": "Defaults to 16"
+            },
+            "position": {
+              "$ref": "#/definitions/position"
+            }
+          },
+          "required": ["text", "position"],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "position": {
+      "type": "object",
+      "description": "Position of the element",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": ["x", "y"],
+      "additionalProperties": false
+    },
+    "category": {
+      "type": "object",
+      "description": "A category of seats, e.g. a price level.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Internal name of the seats, e.g. 'stalls'. This should be used to map this to actual shop products."
+        },
+        "color": {
+          "type": "string",
+          "description": "The color used to draw seats of this category."
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    }
+  }
+}

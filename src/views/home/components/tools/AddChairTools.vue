@@ -1,12 +1,19 @@
 <template>
   <v-list v-if="props.opened" id="seat-tools">
-    <v-list-item @click="onClick">
+    <v-list-item
+      @click="changeTool('row')"
+      :class="tool == 'row' ? 'current-tool' : ''"
+    >
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">One Row</v-tooltip>
         <RowSingleIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
-    <v-list-item @click="onClick">
+
+    <v-list-item
+      @click="changeTool('rows')"
+      :class="tool == 'rows' ? 'current-tool' : ''"
+    >
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Multi Rows</v-tooltip>
         <RowMultiIcon width="20px" height="20px" />
@@ -50,7 +57,7 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, computed, ref } from "vue";
 
 import RowSingleIcon from "@/assets/svgs/menuIcons/RowSingleIcon.vue";
 import RowMultiIcon from "@/assets/svgs/menuIcons/RowMultiIcon.vue";
@@ -60,11 +67,17 @@ import TableRoundIcon from "@/assets/svgs/menuIcons/TableRoundIcon.vue";
 import TableRectIcon from "@/assets/svgs/menuIcons/TableRectIcon.vue";
 import GaCircleIcon from "@/assets/svgs/menuIcons/GaCircleIcon.vue";
 
+import { useMainStore } from "@/stores";
+const store = useMainStore();
 const onClick = () => alert("Not set yet");
 
 const props = defineProps({
   opened: Boolean,
 });
+
+const tool = ref(computed(() => store.tool));
+
+const changeTool = (tool) => store.changeTool(tool);
 </script>
 
 <style>
@@ -85,5 +98,8 @@ const props = defineProps({
     0px 3px 14px 2px var(--v-shadow-key-ambient-opacity, rgba(0, 0, 0, 0.12));
   transition: all 1s;
   z-index: 9999;
+}
+.current-tool {
+  background-color: #e7e7e7;
 }
 </style>
