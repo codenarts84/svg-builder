@@ -4,7 +4,7 @@
       <v-btn @click="reset">BTN New</v-btn>
     </div>
     <div class="group">
-      <v-btn
+      <!-- <v-btn
         @click="changeTool('select')"
         :class="tool == 'select' ? 'current-tool' : ''"
       >
@@ -41,8 +41,8 @@
         :class="tool == 'circle' ? 'current-tool' : ''"
       >
         circle
-      </v-btn>
-
+      </v-btn> -->
+      <!-- 
       <v-btn
         @click="changeTool('ellipse')"
         :class="tool == 'ellipse' ? 'current-tool' : ''"
@@ -62,7 +62,7 @@
         :class="tool == 'text' ? 'current-tool' : ''"
       >
         text
-      </v-btn>
+      </v-btn> -->
     </div>
 
     <div class="group">

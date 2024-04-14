@@ -2,7 +2,7 @@
   <div>
     <!-- <h1>TEST</h1> -->
     <!-- <div class="app-navbar"> -->
-    <!-- <Toolbar /> -->
+    <Toolbar />
     <!-- </div> -->
     <!-- <div class="app-main"> -->
     <!-- <div class="app-canvas-area"> -->
@@ -16,7 +16,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import { usePlanStore } from "@/stores/plan.js"; // Assuming you've set up a Pinia store in this location
-// import Toolbar from "./components/Toolbar.vue";
+import Toolbar from "./components/Toolbar.vue";
 import Plan from "./components/canvas/Plan.vue";
 
 const WELCOME_VERSION = "1";
@@ -33,7 +33,6 @@ const cmdOtherwiseCtrl = ref(
   window.navigator.platform.toLowerCase().startsWith("mac") ? "CMD" : "CTRL"
 );
 
-// Computed properties using Pinia store
 const plan = computed(() => planStore.plan);
 
 // Methods
@@ -43,7 +42,7 @@ const hideWelcomePrompt = () => {
 };
 </script>
 
-<style>
+<!-- <style>
 #app {
   display: flex;
   flex-direction: column;
@@ -133,5 +132,5 @@ const hideWelcomePrompt = () => {
   #app .app-status-bar {
     display: none;
   }
-}
 </style>
+} -->
