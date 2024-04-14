@@ -31,13 +31,14 @@
         :textL="textL"
         :textC="textC"
       />
-      <MainZone style="padding: 100px"></MainZone>
+      <!-- <MainZone style="padding: 100px"></MainZone> -->
+      <Plan ref="plan"></Plan>
       <!-- <TestEditor ref="TestEdt" /> -->
     </div>
   </v-layout>
 </template>
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import AppToolbar from "./components/AppToolbar.vue";
 // import TestEditor from "./components/TestEditor.vue";
 import RightNav from "../layout/rightnav/RightNav.vue";
@@ -80,5 +81,31 @@ const handleDownloadSVG = () => {
   } else {
     console.error("TestEdt component is not yet mounted or available.");
   }
+};
+
+import { usePlanStore } from "@/stores/plan.js"; // Assuming you've set up a Pinia store in this location
+import Toolbar from "./components/Toolbar.vue";
+import Plan from "./components/canvas/Plan.vue";
+
+const WELCOME_VERSION = "1";
+
+// Using Pinia store
+const planStore = usePlanStore();
+
+// Data properties as refs
+const showCreateZonePrompt = ref(false);
+const showWelcomePrompt = ref(
+  window.localStorage.getItem("frontrow2.welcome.seen") !== WELCOME_VERSION
+);
+const cmdOtherwiseCtrl = ref(
+  window.navigator.platform.toLowerCase().startsWith("mac") ? "CMD" : "CTRL"
+);
+
+const plan = computed(() => planStore.plan);
+
+// Methods
+const hideWelcomePrompt = () => {
+  showWelcomePrompt.value = false;
+  window.localStorage.setItem("frontrow2.welcome.seen", WELCOME_VERSION);
 };
 </script>
