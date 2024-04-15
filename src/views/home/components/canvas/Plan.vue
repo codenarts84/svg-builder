@@ -1664,6 +1664,9 @@ export default {
   },
 
   mounted() {
+    console.log("Mounted");
+    this.createZoom();
+
     window.addEventListener("resize", this.createZoom);
     window.addEventListener("keydown", this.hotkey);
   },
@@ -1683,10 +1686,10 @@ export default {
     @mousemove="mousemove"
     @mouseup="mouseup"
     @mousedown="mousedown"
+    :transform="zoomTransform.toString()"
+    style="background-color: grey"
   >
-    <g :transform="zoomTransform.toString()" :class="mainclasses">
-      <text x="100" y="100" fill="red">{{ zoomTransform.toString() }}</text>
-
+    <g :class="mainclasses">
       <rect
         :width="plan.size.width"
         :height="plan.size.height"
