@@ -23,7 +23,7 @@
     "
   >
     <RightNav />
-    <div style="width: 100%">
+    <div class="main-pan">
       <HandMenu
         :addTextField="addTextField"
         :addEllipse="addEllipse"
@@ -123,3 +123,13 @@ const hideWelcomePrompt = () => {
   window.localStorage.setItem("frontrow2.welcome.seen", WELCOME_VERSION);
 };
 </script>
+
+<style>
+.main-pan {
+  width: 100%;
+  background-color: rgb(151, 162, 182);
+  /* display: flex; */
+  /* align-items: center; */
+  /* justify-content: center; */
+}
+</style>
