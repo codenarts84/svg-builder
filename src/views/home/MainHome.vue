@@ -1,8 +1,9 @@
 <template>
   <AppToolbar
     :importSVG="importSVG"
-    @zoomIn="zoomIn"
-    @zoomOut="zoomOut"
+    :zoomIn="zoomIn"
+    :zoomOut="zoomOut"
+    :zoomTo="zoomTo"
     :textL="textL"
     :textR="textR"
     :textC="textC"
@@ -32,12 +33,14 @@
         :textC="textC"
       />
       <!-- <MainZone style="padding: 100px"></MainZone> -->
-      <Plan ref="plan"></Plan>
+      <!-- <Toolbar></Toolbar> -->
+      <Plan ref="planref"></Plan>
       <!-- <TestEditor ref="TestEdt" /> -->
     </div>
   </v-layout>
 </template>
 <script setup>
+import * as d3 from "d3";
 import { ref, computed } from "vue";
 import AppToolbar from "./components/AppToolbar.vue";
 // import TestEditor from "./components/TestEditor.vue";
@@ -55,11 +58,12 @@ store.loadPlan(
     : sampleplan.sampleplan
 );
 
+const planref = ref(null);
 const TestEdt = ref(null);
 
-const zoomIn = () => {
-  TestEdt.value.zoomIn();
-};
+// const zoomIn = () => {
+//   TestEdt.value.zoomIn();
+// };
 
 const removeItem = () => {
   TestEdt.value.deleteItem();
@@ -72,7 +76,7 @@ const importSVG = () => TestEdt.value.importSVG();
 const addEllipse = () => TestEdt.value.addEllipse();
 const addRectangle = () => TestEdt.value.addRectangle();
 const addTextField = () => TestEdt.value.addTextField();
-const zoomOut = () => TestEdt.value.zoomOut();
+// const zoomOut = () => TestEdt.value.zoomOut();
 const onImportClick = () => TestEdt.value.onImportClick();
 const handleDownloadSVG = () => {
   if (TestEdt.value) {
@@ -102,6 +106,16 @@ const cmdOtherwiseCtrl = ref(
 );
 
 const plan = computed(() => planStore.plan);
+
+const zoomIn = () => {
+  planref.value.scaleBy(planref.value, 1.1);
+};
+const zoomOut = () => {
+  // planref.value.scaleTo(planref.value, 1);
+  planref.value.scaleBy(planref.value, 0.9);
+};
+
+const zoomTo = (v) => planref.value.scaleTo(planref.value, v);
 
 // Methods
 const hideWelcomePrompt = () => {

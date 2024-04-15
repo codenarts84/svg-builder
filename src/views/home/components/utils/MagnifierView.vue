@@ -1,5 +1,5 @@
 <template>
-  <v-btn class="btn" @click="increaseZoom">
+  <v-btn class="btn" @click="zoomOut">
     <v-icon color="black" icon="mdi-minus" size="large"></v-icon>
     <v-tooltip activator="parent" location="bottom">Zoom out</v-tooltip>
   </v-btn>
@@ -14,34 +14,40 @@
     variant="plane"
   />
 
-  <v-btn class="btn" @click="decreaseZoom">
+  <v-btn class="btn" @click="zoomIn">
     <v-icon color="black" icon="mdi-plus" size="large"></v-icon>
     <v-tooltip activator="parent" location="bottom">Zoom In</v-tooltip>
   </v-btn>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, defineProps, ref, watch } from "vue";
 import { useSvgStore } from "../../../../stores/svgStore";
+import { useMainStore } from "@/stores";
+const store = useMainStore();
 
-const svgStore = useSvgStore();
-
-// Create a computed property with a getter and a setter
-const zoomValue = computed({
-  // Getter returns a string representation of the zoom level
-  get: () => `${Math.round(svgStore.magnifier_init * 100)}`,
-  // Setter parses the input value to a float and updates the store
-  set: (value) => {
-    const numericValue = parseFloat(value) / 100; // Convert back to a fraction
-    svgStore.set_zoom(numericValue);
+const zoomValue = ref(computed(() => Math.round(store.zoomTransform.k * 100)));
+watch(
+  [store.zoomTransform.k],
+  () => {
+    console.log("Changed", store.zoomTransform.k);
   },
+  { immediate: true }
+);
+const onChange = (e) => {
+  props.zoomTo(e.target.value / 100);
+};
+
+const props = defineProps({
+  zoomIn: Function,
+  zoomOut: Function,
+  zoomTo: Function,
 });
 
-const increaseZoom = () => svgStore.zoom_in();
-const decreaseZoom = () => svgStore.zoom_up();
+// const zoomIn =
 </script>
 
-<style lang="scss">
+<style>
 .custom-input-1 {
   display: flex;
   align-items: center;
@@ -49,17 +55,10 @@ const decreaseZoom = () => svgStore.zoom_up();
   width: 65px;
   font-size: 12px !important;
 }
-</style>
-
-<style>
 .v-field--appended {
   padding-inline-end: 0px;
   font-size: 14px;
 }
-</style>
-
-<style>
-/* Target the input inside v-text-field */
 .v-text-field input[type="number"]::-webkit-inner-spin-button,
 .v-text-field input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;

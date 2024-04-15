@@ -1,6 +1,6 @@
 export default {
   sampleplan: {
-    name: "Plan",
+    name: "My Board",
     categories: [
       {
         name: "Category I",
