@@ -91,12 +91,12 @@ const changeTool = (tool) => store.changeTool(tool);
   position: absolute;
   width: 60px;
   left: 70px;
-  top: 65px;
+  top: 115px;
   border-radius: 10px;
   box-shadow: 0px 5px 5px -3px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)),
     0px 8px 10px 1px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)),
     0px 3px 14px 2px var(--v-shadow-key-ambient-opacity, rgba(0, 0, 0, 0.12));
   transition: all 1s;
-  z-index: 9999;
+  z-index: 99;
 }
 </style>

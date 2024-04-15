@@ -331,6 +331,7 @@ export default {
       return this.selectionBoxes.filter((b) => b.visible);
     },
     selectionBoxes() {
+      console.log("selectionBoxes");
       const res = [];
       if (this.selection.length) {
         for (const z of this.plan.zones) {
@@ -590,8 +591,7 @@ export default {
 
     mousedown(event) {
       if (!this.svg) return;
-
-      console.log("Mouse Downed!", this.svg, this.getSvgRect());
+      console.log("mouse Down");
 
       const store = useMainStore();
 
@@ -613,12 +613,11 @@ export default {
             this.zoomTransform,
             null
           );
-          console.log("Selected!", this.tool, selPos);
-          // this.selecting = true;
-          // this.selectingStartX = selPos.x;
-          // this.selectingStartY = selPos.y;
-          // this.selectingCurrentX = selPos.x;
-          // this.selectingCurrentY = selPos.y;
+          this.selecting = true;
+          this.selectingStartX = selPos.x;
+          this.selectingStartY = selPos.y;
+          this.selectingCurrentX = selPos.x;
+          this.selectingCurrentY = selPos.y;
           break;
         }
         case "rectangle":
@@ -1021,7 +1020,6 @@ export default {
             for (const z of this.plan.zones) {
               if (this.lockedZones.includes(z.uuid)) continue;
               for (const r of z.rows) {
-                console.log("about r", r, z.rows);
                 for (const s of r.seats) {
                   if (
                     z.position.x +
@@ -1462,190 +1460,190 @@ export default {
 
     hotkey(event) {
       console.log("Hotkey");
-      // if (
-      //   event.target !== document.body &&
-      //   !event.target.matches(".c-toolbar *")
-      // ) {
-      //   return; // Do nothing if something is focused, e.g. an input element (except it's a toolbar button)
-      // }
-      // switch (event.code) {
-      //   case "Delete":
-      //   case "Backspace":
-      //     usePlanStore().deleteObjects(selection.value);
-      //     event.preventDefault(); // prevent backspace to go history back in Firefox on Mac
-      //     return;
-      //   case "Enter":
-      //     if (polygonDrawing.value) {
-      //       this.finishPolygon();
-      //       event.preventDefault();
-      //       event.stopPropagation();
-      //       return true;
-      //     }
-      //     return false;
-      //   case "Escape":
-      //     rowBlockDrawing.value = false;
-      //     rowDrawing.value = false;
-      //     polygonDrawing.value = false;
-      //     drawing.value = false;
-      //     if (
-      //       tool.value === "rowCircle" ||
-      //       tool.value === "rowCircleFixedCenter"
-      //     ) {
-      //       useMainStore().changeTool("select");
-      //     }
-      //     event.preventDefault();
-      //     event.stopPropagation();
-      //     return;
-      //   case "ArrowUp":
-      //     useMainStore().moveSelected(
-      //       0,
-      //       -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-      //     );
-      //     event.preventDefault();
-      //     event.stopPropagation();
-      //     return;
-      //   case "ArrowDown":
-      //     useMainStore().moveSelected(
-      //       0,
-      //       1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-      //     );
-      //     event.preventDefault();
-      //     event.stopPropagation();
-      //     return;
-      //   case "ArrowLeft":
-      //     useMainStore().moveSelected(
-      //       0,
-      //       -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-      //     );
-      //     event.preventDefault();
-      //     event.stopPropagation();
-      //     return;
-      //   case "ArrowRight":
-      //     useMainStore().moveSelected(
-      //       0,
-      //       1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-      //     );
-      //     event.preventDefault();
-      //     event.stopPropagation();
-      //     return;
-      // }
-      // if (event.metaKey || event.ctrlKey) {
-      //   switch (event.key) {
-      //     case "a":
-      //       useMainStore().selectAll();
-      //       event.preventDefault();
-      //       event.stopPropagation();
-      //       return true;
-      //     case "s": {
-      //       const url = URL.createObjectURL(
-      //         new Blob([JSON.stringify(this.plan, undefined, 2)])
-      //       );
-      //       const a = document.createElement("a");
-      //       a.style.display = "none";
-      //       a.href = url;
-      //       a.download = this.plan.name + ".json";
-      //       document.body.appendChild(a);
-      //       a.click();
-      //       URL.revokeObjectURL(url);
-      //       event.preventDefault();
-      //       event.stopPropagation();
-      //       return true;
-      //     }
-      //     case "c":
-      //       if (tool.value === "seatselect") {
-      //         alert(
-      //           "Copying individual seats is currently not possible, please select a row instead."
-      //         );
-      //         return;
-      //       }
-      //       useMainStore().copy(this.selection);
-      //       event.preventDefault();
-      //       event.stopPropagation();
-      //       return true;
-      //     case "x":
-      //       if (tool.value === "seatselect") {
-      //         alert(
-      //           "Copying individual seats is currently not possible, please select a row instead."
-      //         );
-      //         return;
-      //       }
-      //       useMainStore().cut(this.selection);
-      //       event.preventDefault();
-      //       event.stopPropagation();
-      //       return true;
-      //     case "v":
-      //       useMainStore().paste();
-      //       event.preventDefault();
-      //       event.stopPropagation();
-      //       return true;
-      //     case "z":
-      //       usePlanStore().undo();
-      //       event.preventDefault();
-      //       event.stopPropagation();
-      //       return true;
-      //     case "y":
-      //       usePlanStore().redo();
-      //       event.preventDefault();
-      //       event.stopPropagation();
-      //       return true;
-      //     case "+":
-      //       if (tool.value === "rows") {
-      //         this.rowSpacing += event.altKey ? 0.1 : 1;
-      //         event.preventDefault();
-      //         event.stopPropagation();
-      //         return true;
-      //       }
-      //       break;
-      //     case "-":
-      //       if (tool.value === "rows" && event.ctrlKey) {
-      //         this.rowSpacing -= event.altKey ? 0.1 : 1;
-      //         event.preventDefault();
-      //         event.stopPropagation();
-      //         return true;
-      //       }
-      //       break;
-      //   }
-      // } else {
-      //   switch (event.key) {
-      //     case "+":
-      //       if (["rows", "row"].includes(tool.value)) {
-      //         this.rowSeatSpacing += event.altKey ? 0.1 : 1;
-      //       }
-      //       break;
-      //     case "-":
-      //       if (["rows", "row"].includes(tool.value)) {
-      //         this.rowSeatSpacing -= event.altKey ? 0.1 : 1;
-      //       }
-      //       break;
-      //     case "v":
-      //       useMainStore().changeTool("select");
-      //       break;
-      //     case "s":
-      //       useMainStore().changeTool("seatselect");
-      //       break;
-      //     case "n":
-      //       useMainStore().changeTool("row");
-      //       break;
-      //     case "b":
-      //       useMainStore().changeTool("rows");
-      //       break;
-      //     case "r":
-      //       useMainStore().changeTool("rectangle");
-      //       break;
-      //     case "c":
-      //       useMainStore().changeTool("circle");
-      //       break;
-      //     case "e":
-      //       useMainStore().changeTool("ellipse");
-      //       break;
-      //     case "p":
-      //       useMainStore().changeTool("polygon");
-      //       break;
-      //     case "t":
-      //       useMainStore().changeTool("text");
-      //       break;
-      //   }
-      // }
+      if (
+        event.target !== document.body &&
+        !event.target.matches(".c-toolbar *")
+      ) {
+        return; // Do nothing if something is focused, e.g. an input element (except it's a toolbar button)
+      }
+      switch (event.code) {
+        case "Delete":
+        case "Backspace":
+          usePlanStore().deleteObjects(this.selection);
+          event.preventDefault(); // prevent backspace to go history back in Firefox on Mac
+          return;
+        case "Enter":
+          if (this.polygonDrawing) {
+            this.finishPolygon();
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+          }
+          return false;
+        case "Escape":
+          this.rowBlockDrawing = false;
+          this.rowDrawing = false;
+          this.polygonDrawing = false;
+          this.drawing = false;
+          if (
+            this.tool === "rowCircle" ||
+            this.tool === "rowCircleFixedCenter"
+          ) {
+            useMainStore().changeTool("select");
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        case "ArrowUp":
+          useMainStore().moveSelected(
+            0,
+            -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+          );
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        case "ArrowDown":
+          useMainStore().moveSelected(
+            0,
+            1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+          );
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        case "ArrowLeft":
+          useMainStore().moveSelected(
+            0,
+            -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+          );
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        case "ArrowRight":
+          useMainStore().moveSelected(
+            0,
+            1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+          );
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+      }
+      if (event.metaKey || event.ctrlKey) {
+        switch (event.key) {
+          case "a":
+            useMainStore().selectAll();
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+          case "s": {
+            const url = URL.createObjectURL(
+              new Blob([JSON.stringify(this.plan, undefined, 2)])
+            );
+            const a = document.createElement("a");
+            a.style.display = "none";
+            a.href = url;
+            a.download = this.plan.name + ".json";
+            document.body.appendChild(a);
+            a.click();
+            URL.revokeObjectURL(url);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+          }
+          case "c":
+            if (this.tool === "seatselect") {
+              alert(
+                "Copying individual seats is currently not possible, please select a row instead."
+              );
+              return;
+            }
+            useMainStore().copy(this.selection);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+          case "x":
+            if (this.tool === "seatselect") {
+              alert(
+                "Copying individual seats is currently not possible, please select a row instead."
+              );
+              return;
+            }
+            useMainStore().cut(this.selection);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+          case "v":
+            useMainStore().paste();
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+          case "z":
+            usePlanStore().undo();
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+          case "y":
+            usePlanStore().redo();
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+          case "+":
+            if (this.tool === "rows") {
+              this.rowSpacing += event.altKey ? 0.1 : 1;
+              event.preventDefault();
+              event.stopPropagation();
+              return true;
+            }
+            break;
+          case "-":
+            if (this.tool === "rows" && event.ctrlKey) {
+              this.rowSpacing -= event.altKey ? 0.1 : 1;
+              event.preventDefault();
+              event.stopPropagation();
+              return true;
+            }
+            break;
+        }
+      } else {
+        switch (event.key) {
+          case "+":
+            if (["rows", "row"].includes(this.tool)) {
+              this.rowSeatSpacing += event.altKey ? 0.1 : 1;
+            }
+            break;
+          case "-":
+            if (["rows", "row"].includes(this.tool)) {
+              this.rowSeatSpacing -= event.altKey ? 0.1 : 1;
+            }
+            break;
+          case "v":
+            useMainStore().changeTool("select");
+            break;
+          case "s":
+            useMainStore().changeTool("seatselect");
+            break;
+          case "n":
+            useMainStore().changeTool("row");
+            break;
+          case "b":
+            useMainStore().changeTool("rows");
+            break;
+          case "r":
+            useMainStore().changeTool("rectangle");
+            break;
+          case "c":
+            useMainStore().changeTool("circle");
+            break;
+          case "e":
+            useMainStore().changeTool("ellipse");
+            break;
+          case "p":
+            useMainStore().changeTool("polygon");
+            break;
+          case "t":
+            useMainStore().changeTool("text");
+            break;
+        }
+      }
     },
 
     scaleBy(temp, factor) {
@@ -1666,7 +1664,6 @@ export default {
   mounted() {
     console.log("Mounted");
     this.createZoom();
-
     window.addEventListener("resize", this.createZoom);
     window.addEventListener("keydown", this.hotkey);
   },
