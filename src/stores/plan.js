@@ -340,6 +340,7 @@ export const usePlanStore = defineStore("plan", {
             }
 
             // Assuming SEAT_NUMBERINGS is available and imported
+            //Changed here
             let newnumber = "?";
             for (let numbering of SEAT_NUMBERINGS) {
               try {
