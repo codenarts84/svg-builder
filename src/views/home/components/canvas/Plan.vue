@@ -451,15 +451,19 @@ export default {
         });
       }
     });
-    this.unwatchTool = watch([this.tool], (newValue, oldValue) => {
-      if (!oldValue || newValue !== oldValue) {
-        this.drawing.value = false;
-        this.selecting.value = false;
-        this.rowBlockDrawing.value = false;
-        this.polygonDrawing.value = false;
-        this.polygonPoints.value = [];
+    this.unwatchTool = watch(
+      () => this.tool,
+      (newValue, oldValue) => {
+        console.log("This is the tool", this.tool);
+        if (!oldValue || newValue !== oldValue) {
+          this.drawing = false;
+          this.selecting = false;
+          this.rowBlockDrawing = false;
+          this.polygonDrawing = false;
+          this.polygonPoints = [];
+        }
       }
-    });
+    );
   },
 
   unmounted() {

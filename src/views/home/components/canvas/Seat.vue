@@ -5,7 +5,7 @@
       :cx="seat.position.x"
       :cy="seat.position.y"
       :r="radius"
-      :stroke="category ? 'none' : '#000'"
+      :stroke="category ? 'none' : '#0064D0'"
       style="stroke-width: 1px"
     >
     </circle>
@@ -79,7 +79,7 @@ export default {
       if (this.category) {
         return this.category.color;
       } else {
-        return "#ffffff";
+        return "#8fc8f3";
       }
     },
     textColor() {

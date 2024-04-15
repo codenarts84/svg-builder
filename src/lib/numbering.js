@@ -22,6 +22,20 @@ function reverseLetterCounter(letters) {
 
 const SEAT_NUMBERINGS = [
   {
+    id: "alpha",
+    label: "A, B, C, …",
+    compute: (seats, startAt) => {
+      let counter = startAt;
+      return seats.map((s) => {
+        letterCounter(counter++, "A");
+        console.log(s);
+      });
+    },
+    findStartAt: (firstValue) => {
+      return reverseLetterCounter(firstValue.toUpperCase());
+    },
+  },
+  {
     id: "natural",
     label: "1, 2, 3, …",
     compute: (seats, startAt) => {
@@ -51,20 +65,6 @@ const SEAT_NUMBERINGS = [
     },
   },
   {
-    id: "alpha",
-    label: "A, B, C, …",
-    compute: (seats, startAt) => {
-      let counter = startAt;
-      return seats.map((s) => {
-        letterCounter(counter++, "A");
-        console.log(s);
-      });
-    },
-    findStartAt: (firstValue) => {
-      return reverseLetterCounter(firstValue.toUpperCase());
-    },
-  },
-  {
     id: "alphalower",
     label: "a, b, c, …",
     compute: (seats, startAt) => {
@@ -82,6 +82,17 @@ const SEAT_NUMBERINGS = [
 
 const ROW_NUMBERINGS = [
   {
+    id: "alpha",
+    label: "A, B, C, …",
+    compute: (rows, startAt) => {
+      let counter = startAt;
+      return rows.map((r) => letterCounter(counter++, "A"));
+    },
+    findStartAt: (firstValue) => {
+      return reverseLetterCounter(firstValue.toUpperCase());
+    },
+  },
+  {
     id: "natural",
     label: "1, 2, 3, …",
     compute: (rows, startAt) => {
@@ -93,17 +104,6 @@ const ROW_NUMBERINGS = [
     },
     findStartAt: (firstValue) => {
       return parseInt(firstValue);
-    },
-  },
-  {
-    id: "alpha",
-    label: "A, B, C, …",
-    compute: (rows, startAt) => {
-      let counter = startAt;
-      return rows.map((r) => letterCounter(counter++, "A"));
-    },
-    findStartAt: (firstValue) => {
-      return reverseLetterCounter(firstValue.toUpperCase());
     },
   },
   {

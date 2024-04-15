@@ -103,6 +103,7 @@ export default {
   },
   computed: {
     isSelected() {
+      console.log("Check here");
       return this.selection.includes(this.area.uuid);
     },
     isIndividuallySelected() {
@@ -156,6 +157,7 @@ export default {
       }
     },
     mousedown(event) {
+      console.log("Mousedown on ZoneArea", event);
       if (event.ctrlKey || event.metaKey) {
         // this is a panning event
         return false;
