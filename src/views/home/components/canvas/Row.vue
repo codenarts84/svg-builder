@@ -44,6 +44,7 @@
 <script>
 import Seat from "./Seat";
 import { useMainStore } from "@/stores";
+import { computed } from "vue";
 // import { mapState } from "vuex";
 // import { positionInZone } from "../../lib/geometry";
 
@@ -125,7 +126,7 @@ export default {
   },
   setup() {
     const store = useMainStore();
-    const selection = store.selection;
+    const selection = computed(() => store.selection);
     return { selection };
   },
   data() {

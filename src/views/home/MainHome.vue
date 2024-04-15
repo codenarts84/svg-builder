@@ -17,8 +17,8 @@
   <v-layout
     style="
       height: calc(100vh - 50px);
-      top: 50px;
-      position: absolute;
+      /* top: 50px; */
+      /* position: absolute; */
       width: calc(100% - 300px);
     "
   >
@@ -35,6 +35,7 @@
       <!-- <MainZone style="padding: 100px"></MainZone> -->
       <!-- <Toolbar></Toolbar> -->
       <Plan ref="planref"></Plan>
+      <StatusBar></StatusBar>
       <!-- <TestEditor ref="TestEdt" /> -->
     </div>
   </v-layout>
@@ -90,6 +91,7 @@ const handleDownloadSVG = () => {
 import { usePlanStore } from "@/stores/plan.js"; // Assuming you've set up a Pinia store in this location
 import Toolbar from "./components/Toolbar.vue";
 import Plan from "./components/canvas/Plan.vue";
+import StatusBar from "./components/StatusBar.vue";
 
 const WELCOME_VERSION = "1";
 
