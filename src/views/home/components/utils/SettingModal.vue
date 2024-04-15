@@ -53,13 +53,19 @@
   </div>
 </template>
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useBoardStore } from "../../../../stores/svgStore";
+import { useMainStore } from "@/stores";
+import { usePlanStore } from "@/stores/plan";
+// import { usePlanStore } from "@/stores/plan";
+
+const planstore = usePlanStore();
+const plan = computed(() => planstore.plan);
 
 const boardStore = useBoardStore();
-const boardName = ref(boardStore.board_name);
-const boardWidth = ref(boardStore.width);
-const boardHeight = ref(boardStore.height);
+const boardName = ref(plan.value.name);
+const boardWidth = ref(plan.value.size.width);
+const boardHeight = ref(plan.value.size.height);
 
 const dialog = ref(false);
 
@@ -72,9 +78,8 @@ const onSave = () => {
     alert("You need to fill all required fields");
     return;
   }
-  boardStore.set_height(boardHeight.value);
-  boardStore.set_width(boardWidth.value);
-  boardStore.set_name(boardName.value);
+  planstore.setPlanSize(boardWidth, boardHeight);
+  planstore.setPlanName(boardName);
   dialog.value = false;
 };
 </script>

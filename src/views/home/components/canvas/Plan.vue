@@ -26,56 +26,6 @@ const defaultBg = JSON.parse(
 export default {
   name: "ZoneComp",
   components: { ZoneComponent },
-
-  // data() {
-  //   return {
-  //     svg: ref(null),
-  //     zoom: null,
-  //     defaultScale: 1,
-  //     fullScreen: true,
-  //     lastMouseUp: 0,
-
-  //     background: defaultBg.background,
-  //     backgroundOpacity: defaultBg.backgroundOpacity,
-  //     backgroundWidth: defaultBg.backgroundWidth,
-  //     backgroundHeight: defaultBg.backgroundHeight,
-  //     backgroundX: defaultBg.backgroundX,
-  //     backgroundY: defaultBg.backgroundY,
-
-  //     rotating: false,
-  //     rotatingOriginX: 0,
-  //     rotatingOriginY: 0,
-  //     rotatingHandleX: 0,
-  //     rotatingHandleY: 0,
-  //     rotatingStartAngle: 0,
-
-  //     resizing: false,
-  //     resizingOriginX: 0,
-  //     resizingOriginY: 0,
-  //     resizingStartDistance: 0,
-
-  //     selecting: false,
-  //     selectingStartX: 0,
-  //     selectingStartY: 0,
-  //     selectingCurrentX: 100,
-  //     selectingCurrentY: 100,
-
-  //     drawing: false,
-  //     drawingStartX: 0,
-  //     drawingStartY: 0,
-  //     drawingCurrentX: 100,
-  //     drawingCurrentY: 100,
-
-  //     polygonDrawing: false,
-  //     polygonPoints: [],
-
-  //     rowBlockDrawing: false,
-
-  //     rowDrawing: false,
-  //     rowSpacing: 25,
-  //     rowSeatSpacing: 25,
-  //   };
-  // },
   setup() {
     const svg = ref(null);
     const zoom = ref(null);
@@ -133,311 +83,6 @@ export default {
     });
 
     const getSvgRect = () => svg.value.getBoundingClientRect();
-    const createZoom = () => {
-      if (!svg || !svg.value) return;
-
-      const viewportHeight = svg.value.clientHeight;
-      const viewportWidth = svg.value.clientWidth;
-      const panPadding = 25;
-      defaultScale.value = plan.value.size.height
-        ? Math.min(
-            viewportWidth / plan.value.size.width,
-            viewportHeight / plan.value.size.height
-          )
-        : 1;
-
-      zoom.value = d3
-        .zoom()
-        .scaleExtent([
-          Math.min(defaultScale.value * 0.5, 1),
-          Math.max(5, defaultScale.value * 5),
-        ])
-        .translateExtent([
-          [
-            (-viewportWidth + panPadding) / defaultScale.value,
-            (-viewportHeight + panPadding) / defaultScale.value,
-          ],
-          [
-            (viewportWidth - panPadding) / defaultScale.value +
-              plan.value.size.width,
-            (viewportHeight - panPadding) / defaultScale.value +
-              plan.value.size.height,
-          ],
-        ])
-        .extent([
-          [0, 0],
-          [viewportWidth, viewportHeight],
-        ])
-        .filter((event) => {
-          const wheeled = event.type === "wheel";
-          const mouseDrag =
-            event.type === "mousedown" ||
-            event.type === "mouseup" ||
-            event.type === "mousemove";
-          const touch =
-            event.type === "touchstart" ||
-            event.type === "touchmove" ||
-            event.type === "touchstop";
-          return (
-            (wheeled || mouseDrag || touch) && (event.metaKey || event.ctrlKey)
-          );
-        })
-        .wheelDelta((event) => {
-          // In contrast to default implementation, do not use a factor 10 if ctrl is pressed
-          return (
-            -event.deltaY *
-            (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002)
-          );
-        })
-        .on("zoom", (event) => {
-          const scale = event.transform.k;
-          useMainStore().setZoomTransform(event.transform);
-
-          zoom.value.translateExtent([
-            [
-              (-viewportWidth + panPadding) / scale,
-              (-viewportHeight + panPadding) / scale,
-            ],
-            [
-              (viewportWidth - panPadding) / scale + plan.value.size.width,
-              (viewportHeight - panPadding) / scale + plan.value.size.height,
-            ],
-          ]);
-        });
-      // todo: old code had an zoom.on("zoom", null); do we need that?
-
-      const initTransform = d3.zoomIdentity
-        .scale(defaultScale.value)
-        .translate(
-          (viewportWidth / defaultScale.value - plan.value.size.width) / 2,
-          (viewportHeight / defaultScale.value - plan.value.size.height) / 2
-        );
-      useMainStore().setZoomTransform(initTransform);
-
-      d3.select(svg.value)
-        .call(zoom.value.transform, initTransform)
-        .on("wheel", function (event) {
-          // Prevent scrolling when the min/max of the zoom extent is reached
-          event.preventDefault();
-        });
-
-      const svg = d3.select(svg.value).call(zoom);
-      svg.on("touchmove.zoom", null);
-
-      // TODO touch support
-      // TODO if we ever use this as a non-editor, we need things like fullscreen mode and zoom-on-first-touch
-    };
-
-    const hotkey = (event) => {
-      if (
-        event.target !== document.body &&
-        !event.target.matches(".c-toolbar *")
-      ) {
-        return; // Do nothing if something is focused, e.g. an input element (except it's a toolbar button)
-      }
-      switch (event.code) {
-        case "Delete":
-        case "Backspace":
-          usePlanStore().deleteObjects(selection.value);
-          event.preventDefault(); // prevent backspace to go history back in Firefox on Mac
-          return;
-        case "Enter":
-          if (polygonDrawing.value) {
-            this.finishPolygon();
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-          }
-          return false;
-        case "Escape":
-          rowBlockDrawing.value = false;
-          rowDrawing.value = false;
-          polygonDrawing.value = false;
-          drawing.value = false;
-          if (
-            tool.value === "rowCircle" ||
-            tool.value === "rowCircleFixedCenter"
-          ) {
-            useMainStore().changeTool("select");
-          }
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        case "ArrowUp":
-          useMainStore().moveSelected(
-            0,
-            -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-          );
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        case "ArrowDown":
-          useMainStore().moveSelected(
-            0,
-            1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-          );
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        case "ArrowLeft":
-          useMainStore().moveSelected(
-            0,
-            -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-          );
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        case "ArrowRight":
-          useMainStore().moveSelected(
-            0,
-            1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-          );
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-      }
-      if (event.metaKey || event.ctrlKey) {
-        switch (event.key) {
-          case "a":
-            useMainStore().selectAll();
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-          case "s": {
-            const url = URL.createObjectURL(
-              new Blob([JSON.stringify(this.plan, undefined, 2)])
-            );
-            const a = document.createElement("a");
-            a.style.display = "none";
-            a.href = url;
-            a.download = this.plan.name + ".json";
-            document.body.appendChild(a);
-            a.click();
-            URL.revokeObjectURL(url);
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-          }
-          case "c":
-            if (tool.value === "seatselect") {
-              alert(
-                "Copying individual seats is currently not possible, please select a row instead."
-              );
-              return;
-            }
-            useMainStore().copy(this.selection);
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-          case "x":
-            if (tool.value === "seatselect") {
-              alert(
-                "Copying individual seats is currently not possible, please select a row instead."
-              );
-              return;
-            }
-            useMainStore().cut(this.selection);
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-          case "v":
-            useMainStore().paste();
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-          case "z":
-            usePlanStore().undo();
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-          case "y":
-            usePlanStore().redo();
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-          case "+":
-            if (tool.value === "rows") {
-              this.rowSpacing += event.altKey ? 0.1 : 1;
-              event.preventDefault();
-              event.stopPropagation();
-              return true;
-            }
-            break;
-          case "-":
-            if (tool.value === "rows" && event.ctrlKey) {
-              this.rowSpacing -= event.altKey ? 0.1 : 1;
-              event.preventDefault();
-              event.stopPropagation();
-              return true;
-            }
-            break;
-        }
-      } else {
-        switch (event.key) {
-          case "+":
-            if (["rows", "row"].includes(tool.value)) {
-              this.rowSeatSpacing += event.altKey ? 0.1 : 1;
-            }
-            break;
-          case "-":
-            if (["rows", "row"].includes(tool.value)) {
-              this.rowSeatSpacing -= event.altKey ? 0.1 : 1;
-            }
-            break;
-          case "v":
-            useMainStore().changeTool("select");
-            break;
-          case "s":
-            useMainStore().changeTool("seatselect");
-            break;
-          case "n":
-            useMainStore().changeTool("row");
-            break;
-          case "b":
-            useMainStore().changeTool("rows");
-            break;
-          case "r":
-            useMainStore().changeTool("rectangle");
-            break;
-          case "c":
-            useMainStore().changeTool("circle");
-            break;
-          case "e":
-            useMainStore().changeTool("ellipse");
-            break;
-          case "p":
-            useMainStore().changeTool("polygon");
-            break;
-          case "t":
-            useMainStore().changeTool("text");
-            break;
-        }
-      }
-    };
-
-    window.addEventListener("resize", createZoom);
-    window.addEventListener("keydown", hotkey);
-
-    const unwatch = watch(planSize, (newValue, oldValue) => {
-      if (
-        !oldValue ||
-        newValue.width !== oldValue.width ||
-        newValue.height !== oldValue.height
-      ) {
-        nextTick(() => {
-          createZoom(); // Make sure this.createZoom() is compatible with the composition API
-        });
-      }
-    });
-    const unwatchTool = watch([tool], (newValue, oldValue) => {
-      if (!oldValue || newValue !== oldValue) {
-        drawing.value = false;
-        selecting.value = false;
-        rowBlockDrawing.value = false;
-        polygonDrawing.value = false;
-        polygonPoints.value = [];
-      }
-    });
 
     return {
       plan,
@@ -449,10 +94,10 @@ export default {
       selectedZone,
       lockedZones,
       grid,
-      unwatch,
-      unwatchTool,
-      createZoom,
-      hotkey,
+      // unwatch,
+      // unwatchTool,
+      // createZoom,
+      // hotkey,
       svg,
       zoom,
       defaultScale,
@@ -790,13 +435,36 @@ export default {
       };
     },
   },
-  mounted() {
-    // this.createZoom();
+
+  created() {
+    window.addEventListener("resize", this.createZoom);
+    window.addEventListener("keydown", this.hotkey);
+    this.unwatch = watch(this.planSize, (newValue, oldValue) => {
+      if (
+        !oldValue ||
+        newValue.width !== oldValue.width ||
+        newValue.height !== oldValue.height
+      ) {
+        nextTick(() => {
+          this.createZoom(); // Make sure this.createZoom() is compatible with the composition API
+        });
+      }
+    });
+    this.unwatchTool = watch([this.tool], (newValue, oldValue) => {
+      if (!oldValue || newValue !== oldValue) {
+        this.drawing.value = false;
+        this.selecting.value = false;
+        this.rowBlockDrawing.value = false;
+        this.polygonDrawing.value = false;
+        this.polygonPoints.value = [];
+      }
+    });
   },
 
   unmounted() {
-    // window.removeEventListener("resize", this.createZoom);
+    window.removeEventListener("resize", this.createZoom);
     window.removeEventListener("keydown", this.hotkey);
+    console.log("unMounted");
     this.unwatch();
     this.unwatchTool();
   },
@@ -1698,9 +1366,310 @@ export default {
       );
     },
 
+    createZoom() {
+      if (!this.svg) return;
+
+      const viewportHeight = this.svg.clientHeight;
+      const viewportWidth = this.svg.clientWidth;
+      const panPadding = 25;
+      this.defaultScale = this.plan.size.height
+        ? Math.min(
+            viewportWidth / this.plan.size.width,
+            viewportHeight / this.plan.size.height
+          )
+        : 1;
+
+      this.zoom = d3
+        .zoom()
+        .scaleExtent([
+          Math.min(this.defaultScale * 0.5, 1),
+          Math.max(5, this.defaultScale * 5),
+        ])
+        .translateExtent([
+          [
+            (-viewportWidth + panPadding) / this.defaultScale,
+            (-viewportHeight + panPadding) / this.defaultScale,
+          ],
+          [
+            (viewportWidth - panPadding) / this.defaultScale +
+              this.plan.size.width,
+            (viewportHeight - panPadding) / this.defaultScale +
+              this.plan.size.height,
+          ],
+        ])
+        .extent([
+          [0, 0],
+          [viewportWidth, viewportHeight],
+        ])
+        .filter((event) => {
+          const wheeled = event.type === "wheel";
+          const mouseDrag =
+            event.type === "mousedown" ||
+            event.type === "mouseup" ||
+            event.type === "mousemove";
+          const touch =
+            event.type === "touchstart" ||
+            event.type === "touchmove" ||
+            event.type === "touchstop";
+          return (
+            (wheeled || mouseDrag || touch) && (event.metaKey || event.ctrlKey)
+          );
+        })
+        .wheelDelta((event) => {
+          // In contrast to default implementation, do not use a factor 10 if ctrl is pressed
+          return (
+            -event.deltaY *
+            (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002)
+          );
+        })
+        .on("zoom", (event) => {
+          const scale = event.transform.k;
+          useMainStore().setZoomTransform(event.transform);
+
+          this.zoom.translateExtent([
+            [
+              (-viewportWidth + panPadding) / scale,
+              (-viewportHeight + panPadding) / scale,
+            ],
+            [
+              (viewportWidth - panPadding) / scale + this.plan.size.width,
+              (viewportHeight - panPadding) / scale + this.plan.size.height,
+            ],
+          ]);
+        });
+      // // todo: old code had an zoom.on("zoom", null); do we need that?
+
+      const initTransform = d3.zoomIdentity
+        .scale(this.defaultScale)
+        .translate(
+          (viewportWidth / this.defaultScale - this.plan.size.width) / 2,
+          (viewportHeight / this.defaultScale - this.plan.size.height) / 2
+        );
+      useMainStore().setZoomTransform(initTransform);
+
+      d3.select(this.svg)
+        .call(this.zoom.transform, initTransform)
+        .on("wheel", function (event) {
+          // Prevent scrolling when the min/max of the zoom extent is reached
+          event.preventDefault();
+        });
+
+      const svg = d3.select(this.svg).call(this.zoom);
+      svg.on("touchmove.zoom", null);
+
+      console.log("successed", this.zoom.scaleBy);
+    },
+
+    hotkey(event) {
+      console.log("Hotkey");
+      // if (
+      //   event.target !== document.body &&
+      //   !event.target.matches(".c-toolbar *")
+      // ) {
+      //   return; // Do nothing if something is focused, e.g. an input element (except it's a toolbar button)
+      // }
+      // switch (event.code) {
+      //   case "Delete":
+      //   case "Backspace":
+      //     usePlanStore().deleteObjects(selection.value);
+      //     event.preventDefault(); // prevent backspace to go history back in Firefox on Mac
+      //     return;
+      //   case "Enter":
+      //     if (polygonDrawing.value) {
+      //       this.finishPolygon();
+      //       event.preventDefault();
+      //       event.stopPropagation();
+      //       return true;
+      //     }
+      //     return false;
+      //   case "Escape":
+      //     rowBlockDrawing.value = false;
+      //     rowDrawing.value = false;
+      //     polygonDrawing.value = false;
+      //     drawing.value = false;
+      //     if (
+      //       tool.value === "rowCircle" ||
+      //       tool.value === "rowCircleFixedCenter"
+      //     ) {
+      //       useMainStore().changeTool("select");
+      //     }
+      //     event.preventDefault();
+      //     event.stopPropagation();
+      //     return;
+      //   case "ArrowUp":
+      //     useMainStore().moveSelected(
+      //       0,
+      //       -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+      //     );
+      //     event.preventDefault();
+      //     event.stopPropagation();
+      //     return;
+      //   case "ArrowDown":
+      //     useMainStore().moveSelected(
+      //       0,
+      //       1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+      //     );
+      //     event.preventDefault();
+      //     event.stopPropagation();
+      //     return;
+      //   case "ArrowLeft":
+      //     useMainStore().moveSelected(
+      //       0,
+      //       -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+      //     );
+      //     event.preventDefault();
+      //     event.stopPropagation();
+      //     return;
+      //   case "ArrowRight":
+      //     useMainStore().moveSelected(
+      //       0,
+      //       1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+      //     );
+      //     event.preventDefault();
+      //     event.stopPropagation();
+      //     return;
+      // }
+      // if (event.metaKey || event.ctrlKey) {
+      //   switch (event.key) {
+      //     case "a":
+      //       useMainStore().selectAll();
+      //       event.preventDefault();
+      //       event.stopPropagation();
+      //       return true;
+      //     case "s": {
+      //       const url = URL.createObjectURL(
+      //         new Blob([JSON.stringify(this.plan, undefined, 2)])
+      //       );
+      //       const a = document.createElement("a");
+      //       a.style.display = "none";
+      //       a.href = url;
+      //       a.download = this.plan.name + ".json";
+      //       document.body.appendChild(a);
+      //       a.click();
+      //       URL.revokeObjectURL(url);
+      //       event.preventDefault();
+      //       event.stopPropagation();
+      //       return true;
+      //     }
+      //     case "c":
+      //       if (tool.value === "seatselect") {
+      //         alert(
+      //           "Copying individual seats is currently not possible, please select a row instead."
+      //         );
+      //         return;
+      //       }
+      //       useMainStore().copy(this.selection);
+      //       event.preventDefault();
+      //       event.stopPropagation();
+      //       return true;
+      //     case "x":
+      //       if (tool.value === "seatselect") {
+      //         alert(
+      //           "Copying individual seats is currently not possible, please select a row instead."
+      //         );
+      //         return;
+      //       }
+      //       useMainStore().cut(this.selection);
+      //       event.preventDefault();
+      //       event.stopPropagation();
+      //       return true;
+      //     case "v":
+      //       useMainStore().paste();
+      //       event.preventDefault();
+      //       event.stopPropagation();
+      //       return true;
+      //     case "z":
+      //       usePlanStore().undo();
+      //       event.preventDefault();
+      //       event.stopPropagation();
+      //       return true;
+      //     case "y":
+      //       usePlanStore().redo();
+      //       event.preventDefault();
+      //       event.stopPropagation();
+      //       return true;
+      //     case "+":
+      //       if (tool.value === "rows") {
+      //         this.rowSpacing += event.altKey ? 0.1 : 1;
+      //         event.preventDefault();
+      //         event.stopPropagation();
+      //         return true;
+      //       }
+      //       break;
+      //     case "-":
+      //       if (tool.value === "rows" && event.ctrlKey) {
+      //         this.rowSpacing -= event.altKey ? 0.1 : 1;
+      //         event.preventDefault();
+      //         event.stopPropagation();
+      //         return true;
+      //       }
+      //       break;
+      //   }
+      // } else {
+      //   switch (event.key) {
+      //     case "+":
+      //       if (["rows", "row"].includes(tool.value)) {
+      //         this.rowSeatSpacing += event.altKey ? 0.1 : 1;
+      //       }
+      //       break;
+      //     case "-":
+      //       if (["rows", "row"].includes(tool.value)) {
+      //         this.rowSeatSpacing -= event.altKey ? 0.1 : 1;
+      //       }
+      //       break;
+      //     case "v":
+      //       useMainStore().changeTool("select");
+      //       break;
+      //     case "s":
+      //       useMainStore().changeTool("seatselect");
+      //       break;
+      //     case "n":
+      //       useMainStore().changeTool("row");
+      //       break;
+      //     case "b":
+      //       useMainStore().changeTool("rows");
+      //       break;
+      //     case "r":
+      //       useMainStore().changeTool("rectangle");
+      //       break;
+      //     case "c":
+      //       useMainStore().changeTool("circle");
+      //       break;
+      //     case "e":
+      //       useMainStore().changeTool("ellipse");
+      //       break;
+      //     case "p":
+      //       useMainStore().changeTool("polygon");
+      //       break;
+      //     case "t":
+      //       useMainStore().changeTool("text");
+      //       break;
+      //   }
+      // }
+    },
+
+    scaleBy(temp, factor) {
+      console.log(temp, factor);
+      d3.select(temp).transition().call(this.zoom.scaleBy, factor);
+    },
+
+    scaleTo(temp, factor) {
+      console.log(temp, factor);
+      d3.select(temp).transition().call(this.zoom.scaleTo, factor);
+    },
+
     testFunc() {
       console.log("This is the test Func");
     },
+  },
+
+  mounted() {
+    window.addEventListener("resize", this.createZoom);
+    window.addEventListener("keydown", this.hotkey);
+  },
+  beforeUnmout() {
+    window.addEventListener("resize", this.createZoom);
+    window.addEventListener("keydown", this.hotkey);
   },
 };
 </script>
@@ -1716,6 +1685,8 @@ export default {
     @mousedown="mousedown"
   >
     <g :transform="zoomTransform.toString()" :class="mainclasses">
+      <text x="100" y="100" fill="red">{{ zoomTransform.toString() }}</text>
+
       <rect
         :width="plan.size.width"
         :height="plan.size.height"

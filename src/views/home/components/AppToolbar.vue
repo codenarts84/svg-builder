@@ -20,7 +20,11 @@
     }}</v-toolbar-title>
 
     <v-toolbar-items class="border-left">
-      <MagnifierComponent />
+      <MagnifierComponent
+        :zoomIn="zoomIn"
+        :zoomOut="zoomOut"
+        :zoomTo="zoomTo"
+      />
     </v-toolbar-items>
     <v-toolbar-items class="border-left">
       <GridView />
@@ -45,8 +49,10 @@ import MainTools from "./tools/MainTools.vue";
 import FileTool from "./tools/FileTool.vue";
 import GridView from "./utils/GridView.vue";
 
+import { usePlanStore } from "@/stores/plan";
+const planStore = usePlanStore();
 const boardStore = useBoardStore();
-const boardName = ref(computed(() => boardStore.board_name));
+const boardName = ref(computed(() => planStore.plan.name));
 
 const exportSVG = () => props.downloadSVG();
 
@@ -60,6 +66,9 @@ const props = defineProps({
   textR: Function,
   textL: Function,
   textC: Function,
+  zoomIn: Function,
+  zoomOut: Function,
+  zoomTo: Function,
 });
 
 const toolbarTitleStyle = computed(() => {
