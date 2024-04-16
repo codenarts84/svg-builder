@@ -28,7 +28,10 @@
       <v-tooltip activator="parent" location="bottom">Undo</v-tooltip>
       <UndoIcon width="20px" height="20px" />
     </v-btn>
-    <v-btn @click="onHand" :style="hand_selected ? item_selected : {}">
+    <v-btn
+      @click="changeTool('hand')"
+      :class="tool == 'hand' ? 'current-tool' : ''"
+    >
       <v-tooltip activator="parent" location="bottom">Hand</v-tooltip>
       <HandIcon width="20px" height="20px" />
     </v-btn>

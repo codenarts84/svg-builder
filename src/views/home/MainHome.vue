@@ -2,6 +2,7 @@
   <AppToolbar
     :importSVG="importSVG"
     :zoomIn="zoomIn"
+    :setTransfrom="setTransfrom"
     :zoomOut="zoomOut"
     :zoomTo="zoomTo"
     :textL="textL"
@@ -108,6 +109,7 @@ const cmdOtherwiseCtrl = ref(
 );
 
 const plan = computed(() => planStore.plan);
+const setTransfrom = (v) => planref.value.setTransfrom(v);
 
 const zoomIn = () => {
   planref.value.scaleBy(planref.value, 1.1);

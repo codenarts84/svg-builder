@@ -10,7 +10,7 @@
     >
     </circle>
     <text
-      :fill="textColor"
+      :fill="textColor ? 'black' : 'black'"
       :x="seat.position.x"
       :y="seat.position.y"
       text-anchor="middle"
@@ -79,7 +79,7 @@ export default {
       if (this.category) {
         return this.category.color;
       } else {
-        return "#8fc8f3";
+        return "#ddd";
       }
     },
     textColor() {

@@ -78,6 +78,11 @@
       <span class="hint">Click to apply</span>
     </span>
 
+    <span v-else-if="tool === 'hand'">
+      <span class="hint">You can <code>wheel</code> to zoom in and out.</span>
+      <span class="hint">Drag board</span>
+    </span>
+
     <span v-else-if="tool === 'rows'">
       <span v-if="plan.rowBlockDrawing">
         <span class="hint"
@@ -248,6 +253,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  background-color: white;
 }
 .c-status-bar code {
   display: inline-block;
