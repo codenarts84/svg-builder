@@ -5,7 +5,7 @@
       :cx="seat.position.x"
       :cy="seat.position.y"
       :r="radius"
-      :stroke="category ? 'none' : '#0064D0'"
+      :stroke="category ? 'none' : '#000'"
       style="stroke-width: 1px"
     >
     </circle>

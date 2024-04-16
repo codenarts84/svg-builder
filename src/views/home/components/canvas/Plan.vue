@@ -1991,8 +1991,8 @@ export default {
 
 svg .selection-area {
   stroke-width: 1.5px;
-  fill: rgba(0, 0, 204, 0.3);
-  stroke: rgba(0, 0, 204, 0.5);
+  fill: #8fc8f330;
+  stroke: #0064d050;
 }
 
 svg .selection-box {
