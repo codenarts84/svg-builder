@@ -211,7 +211,7 @@ export default {
 </script>
 <style>
 .selection-line {
-  stroke: #00c;
+  stroke: #0064d080;
   stroke-width: 2px;
   pointer-events: none;
   fill: none;
