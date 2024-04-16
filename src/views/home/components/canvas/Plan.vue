@@ -331,7 +331,7 @@ export default {
       return this.selectionBoxes.filter((b) => b.visible);
     },
     selectionBoxes() {
-      console.log("selectionBoxes");
+      // console.log("selectionBoxes");
       const res = [];
       if (this.selection.length) {
         for (const z of this.plan.zones) {
@@ -438,8 +438,8 @@ export default {
   },
 
   created() {
-    window.addEventListener("resize", this.createZoom);
-    window.addEventListener("keydown", this.hotkey);
+    // window.addEventListener("resize", this.createZoom);
+    // window.addEventListener("keydown", this.hotkey);
     this.unwatch = watch(this.planSize, (newValue, oldValue) => {
       if (
         !oldValue ||
@@ -454,8 +454,8 @@ export default {
     this.unwatchTool = watch(
       () => this.tool,
       (newValue, oldValue) => {
-        console.log("This is the tool", this.tool);
         if (!oldValue || newValue !== oldValue) {
+          console.log("This is the tool", this.tool, oldValue, newValue);
           this.drawing = false;
           this.selecting = false;
           this.rowBlockDrawing = false;
@@ -595,7 +595,6 @@ export default {
 
     mousedown(event) {
       if (!this.svg) return;
-      console.log("mouse Down");
 
       const store = useMainStore();
 
@@ -607,16 +606,25 @@ export default {
         return;
       }
       const svgbox = this.getSvgRect(); //this.getSvgRect();
+      console.log(svgbox);
+
       const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
       switch (this.tool) {
+        // case "hand":
+        //   console.log("changed to handon");
+        //   useMainStore().changeTool("handon");
+        //   return;
         case "select":
         case "seatselect": {
+          // console.log("select");
+          // console.log(event, svgbox.x, this.zoomTransform);
           let selPos = positionInZone(
             event.clientX - svgbox.x,
             event.clientY - svgbox.y,
             this.zoomTransform,
             null
           );
+          console.log(selPos);
           this.selecting = true;
           this.selectingStartX = selPos.x;
           this.selectingStartY = selPos.y;
@@ -761,6 +769,7 @@ export default {
     mousemove(event) {
       if (!this.svg) return;
       const store = useMainStore();
+      // console.log(this.tool);
       if (event.ctrlKey || event.metaKey) {
         // this is a panning event
         return false;
@@ -924,8 +933,14 @@ export default {
           break;
       }
     },
-    mouseup() {
+    mouseup(event) {
       if (!this.svg) return;
+      // console.log("~~~~~~~~~~~~~~~Mouse Up", this.tool);
+      // if (this.tool == "handon") {
+      //   console.log("MouseUP", this.tool);
+      //   useMainStore().changeTool("hand");
+      //   return false;
+      // }
       const store = useMainStore();
       if (event.ctrlKey || event.metaKey) {
         // this is a panning event
@@ -1006,6 +1021,7 @@ export default {
                 }
               }
             }
+            // console.log("Selectseat", uuids, this.selectedZone, event.shiftKey);
 
             store.setSelection(uuids, this.selectedZone, event.shiftKey);
             return true;
@@ -1054,10 +1070,13 @@ export default {
               }
               for (const a of z.areas) {
                 if (testOverlap(a, z, xmin, ymin, xmax, ymax)) {
+                  // console.log("HERE??");
                   uuids.push(a.uuid);
                 }
               }
             }
+
+            // console.log("Select", uuids, this.selectedZone, event.shiftKey);
             store.setSelection(uuids, this.selectedZone, event.shiftKey);
             return true;
           }
@@ -1104,7 +1123,7 @@ export default {
                 },
               })
               .then(() => {
-                console.log("HERE", "error", this.selectZone);
+                // console.log("HERE", "error", this.selectZone);
 
                 this.$nextTick(() => {
                   store.toggleSelection([newId], this.selectedZone, false);
@@ -1259,7 +1278,7 @@ export default {
             break;
           }
           if (this.rowBlockDrawing) {
-            console.log(this.rowBlockRows, this.rowBlockSeats);
+            // console.log(this.rowBlockRows, this.rowBlockSeats);
             usePlanStore()
               .createRowBlock(
                 zone.uuid,
@@ -1373,14 +1392,14 @@ export default {
 
       const viewportHeight = this.svg.clientHeight;
       const viewportWidth = this.svg.clientWidth;
-      const panPadding = 25;
+      const panPadding = viewportHeight * -10;
       this.defaultScale = this.plan.size.height
         ? Math.min(
             viewportWidth / this.plan.size.width,
             viewportHeight / this.plan.size.height
           )
         : 1;
-
+      console.log("here`````````````````");
       this.zoom = d3
         .zoom()
         .scaleExtent([
@@ -1414,7 +1433,11 @@ export default {
             event.type === "touchmove" ||
             event.type === "touchstop";
           return (
-            (wheeled || mouseDrag || touch) && (event.metaKey || event.ctrlKey)
+            (wheeled || mouseDrag || touch) &&
+            (event.metaKey ||
+              event.ctrlKey ||
+              this.tool == "hand" ||
+              this.tool == "handon")
           );
         })
         .wheelDelta((event) => {
@@ -1439,7 +1462,9 @@ export default {
             ],
           ]);
         });
-      // // todo: old code had an zoom.on("zoom", null); do we need that?
+
+      // // // todo: old code had an zoom.on("zoom", null); do we need that?
+      // useMainStore().changeTool("hand");
 
       const initTransform = d3.zoomIdentity
         .scale(this.defaultScale)
@@ -1459,11 +1484,10 @@ export default {
       const svg = d3.select(this.svg).call(this.zoom);
       svg.on("touchmove.zoom", null);
 
-      console.log("successed", this.zoom.scaleBy);
+      console.log("successed", this.zoom);
     },
 
     hotkey(event) {
-      console.log("Hotkey");
       if (
         event.target !== document.body &&
         !event.target.matches(".c-toolbar *")
@@ -1650,6 +1674,13 @@ export default {
       }
     },
 
+    getTransform() {
+      return this.zoomTransform.k;
+    },
+    setTransfrom(v) {
+      this.zoomTransform.k = v;
+    },
+
     scaleBy(temp, factor) {
       console.log(temp, factor);
       d3.select(temp).transition().call(this.zoom.scaleBy, factor);
@@ -1681,16 +1712,14 @@ export default {
   <svg
     :width="plan.size.width"
     :height="plan.size.height"
-    preserveAspectRatio="none"
     v-if="plan.size"
     ref="svg"
     @mousemove="mousemove"
     @mouseup="mouseup"
     @mousedown="mousedown"
-    :transform="zoomTransform.toString()"
-    style="background-color: grey"
+    style="width: 100%; height: 100%; background-color: rgb(151, 162, 182)"
   >
-    <g :class="mainclasses">
+    <g :class="mainclasses" :transform="zoomTransform.toString()">
       <rect
         :width="plan.size.width"
         :height="plan.size.height"
@@ -1997,31 +2026,31 @@ svg .selection-area {
 
 svg .selection-box {
   stroke-width: 1.5px;
-  stroke: #00c;
+  stroke: #0064d0;
 }
 
 svg .selection-resize-handle-nw {
-  fill: #00c;
+  fill: #0064d0;
   cursor: nw-resize;
 }
 
 svg .selection-resize-handle-ne {
-  fill: #00c;
+  fill: #0064d0;
   cursor: ne-resize;
 }
 
 svg .selection-resize-handle-sw {
-  fill: #00c;
+  fill: #0064d0;
   cursor: sw-resize;
 }
 
 svg .selection-resize-handle-se {
-  fill: #00c;
+  fill: #0064d0;
   cursor: se-resize;
 }
 
 svg .selection-rotate-handle {
-  fill: #00c;
+  fill: #0064d0;
   cursor: grab;
 }
 
@@ -2029,32 +2058,32 @@ svg .selection-rotate-handle-connector,
 svg .selection-rotate-handle-end {
   fill: #fff;
   stroke-width: 1.5px;
-  stroke: #00c;
+  stroke: #0064d0;
   pointer-events: none;
 }
 
 svg .selection-boundary {
-  box-shadow: 0 0 5px 5px #00c;
-  stroke: #00c;
+  box-shadow: 0 0 5px 5px #0064d0;
+  stroke: #0064d0;
   stroke-width: 1.5px;
   stroke-dasharray: 3, 3;
 }
 
 svg .preview {
-  stroke: #00c;
+  stroke: #0064d0;
   stroke-width: 2px;
   fill: rgba(0, 0, 204, 0.3);
 }
 
 svg .auxline {
-  stroke: #00c;
+  stroke: #0064d0;
   stroke-width: 1px;
   opacity: 0.5;
   fill: rgba(0, 0, 204, 0.3);
 }
 
 svg .seat-preview {
-  stroke: #00c;
+  stroke: #0064d0;
   stroke-width: 1px;
   fill: rgba(0, 0, 204, 0.3);
 }

@@ -1,5 +1,5 @@
 <template>
-  <v-btn class="btn" @click="zoomOut">
+  <v-btn class="btn" @click="setTransfrom((zoomValue - 10) / 100)">
     <v-icon color="black" icon="mdi-minus" size="large"></v-icon>
     <v-tooltip activator="parent" location="bottom">Zoom out</v-tooltip>
   </v-btn>
@@ -14,7 +14,7 @@
     variant="plane"
   />
 
-  <v-btn class="btn" @click="zoomIn">
+  <v-btn class="btn" @click="setTransfrom((zoomValue + 10) / 100)">
     <v-icon color="black" icon="mdi-plus" size="large"></v-icon>
     <v-tooltip activator="parent" location="bottom">Zoom In</v-tooltip>
   </v-btn>
@@ -42,6 +42,7 @@ const props = defineProps({
   zoomIn: Function,
   zoomOut: Function,
   zoomTo: Function,
+  setTransfrom: Function,
 });
 
 // const zoomIn =

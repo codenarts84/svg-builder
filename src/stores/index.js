@@ -49,6 +49,10 @@ export const useMainStore = defineStore({
         case "rows":
         case "row":
           return "crosshair";
+        case "hand":
+          return "grab";
+        case "handon":
+          return "grabbing";
         default:
           return "default";
       }

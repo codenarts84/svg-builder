@@ -103,7 +103,8 @@ export default {
   },
   computed: {
     isSelected() {
-      console.log("Check here");
+      // console.log("Check here");
+      // console.log(this.selection, this.area.uuid);
       return this.selection.includes(this.area.uuid);
     },
     isIndividuallySelected() {

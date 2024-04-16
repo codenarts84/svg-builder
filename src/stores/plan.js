@@ -147,12 +147,7 @@ export const usePlanStore = defineStore("plan", {
                 category: "",
               });
             }
-            console.log("check here", row);
-            this.createRow(
-              zone.uuid,
-              { x: position.x, y: position.y + rix * row_spacing },
-              row
-            );
+            this.createRowAfter(zone.uuid, row, false);
             rowids.push(row.uuid);
           }
           this.persistPlan();
@@ -344,6 +339,8 @@ export const usePlanStore = defineStore("plan", {
             let newnumber = "?";
             for (let numbering of SEAT_NUMBERINGS) {
               try {
+                numbering = SEAT_NUMBERINGS.find((n) => n.id === "alpha");
+                console.log("START numbering HERE", numbering);
                 let guessedStartAt = numbering.findStartAt(
                   r.seats[0].seat_number
                 );
@@ -471,6 +468,12 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
+    createRowAfter(zone, row, persist) {
+      zone = this._plan.zones.find((z) => z.uuid === zone);
+      zone.rows.push(row);
+      if (persist) this.persistPlan();
+    },
+
     createRow(zone, position, seats) {
       return new Promise((res, rej) => {
         try {
@@ -484,28 +487,36 @@ export const usePlanStore = defineStore("plan", {
             seats: [],
             uuid: uuid(),
           };
-          console.log("Create Row", seats, Object.keys(seats));
-          // if(seats.)
-          const temp = Object.keys(seats);
-          if (temp[0] == "0") {
-            for (const [six, spos] of seats.entries()) {
-              row.seats.push({
-                seat_number: (six + 1).toString(),
-                seat_guid: uuid(),
-                uuid: uuid(),
-                position: { x: spos.x, y: spos.y },
-                category: "",
-              });
-            }
-          } else {
-            console.log("Edit here", seats);
-            seats.seats.forEach((v) => {
-              row.seats.push(v);
+          for (const [six, spos] of seats.entries()) {
+            console.log(six, spos);
+            row.seats.push({
+              seat_number: (six + 1).toString(),
+              seat_guid: uuid(),
+              uuid: uuid(),
+              position: { x: spos.x, y: spos.y },
+              category: "",
             });
           }
-          zone.rows.push(row);
+
+          this.createRowAfter(zone.uuid, row, false);
+          // if (temp[0] == "0") {
+          //   for (const [six, spos] of seats.entries()) {
+          //     console.log(six, spos);
+          //     row.seats.push({
+          //       seat_number: (six + 1).toString(),
+          //       seat_guid: uuid(),
+          //       uuid: uuid(),
+          //       position: { x: spos.x, y: spos.y },
+          //       category: "",
+          //     });
+          //   }
+          // } else {
+          //   seats.seats.forEach((v) => {
+          //     row.seats.push(v);
+          //   });
+          // }
+          // zone.rows.push(row);
           this.persistPlan();
-          console.log("Final", zone.rows);
           return row.uuid;
         } catch (err) {
           rej(err);
@@ -513,13 +524,15 @@ export const usePlanStore = defineStore("plan", {
       });
     },
 
-    createArea(zoneUuid, area) {
+    createAreaAfter(zone, area) {
+      zone = this._plan.zones.find((z) => z.uuid === zone);
+      zone.areas.push(area);
+    },
+
+    createArea(zone, area) {
       return new Promise((res, rej) => {
         try {
-          const zone = this._plan.zones.find((z) => z.uuid === zoneUuid);
-          if (zone) {
-            zone.areas.push(area);
-          }
+          this.createAreaAfter(zone, area);
         } catch (err) {
           rej(err);
         }

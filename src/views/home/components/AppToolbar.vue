@@ -24,6 +24,7 @@
         :zoomIn="zoomIn"
         :zoomOut="zoomOut"
         :zoomTo="zoomTo"
+        :setTransfrom="setTransfrom"
       />
     </v-toolbar-items>
     <v-toolbar-items class="border-left">
@@ -63,6 +64,7 @@ const props = defineProps({
   addEllipse: Function,
   addRectangle: Function,
   onImportClick: Function,
+  setTransfrom: Function,
   textR: Function,
   textL: Function,
   textC: Function,

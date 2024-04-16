@@ -23,6 +23,45 @@
         </v-col>
       </v-row>
     </v-container>
+    <!-- <div v-if="rows.length > 1" class="row-numbers">
+      <div class="group-title">
+        <span>Row numbers</span>
+      </div>
+      <div class="toolbox-row">
+        <label>Numbering</label>
+        <select
+          class="toolbox-input"
+          v-model="selectedRowNumberingSchemeId"
+          @change="updateRowNumbering"
+        >
+          <option
+            v-for="option in rowNumberings"
+            :key="option.id"
+            :value="option.id"
+          >
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+      <div class="toolbox-row">
+        <label>Starting at</label>
+        <input
+          type="number"
+          class="toolbox-input"
+          v-model.number="startingAt"
+          @change="updateStartingAt"
+        />
+      </div>
+      <div class="toolbox-row">
+        <label>Reversed</label>
+        <input
+          type="checkbox"
+          class="toolbox-input"
+          v-model="isReversed"
+          @change="updateReversed"
+        />
+      </div>
+    </div> -->
   </div>
 </template>
 
