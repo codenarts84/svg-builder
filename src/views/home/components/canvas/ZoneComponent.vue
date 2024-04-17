@@ -7,6 +7,9 @@
       lockedZones.includes(zone.uuid) ? 'none' : 'visiblePainted'
     "
   >
+    <text x="500" y="500">
+      {{ store.selectedZone }}
+    </text>
     <ZoneArea
       v-for="a in zone.areas"
       :key="a.uuid"

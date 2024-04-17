@@ -199,7 +199,6 @@ export default {
         return false;
       }
       if (useMainStore().tool === "select") {
-        console.log("HEREEkjjfklsjfsjfkljfsdfsdjl");
         this.$emit("startDragging", this.row.uuid, this.zone, event);
         event.stopPropagation();
         return true;

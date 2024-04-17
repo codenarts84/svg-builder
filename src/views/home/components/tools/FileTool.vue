@@ -30,6 +30,8 @@ const reset = () => {
     )
   ) {
     const store = useMainStore();
+    localStorage.clear("frontrow2.editor.plan");
+    location.reload();
     store.loadPlan(sampleplan.sampleplan);
   }
 };

@@ -467,7 +467,7 @@ export default {
   },
 
   unmounted() {
-    window.removeEventListener("resize", this.createZoom);
+    // window.removeEventListener("resize", this.createZoom);
     window.removeEventListener("keydown", this.hotkey);
     console.log("unMounted");
     this.unwatch();
@@ -830,6 +830,52 @@ export default {
           } else if (this.selecting) {
             this.selectingCurrentX = pos.x;
             this.selectingCurrentY = pos.y;
+
+            let uuids = [];
+            const xmin = Math.min(this.selectingStartX, this.selectingCurrentX);
+            const ymin = Math.min(this.selectingStartY, this.selectingCurrentY);
+            const xmax = Math.max(this.selectingStartX, this.selectingCurrentX);
+            const ymax = Math.max(this.selectingStartY, this.selectingCurrentY);
+            for (const z of this.plan.zones) {
+              if (this.lockedZones.includes(z.uuid)) continue;
+              for (const r of z.rows) {
+                for (const s of r.seats) {
+                  if (
+                    z.position.x +
+                      r.position.x +
+                      s.position.x +
+                      (s.radius || 10) >=
+                      xmin &&
+                    z.position.x +
+                      r.position.x +
+                      s.position.x -
+                      (s.radius || 10) <=
+                      xmax &&
+                    z.position.y +
+                      r.position.y +
+                      s.position.y +
+                      (s.radius || 10) >=
+                      ymin &&
+                    z.position.y +
+                      r.position.y +
+                      s.position.y -
+                      (s.radius || 10) <=
+                      ymax
+                  ) {
+                    uuids.push(s.uuid);
+                  }
+                }
+              }
+            }
+
+            // console.log(
+            //   "mousemove",
+            //   uuids,
+            //   this.selectedZone,
+            //   event.shiftKey,
+            //   store.selectedZone
+            // );
+            store.setSelection(uuids, this.selectedZone, event.shiftKey);
           } else {
             return false;
           }
@@ -1699,11 +1745,11 @@ export default {
   mounted() {
     console.log("Mounted");
     this.createZoom();
-    window.addEventListener("resize", this.createZoom);
+    // window.addEventListener("resize", this.createZoom);
     window.addEventListener("keydown", this.hotkey);
   },
   beforeUnmout() {
-    window.addEventListener("resize", this.createZoom);
+    // window.addEventListener("resize", this.createZoom);
     window.addEventListener("keydown", this.hotkey);
   },
 };
@@ -1717,7 +1763,12 @@ export default {
     @mousemove="mousemove"
     @mouseup="mouseup"
     @mousedown="mousedown"
-    style="width: 100%; height: 100%; background-color: rgb(151, 162, 182)"
+    style="
+      width: 100%;
+      height: 100%;
+      background-color: rgb(151, 162, 182);
+      user-select: none;
+    "
   >
     <g :class="mainclasses" :transform="zoomTransform.toString()">
       <rect
@@ -1738,12 +1789,12 @@ export default {
       <defs>
         <pattern
           id="smallGrid"
-          width="10"
-          height="10"
+          width="20"
+          height="20"
           patternUnits="userSpaceOnUse"
         >
           <path
-            d="M 10 0 L 0 0 0 10"
+            d="M 20 0 L 0 0 0 20"
             fill="none"
             stroke="#ddd"
             stroke-width="0.5"
@@ -1944,6 +1995,29 @@ export default {
           :x2="drawingCurrentX + (drawingCurrentX - drawingStartX) * 1000"
           :y2="drawingCurrentY + (drawingCurrentY - drawingStartY) * 1000"
         ></line>
+        <text
+          v-if="rowDrawingSeats.length >= 3"
+          :x="
+            (rowDrawingSeats[rowDrawingSeats.length - 1].x -
+              rowDrawingSeats[0].x) /
+              rowDrawingSeats.length +
+            rowDrawPosition.x +
+            30
+          "
+          :y="
+            (rowDrawingSeats[rowDrawingSeats.length - 1].y -
+              rowDrawingSeats[0].y) /
+              rowDrawingSeats.length +
+            rowDrawPosition.y -
+            30
+          "
+          text-anchor="middle"
+          fill="black"
+          dy=".3em"
+          style="z-index: 99"
+        >
+          {{ rowDrawingSeats.length }} Seats
+        </text>
         <circle
           class="seat-preview"
           v-for="(s, sid) in rowDrawingSeats"
@@ -2015,6 +2089,11 @@ export default {
 }
 
 .c-plan svg * {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
   user-select: none;
 }
 
@@ -2085,17 +2164,17 @@ svg .auxline {
 svg .seat-preview {
   stroke: #0064d0;
   stroke-width: 1px;
-  fill: rgba(0, 0, 204, 0.3);
+  fill: #8fc8f3;
 }
 
 svg .row-circle-preview circle.preview {
-  fill: rgba(0, 0, 204, 0.1);
+  fill: #8fc8f3;
   stroke-width: 2px;
   opacity: 0.5;
 }
 
 svg .row-circle-preview circle.preview-center {
-  fill: rgba(0, 0, 204, 0.8);
+  fill: #8fc8f3;
   stroke-width: 0;
   opacity: 0.5;
 }

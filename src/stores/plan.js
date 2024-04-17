@@ -340,7 +340,6 @@ export const usePlanStore = defineStore("plan", {
             for (let numbering of SEAT_NUMBERINGS) {
               try {
                 numbering = SEAT_NUMBERINGS.find((n) => n.id === "alpha");
-                console.log("START numbering HERE", numbering);
                 let guessedStartAt = numbering.findStartAt(
                   r.seats[0].seat_number
                 );
@@ -565,8 +564,6 @@ export const usePlanStore = defineStore("plan", {
     },
 
     loadPlan(plan) {
-      console.log("plan.js here", plan);
-
       for (const z of plan.zones) {
         if (!z.uuid) z.uuid = uuid();
         if (z._editor_id) {

@@ -188,8 +188,6 @@ export default {
   },
   computed: {
     selectionIsPolygon() {
-      console.log("HERE", this.plan);
-
       if (!this.plan && !this.plan.zones) return false;
 
       for (const z of this.plan.zones) {
