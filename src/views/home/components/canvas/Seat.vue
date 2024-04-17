@@ -1,7 +1,7 @@
 <template>
   <g @mousedown="mousedown" @mouseup="mouseup" :class="classObject">
     <circle
-      :fill="seatColor"
+      :fill="seatColor ? 'white' : 'white'"
       :cx="seat.position.x"
       :cy="seat.position.y"
       :r="radius"

@@ -362,7 +362,6 @@ watch(
       ") scale(" +
       scale.value +
       ")";
-    console.log("HERE", PaddingLeft.value, PaddingTop.value);
   },
   { immediate: true }
 );

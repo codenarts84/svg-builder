@@ -140,8 +140,8 @@ const findClosestGridPoint = ({ x, y, zone }) => {
     y += zone.position.y;
   }
   // grid-size was 10, but 5 fits better with default seating distance of 25
-  x = Math.round(x / 5) * 5;
-  y = Math.round(y / 5) * 5;
+  x = Math.round(x / 20) * 20;
+  y = Math.round(y / 20) * 20;
   if (zone) {
     x -= zone.position.x;
     y -= zone.position.y;

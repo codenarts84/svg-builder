@@ -61,6 +61,7 @@ export const useMainStore = defineStore({
 
   actions: {
     loadPlan(plan) {
+      console.log(plan);
       const temp = usePlanStore();
       temp.loadPlan(plan);
       this.selectedZone = temp.plan.zones[0].uuid;
@@ -118,6 +119,7 @@ export const useMainStore = defineStore({
     },
 
     setSelection(uuids, addition, zone) {
+      console.log(addition, zone, this.selection);
       if (addition && this.selection.length > 0) {
         for (const uuid of uuids) {
           if (!this.selection.includes(uuid)) {
@@ -125,7 +127,7 @@ export const useMainStore = defineStore({
           }
         }
       } else {
-        this.selectedZone = zone;
+        this.selectedZone = addition;
         this.selection = uuids;
       }
     },

@@ -35,7 +35,7 @@ watch(
   { immediate: true }
 );
 const onChange = (e) => {
-  props.zoomTo(e.target.value / 100);
+  props.setTransfrom(e.target.value / 100);
 };
 
 const props = defineProps({
