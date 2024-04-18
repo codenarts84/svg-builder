@@ -6,7 +6,7 @@
     <v-icon v-if="grid == false" color="black" icon="mdi-grid-off"
       size="large"></v-icon>
   </v-btn>
-  <v-btn @click="btn_snap_2_grid_clicked">
+  <v-btn @click="toogleSnap" :class="snap ? 'current-tool' : ''">
     <v-tooltip activator="parent" location="bottom">Snap to Grid</v-tooltip>
     <SnapToGridIcon width="20" height="20" />
   </v-btn>
@@ -22,10 +22,16 @@ import { useToolbarStore } from "@/stores/toolbar";
 const boardStore = useBoardStore();
 // const grid = ref(computed(() => boardStore.grid));
 const grid = ref(computed(() => store.grid));
+const snap = ref(computed(() => store.snap));
 
 // const toggleGrid = () => boardStore.grid_toggle();
 const store = useMainStore();
 const toolbarStore = useToolbarStore();
-const toggleGrid = () => store.toggleGrid();
+const toogleSnap = () => store.toggleSnap();
+const toggleGrid = () => store.toggleGrid()
+
+const bSnap2Grid = ref(computed(() => toolbarStore.bSnap2Grid))
+
+// const tool = ref(computed(() => store.tool));
 const btn_snap_2_grid_clicked = () => toolbarStore.changeSnap2Grid();
 </script>

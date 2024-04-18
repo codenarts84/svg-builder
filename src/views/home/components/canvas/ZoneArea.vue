@@ -35,6 +35,10 @@
 		S7.7,5.9,10,5.9s4.1,1.8,4.1,4.1S12.3,14.1,10,14.1z" />
     </g>
 
+    <!-- <g v-if="area.shape === 'roundTable'">
+      <circle cx="0" cy="0" :r="40"></circle>
+    </g> -->
+
     <g v-if="area.shape === 'rectangleTable'"
       :transform="`scale(${area.rectangleTable.scale})`" :x="area.position.x"
       :y="area.position.y">

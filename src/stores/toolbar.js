@@ -6,6 +6,7 @@ export const useToolbarStore = defineStore('toolbarstore', {
   }),
   actions: {
     changeSnap2Grid() {
+      console.log(this.bSnap2Grid);
       this.bSnap2Grid = !this.bSnap2Grid;
     }
   },

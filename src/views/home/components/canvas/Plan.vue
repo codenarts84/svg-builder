@@ -86,6 +86,9 @@ export default {
 
     const toolbarStore = useToolbarStore();
 
+    const bSnap2Grid = computed(() => store.snap);
+    console.log(bSnap2Grid)
+
     onMounted(() => {
       console.log("SVG Element:", svg.value.getBoundingClientRect());
     });
@@ -93,7 +96,7 @@ export default {
     const getSvgRect = () => svg.value.getBoundingClientRect();
 
     return {
-      bSnap2Grid: toolbarStore.bSnap2Grid,
+      bSnap2Grid,
       plan,
       validationErrors,
       selection,
@@ -996,6 +999,7 @@ export default {
       }
     },
     mousemove(event) {
+      console.log('mousemove occurs')
       if (!this.svg) return;
       const store = useMainStore();
       // console.log(this.tool);
@@ -1050,10 +1054,11 @@ export default {
         case "select":
         case "seatselect":
           if (store.dragging) {
+            console.log('******', this.bSnap2Grid)
             store.moveDragging(
               pos.x,
               pos.y,
-              event.shiftKey,
+              event.shiftKey || this.bSnap2Grid,
               this.zoomTransform.k
             );
           } else if (this.selecting) {
@@ -1179,7 +1184,7 @@ export default {
             store.moveDragging(
               pos.x,
               pos.y,
-              event.shiftKey,
+              event.shiftKey || this.bSnap2Grid,
               this.zoomTransform.k
             );
             break;
