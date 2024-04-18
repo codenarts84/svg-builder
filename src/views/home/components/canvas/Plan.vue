@@ -11,6 +11,8 @@ import {
   rectangleBBox,
   testOverlap,
   textBBox,
+  roundTableBBox,
+  rectangleTableBBox,
 } from "@/lib/geometry";
 import { v4 as uuid } from "uuid";
 import * as d3 from "d3";
@@ -335,7 +337,6 @@ export default {
       return this.selectionBoxes.filter((b) => b.visible);
     },
     selectionBoxes() {
-      // console.log("selectionBoxes");
       const res = [];
       if (this.selection.length) {
         for (const z of this.plan.zones) {
@@ -393,6 +394,7 @@ export default {
                   height: 2 * a.circle.radius,
                 };
               } else if (a.shape === "ellipse") {
+
                 abox = ellipseBBox(a);
               } else if (a.shape === "rectangle") {
                 abox = rectangleBBox(a);
@@ -401,7 +403,12 @@ export default {
               } else if (a.shape === "text") {
                 const s = a.text.size || 16;
                 abox = textBBox(a, a.text.text, s);
+              } else if (a.shape === 'roundTable') {
+                abox = roundTableBBox(a);
+              } else if (a.shape === 'rectangleTable') {
+                abox = rectangleTableBBox(a);
               }
+              //COME HERE
               abox.x += z.position.x;
               abox.y += z.position.y;
               abox.visible = true;
@@ -510,8 +517,6 @@ export default {
 
     startResizing(event, node) {
       if (!this.svg) return;
-      console.log("resizing");
-      console.log("Opps");
 
       if (event.ctrlKey || event.metaKey) {
         // this is a panning event
@@ -555,12 +560,12 @@ export default {
         (drawPos.y - this.resizingOriginY) *
         (drawPos.y - this.resizingOriginY)
       );
+      console.log(this.resizingStartDistance);
       return true;
     },
 
     startDragging(uuid, zone, event) {
       if (!this.svg) return;
-      //   console.log("Plan works");
       //   console.log(event);
       if (event) {
         const svgbox = this.getSvgRect();
@@ -572,6 +577,7 @@ export default {
           null
         );
         const store = useMainStore();
+        console.log('error', pos);
         store.startDragging(uuid, event.shiftKey, pos.x, pos.y, zone.uuid);
       }
     },
@@ -695,6 +701,86 @@ export default {
             });
           break;
         }
+        case "roundTable": {
+          let targetPos = positionInZone(
+            event.clientX - svgbox.x,
+            event.clientY - svgbox.y,
+            this.zoomTransform,
+            zone
+          );
+          if (event.shiftKey) {
+            targetPos = findClosestGridPoint({
+              x: targetPos.x,
+              y: targetPos.y,
+            });
+          }
+          const newId = uuid();
+          usePlanStore()
+            .createArea(this.selectedZone, {
+              shape: "roundTable",
+              rotation: 0,
+              uuid: newId,
+              position: {
+                x: targetPos.x - 40,
+                y: targetPos.y - 40
+              },
+              text: {
+                position: { x: 0, y: 0 },
+                color: "#333333",
+                text: "",
+              },
+              roundTable: {
+                scale: 4
+              }
+            })
+            .then(() => {
+              this.$nextTick(() => {
+                store.toggleSelection([newId], this.selectedZone, false);
+              });
+            });
+          break;
+        }
+
+        case "rectangleTable": {
+          let targetPos = positionInZone(
+            event.clientX - svgbox.x,
+            event.clientY - svgbox.y,
+            this.zoomTransform,
+            zone
+          );
+          if (event.shiftKey) {
+            targetPos = findClosestGridPoint({
+              x: targetPos.x,
+              y: targetPos.y,
+            });
+          }
+          const newId = uuid();
+          usePlanStore()
+            .createArea(this.selectedZone, {
+              shape: "rectangleTable",
+              rotation: 0,
+              uuid: newId,
+              position: {
+                x: targetPos.x - 40,
+                y: targetPos.y - 40
+              },
+              text: {
+                position: { x: 0, y: 0 },
+                color: "#333333",
+                text: "",
+              },
+              rectangleTable: {
+                scale: 4
+              }
+            })
+            .then(() => {
+              this.$nextTick(() => {
+                store.toggleSelection([newId], this.selectedZone, false);
+              });
+            });
+          break;
+        }
+
         case "rowCircle":
         case "rowCircleFixedCenter": {
           if (this.tool !== "rowCircle" && this.tool !== "rowCircleFixedCenter")

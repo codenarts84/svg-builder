@@ -8,10 +8,10 @@ const positionInZone = (x, y, zoomTransform, zone) => {
 
 const estimateTextWidth = (text, size) => {
   /*
-	There is no native way to get the width of an SVG text, short of rendering it and calling getBBox(), which in our
-	case turned out to be unfeasibly complex due to the rendering cycle of vue. So we just use HTML5 canvas to get a
-	rough idea. In our experiments, this works perfectly fine in Chrome and Firefox.
-	*/
+  There is no native way to get the width of an SVG text, short of rendering it and calling getBBox(), which in our
+  case turned out to be unfeasibly complex due to the rendering cycle of vue. So we just use HTML5 canvas to get a
+  rough idea. In our experiments, this works perfectly fine in Chrome and Firefox.
+  */
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
   context.font = size + "px " + "sans-serif";
@@ -23,31 +23,31 @@ const rotateRectangluarBox = (area, abox) => {
   let oy = area.position.y;
   const rotated_points_x = [
     Math.cos((area.rotation / 180) * Math.PI) * (abox.x - ox) -
-      Math.sin((area.rotation / 180) * Math.PI) * (abox.y - oy) +
-      ox,
+    Math.sin((area.rotation / 180) * Math.PI) * (abox.y - oy) +
+    ox,
     Math.cos((area.rotation / 180) * Math.PI) * (abox.x + abox.width - ox) -
-      Math.sin((area.rotation / 180) * Math.PI) * (abox.y - oy) +
-      ox,
+    Math.sin((area.rotation / 180) * Math.PI) * (abox.y - oy) +
+    ox,
     Math.cos((area.rotation / 180) * Math.PI) * (abox.x - ox) -
-      Math.sin((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
-      ox,
+    Math.sin((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
+    ox,
     Math.cos((area.rotation / 180) * Math.PI) * (abox.x + abox.width - ox) -
-      Math.sin((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
-      ox,
+    Math.sin((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
+    ox,
   ];
   const rotated_points_y = [
     Math.sin((area.rotation / 180) * Math.PI) * (abox.x - ox) +
-      Math.cos((area.rotation / 180) * Math.PI) * (abox.y - oy) +
-      oy,
+    Math.cos((area.rotation / 180) * Math.PI) * (abox.y - oy) +
+    oy,
     Math.sin((area.rotation / 180) * Math.PI) * (abox.x + abox.width - ox) +
-      Math.cos((area.rotation / 180) * Math.PI) * (abox.y - oy) +
-      oy,
+    Math.cos((area.rotation / 180) * Math.PI) * (abox.y - oy) +
+    oy,
     Math.sin((area.rotation / 180) * Math.PI) * (abox.x - ox) +
-      Math.cos((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
-      oy,
+    Math.cos((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
+    oy,
     Math.sin((area.rotation / 180) * Math.PI) * (abox.x + abox.width - ox) +
-      Math.cos((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
-      oy,
+    Math.cos((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
+    oy,
   ];
   const minx = Math.min(...rotated_points_x);
   const miny = Math.min(...rotated_points_y);
@@ -74,6 +74,33 @@ const rectangleBBox = (area) => {
   return abox;
 };
 
+const roundTableBBox = (area) => {
+  let abox = {
+    x: area.position.x,
+    y: area.position.y,
+    width: 80 * area.roundTable.scale / 4,
+    height: 80 * area.roundTable.scale / 4,
+  };
+  if (area.rotation) {
+    abox = rotateRectangluarBox(area, abox);
+  }
+  return abox;
+}
+
+const rectangleTableBBox = (area) => {
+  let abox = {
+    x: area.position.x,
+    y: area.position.y,
+    width: 80 * area.rectangleTable.scale / 4,
+    height: 80 * area.rectangleTable.scale / 4,
+  };
+  if (area.rotation) {
+    abox = rotateRectangluarBox(area, abox);
+  }
+  return abox;
+}
+
+
 const textBBox = (area, text, size) => {
   const width = estimateTextWidth(text, size);
   let abox = {
@@ -91,13 +118,13 @@ const textBBox = (area, text, size) => {
 const polygonBBox = (area) => {
   const points = area.rotation
     ? area.polygon.points.map((p) => ({
-        x:
-          Math.cos((area.rotation / 180) * Math.PI) * p.x -
-          Math.sin((area.rotation / 180) * Math.PI) * p.y,
-        y:
-          Math.sin((area.rotation / 180) * Math.PI) * p.x +
-          Math.cos((area.rotation / 180) * Math.PI) * p.y,
-      }))
+      x:
+        Math.cos((area.rotation / 180) * Math.PI) * p.x -
+        Math.sin((area.rotation / 180) * Math.PI) * p.y,
+      y:
+        Math.sin((area.rotation / 180) * Math.PI) * p.x +
+        Math.cos((area.rotation / 180) * Math.PI) * p.y,
+    }))
     : area.polygon.points;
   const minx = Math.min(...points.map((s) => s.x));
   const miny = Math.min(...points.map((s) => s.y));
@@ -155,15 +182,15 @@ const findClosestGridPoint = ({ x, y, zone }) => {
 const rotatePolygon = (points, rotation, ox, oy) => {
   return rotation
     ? points.map((p) => ({
-        x:
-          Math.cos((rotation / 180) * Math.PI) * (p.x - ox) -
-          Math.sin((rotation / 180) * Math.PI) * (p.y - oy) +
-          ox,
-        y:
-          Math.sin((rotation / 180) * Math.PI) * (p.x - ox) +
-          Math.cos((rotation / 180) * Math.PI) * (p.y - oy) +
-          oy,
-      }))
+      x:
+        Math.cos((rotation / 180) * Math.PI) * (p.x - ox) -
+        Math.sin((rotation / 180) * Math.PI) * (p.y - oy) +
+        ox,
+      y:
+        Math.sin((rotation / 180) * Math.PI) * (p.x - ox) +
+        Math.cos((rotation / 180) * Math.PI) * (p.y - oy) +
+        oy,
+    }))
     : points;
 };
 
@@ -305,4 +332,6 @@ export {
   textBBox,
   ellipseBBox,
   testOverlap,
+  roundTableBBox,
+  rectangleTableBBox
 };
