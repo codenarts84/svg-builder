@@ -127,7 +127,6 @@ export const usePlanStore = defineStore("plan", {
       return new Promise((res, rej) => {
         try {
           const rowids = [];
-          console.log(rows, seats);
           zone = this._plan.zones.find((z) => z.uuid === zone);
           for (const rix of [...Array(rows).keys()]) {
             const row = {
@@ -146,6 +145,63 @@ export const usePlanStore = defineStore("plan", {
                 category: "",
               });
             }
+            this.createRowAfter(zone.uuid, row, false);
+            rowids.push(row.uuid);
+          }
+          this.persistPlan();
+          return rowids;
+        } catch (err) {
+          rej(err);
+        }
+      });
+    },
+
+    createStgRowBlock(zone, position, rows, seats, row_spacing, seat_spacing) {
+      return new Promise((res, rej) => {
+        try {
+          const rowids = [];
+          zone = this._plan.zones.find((z) => z.uuid === zone);
+          console.log(rows);
+          for (const rix of [...Array(rows).keys()]) {
+            console.log(rix)
+            let row = {};
+            if (rix % 2 === 0) {
+              row = {
+                position: { x: position.x, y: position.y + rix * row_spacing },
+                row_number: (rix + 1).toString(),
+                row_number_position: "both",
+                seats: [],
+                uuid: uuid(),
+              }
+
+              for (const six of [...Array(seats).keys()]) {
+                row.seats.push({
+                  seat_number: (six + 1).toString(),
+                  seat_guid: uuid(),
+                  uuid: uuid(),
+                  position: { x: six * seat_spacing, y: 0 },
+                  category: "",
+                });
+              }
+            } else {
+              row = {
+                position: { x: position.x + 10, y: position.y + rix * row_spacing },
+                row_number: (rix + 1).toString(),
+                row_number_position: "both",
+                seats: [],
+                uuid: uuid(),
+              };
+              for (const six of [...Array(seats - 1).keys()]) {
+                row.seats.push({
+                  seat_number: (six + 1).toString(),
+                  seat_guid: uuid(),
+                  uuid: uuid(),
+                  position: { x: six * seat_spacing, y: 0 },
+                  category: "",
+                });
+              }
+            }
+
             this.createRowAfter(zone.uuid, row, false);
             rowids.push(row.uuid);
           }

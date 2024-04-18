@@ -13,6 +13,8 @@ import {
   textBBox,
   roundTableBBox,
   rectangleTableBBox,
+  gaSquareBBox,
+  gaCircleBBox,
 } from "@/lib/geometry";
 import { v4 as uuid } from "uuid";
 import * as d3 from "d3";
@@ -64,6 +66,7 @@ export default {
     const polygonDrawing = ref(false);
     const polygonPoints = ref([]);
     const rowBlockDrawing = ref(false);
+    const stgrowBlockDrawing = ref(false);
     const rowDrawing = ref(false);
     const rowSpacing = ref(25);
     const rowSeatSpacing = ref(25);
@@ -138,6 +141,7 @@ export default {
       polygonDrawing,
       polygonPoints,
       rowBlockDrawing,
+      stgrowBlockDrawing,
       rowDrawing,
       rowSpacing,
       rowSeatSpacing,
@@ -204,6 +208,17 @@ export default {
         return 0;
       }
     },
+
+    stgrowBlockRows() {
+      if (this.stgrowBlockDrawing) {
+        return Math.ceil(
+          Math.abs(this.drawingCurrentY - this.drawingStartY) / this.rowSpacing
+        );
+      } else {
+        return 0;
+      }
+    },
+
     rowCirclePreviews() {
       const circles = [];
       for (const z of this.plan.zones) {
@@ -333,6 +348,26 @@ export default {
         return 0;
       }
     },
+    stgrowBlockSeats() {
+      if (this.stgrowBlockDrawing) {
+        return Math.ceil(
+          Math.abs(this.drawingCurrentX - this.drawingStartX) /
+          this.rowSeatSpacing
+        );
+      } else {
+        return 0;
+      }
+    },
+    stgrowBlockSeats1() {
+      if (this.stgrowBlockDrawing) {
+        return Math.ceil(
+          Math.abs(this.drawingCurrentX - this.drawingStartX) /
+          this.rowSeatSpacing
+        ) - 1;
+      } else {
+        return 0;
+      }
+    },
     selectionBoxesVisible() {
       return this.selectionBoxes.filter((b) => b.visible);
     },
@@ -407,6 +442,10 @@ export default {
                 abox = roundTableBBox(a);
               } else if (a.shape === 'rectangleTable') {
                 abox = rectangleTableBBox(a);
+              } else if (a.shape === 'gaSquare') {
+                abox = gaSquareBBox(a);
+              } else if (a.shape === 'gaCircle') {
+                abox = gaCircleBBox(a);
               }
               //COME HERE
               abox.x += z.position.x;
@@ -781,6 +820,86 @@ export default {
           break;
         }
 
+        case "gaSquare": {
+          let targetPos = positionInZone(
+            event.clientX - svgbox.x,
+            event.clientY - svgbox.y,
+            this.zoomTransform,
+            zone
+          );
+          if (event.shiftKey) {
+            targetPos = findClosestGridPoint({
+              x: targetPos.x,
+              y: targetPos.y,
+            });
+          }
+          const newId = uuid();
+          usePlanStore()
+            .createArea(this.selectedZone, {
+              shape: "gaSquare",
+              rotation: 0,
+              uuid: newId,
+              position: {
+                x: targetPos.x - 40,
+                y: targetPos.y - 40
+              },
+              text: {
+                position: { x: 0, y: 0 },
+                color: "#333333",
+                text: "",
+              },
+              gaSquare: {
+                scale: 4
+              }
+            })
+            .then(() => {
+              this.$nextTick(() => {
+                store.toggleSelection([newId], this.selectedZone, false);
+              });
+            });
+          break;
+        }
+
+        case "gaCircle": {
+          let targetPos = positionInZone(
+            event.clientX - svgbox.x,
+            event.clientY - svgbox.y,
+            this.zoomTransform,
+            zone
+          );
+          if (event.shiftKey) {
+            targetPos = findClosestGridPoint({
+              x: targetPos.x,
+              y: targetPos.y,
+            });
+          }
+          const newId = uuid();
+          usePlanStore()
+            .createArea(this.selectedZone, {
+              shape: "gaCircle",
+              rotation: 0,
+              uuid: newId,
+              position: {
+                x: targetPos.x - 40,
+                y: targetPos.y - 40
+              },
+              text: {
+                position: { x: 0, y: 0 },
+                color: "#333333",
+                text: "",
+              },
+              gaCircle: {
+                scale: 4
+              }
+            })
+            .then(() => {
+              this.$nextTick(() => {
+                store.toggleSelection([newId], this.selectedZone, false);
+              });
+            });
+          break;
+        }
+
         case "rowCircle":
         case "rowCircleFixedCenter": {
           if (this.tool !== "rowCircle" && this.tool !== "rowCircleFixedCenter")
@@ -848,6 +967,26 @@ export default {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
 
           this.rowBlockDrawing = true;
+          this.drawingStartX = pos.x;
+          this.drawingStartY = pos.y;
+          this.drawingCurrentX = pos.x;
+          this.drawingCurrentY = pos.y;
+          break;
+        }
+        case "stgrows": {
+          if (this.stgrowBlockDrawing) {
+            break;
+          }
+          let pos = positionInZone(
+            event.clientX - svgbox.x,
+            event.clientY - svgbox.y,
+            this.zoomTransform,
+            null
+          );
+          if (event.shiftKey)
+            pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
+
+          this.stgrowBlockDrawing = true;
           this.drawingStartX = pos.x;
           this.drawingStartY = pos.y;
           this.drawingCurrentX = pos.x;
@@ -1021,6 +1160,14 @@ export default {
           break;
         case "rows":
           if (!this.rowBlockDrawing) return false;
+          if (event.shiftKey) {
+            pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
+          }
+          this.drawingCurrentX = pos.x;
+          this.drawingCurrentY = pos.y;
+          break;
+        case "stgrows":
+          if (!this.stgrowBlockDrawing) return false;
           if (event.shiftKey) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
           }
@@ -1414,7 +1561,6 @@ export default {
             break;
           }
           if (this.rowBlockDrawing) {
-            // console.log(this.rowBlockRows, this.rowBlockSeats);
             usePlanStore()
               .createRowBlock(
                 zone.uuid,
@@ -1433,6 +1579,36 @@ export default {
                 });
               });
             this.rowBlockDrawing = false;
+          }
+          break;
+        case "stgrows":
+          // if mouseup is in same spot as mousedown, keep drawing, as this
+          // was the original behaviour with click-draw-click vs. mousedown-draw-mouseup
+          if (event.shiftKey) {
+            pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
+          }
+          if (this.drawingStartX === pos.x && this.drawingStartY === pos.y) {
+            break;
+          }
+          if (this.stgrowBlockDrawing) {
+            usePlanStore()
+              .createStgRowBlock(
+                zone.uuid,
+                {
+                  x: this.rowBlockPosition.x - zone.position.x,
+                  y: this.rowBlockPosition.y - zone.position.y,
+                },
+                this.stgrowBlockRows,
+                this.stgrowBlockSeats,
+                this.rowSpacing,
+                this.rowSeatSpacing
+              )
+              .then((rowIds) => {
+                this.$nextTick(() => {
+                  store.toggleSelection(rowIds, this.selectedZone, false);
+                });
+              });
+            this.stgrowBlockDrawing = false;
           }
           break;
         case "row":
@@ -1989,6 +2165,37 @@ export default {
           {{ rowBlockRows }} × {{ rowBlockSeats }}
         </text>
       </g>
+      <g class="rows-preview" v-if="tool === 'stgrows' && stgrowBlockDrawing"
+        :transform="rowBlockTransform">
+        <!-- //change here -->
+        <g v-for="rid in stgrowBlockRows" :key="rid">
+          <g v-if="rid % 2">
+            <circle class="seat-preview" v-for="sid in stgrowBlockSeats"
+              :key="sid"
+              :cx="rid % 2 ? rowSeatSpacing * (sid - 1) : rowSeatSpacing * (sid - 1) + rowSeatSpacing / 2"
+              :cy="rowSpacing * (rid - 1)" r="10">
+            </circle>
+          </g>
+          <g v-else>
+            <circle class="seat-preview" v-for="sid in stgrowBlockSeats1"
+              :key="sid"
+              :cx="rid % 2 ? rowSeatSpacing * (sid - 1) : rowSeatSpacing * (sid - 1) + rowSeatSpacing / 2"
+              :cy="rowSpacing * (rid - 1)" r="10">
+            </circle>
+          </g>
+          <rect v-if="stgrowBlockSeats + stgrowBlockRows >= 7"
+            :x="(rowSeatSpacing * stgrowBlockSeats) / 2 - 25 - 12.5"
+            :y="(rowSpacing * stgrowBlockRows) / 2 - 25" width="50" height="25"
+            fill="#00c"></rect>
+          <text v-if="stgrowBlockSeats + stgrowBlockRows >= 7"
+            :x="(rowSeatSpacing * stgrowBlockSeats) / 2 - 12.5"
+            :y="(rowSpacing * stgrowBlockRows) / 2 - 12.5" text-anchor="middle"
+            fill="#fff" dy=".3em">
+            {{ stgrowBlockRows }} × {{ stgrowBlockSeats }}
+          </text>
+        </g>
+      </g>
+
       <rect class="selection-area"
         v-if="(tool == 'select' || tool == 'seatselect') && selecting"
         :x="Math.min(selectingStartX, selectingCurrentX)"

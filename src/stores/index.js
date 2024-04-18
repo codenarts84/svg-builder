@@ -48,8 +48,11 @@ export const useMainStore = defineStore({
         case "text":
         case "roundTable":
         case "rectangleTable":
+        case "gaSquare":
+        case "gaCircle":
         case "rows":
         case "row":
+        case "stgrows":
           return "crosshair";
         case "hand":
           return "grab";
@@ -163,18 +166,20 @@ export const useMainStore = defineStore({
       const rowTools = [
         "rows",
         "row",
+        "stgrows",
         "select",
         "rowCircle",
         "rowCircleFixedCenter",
       ];
       const keepSelection =
         tool === this.tool ||
-        ((this.tool === "rows" || this.tool === "row") && tool === "select") ||
+        ((this.tool === "rows" || this.tool === "row" || this.tool === 'stgrows') && tool === "select") ||
         (rowTools.includes(this.tool) && rowTools.includes(tool));
       if (!keepSelection) {
         this.selection = [];
       }
       this.tool = tool;
+      console.log('changed tool', tool)
     },
     clearSelection() {
       this.selection = [];
@@ -361,6 +366,7 @@ export const useMainStore = defineStore({
       planStore.persistPlan();
     },
     moveDragging(x, y, snap, zoomLevel) {
+      console.log('move Dragging HERE?');
       if (!this.dragging) return;
       let dx = x - this.dragStartX;
       let dy = y - this.dragStartY;
@@ -608,6 +614,12 @@ export const useMainStore = defineStore({
                 break;
               case "rectangleTable":
                 area.rectangleTable.scale *= factor;
+                break;
+              case "gaSquare":
+                area.gaSquare.scale *= factor;
+                break;
+              case "gaCircle":
+                area.gaCircle.scale *= factor;
                 break;
               case "text":
                 area.text.size =
