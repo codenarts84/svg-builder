@@ -1,50 +1,28 @@
 <template>
-  <g
-    :transform="transform"
-    @mousedown="mousedown"
-    @mouseup="mouseup"
-    :class="classObject"
-  >
-    <text
-      v-if="rowNumberStart"
-      :x="rowNumberStart.x"
-      :y="rowNumberStart.y"
-      dy=".3em"
-      :font-size="rowNumberStart.fontSize"
+  <g :transform="transform" @mousedown="mousedown" @mouseup="mouseup"
+    :class="classObject">
+    <text v-if="rowNumberStart" :x="rowNumberStart.x" :y="rowNumberStart.y"
+      dy=".3em" :font-size="rowNumberStart.fontSize"
       :text-anchor="rowNumberStart.textAnchor"
-      :transform="rowNumberStart.transform"
-      fill="#888"
-      >{{ row.row_number }}</text
-    >
-    <text
-      v-if="rowNumberEnd"
-      :x="rowNumberEnd.x"
-      :y="rowNumberEnd.y"
-      dy=".3em"
-      :font-size="rowNumberEnd.fontSize"
-      :text-anchor="rowNumberEnd.textAnchor"
-      :transform="rowNumberEnd.transform"
-      fill="#888"
-      >{{ row.row_number }}</text
-    >
-    <Seat
-      v-for="s in row.seats"
-      :seat="s"
-      :key="s.uuid"
-      :zone="zone"
-      @startDragging="startDragging"
-    ></Seat>
-    <path
-      class="selection-line"
-      v-if="selection.includes(row.uuid)"
-      :d="selectionLinePath"
-    ></path>
+      :transform="rowNumberStart.transform" fill="#888">{{ rowContent
+      }}</text>
+    <text v-if="rowNumberEnd" :x="rowNumberEnd.x" :y="rowNumberEnd.y" dy=".3em"
+      :font-size="rowNumberEnd.fontSize" :text-anchor="rowNumberEnd.textAnchor"
+      :transform="rowNumberEnd.transform" fill="#888">{{ rowContent }}</text>
+    <Seat v-for="s in row.seats" :seat="s" :key="s.uuid" :zone="zone"
+      @startDragging="startDragging" :row_number="row.row_number"></Seat>
+    <text>{{ row.row_number }}</text>
+    <path class="selection-line" v-if="selection.includes(row.uuid)"
+      :d="selectionLinePath"></path>
   </g>
 </template>
 <script>
 import Seat from "./Seat";
 import { useMainStore } from "@/stores";
 import { computed } from "vue";
+import { letterCounter } from "@/lib/numbering";
+import { useSeatFormatStore } from "@/stores/seatFormat";
+
 // import { mapState } from "vuex";
 // import { positionInZone } from "../../lib/geometry";
 
@@ -127,7 +105,12 @@ export default {
   setup() {
     const store = useMainStore();
     const selection = computed(() => store.selection);
-    return { selection };
+    const storeSeatFormat = useSeatFormatStore();
+
+    return {
+      selection,
+      seatCur: storeSeatFormat.seatCur
+    };
   },
   data() {
     return {
@@ -136,6 +119,18 @@ export default {
   },
   computed: {
     // ...mapState(["selection"]),
+
+    rowContent() {
+      let content = '';
+      if (this.seatCur === 0) {
+        content = this.row.row_number;
+      } else if (this.seatCur === 1) {
+        content = letterCounter(parseInt(this.row.row_number), 'A')
+      } else {
+        content = letterCounter(parseInt(this.row.row_number), 'a')
+      }
+      return content;
+    },
 
     classObject() {
       return {
@@ -163,10 +158,14 @@ export default {
     rowNumberEnd() {
       return getRowNumber(this.row, true);
     },
+    getRowNumber_Custom() {
+      console.log('typeof', typeof (this.row.row_number))
+      return this.row.row_number;
+    },
   },
   watch: {},
-  mounted() {},
-  unmounted() {},
+  mounted() { },
+  unmounted() { },
   methods: {
     startDragging(uuid, zone, event) {
       this.$emit("startDragging", uuid, zone, event);

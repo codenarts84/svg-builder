@@ -1,30 +1,14 @@
 <template>
-  <g
-    class="zone"
-    :transform="transform"
-    :opacity="opacity"
-    :pointer-events="
-      lockedZones.includes(zone.uuid) ? 'none' : 'visiblePainted'
-    "
-  >
-    <text x="500" y="500">
+  <g class="zone" :transform="transform" :opacity="opacity" :pointer-events="lockedZones.includes(zone.uuid) ? 'none' : 'visiblePainted'
+    ">
+    <!-- <text x="500" y="500">
       {{ store.selectedZone }}
-    </text>
-    <ZoneArea
-      v-for="a in zone.areas"
-      :key="a.uuid"
-      :area="a"
-      :zone="zone"
+    </text> -->
+    <ZoneArea v-for="a in zone.areas" :key="a.uuid" :area="a" :zone="zone"
       @startDragging="startDragging"
-      @startDraggingPolygonPoint="startDraggingPolygonPoint"
-    ></ZoneArea>
-    <Row
-      v-for="r in zone.rows"
-      :key="r.uuid"
-      :row="r"
-      :zone="zone"
-      @startDragging="startDragging"
-    ></Row>
+      @startDraggingPolygonPoint="startDraggingPolygonPoint"></ZoneArea>
+    <Row v-for="r in zone.rows" :key="r.uuid" :row="r" :zone="zone"
+      @startDragging="startDragging"></Row>
   </g>
 </template>
 
