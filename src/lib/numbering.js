@@ -1,7 +1,6 @@
-function letterCounter(number, start) {
-  // A, B, … Z, AA, AB, … ZZ, AAA …
-  let baseChar = start.charCodeAt(0);
-  let letters = "";
+function letterCounter(number, start) { // A, B, … Z, AA, AB, … ZZ, AAA …
+  let baseChar = start.charCodeAt(0)
+  let letters = ""
 
   do {
     number -= 1;
@@ -22,105 +21,96 @@ function reverseLetterCounter(letters) {
 
 const SEAT_NUMBERINGS = [
   {
-    id: "alpha",
-    label: "A, B, C, …",
+    id: 'natural',
+    label: '1, 2, 3, …',
     compute: (seats, startAt) => {
-      let counter = startAt;
-      return seats.map((s) => {
-        letterCounter(counter++, "A");
-        console.log(s);
-      });
+      let counter = startAt
+      return seats.map(s => (counter++).toString())
     },
     findStartAt: (firstValue) => {
-      return reverseLetterCounter(firstValue.toUpperCase());
+      return parseInt(firstValue)
     },
   },
   {
-    id: "natural",
-    label: "1, 2, 3, …",
+    id: 'odd',
+    label: '1, 3, 5, … / 2, 4, 6, …',
     compute: (seats, startAt) => {
-      let counter = startAt;
-      return seats.map((s) => {
-        (counter++).toString();
-      });
+      let counter = startAt
+      return seats.map(s => {
+        const n = counter
+        counter += 2
+        return n.toString()
+      })
     },
     findStartAt: (firstValue) => {
-      return parseInt(firstValue);
+      return parseInt(firstValue)
     },
   },
   {
-    id: "odd",
-    label: "1, 3, 5, … / 2, 4, 6, …",
+    id: 'alpha',
+    label: 'A, B, C, …',
     compute: (seats, startAt) => {
-      let counter = startAt;
-      return seats.map((s) => {
-        console.log(s);
-        const n = counter;
-        counter += 2;
-        return n.toString();
-      });
+      let counter = startAt
+      return seats.map(s => letterCounter(counter++, 'A'))
     },
     findStartAt: (firstValue) => {
-      return parseInt(firstValue);
+      return reverseLetterCounter(firstValue.toUpperCase())
     },
   },
   {
-    id: "alphalower",
-    label: "a, b, c, …",
+    id: 'alphalower',
+    label: 'a, b, c, …',
     compute: (seats, startAt) => {
-      let counter = startAt;
-      return seats.map((s) => {
-        letterCounter(counter++, "a");
-        console.log(s);
-      });
+      let counter = startAt
+      return seats.map(s => letterCounter(counter++, 'a'))
     },
     findStartAt: (firstValue) => {
-      return reverseLetterCounter(firstValue.toUpperCase());
+      return reverseLetterCounter(firstValue.toUpperCase())
     },
   },
-];
+]
 
 const ROW_NUMBERINGS = [
   {
-    id: "alpha",
-    label: "A, B, C, …",
+    id: 'natural',
+    label: '1, 2, 3, …',
     compute: (rows, startAt) => {
-      let counter = startAt;
-      return rows.map((r) => letterCounter(counter++, "A"));
+      let counter = startAt
+      return rows.map(r => (counter++).toString())
     },
     findStartAt: (firstValue) => {
-      return reverseLetterCounter(firstValue.toUpperCase());
+      return parseInt(firstValue)
     },
   },
   {
-    id: "natural",
-    label: "1, 2, 3, …",
+    id: 'alpha',
+    label: 'A, B, C, …',
     compute: (rows, startAt) => {
-      let counter = startAt;
-      return rows.map((r) => {
-        console.log(r);
-        (counter++).toString();
-      });
+      let counter = startAt
+      return rows.map(r => letterCounter(counter++, 'A'))
     },
     findStartAt: (firstValue) => {
-      return parseInt(firstValue);
+      return reverseLetterCounter(firstValue.toUpperCase())
     },
   },
   {
-    id: "alphalower",
-    label: "a, b, c, …",
+    id: 'alphalower',
+    label: 'a, b, c, …',
     compute: (rows, startAt) => {
-      let counter = startAt;
-      return rows.map((r) => letterCounter(counter++, "a"));
+      let counter = startAt
+      return rows.map(r => letterCounter(counter++, 'a'))
     },
     findStartAt: (firstValue) => {
-      return reverseLetterCounter(firstValue.toUpperCase());
+      return reverseLetterCounter(firstValue.toUpperCase())
     },
   },
   // roman numbers?
-];
+]
 
-const reverse = (array) =>
-  array.map((item, idx) => array[array.length - 1 - idx]);
+const reverse = (array) => array.map((item, idx) => array[array.length - 1 - idx])
 
-export { reverse, SEAT_NUMBERINGS, ROW_NUMBERINGS };
+export {
+  reverse,
+  SEAT_NUMBERINGS,
+  ROW_NUMBERINGS
+}

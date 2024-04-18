@@ -4,168 +4,81 @@
       <Sketch v-model="colors" @change-color="onChange" />
     </div> -->
 
-    <v-file-input
-      id="custom-file-input"
-      label="Upload your svg file"
-      prepend-icon="mdi-svg"
-      variant="filled"
-      type="file"
-      accept=".svg"
-      @change="importSVG"
-      style="display: none"
-    ></v-file-input>
+    <v-file-input id="custom-file-input" label="Upload your svg file"
+      prepend-icon="mdi-svg" variant="filled" type="file" accept=".svg"
+      @change="importSVG" style="display: none"></v-file-input>
     <v-btn @click="addCircle"> Add circle </v-btn>
     <div class="canvas" @mouseup="onHandUp" style="background-color: #97a2b6">
-      <svg
-        ref="svgBoard"
-        id="mysvg"
-        :width="boardWidth"
-        :height="boardHeight"
-        :viewBox="viewBox"
-        :transform="newTransform"
-        @mousemove="onMouseMove($event)"
-        @mouseup="onMouseUp($event)"
-        @mousedown="onMouseDown($event)"
-        @click="onClickItem($event, {})"
-        :style="hand_selected == true ? customCursorStyle : normalCursorStyle"
-      >
+      <svg ref="svgBoard" id="mysvg" :width="boardWidth" :height="boardHeight"
+        :viewBox="viewBox" :transform="newTransform"
+        @mousemove="onMouseMove($event)" @mouseup="onMouseUp($event)"
+        @mousedown="onMouseDown($event)" @click="onClickItem($event, {})"
+        :style="hand_selected == true ? customCursorStyle : normalCursorStyle">
         <defs>
-          <pattern
-            id="smallGrid"
-            width="10"
-            height="10"
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M 10 0 L 0 0 0 10"
-              fill="none"
-              stroke="#ddd"
-              stroke-width="0.5"
-            ></path>
+          <pattern id="smallGrid" width="10" height="10"
+            patternUnits="userSpaceOnUse">
+            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#ddd"
+              stroke-width="0.5"></path>
           </pattern>
-          <pattern
-            id="grid"
-            width="100"
-            height="100"
-            patternUnits="userSpaceOnUse"
-          >
+          <pattern id="grid" width="100" height="100"
+            patternUnits="userSpaceOnUse">
             <rect width="100" height="100" fill="url(#smallGrid)"></rect>
-            <path
-              d="M 100 0 L 0 0 0 100"
-              fill="none"
-              stroke="#ccc"
-              stroke-width="1"
-            ></path>
+            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#ccc"
+              stroke-width="1"></path>
           </pattern>
         </defs>
         <rect :width="boardWidth" :height="boardHeight" fill="white"></rect>
-        <rect
-          v-if="grid"
-          :width="boardWidth"
-          :height="boardHeight"
-          :fill="`url(#grid)`"
-        ></rect>
-        <g
-          v-for="item in items"
-          :transform="'translate(' + item.x + ', ' + item.y + ')'"
-          :key="item"
-        >
-          <text
-            v-if="item.type == 'text'"
-            :x="getTextXPos(item)"
-            :y="item.height * 0.9"
-            :_width="item.width"
-            :_height="item.height"
-            :font-size="item.height"
-            :font-family="item.font"
-            :fill="item.color"
-            :text-anchor="item.textAnchor"
-            @click="onClickItem($event, item)"
-          >
+        <rect v-if="grid" :width="boardWidth" :height="boardHeight"
+          :fill="`url(#grid)`"></rect>
+        <g v-for="item in items"
+          :transform="'translate(' + item.x + ', ' + item.y + ')'" :key="item">
+          <text v-if="item.type == 'text'" :x="getTextXPos(item)"
+            :y="item.height * 0.9" :_width="item.width" :_height="item.height"
+            :font-size="item.height" :font-family="item.font" :fill="item.color"
+            :text-anchor="item.textAnchor" @click="onClickItem($event, item)">
             {{ item.text }}
           </text>
 
-          <rect
-            v-if="item.type == 'rect'"
-            :x="0"
-            :y="0"
-            :width="item.width"
-            :height="item.height"
-            :fill="item.color"
-            @click="onClickItem($event, item)"
-          ></rect>
+          <rect v-if="item.type == 'rect'" :x="0" :y="0" :width="item.width"
+            :height="item.height" :fill="item.color"
+            @click="onClickItem($event, item)"></rect>
 
-          <ellipse
-            v-if="item.type == 'ellipse'"
-            :cx="item.width / 2"
-            :cy="item.height / 2"
-            :rx="item.width / 2"
-            :ry="item.height / 2"
-            :fill="item.color"
-            @click="onClickItem($event, item)"
-          ></ellipse>
+          <ellipse v-if="item.type == 'ellipse'" :cx="item.width / 2"
+            :cy="item.height / 2" :rx="item.width / 2" :ry="item.height / 2"
+            :fill="item.color" @click="onClickItem($event, item)"></ellipse>
 
-          <circle
-            v-if="item.type == 'circle'"
-            :cx="item.width / 2"
-            :cy="item.height / 2"
-            :r="item.width / 2"
-            :fill="item.color"
-            @click="onClickItem($event, item)"
-          ></circle>
+          <circle v-if="item.type == 'circle'" :cx="item.width / 2"
+            :cy="item.height / 2" :r="item.width / 2" :fill="item.color"
+            @click="onClickItem($event, item)"></circle>
 
           <g v-if="item.active">
-            <rect
-              :x="0"
-              :y="0"
-              :width="item.width"
-              :height="item.height"
-              class="ctrl-bounds"
-              @click="onClickItem($event, item)"
+            <rect :x="0" :y="0" :width="item.width" :height="item.height"
+              class="ctrl-bounds" @click="onClickItem($event, item)"
               @_mouseout="onMouseUpRegion($event, item)"
-              @mousedown="onMouseDownRegion($event, item)"
-            />
+              @mousedown="onMouseDownRegion($event, item)" />
             <g @mousedown="onMouseDownHandles($event, item)">
-              <rect
-                class="ctrl-rect"
-                :width="tools.squaresize"
-                :height="tools.squaresize"
-                data-handleid="1"
-                :x="0 - tools.squaresize / 2"
-                :y="0 - tools.squaresize / 2"
-              />
-              <rect
-                class="ctrl-rect"
-                :width="tools.squaresize"
-                :height="tools.squaresize"
-                data-handleid="3"
+              <rect class="ctrl-rect" :width="tools.squaresize"
+                :height="tools.squaresize" data-handleid="1"
+                :x="0 - tools.squaresize / 2" :y="0 - tools.squaresize / 2" />
+              <rect class="ctrl-rect" :width="tools.squaresize"
+                :height="tools.squaresize" data-handleid="3"
                 :x="item.width - tools.squaresize / 2"
-                :y="0 - tools.squaresize / 2"
-              />
-              <rect
-                class="ctrl-rect"
-                :width="tools.squaresize"
-                :height="tools.squaresize"
-                data-handleid="7"
+                :y="0 - tools.squaresize / 2" />
+              <rect class="ctrl-rect" :width="tools.squaresize"
+                :height="tools.squaresize" data-handleid="7"
                 :x="0 - tools.squaresize / 2"
-                :y="item.height - tools.squaresize / 2"
-              />
-              <rect
-                class="ctrl-rect"
-                :width="tools.squaresize"
-                :height="tools.squaresize"
-                data-handleid="9"
+                :y="item.height - tools.squaresize / 2" />
+              <rect class="ctrl-rect" :width="tools.squaresize"
+                :height="tools.squaresize" data-handleid="9"
                 :x="item.width - tools.squaresize / 2"
-                :y="item.height - tools.squaresize / 2"
-              />
+                :y="item.height - tools.squaresize / 2" />
             </g>
           </g>
         </g>
       </svg>
     </div>
 
-    <div
-      style="
+    <div style="
         position: fixed;
         bottom: 0;
         width: calc(100% - 300px);
@@ -175,38 +88,18 @@
         z-index: 9999;
         display: flex;
         justify-content: space-between;
-      "
-    >
+      ">
       <div style="align-content: center; padding-left: 10px">
         <p>This is the context panel</p>
       </div>
-      <div
-        v-if="activeItem !== -1"
-        style="display: flex; justify-content: center"
-      >
-        <v-text-field
-          label="Name"
-          type="text"
-          v-model="items[activeItem].name"
-          placeholder="Circle Name"
-          density="compact"
-          style="width: 200px"
-        />
-        <v-text-field
-          label="Id"
-          type="text"
-          v-model.number="items[activeItem].id"
-          placeholder="Radius"
-          density="compact"
-          style="width: 200px"
-        />
-        <v-text-field
-          label="Color"
-          type="color"
-          v-model="items[activeItem].color"
-          density="compact"
-          style="width: 100px"
-        />
+      <div v-if="activeItem !== -1"
+        style="display: flex; justify-content: center">
+        <v-text-field label="Name" type="text" v-model="items[activeItem].name"
+          placeholder="Circle Name" density="compact" style="width: 200px" />
+        <v-text-field label="Id" type="text" v-model.number="items[activeItem].id"
+          placeholder="Radius" density="compact" style="width: 200px" />
+        <v-text-field label="Color" type="color" v-model="items[activeItem].color"
+          density="compact" style="width: 100px" />
       </div>
     </div>
   </div>

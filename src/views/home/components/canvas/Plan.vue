@@ -15,12 +15,13 @@ import {
 import { v4 as uuid } from "uuid";
 import * as d3 from "d3";
 import ZoneComponent from "./ZoneComponent.vue";
+import { useToolbarStore } from '@/stores/toolbar';
 
 const round = (fl, places) => Number(fl.toFixed(places || 0));
 
 const defaultBg = JSON.parse(
   window.localStorage.getItem("frontrow2.editor.bg") ||
-    '{"background": null, "backgroundOpacity": 100, "backgroundX": 0, "backgroundY": 0, "backgroundWidth": 100, "backgroundHeight": 100}'
+  '{"background": null, "backgroundOpacity": 100, "backgroundX": 0, "backgroundY": 0, "backgroundWidth": 100, "backgroundHeight": 100}'
 );
 
 export default {
@@ -78,6 +79,8 @@ export default {
     const grid = computed(() => store.grid);
     const planSize = computed(() => planstore.planSize);
 
+    const toolbarStore = useToolbarStore();
+
     onMounted(() => {
       console.log("SVG Element:", svg.value.getBoundingClientRect());
     });
@@ -85,6 +88,7 @@ export default {
     const getSvgRect = () => svg.value.getBoundingClientRect();
 
     return {
+      bSnap2Grid: toolbarStore.bSnap2Grid,
       plan,
       validationErrors,
       selection,
@@ -169,12 +173,12 @@ export default {
         this.drawingCurrentX > this.drawingStartX
           ? this.drawingStartX
           : this.drawingCurrentX +
-            ((this.drawingStartX - this.drawingCurrentX) % this.rowSeatSpacing);
+          ((this.drawingStartX - this.drawingCurrentX) % this.rowSeatSpacing);
       const y =
         this.drawingCurrentY > this.drawingStartY
           ? this.drawingStartY
           : this.drawingCurrentY +
-            ((this.drawingStartY - this.drawingCurrentY) % this.rowSpacing);
+          ((this.drawingStartY - this.drawingCurrentY) % this.rowSpacing);
       return { x, y };
     },
     rowDrawPosition() {
@@ -182,7 +186,7 @@ export default {
         this.drawingCurrentX > this.drawingStartX
           ? this.drawingStartX
           : this.drawingCurrentX +
-            ((this.drawingStartX - this.drawingCurrentX) % this.rowSeatSpacing);
+          ((this.drawingStartX - this.drawingCurrentX) % this.rowSeatSpacing);
       const y = this.drawingStartY;
       return { x, y };
     },
@@ -219,9 +223,9 @@ export default {
             if (this.tool === "rowCircleFixedCenter") {
               const radius = Math.sqrt(
                 (this.drawingCurrentX - firstx) *
-                  (this.drawingCurrentX - firstx) +
-                  (this.drawingCurrentY - firsty) *
-                    (this.drawingCurrentY - firsty)
+                (this.drawingCurrentX - firstx) +
+                (this.drawingCurrentY - firsty) *
+                (this.drawingCurrentY - firsty)
               );
 
               circles.push({
@@ -232,18 +236,18 @@ export default {
             } else {
               const distance = Math.sqrt(
                 (lastx - firstx) * (lastx - firstx) +
-                  (lasty - firsty) * (lasty - firsty)
+                (lasty - firsty) * (lasty - firsty)
               );
               const radius = Math.max(
                 Math.abs(
                   (this.drawingCurrentX - firstx) * (lasty - firsty) -
-                    (this.drawingCurrentY - firsty) * (lastx - firstx)
+                  (this.drawingCurrentY - firsty) * (lastx - firstx)
                 ) / distance,
                 distance / 2
               );
               const sign = Math.sign(
                 (this.drawingCurrentX - firstx) * (lasty - firsty) -
-                  (this.drawingCurrentY - firsty) * (lastx - firstx)
+                (this.drawingCurrentY - firsty) * (lastx - firstx)
               );
 
               const { cx, cy } = findCircleCenter({
@@ -271,7 +275,7 @@ export default {
         const numberOfSeats = Math.ceil(
           Math.sqrt(
             Math.pow(this.drawingCurrentX - this.drawingStartX, 2) +
-              Math.pow(this.drawingCurrentY - this.drawingStartY, 2)
+            Math.pow(this.drawingCurrentY - this.drawingStartY, 2)
           ) / this.rowSeatSpacing
         );
         const seats = [];
@@ -282,33 +286,33 @@ export default {
               y:
                 this.drawingStartY +
                 this.rowSeatSpacing *
-                  si *
-                  Math.sign(this.drawingCurrentY - this.drawingStartY),
+                si *
+                Math.sign(this.drawingCurrentY - this.drawingStartY),
             });
           } else {
             seats.push({
               x:
                 this.drawingStartX +
                 this.rowSeatSpacing *
-                  si *
-                  Math.sign(this.drawingCurrentX - this.drawingStartX) *
-                  Math.cos(
-                    Math.atan(
-                      (this.drawingCurrentY - this.drawingStartY) /
-                        (this.drawingCurrentX - this.drawingStartX)
-                    )
-                  ),
+                si *
+                Math.sign(this.drawingCurrentX - this.drawingStartX) *
+                Math.cos(
+                  Math.atan(
+                    (this.drawingCurrentY - this.drawingStartY) /
+                    (this.drawingCurrentX - this.drawingStartX)
+                  )
+                ),
               y:
                 this.drawingStartY +
                 this.rowSeatSpacing *
-                  si *
-                  Math.sign(this.drawingCurrentX - this.drawingStartX) *
-                  Math.sin(
-                    Math.atan(
-                      (this.drawingCurrentY - this.drawingStartY) /
-                        (this.drawingCurrentX - this.drawingStartX)
-                    )
-                  ),
+                si *
+                Math.sign(this.drawingCurrentX - this.drawingStartX) *
+                Math.sin(
+                  Math.atan(
+                    (this.drawingCurrentY - this.drawingStartY) /
+                    (this.drawingCurrentX - this.drawingStartX)
+                  )
+                ),
             });
           }
         }
@@ -321,7 +325,7 @@ export default {
       if (this.rowBlockDrawing) {
         return Math.ceil(
           Math.abs(this.drawingCurrentX - this.drawingStartX) /
-            this.rowSeatSpacing
+          this.rowSeatSpacing
         );
       } else {
         return 0;
@@ -547,9 +551,9 @@ export default {
       }
       this.resizingStartDistance = Math.sqrt(
         (drawPos.x - this.resizingOriginX) *
-          (drawPos.x - this.resizingOriginX) +
-          (drawPos.y - this.resizingOriginY) *
-            (drawPos.y - this.resizingOriginY)
+        (drawPos.x - this.resizingOriginX) +
+        (drawPos.y - this.resizingOriginY) *
+        (drawPos.y - this.resizingOriginY)
       );
       return true;
     },
@@ -808,7 +812,7 @@ export default {
       if (this.resizing) {
         let distance = Math.sqrt(
           (pos.x - this.resizingOriginX) * (pos.x - this.resizingOriginX) +
-            (pos.y - this.resizingOriginY) * (pos.y - this.resizingOriginY)
+          (pos.y - this.resizingOriginY) * (pos.y - this.resizingOriginY)
         );
         store.moveResizing(
           this.resizingOriginX,
@@ -842,25 +846,25 @@ export default {
                 for (const s of r.seats) {
                   if (
                     z.position.x +
-                      r.position.x +
-                      s.position.x +
-                      (s.radius || 10) >=
-                      xmin &&
+                    r.position.x +
+                    s.position.x +
+                    (s.radius || 10) >=
+                    xmin &&
                     z.position.x +
-                      r.position.x +
-                      s.position.x -
-                      (s.radius || 10) <=
-                      xmax &&
+                    r.position.x +
+                    s.position.x -
+                    (s.radius || 10) <=
+                    xmax &&
                     z.position.y +
-                      r.position.y +
-                      s.position.y +
-                      (s.radius || 10) >=
-                      ymin &&
+                    r.position.y +
+                    s.position.y +
+                    (s.radius || 10) >=
+                    ymin &&
                     z.position.y +
-                      r.position.y +
-                      s.position.y -
-                      (s.radius || 10) <=
-                      ymax
+                    r.position.y +
+                    s.position.y -
+                    (s.radius || 10) <=
+                    ymax
                   ) {
                     uuids.push(s.uuid);
                   }
@@ -1042,25 +1046,25 @@ export default {
                 for (const s of r.seats) {
                   if (
                     z.position.x +
-                      r.position.x +
-                      s.position.x +
-                      (s.radius || 10) >=
-                      xmin &&
+                    r.position.x +
+                    s.position.x +
+                    (s.radius || 10) >=
+                    xmin &&
                     z.position.x +
-                      r.position.x +
-                      s.position.x -
-                      (s.radius || 10) <=
-                      xmax &&
+                    r.position.x +
+                    s.position.x -
+                    (s.radius || 10) <=
+                    xmax &&
                     z.position.y +
-                      r.position.y +
-                      s.position.y +
-                      (s.radius || 10) >=
-                      ymin &&
+                    r.position.y +
+                    s.position.y +
+                    (s.radius || 10) >=
+                    ymin &&
                     z.position.y +
-                      r.position.y +
-                      s.position.y -
-                      (s.radius || 10) <=
-                      ymax
+                    r.position.y +
+                    s.position.y -
+                    (s.radius || 10) <=
+                    ymax
                   ) {
                     uuids.push(s.uuid);
                   }
@@ -1089,25 +1093,25 @@ export default {
                 for (const s of r.seats) {
                   if (
                     z.position.x +
-                      r.position.x +
-                      s.position.x +
-                      (s.radius || 10) >=
-                      xmin &&
+                    r.position.x +
+                    s.position.x +
+                    (s.radius || 10) >=
+                    xmin &&
                     z.position.x +
-                      r.position.x +
-                      s.position.x -
-                      (s.radius || 10) <=
-                      xmax &&
+                    r.position.x +
+                    s.position.x -
+                    (s.radius || 10) <=
+                    xmax &&
                     z.position.y +
-                      r.position.y +
-                      s.position.y +
-                      (s.radius || 10) >=
-                      ymin &&
+                    r.position.y +
+                    s.position.y +
+                    (s.radius || 10) >=
+                    ymin &&
                     z.position.y +
-                      r.position.y +
-                      s.position.y -
-                      (s.radius || 10) <=
-                      ymax &&
+                    r.position.y +
+                    s.position.y -
+                    (s.radius || 10) <=
+                    ymax &&
                     !uuids.includes(r.uuid)
                   ) {
                     uuids.push(r.uuid);
@@ -1182,7 +1186,7 @@ export default {
             const radius = round(
               Math.sqrt(
                 Math.pow(this.drawingStartX - pos.x, 2) +
-                  Math.pow(this.drawingStartY - pos.y, 2)
+                Math.pow(this.drawingStartY - pos.y, 2)
               ),
               4
             );
@@ -1297,9 +1301,9 @@ export default {
             }
             if (
               comparepos.x ===
-                this.polygonPoints[this.polygonPoints.length - 1].x &&
+              this.polygonPoints[this.polygonPoints.length - 1].x &&
               comparepos.y ===
-                this.polygonPoints[this.polygonPoints.length - 1].y
+              this.polygonPoints[this.polygonPoints.length - 1].y
             ) {
               // "Double click"
               this.finishPolygon();
@@ -1441,9 +1445,9 @@ export default {
       const panPadding = viewportHeight * -10;
       this.defaultScale = this.plan.size.height
         ? Math.min(
-            viewportWidth / this.plan.size.width,
-            viewportHeight / this.plan.size.height
-          )
+          viewportWidth / this.plan.size.width,
+          viewportHeight / this.plan.size.height
+        )
         : 1;
       console.log("here`````````````````");
       this.zoom = d3
@@ -1459,9 +1463,9 @@ export default {
           ],
           [
             (viewportWidth - panPadding) / this.defaultScale +
-              this.plan.size.width,
+            this.plan.size.width,
             (viewportHeight - panPadding) / this.defaultScale +
-              this.plan.size.height,
+            this.plan.size.height,
           ],
         ])
         .extent([
@@ -1755,320 +1759,156 @@ export default {
 };
 </script>
 <template>
-  <svg
-    :width="plan.size.width"
-    :height="plan.size.height"
-    v-if="plan.size"
-    ref="svg"
-    @mousemove="mousemove"
-    @mouseup="mouseup"
-    @mousedown="mousedown"
+  <svg :width="plan.size.width" :height="plan.size.height" v-if="plan.size"
+    ref="svg" @mousemove="mousemove" @mouseup="mouseup" @mousedown="mousedown"
     style="
       width: 100%;
       height: 100%;
       background-color: rgb(151, 162, 182);
       user-select: none;
-    "
-  >
+    ">
     <g :class="mainclasses" :transform="zoomTransform.toString()">
-      <rect
-        :width="plan.size.width"
-        :height="plan.size.height"
-        fill="#fcfcfc"
-        :cursor="cursor"
-      ></rect>
-      <image
-        v-if="background"
-        :width="backgroundWidth"
-        :height="backgroundHeight"
-        :href="background"
-        :opacity="backgroundOpacity / 100"
-        :x="backgroundX"
-        :y="backgroundY"
-      ></image>
+      <rect :width="plan.size.width" :height="plan.size.height" fill="#fcfcfc"
+        :cursor="cursor"></rect>
+      <image v-if="background" :width="backgroundWidth" :height="backgroundHeight"
+        :href="background" :opacity="backgroundOpacity / 100" :x="backgroundX"
+        :y="backgroundY"></image>
       <defs>
-        <pattern
-          id="smallGrid"
-          width="20"
-          height="20"
-          patternUnits="userSpaceOnUse"
-        >
-          <path
-            d="M 20 0 L 0 0 0 20"
-            fill="none"
-            stroke="#ddd"
-            stroke-width="0.5"
-          ></path>
+        <pattern id="smallGrid" width="20" height="20"
+          patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#ddd"
+            stroke-width="0.5"></path>
         </pattern>
-        <pattern
-          id="grid"
-          width="100"
-          height="100"
-          patternUnits="userSpaceOnUse"
-        >
+        <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
           <rect width="100" height="100" fill="url(#smallGrid)"></rect>
-          <path
-            d="M 100 0 L 0 0 0 100"
-            fill="none"
-            stroke="#ccc"
-            stroke-width="1"
-          ></path>
+          <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#ccc"
+            stroke-width="1"></path>
         </pattern>
       </defs>
-      <rect
-        v-if="grid"
-        :width="plan.size.width"
-        :height="plan.size.height"
-        fill="url(#grid)"
-        :cursor="cursor"
-      ></rect>
-      <ZoneComponent
-        v-for="z in plan.zones"
-        :zone="z"
-        :key="z.uuid"
+      <rect v-if="grid" :width="plan.size.width" :height="plan.size.height"
+        fill="url(#grid)" :cursor="cursor"></rect>
+      <ZoneComponent v-for="z in plan.zones" :zone="z" :key="z.uuid"
         :startDragging="startDragging"
-        :startDraggingPolygonPoint="startDraggingPolygonPoint"
-      ></ZoneComponent>
-      <rect
-        class="selection-box"
-        v-for="b in selectionBoxesVisible"
-        :x="b.x - 1.5"
-        :y="b.y - 1.5"
-        :width="b.width + 3"
-        :height="b.height + 3"
-        :key="b"
-        fill="none"
-      ></rect>
-      <line
-        class="selection-rotate-handle-connector"
+        :startDraggingPolygonPoint="startDraggingPolygonPoint"></ZoneComponent>
+      <rect class="selection-box" v-for="b in selectionBoxesVisible"
+        :x="b.x - 1.5" :y="b.y - 1.5" :width="b.width + 3" :height="b.height + 3"
+        :key="b" fill="none"></rect>
+      <line class="selection-rotate-handle-connector"
+        v-if="selection.length && selectionBoundary" :x1="rotateHandle.x"
+        :y1="rotateHandle.y" :x2="rotatingOriginX
+          ? rotatingOriginX
+          : selectionBoundary.x + selectionBoundary.width / 2
+          " :y2="rotatingOriginY
+    ? rotatingOriginY
+    : selectionBoundary.y + selectionBoundary.height / 2
+    "></line>
+      <circle class="selection-rotate-handle"
+        v-if="selection.length && selectionBoundary" :cx="rotateHandle.x"
+        :cy="rotateHandle.y" r="5" @mousedown="startRotating"></circle>
+      <circle class="selection-rotate-handle-end"
+        v-if="selection.length && selectionBoundary" :cx="rotatingOriginX
+          ? rotatingOriginX
+          : selectionBoundary.x + selectionBoundary.width / 2
+          " :cy="rotatingOriginY
+    ? rotatingOriginY
+    : selectionBoundary.y + selectionBoundary.height / 2
+    " r="5"></circle>
+      <rect class="selection-boundary"
         v-if="selection.length && selectionBoundary"
-        :x1="rotateHandle.x"
-        :y1="rotateHandle.y"
-        :x2="
-          rotatingOriginX
-            ? rotatingOriginX
-            : selectionBoundary.x + selectionBoundary.width / 2
-        "
-        :y2="
-          rotatingOriginY
-            ? rotatingOriginY
-            : selectionBoundary.y + selectionBoundary.height / 2
-        "
-      ></line>
-      <circle
-        class="selection-rotate-handle"
-        v-if="selection.length && selectionBoundary"
-        :cx="rotateHandle.x"
-        :cy="rotateHandle.y"
-        r="5"
-        @mousedown="startRotating"
-      ></circle>
-      <circle
-        class="selection-rotate-handle-end"
-        v-if="selection.length && selectionBoundary"
-        :cx="
-          rotatingOriginX
-            ? rotatingOriginX
-            : selectionBoundary.x + selectionBoundary.width / 2
-        "
-        :cy="
-          rotatingOriginY
-            ? rotatingOriginY
-            : selectionBoundary.y + selectionBoundary.height / 2
-        "
-        r="5"
-      ></circle>
-      <rect
-        class="selection-boundary"
-        v-if="selection.length && selectionBoundary"
-        :x="selectionBoundary.x - 1.5"
-        :y="selectionBoundary.y - 1.5"
+        :x="selectionBoundary.x - 1.5" :y="selectionBoundary.y - 1.5"
         :width="selectionBoundary.width + 3"
-        :height="selectionBoundary.height + 3"
-        fill="none"
-      ></rect>
-      <rect
-        class="selection-resize-handle-nw"
+        :height="selectionBoundary.height + 3" fill="none"></rect>
+      <rect class="selection-resize-handle-nw"
         v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
-        :x="selectionBoundary.x - 4.5"
-        :y="selectionBoundary.y - 4.5"
-        :width="6"
-        :height="6"
-        @mousedown="startResizing($event, 'nw')"
-      ></rect>
-      <rect
-        class="selection-resize-handle-ne"
+        :x="selectionBoundary.x - 4.5" :y="selectionBoundary.y - 4.5" :width="6"
+        :height="6" @mousedown="startResizing($event, 'nw')"></rect>
+      <rect class="selection-resize-handle-ne"
         v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
         :x="selectionBoundary.x + selectionBoundary.width - 1.5"
-        :y="selectionBoundary.y - 4.5"
-        :width="6"
-        :height="6"
-        @mousedown="startResizing($event, 'ne')"
-      ></rect>
-      <rect
-        class="selection-resize-handle-sw"
+        :y="selectionBoundary.y - 4.5" :width="6" :height="6"
+        @mousedown="startResizing($event, 'ne')"></rect>
+      <rect class="selection-resize-handle-sw"
         v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
         :x="selectionBoundary.x - 4.5"
-        :y="selectionBoundary.y + selectionBoundary.height - 1.5"
-        :width="6"
-        :height="6"
-        @mousedown="startResizing($event, 'sw')"
-      ></rect>
-      <rect
-        class="selection-resize-handle-se"
+        :y="selectionBoundary.y + selectionBoundary.height - 1.5" :width="6"
+        :height="6" @mousedown="startResizing($event, 'sw')"></rect>
+      <rect class="selection-resize-handle-se"
         v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
         :x="selectionBoundary.x + selectionBoundary.width - 1.5"
-        :y="selectionBoundary.y + selectionBoundary.height - 1.5"
-        :width="6"
-        :height="6"
-        fill="none"
-        @mousedown="startResizing($event, 'se')"
-      ></rect>
-      <rect
-        class="preview"
-        v-if="tool == 'rectangle' && drawing"
+        :y="selectionBoundary.y + selectionBoundary.height - 1.5" :width="6"
+        :height="6" fill="none" @mousedown="startResizing($event, 'se')"></rect>
+      <rect class="preview" v-if="tool == 'rectangle' && drawing"
         :x="Math.min(drawingStartX, drawingCurrentX)"
         :y="Math.min(drawingStartY, drawingCurrentY)"
         :width="Math.abs(drawingStartX - drawingCurrentX)"
-        :height="Math.abs(drawingStartY - drawingCurrentY)"
-      ></rect>
-      <circle
-        class="preview"
-        v-if="tool == 'circle' && drawing"
-        :cx="drawingStartX"
-        :cy="drawingStartY"
-        :r="
-          Math.sqrt(
-            Math.pow(drawingStartX - drawingCurrentX, 2) +
-              Math.pow(drawingStartY - drawingCurrentY, 2)
-          )
-        "
-      ></circle>
-      <ellipse
-        class="preview"
-        v-if="tool == 'ellipse' && drawing"
-        :cx="drawingStartX"
-        :cy="drawingStartY"
+        :height="Math.abs(drawingStartY - drawingCurrentY)"></rect>
+      <circle class="preview" v-if="tool == 'circle' && drawing"
+        :cx="drawingStartX" :cy="drawingStartY" :r="Math.sqrt(
+          Math.pow(drawingStartX - drawingCurrentX, 2) +
+          Math.pow(drawingStartY - drawingCurrentY, 2)
+        )
+          "></circle>
+      <ellipse class="preview" v-if="tool == 'ellipse' && drawing"
+        :cx="drawingStartX" :cy="drawingStartY"
         :rx="Math.abs(drawingStartX - drawingCurrentX)"
-        :ry="Math.abs(drawingStartY - drawingCurrentY)"
-      ></ellipse>
-      <polygon
-        class="preview"
-        v-if="tool === 'polygon' && polygonDrawing"
-        x="0"
-        y="0"
-        :points="polygonPreviewPoints"
-      ></polygon>
-      <g
-        class="row-circle-preview"
-        v-if="tool === 'rowCircle' || tool === 'rowCircleFixedCenter'"
-      >
-        <circle
-          class="preview"
-          v-for="circ in rowCirclePreviews"
-          :r="circ.radius"
-          :cx="circ.cx"
-          :cy="circ.cy"
-          :key="circ"
-        ></circle>
-        <circle
-          class="preview-center"
-          v-for="circ in rowCirclePreviews"
-          :r="2"
-          :cx="circ.cx"
-          :cy="circ.cy"
-          :key="circ"
-        ></circle>
+        :ry="Math.abs(drawingStartY - drawingCurrentY)"></ellipse>
+      <polygon class="preview" v-if="tool === 'polygon' && polygonDrawing" x="0"
+        y="0" :points="polygonPreviewPoints"></polygon>
+      <g class="row-circle-preview"
+        v-if="tool === 'rowCircle' || tool === 'rowCircleFixedCenter'">
+        <circle class="preview" v-for="circ in rowCirclePreviews" :r="circ.radius"
+          :cx="circ.cx" :cy="circ.cy" :key="circ"></circle>
+        <circle class="preview-center" v-for="circ in rowCirclePreviews" :r="2"
+          :cx="circ.cx" :cy="circ.cy" :key="circ"></circle>
       </g>
       <g class="row-preview" v-if="tool === 'row' && rowDrawing">
-        <line
-          class="preview"
-          :x1="drawingStartX"
-          :y1="drawingStartY"
-          :x2="drawingCurrentX"
-          :y2="drawingCurrentY"
-        ></line>
-        <line
-          class="auxline"
+        <line class="preview" :x1="drawingStartX" :y1="drawingStartY"
+          :x2="drawingCurrentX" :y2="drawingCurrentY"></line>
+        <line class="auxline"
           :x1="drawingStartX - (drawingCurrentX - drawingStartX) * 1000"
           :y1="drawingStartY - (drawingCurrentY - drawingStartY) * 1000"
           :x2="drawingCurrentX + (drawingCurrentX - drawingStartX) * 1000"
-          :y2="drawingCurrentY + (drawingCurrentY - drawingStartY) * 1000"
-        ></line>
-        <text
-          v-if="rowDrawingSeats.length >= 3"
-          :x="
-            (rowDrawingSeats[rowDrawingSeats.length - 1].x -
-              rowDrawingSeats[0].x) /
-              rowDrawingSeats.length +
-            rowDrawPosition.x +
-            30
-          "
-          :y="
-            (rowDrawingSeats[rowDrawingSeats.length - 1].y -
-              rowDrawingSeats[0].y) /
-              rowDrawingSeats.length +
-            rowDrawPosition.y -
-            30
-          "
-          text-anchor="middle"
-          fill="black"
-          dy=".3em"
-          style="z-index: 99"
-        >
+          :y2="drawingCurrentY + (drawingCurrentY - drawingStartY) * 1000"></line>
+        <text v-if="rowDrawingSeats.length >= 3" :x="(rowDrawingSeats[rowDrawingSeats.length - 1].x -
+          rowDrawingSeats[0].x) /
+          rowDrawingSeats.length +
+          rowDrawPosition.x +
+          30
+          " :y="(rowDrawingSeats[rowDrawingSeats.length - 1].y -
+    rowDrawingSeats[0].y) /
+    rowDrawingSeats.length +
+    rowDrawPosition.y -
+    30
+    " text-anchor="middle" fill="black" dy=".3em" style="z-index: 99">
           {{ rowDrawingSeats.length }} Seats
         </text>
-        <circle
-          class="seat-preview"
-          v-for="(s, sid) in rowDrawingSeats"
-          :key="sid"
-          :cx="s.x"
-          :cy="s.y"
-          r="10"
-        ></circle>
+        <circle class="seat-preview" v-for="(s, sid) in rowDrawingSeats"
+          :key="sid" :cx="s.x" :cy="s.y" r="10"></circle>
       </g>
-      <g
-        class="rows-preview"
-        v-if="tool === 'rows' && rowBlockDrawing"
-        :transform="rowBlockTransform"
-      >
+      <g class="rows-preview" v-if="tool === 'rows' && rowBlockDrawing"
+        :transform="rowBlockTransform">
         <g v-for="rid in rowBlockRows" :key="rid">
-          <circle
-            class="seat-preview"
-            v-for="sid in rowBlockSeats"
-            :key="sid"
-            :cx="rowSeatSpacing * (sid - 1)"
-            :cy="rowSpacing * (rid - 1)"
-            r="10"
-          ></circle>
+          <circle class="seat-preview" v-for="sid in rowBlockSeats" :key="sid"
+            :cx="rowSeatSpacing * (sid - 1)" :cy="rowSpacing * (rid - 1)" r="10">
+          </circle>
         </g>
-        <rect
-          v-if="rowBlockSeats + rowBlockRows >= 7"
+        <rect v-if="rowBlockSeats + rowBlockRows >= 7"
           :x="(rowSeatSpacing * rowBlockSeats) / 2 - 25 - 12.5"
-          :y="(rowSpacing * rowBlockRows) / 2 - 25"
-          width="50"
-          height="25"
-          fill="#00c"
-        ></rect>
-        <text
-          v-if="rowBlockSeats + rowBlockRows >= 7"
+          :y="(rowSpacing * rowBlockRows) / 2 - 25" width="50" height="25"
+          fill="#00c"></rect>
+        <text v-if="rowBlockSeats + rowBlockRows >= 7"
           :x="(rowSeatSpacing * rowBlockSeats) / 2 - 12.5"
-          :y="(rowSpacing * rowBlockRows) / 2 - 12.5"
-          text-anchor="middle"
-          fill="#fff"
-          dy=".3em"
-        >
+          :y="(rowSpacing * rowBlockRows) / 2 - 12.5" text-anchor="middle"
+          fill="#fff" dy=".3em">
           {{ rowBlockRows }} × {{ rowBlockSeats }}
         </text>
       </g>
-      <rect
-        class="selection-area"
+      <rect class="selection-area"
         v-if="(tool == 'select' || tool == 'seatselect') && selecting"
         :x="Math.min(selectingStartX, selectingCurrentX)"
         :y="Math.min(selectingStartY, selectingCurrentY)"
         :width="Math.abs(selectingStartX - selectingCurrentX)"
-        :height="Math.abs(selectingStartY - selectingCurrentY)"
-      ></rect>
+        :height="Math.abs(selectingStartY - selectingCurrentY)"></rect>
     </g>
   </svg>
 </template>
@@ -2089,11 +1929,16 @@ export default {
 }
 
 .c-plan svg * {
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none; /* Safari */
-  -khtml-user-select: none; /* Konqueror HTML */
-  -moz-user-select: none; /* Old versions of Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Old versions of Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
   user-select: none;
 }
 

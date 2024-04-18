@@ -1,23 +1,12 @@
 <template>
   <g @mousedown="mousedown" @mouseup="mouseup" :class="classObject">
-    <circle
-      :fill="seatColor ? 'white' : 'white'"
-      :cx="seat.position.x"
-      :cy="seat.position.y"
-      :r="radius"
-      :stroke="category ? 'none' : '#000'"
-      style="stroke-width: 1px"
-    >
+    <circle :id="seatID" :fill="seatColor ? 'white' : 'white'"
+      :cx="seat.position.x" :cy="seat.position.y" :r="radius"
+      :stroke="category ? 'none' : '#000'" style="stroke-width: 1px">
     </circle>
-    <text
-      :fill="textColor ? 'black' : 'black'"
-      :x="seat.position.x"
-      :y="seat.position.y"
-      text-anchor="middle"
-      font-size="10px"
-      font-family="sans-serif"
-      dy=".3em"
-    >
+    <text :fill="textColor ? 'black' : 'black'" :x="seat.position.x"
+      :y="seat.position.y" text-anchor="middle" font-size="10px"
+      font-family="sans-serif" dy=".3em">
       {{ textContent }}
     </text>
   </g>
@@ -33,6 +22,7 @@ export default {
   props: {
     seat: Object,
     zone: Object,
+    row_number: String,
   },
   data() {
     return {
@@ -49,6 +39,10 @@ export default {
     return { getCategoryByName, cursor };
   },
   computed: {
+    seatID() {
+      return `seat-${this.$props.row_number}-${this.seat.seat_number}`
+    },
+
     classObject() {
       return {
         seat: true,
