@@ -1,19 +1,15 @@
 <template>
   <v-list v-if="props.opened" id="seat-tools">
-    <v-list-item
-      @click="changeTool('row')"
-      :class="tool == 'row' ? 'current-tool' : ''"
-    >
+    <v-list-item @click="changeTool('row')"
+      :class="tool == 'row' ? 'current-tool' : ''">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">One Row</v-tooltip>
         <RowSingleIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
 
-    <v-list-item
-      @click="changeTool('rows')"
-      :class="tool == 'rows' ? 'current-tool' : ''"
-    >
+    <v-list-item @click="changeTool('rows')"
+      :class="tool == 'rows' ? 'current-tool' : ''">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Multi Rows</v-tooltip>
         <RowMultiIcon width="20px" height="20px" />
@@ -21,9 +17,8 @@
     </v-list-item>
     <v-list-item @click="onClick">
       <v-list-item-title>
-        <v-tooltip activator="parent" location="right"
-          >Multi Staggered Rows</v-tooltip
-        >
+        <v-tooltip activator="parent" location="right">Multi Staggered
+          Rows</v-tooltip>
         <RowStaggedIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
@@ -39,17 +34,15 @@
         <GaCircleIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
-    <v-list-item @click="onClick">
+    <v-list-item @click="changeTool('roundTable')">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Round Table</v-tooltip>
         <TableRoundIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
-    <v-list-item @click="onClick">
+    <v-list-item @click="changeTool('rectangleTable')">
       <v-list-item-title>
-        <v-tooltip activator="parent" location="right"
-          >Rectangle Table</v-tooltip
-        >
+        <v-tooltip activator="parent" location="right">Rectangle Table</v-tooltip>
         <TableRectIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
@@ -86,6 +79,7 @@ const changeTool = (tool) => store.changeTool(tool);
   align-items: center;
   justify-content: space-between;
 }
+
 #seat-tools {
   position: absolute;
   width: 60px;
@@ -99,6 +93,7 @@ const changeTool = (tool) => store.changeTool(tool);
   transition: all 1s;
   z-index: 99;
 }
+
 .current-tool {
   background-color: #e7e7e7;
 }

@@ -46,6 +46,8 @@ export const useMainStore = defineStore({
         case "polygon":
         case "ellipse":
         case "text":
+        case "roundTable":
+        case "rectangleTable":
         case "rows":
         case "row":
           return "crosshair";
@@ -261,7 +263,7 @@ export const useMainStore = defineStore({
           // The distance between those two points is e.g. our minimum diameter
           const distance = Math.sqrt(
             (lastx - firstx) * (lastx - firstx) +
-              (lasty - firsty) * (lasty - firsty)
+            (lasty - firsty) * (lasty - firsty)
           );
 
           // rtx,rty is the position of the mouse which we'll use to compute the circle center
@@ -269,7 +271,7 @@ export const useMainStore = defineStore({
           const rty = ty - r.position.y - z.position.y;
           const sign = Math.sign(
             (rtx - firstx) * (lasty - firsty) -
-              (rty - firsty) * (lastx - firstx)
+            (rty - firsty) * (lastx - firstx)
           );
           let radius, cx, cy;
 
@@ -285,7 +287,7 @@ export const useMainStore = defineStore({
             radius = Math.max(
               Math.abs(
                 (rtx - firstx) * (lasty - firsty) -
-                  (rty - firsty) * (lastx - firstx)
+                (rty - firsty) * (lastx - firstx)
               ) / distance,
               distance / 2
             );
@@ -600,6 +602,12 @@ export const useMainStore = defineStore({
                   p.x *= factor;
                   p.y *= factor;
                 }
+                break;
+              case "roundTable":
+                area.roundTable.scale *= factor;
+                break;
+              case "rectangleTable":
+                area.rectangleTable.scale *= factor;
                 break;
               case "text":
                 area.text.size =

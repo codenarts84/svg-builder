@@ -11,7 +11,6 @@
       :transform="rowNumberEnd.transform" fill="#888">{{ rowContent }}</text>
     <Seat v-for="s in row.seats" :seat="s" :key="s.uuid" :zone="zone"
       @startDragging="startDragging" :row_number="row.row_number"></Seat>
-    <text>{{ row.row_number }}</text>
     <path class="selection-line" v-if="selection.includes(row.uuid)"
       :d="selectionLinePath"></path>
   </g>
