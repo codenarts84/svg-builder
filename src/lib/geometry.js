@@ -100,6 +100,32 @@ const rectangleTableBBox = (area) => {
   return abox;
 }
 
+const gaSquareBBox = (area) => {
+  let abox = {
+    x: area.position.x,
+    y: area.position.y,
+    width: 80 * area.gaSquare.scale / 4,
+    height: 80 * area.gaSquare.scale / 4,
+  };
+  if (area.rotation) {
+    abox = rotateRectangluarBox(area, abox);
+  }
+  return abox;
+}
+
+const gaCircleBBox = (area) => {
+  let abox = {
+    x: area.position.x,
+    y: area.position.y,
+    width: 80 * area.gaCircle.scale / 4,
+    height: 80 * area.gaCircle.scale / 4,
+  };
+  if (area.rotation) {
+    abox = rotateRectangluarBox(area, abox);
+  }
+  return abox;
+}
+
 
 const textBBox = (area, text, size) => {
   const width = estimateTextWidth(text, size);
@@ -333,5 +359,7 @@ export {
   ellipseBBox,
   testOverlap,
   roundTableBBox,
-  rectangleTableBBox
+  rectangleTableBBox,
+  gaSquareBBox,
+  gaCircleBBox
 };

@@ -15,32 +15,37 @@
         <RowMultiIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
-    <v-list-item @click="onClick">
+    <v-list-item @click="changeTool('stgrows')"
+      :class="tool == 'stgrows' ? 'current-tool' : ''">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Multi Staggered
           Rows</v-tooltip>
         <RowStaggedIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
-    <v-list-item @click="onClick">
+    <v-list-item @click="changeTool('gaSquare')"
+      :class="tool == 'gaSquare' ? 'current-tool' : ''">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">GA Square</v-tooltip>
         <GaSquareIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
-    <v-list-item @click="onClick">
+    <v-list-item @click="changeTool('gaCircle')"
+      :class="tool == 'gaCircle' ? 'current-tool' : ''">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">GA Circle</v-tooltip>
         <GaCircleIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
-    <v-list-item @click="changeTool('roundTable')">
+    <v-list-item @click="changeTool('roundTable')"
+      :class="tool == 'roundTable' ? 'current-tool' : ''">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Round Table</v-tooltip>
         <TableRoundIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
-    <v-list-item @click="changeTool('rectangleTable')">
+    <v-list-item @click="changeTool('rectangleTable')"
+      :class="tool == 'rectangleTable' ? 'current-tool' : ''">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Rectangle Table</v-tooltip>
         <TableRectIcon width="20px" height="20px" />

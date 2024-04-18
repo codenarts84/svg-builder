@@ -16,9 +16,8 @@
 
     <span v-if="tool == 'seatselect' || tool == 'select'">
       <span v-if="dragging">
-        <span class="hint"
-          >Hold down <code>SHIFT</code> to snap to grid positions</span
-        >
+        <span class="hint">Hold down <code>SHIFT</code> to snap to grid
+          positions</span>
       </span>
       <!-- <span v-else-if="plan.rotating">
         <span class="hint"
@@ -26,51 +25,41 @@
         >
       </span> -->
       <span v-else-if="selection.length">
-        <span class="hint"
-          >Press <code>SHIFT</code> and click to (de)select more objects</span
-        >
-        <span class="hint"
-          >Press arrow keys to move objects (hold <code>SHIFT</code> to move
-          fast, <code>ALT</code> to move slow)</span
-        >
+        <span class="hint">Press <code>SHIFT</code> and click to (de)select more
+          objects</span>
+        <span class="hint">Press arrow keys to move objects (hold
+          <code>SHIFT</code> to move
+          fast, <code>ALT</code> to move slow)</span>
         <span class="hint">Click and drag to move objects</span>
       </span>
       <span v-else>
         <span class="hint">Click any object to select it</span>
-        <span class="hint" v-if="plan && zoomTransform.k !== plan.defaultScale"
-          >Click + drag while pressing
-          <code>{{ $parent.cmdOtherwiseCtrl }}</code> to move around</span
-        >
-        <span class="hint" v-else
-          >Press <code>{{ $parent.cmdOtherwiseCtrl }}</code> and scroll to
-          zoom</span
-        >
+        <span class="hint"
+          v-if="plan && zoomTransform.k !== plan.defaultScale">Click + drag while
+          pressing
+          <code>{{ $parent.cmdOtherwiseCtrl }}</code> to move around</span>
+        <span class="hint" v-else>Press
+          <code>{{ $parent.cmdOtherwiseCtrl }}</code> and scroll to
+          zoom</span>
       </span>
     </span>
 
     <span v-if="tool == 'row'">
       <span v-if="plan.rowDrawing">
-        <span class="hint"
-          >Move your mouse and click again once the correct number of seats is
-          visible</span
-        >
+        <span class="hint">Move your mouse and click again once the correct number
+          of seats is
+          visible</span>
         <span class="hint">Press <code>ESC</code> to abort</span>
-        <span class="hint"
-          >Drawing {{ plan.rowDrawingSeats.length }} seats</span
-        >
+        <span class="hint">Drawing {{ plan.rowDrawingSeats.length }} seats</span>
       </span>
       <span v-else>
-        <span class="hint"
-          >Click on the position of the first seat to draw</span
-        >
-        <span class="hint"
-          >Hold down <code>SHIFT</code> to choose a position on the grid</span
-        >
+        <span class="hint">Click on the position of the first seat to draw</span>
+        <span class="hint">Hold down <code>SHIFT</code> to choose a position on
+          the grid</span>
       </span>
-      <span class="hint"
-        >Spacing {{ plan.rowSeatSpacing }}, press <code>+</code>/<code>-</code>
-        to vary (<code>ALT</code> for smaller steps)</span
-      >
+      <span class="hint">Spacing {{ plan.rowSeatSpacing }}, press
+        <code>+</code>/<code>-</code>
+        to vary (<code>ALT</code> for smaller steps)</span>
     </span>
 
     <span v-else-if="tool === 'rowCircle' || tool === 'rowCircleFixedCenter'">
@@ -85,67 +74,53 @@
 
     <span v-else-if="tool === 'rows'">
       <span v-if="plan.rowBlockDrawing">
-        <span class="hint"
-          >Move your mouse and click again once the correct number of seats is
-          visible</span
-        >
+        <span class="hint">Move your mouse and click again once the correct number
+          of seats is
+          visible</span>
         <span class="hint">Press <code>ESC</code> to abort</span>
-        <span class="hint"
-          >Drawing
+        <span class="hint">Drawing
           {{ plan.rowBlockRows * plan.rowBlockSeats }}
-          seats</span
-        >
+          seats</span>
       </span>
       <span v-else>
-        <span class="hint"
-          >Click on the position of the first seat to draw</span
-        >
-        <span class="hint"
-          >Hold down <code>SHIFT</code> to choose a position on the grid</span
-        >
+        <span class="hint">Click on the position of the first seat to draw</span>
+        <span class="hint">Hold down <code>SHIFT</code> to choose a position on
+          the grid</span>
       </span>
-      <span class="hint"
-        >Spacing {{ plan.rowSpacing }}x{{ plan.rowSeatSpacing }}, press
+      <span class="hint">Spacing {{ plan.rowSpacing }}x{{ plan.rowSeatSpacing }},
+        press
         <code>CTRL</code>+<code>-</code> to vary (<code>ALT</code> for smaller
-        steps)</span
-      >
+        steps)</span>
     </span>
 
     <span v-else-if="['rectangle', 'circle', 'ellipse'].includes(tool)">
       <span v-if="plan.drawing">
-        <span class="hint"
-          >Move your mouse to start drawing, release it once you're done</span
-        >
-        <span class="hint"
-          >Hold down <code>SHIFT</code> to limit movement to grid
-          positions</span
-        >
+        <span class="hint">Move your mouse to start drawing, release it once
+          you're done</span>
+        <span class="hint">Hold down <code>SHIFT</code> to limit movement to grid
+          positions</span>
         <span class="hint">Press <code>ESC</code> to abort</span>
       </span>
       <span v-else>
         <span class="hint">Click and drag to draw a new shape</span>
-        <span class="hint"
-          >Hold down <code>SHIFT</code> to only start at grid positions</span
-        >
+        <span class="hint">Hold down <code>SHIFT</code> to only start at grid
+          positions</span>
       </span>
     </span>
 
     <span v-else-if="tool === 'polygon'">
       <span v-if="plan.polygonDrawing">
         <span class="hint">Click to add another point</span>
-        <span class="hint"
-          >Press <code>ENTER</code> or double-click to finish</span
-        >
-        <span class="hint"
-          >Hold down <code>SHIFT</code> to limit angles to 5° steps</span
-        >
+        <span class="hint">Press <code>ENTER</code> or double-click to
+          finish</span>
+        <span class="hint">Hold down <code>SHIFT</code> to limit angles to 5°
+          steps</span>
         <span class="hint">Press <code>ESC</code> to abort</span>
       </span>
       <span v-else>
         <span class="hint">Click to add the first point of your polygon</span>
-        <span class="hint"
-          >Hold down <code>SHIFT</code> to choose a position on the grid</span
-        >
+        <span class="hint">Hold down <code>SHIFT</code> to choose a position on
+          the grid</span>
       </span>
     </span>
 
@@ -254,6 +229,7 @@ export default {
 
   background-color: white;
 }
+
 .c-status-bar code {
   display: inline-block;
   border: 1px solid #888;
@@ -262,6 +238,7 @@ export default {
   position: relative;
   top: -1px;
 }
+
 .c-status-bar span.hint {
   display: inline-block;
   margin-right: 15px;
