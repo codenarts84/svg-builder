@@ -24,7 +24,6 @@ import SectionLabel from "./SectionLabel.vue";
 import TagsComponent from "./TagsComponent.vue";
 import RowLabeling from "./RowLabeling.vue";
 import SeatLabeling from "./SeatLabeling.vue";
-import TestComponent from './TestComponent.vue'
 import { useMainStore } from "@/stores";
 import { usePlanStore } from '@/stores/plan';
 

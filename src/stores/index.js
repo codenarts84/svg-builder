@@ -19,6 +19,7 @@ export const useMainStore = defineStore({
   state: () => ({
     zoomTransform: d3.zoomTransform({ k: 1, x: 0, y: 0 }),
     grid: (window.localStorage.getItem("grid_enabled") || "false") === "true",
+    snap: (window.localStorage.getItem("snap_enabled") || "false") === "true",
     clipboardAreas: [],
     clipboardRows: [],
     tool: "select",
@@ -76,6 +77,10 @@ export const useMainStore = defineStore({
     toggleGrid() {
       this.grid = !this.grid;
       window.localStorage.setItem("grid_enabled", this.grid ? "true" : "false");
+    },
+    toggleSnap() {
+      this.snap = !this.snap;
+      window.localStorage.setItem("snap_enabled", this.snap ? "true" : "false");
     },
 
     disableGrid() {
@@ -366,7 +371,8 @@ export const useMainStore = defineStore({
       planStore.persistPlan();
     },
     moveDragging(x, y, snap, zoomLevel) {
-      console.log('move Dragging HERE?');
+      // console.log('move Dragging HERE?');
+      console.log(snap)
       if (!this.dragging) return;
       let dx = x - this.dragStartX;
       let dy = y - this.dragStartY;
