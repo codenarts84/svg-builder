@@ -191,6 +191,7 @@ export const useMainStore = defineStore({
     },
 
     startDragging(uuid, addition, x, y, zone) {
+      console.log('selection start here!!!')
       if (!this.selection.includes(uuid)) {
         if (addition) this.selection.push(uuid);
         else {
@@ -204,6 +205,7 @@ export const useMainStore = defineStore({
       this.dragged = false;
       this.dragStartX = x;
       this.dragStartY = y;
+      console.log(this.selection)
     },
     startDraggingPolygonPoint(uuid, pid, addition, x, y, zone) {
       if (!this.selection.includes(uuid)) {
@@ -614,12 +616,6 @@ export const useMainStore = defineStore({
                   p.x *= factor;
                   p.y *= factor;
                 }
-                break;
-              case "roundTable":
-                area.roundTable.scale *= factor;
-                break;
-              case "rectangleTable":
-                area.rectangleTable.scale *= factor;
                 break;
               case "gaSquare":
                 area.gaSquare.scale *= factor;

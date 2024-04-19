@@ -15,7 +15,7 @@
     <polygon v-if="area.shape === 'polygon'" :fill="area.color || '#888888'"
       :stroke="area.border_color || '#888888'" :points="polygonPoints"
       stroke-width="2px"></polygon>
-    <g v-if="area.shape === 'roundTable'"
+    <!-- <g v-if="area.shape === 'roundTable'"
       :transform="`scale(${area.roundTable.scale})`" :x="area.position.x"
       :y="area.position.y">
       <path d="M17.5,7.5c-0.6,0-1.1,0.2-1.6,0.6l0,0l0,0c0.2,0.6,0.3,1.2,0.3,1.8c0,0.6-0.1,1.2-0.3,1.8l0,0l0,0c0.4,0.4,1,0.6,1.6,0.6
@@ -33,29 +33,33 @@
 		c-1.2-0.7-2.7-0.3-3.4,0.9C11.3,2.8,11.2,3.4,11.3,4L11.3,4z" />
       <path d="M14.8,10c0-2.7-2.2-4.9-4.8-4.9S5.2,7.3,5.2,10s2.2,4.8,4.8,4.8S14.8,12.7,14.8,10z M10,14.1c-2.3,0-4.1-1.8-4.1-4.1
 		S7.7,5.9,10,5.9s4.1,1.8,4.1,4.1S12.3,14.1,10,14.1z" />
-    </g>
-
-    <!-- <g v-if="area.shape === 'roundTable'">
-      <circle cx="0" cy="0" :r="40"></circle>
     </g> -->
 
-    <g v-if="area.shape === 'rectangleTable'"
-      :transform="`scale(${area.rectangleTable.scale})`" :x="area.position.x"
-      :y="area.position.y">
-      <path d="M10,16.3c-0.6,0-1.2-0.1-1.8-0.3c-0.4,0.4-0.6,1-0.6,1.6c0,1.4,1.1,2.5,2.5,2.5c1.4,0,2.5-1.1,2.5-2.5
-		c-0.1-0.7-0.3-1.2-0.7-1.7C11.3,16.1,10.7,16.3,10,16.3z" />
-      <path d="M10,3.8c0.6,0,1.2,0.1,1.8,0.3c0.4-0.4,0.6-1,0.6-1.6C12.5,1.1,11.4,0,10,0S7.5,1.1,7.5,2.5c0,0.6,0.2,1.1,0.6,1.6
-		C8.8,3.9,9.4,3.8,10,3.8z" />
-      <path d="M3.2,16.2c-0.6,0-1.2-0.1-1.8-0.3c-0.4,0.4-0.6,1-0.6,1.6c0,1.4,1.1,2.5,2.5,2.5c1.4,0,2.5-1.1,2.5-2.5
-		c-0.1-0.6-0.3-1.2-0.7-1.7C4.5,16,3.9,16.2,3.2,16.2z" />
-      <path d="M3.2,3.7C3.8,3.7,4.4,3.8,5,4c0.4-0.4,0.6-1,0.6-1.6C5.7,1.1,4.6,0,3.2,0C1.9,0,0.8,1.1,0.8,2.5C0.8,3,1,3.6,1.4,4.1
-		C2,3.8,2.6,3.7,3.2,3.7z" />
-      <path d="M16.7,16.2c-0.6,0-1.2-0.1-1.8-0.3c-0.4,0.4-0.6,1-0.6,1.6c0,1.4,1.1,2.5,2.5,2.5c1.4,0,2.5-1.1,2.5-2.5
-		c-0.1-0.6-0.3-1.2-0.7-1.7C18,16,17.4,16.2,16.7,16.2z" />
-      <path d="M16.8,3.7c0.6,0,1.2,0.1,1.8,0.3c0.4-0.4,0.6-1,0.6-1.6c0-1.4-1.1-2.5-2.5-2.5c-1.4,0-2.5,1.1-2.5,2.5
-		c0.1,0.6,0.3,1.2,0.7,1.7C15.5,3.9,16.1,3.7,16.8,3.7z" />
-      <path
-        d="M19.2,5.1H0.8C0.4,5.1,0,5.5,0,5.9v8.2c0,0.5,0.4,0.8,0.8,0.8h18.4c0.5,0,0.8-0.4,0.8-0.8V5.9C20,5.5,19.6,5.1,19.2,5.1z M19.2,14.1C19.2,14.1,19.2,14.2,19.2,14.1L0.8,14.2c0,0-0.1,0-0.1-0.1V5.9c0,0,0-0.1,0.1-0.1h18.4c0,0,0.1,0,0.1,0.1V14.1z" />
+    <g v-if="area.shape === 'roundTable'">
+      <!-- <circle :cx="area.position.x" :cy="area.position.y" :r="area.position.r">
+      </circle> -->
+      <circle :cx="0" :cy="0" :r="area.position.r" fill="#ffffff" stroke="#000"
+        stroke-width="1">
+      </circle>
+      <circle v-for="item in area.roundTable.seats" :key="item" :cx="item.x"
+        :cy="item.y" :r="item.r" stroke="#000" style="stroke-width: 1px;"
+        fill="#ffffff" stroke-width="1">
+      </circle>
+      <text fill="black" v-for="item in area.roundTable.seats" :x="item.x"
+        :y="item.y" text-anchor="middle" font-size="10px" font-family="sans-serif"
+        :key="item" dy=".3em">{{ item.text }}</text>
+    </g>
+
+    <g v-if="area.shape === 'rectangleTable'">
+      <rect :x="0" :y="0" :width="120" :height="40" fill="#ffffff" stroke="#000"
+        stroke-width="1"></rect>
+      <circle v-for="item in area.rectangleTable.seats" :key="item" :cx="item.x"
+        :cy="item.y" :r="item.r" stroke="#000" style="stroke-width: 1px;"
+        fill="#ffffff" stroke-width="1">
+      </circle>
+      <text fill="black" v-for="item in area.rectangleTable.seats" :x="item.x"
+        :y="item.y" text-anchor="middle" font-size="10px" font-family="sans-serif"
+        :key="item" dy=".3em">{{ item.text }}</text>
     </g>
 
     <g v-if="area.shape === 'gaSquare'"
@@ -187,7 +191,7 @@ export default {
       }
 
       if (this.store.tool === "select") {
-        console.log('zonearea', this.area, this.zone)
+        console.log('zonearea', this.area, this.zone, this.selection)
         this.$emit("startDragging", this.area.uuid, this.zone, event);
         event.stopPropagation();
         return true;

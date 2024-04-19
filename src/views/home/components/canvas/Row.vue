@@ -9,8 +9,10 @@
     <text v-if="rowNumberEnd" :x="rowNumberEnd.x" :y="rowNumberEnd.y" dy=".3em"
       :font-size="rowNumberEnd.fontSize" :text-anchor="rowNumberEnd.textAnchor"
       :transform="rowNumberEnd.transform" fill="#888">{{ rowContent }}</text>
-    <Seat v-for="s in row.seats" :seat="s" :key="s.uuid" :zone="zone"
-      @startDragging="startDragging" :row_number="row.row_number"></Seat>
+    <Seat class="seat_group" v-for="s in row.seats" :seat="s" :key="s.uuid"
+      :zone="zone" @startDragging="startDragging" :row_number="row.row_number"
+      data-object-type="seat_group">
+    </Seat>
     <path class="selection-line" v-if="selection.includes(row.uuid)"
       :d="selectionLinePath"></path>
   </g>

@@ -2,7 +2,7 @@
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
     <v-divider></v-divider>
-    <RowComponent />
+    <RowComponent :rows="selected()" />
     <v-divider></v-divider>
     <ShapeComponent />
     <v-divider></v-divider>
@@ -34,6 +34,7 @@ const plan = ref(computed(() => planstore.plan));
 
 const selectedRows = () => {
   const res = []
+  console.log(selection)
   if (selection.value.length) {
     for (const z of plan.value.zones) {
       for (const r of z.rows) {
@@ -43,6 +44,25 @@ const selectedRows = () => {
       }
     }
   }
+  console.log('&&&&&&', plan.value.zones)
+  console.log('&&&&&&', res)
+  return res;
+}
+
+const selected = () => {
+  const res = []
+  console.log('selected******')
+  console.log(selection, selection.value.length);
+  if (selection.value.length) {
+    for (const z of plan.value.zones) {
+      for (const r of z.areas) {
+        if (selection.value.includes(r.uuid)) {
+          res.push(r);
+        }
+      }
+    }
+  }
+  console.log('sdh', res)
   return res;
 }
 

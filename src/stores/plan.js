@@ -496,6 +496,30 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
+    renumberCircleSeats(rowIds, count) {
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((r) => {
+          if (rowIds.includes(r.uuid)) {
+            const res = [];
+            for (let si = 0; si < count; si++) {
+              const uid = uuid();
+              const degree = 2 * Math.PI / count * si;
+              res.push({
+                text: (si + 1).toString(),
+                x: 40 * Math.cos(degree),
+                y: 40 * Math.sin(degree),
+                r: 10,
+                uid
+              })
+            }
+            r.roundTable.seats = res;
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+
     respaceRows(rowIds, spacing) {
       spacing = Math.max(spacing, 1); // Ensure spacing is at least 1
       this._plan.zones.forEach((z) => {
@@ -582,6 +606,7 @@ export const usePlanStore = defineStore("plan", {
     createAreaAfter(zone, area) {
       zone = this._plan.zones.find((z) => z.uuid === zone);
       zone.areas.push(area);
+      this.persistPlan();
     },
 
     createArea(zone, area) {

@@ -2,11 +2,13 @@
   <g @mousedown="mousedown" @mouseup="mouseup" :class="classObject">
     <circle :id="seatID" :fill="seatColor ? 'white' : 'white'"
       :cx="seat.position.x" :cy="seat.position.y" :r="radius"
-      :stroke="category ? 'none' : '#000'" style="stroke-width: 1px">
+      :stroke="category ? 'none' : '#000'" style="stroke-width: 1px"
+      :data-seat-label="seat.seat_number" :data-row-label="row_number"
+      data-section-label="Center">
     </circle>
     <text :fill="textColor ? 'black' : 'black'" :x="seat.position.x"
       :y="seat.position.y" text-anchor="middle" font-size="10px"
-      font-family="sans-serif" dy=".3em">
+      font-family="sans-serif" dy=".3em" class="seat_label">
       {{ textContent }}
     </text>
   </g>

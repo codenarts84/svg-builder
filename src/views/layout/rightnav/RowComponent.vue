@@ -6,7 +6,8 @@
         <v-col cols="12" sm="6"> Number of seats </v-col>
         <v-col cols="12" sm="6">
           <v-text-field class="custom-small-text-field" variant="outlined"
-            type="number" density="compact"></v-text-field>
+            type="number" density="compact"
+            @input="handle_seat_num_changed"></v-text-field>
         </v-col>
         <v-col cols="12" sm="6"> Curve </v-col>
         <v-col cols="12" sm="6">
@@ -32,3 +33,34 @@
   padding: 5px;
 }
 </style>
+
+<script>
+import { defineComponent, computed } from 'vue';
+import { useSeatFormatStore } from '@/stores/seatFormat';
+import { usePlanStore } from '@/stores/plan';
+
+export default defineComponent({
+  setup() {
+    const seatStore = useSeatFormatStore();
+    const nseat = computed(() => seatStore.nseat);
+    const setNseat = seatStore.setNseat;
+    const planStore = usePlanStore();
+    return {
+      nseat,
+      planStore,
+      setNseat,
+    };
+  },
+  props: {
+    rows: Array
+  },
+  methods: {
+    handle_seat_num_changed(e) {
+      this.setNseat(e.target.value);
+      console.log('sdh', this.rows)
+      // this.recountSeat(this.rows.map(i => i.uuid), e.target.value);
+      this.planStore.renumberCircleSeats(this.rows.map(i => i.uuid), e.target.value)
+    }
+  }
+});
+</script>
