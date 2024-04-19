@@ -1,6 +1,6 @@
 export default {
   sampleplan: {
-    name: "My Board",
+    name: "My Seating Chart",
     categories: [
       {
         name: "Category I",

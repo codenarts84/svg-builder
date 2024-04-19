@@ -2096,7 +2096,10 @@ export default {
         </pattern>
       </defs>
       <rect v-if="grid" :width="plan.size.width" :height="plan.size.height"
-        fill="url(#grid)" :cursor="cursor"></rect>
+        fill="url(#grid)" :cursor="cursor">
+      </rect>
+      <text :x="plan.size.width / 2 - 50" y="100" font-size="40"
+        fill="fcfcfc">STAGE</text>
       <ZoneComponent v-for="z in plan.zones" :zone="z" :key="z.uuid"
         :startDragging="startDragging"
         :startDraggingPolygonPoint="startDraggingPolygonPoint"></ZoneComponent>

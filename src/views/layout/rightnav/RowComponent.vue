@@ -57,9 +57,8 @@ export default defineComponent({
   methods: {
     handle_seat_num_changed(e) {
       this.setNseat(e.target.value);
-      console.log('sdh', this.rows)
-      // this.recountSeat(this.rows.map(i => i.uuid), e.target.value);
-      this.planStore.renumberCircleSeats(this.rows.map(i => i.uuid), e.target.value)
+      // console.log('okay', this.rows[0].shape)
+      this.planStore.renumberCircleSeats(this.rows.map(i => i.uuid), e.target.value);
     }
   }
 });
