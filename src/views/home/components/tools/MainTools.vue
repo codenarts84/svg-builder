@@ -66,6 +66,7 @@ const set_all_false = () => {
   boardstore.select_toggle(false);
   boardstore.dselect_toggle(false);
   boardstore.set_hand_false();
+  store.clearSelection();
 };
 const onHand = () => {
   set_all_false();
