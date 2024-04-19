@@ -20,6 +20,7 @@ import { v4 as uuid } from "uuid";
 import * as d3 from "d3";
 import ZoneComponent from "./ZoneComponent.vue";
 import { useToolbarStore } from '@/stores/toolbar';
+import { useSeatFormatStore } from "@/stores/seatFormat";
 
 const round = (fl, places) => Number(fl.toFixed(places || 0));
 
@@ -86,8 +87,10 @@ export default {
 
     const toolbarStore = useToolbarStore();
 
+    const seatStore = useSeatFormatStore();
+    const nseat = computed(() => seatStore.nseat);
+
     const bSnap2Grid = computed(() => store.snap);
-    console.log(bSnap2Grid)
 
     onMounted(() => {
       console.log("SVG Element:", svg.value.getBoundingClientRect());
@@ -149,6 +152,7 @@ export default {
       rowSpacing,
       rowSeatSpacing,
       getSvgRect,
+      nseat
     };
   },
   computed: {
@@ -607,8 +611,8 @@ export default {
     },
 
     startDragging(uuid, zone, event) {
+      console.log('startdragging here!!!')
       if (!this.svg) return;
-      //   console.log(event);
       if (event) {
         const svgbox = this.getSvgRect();
 
@@ -619,14 +623,12 @@ export default {
           null
         );
         const store = useMainStore();
-        console.log('error', pos);
         store.startDragging(uuid, event.shiftKey, pos.x, pos.y, zone.uuid);
       }
     },
 
     startDraggingPolygonPoint(uuid, pid, zone, event) {
       if (!this.svg) return;
-      console.log("Dragging works");
       const svgbox = this.getSvgRect();
       const pos = positionInZone(
         event.clientX - svgbox.x,
@@ -660,6 +662,7 @@ export default {
       const svgbox = this.getSvgRect(); //this.getSvgRect();
       console.log(svgbox);
 
+
       const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
       switch (this.tool) {
         // case "hand":
@@ -668,15 +671,12 @@ export default {
         //   return;
         case "select":
         case "seatselect": {
-          // console.log("select");
-          // console.log(event, svgbox.x, this.zoomTransform);
           let selPos = positionInZone(
             event.clientX - svgbox.x,
             event.clientY - svgbox.y,
             this.zoomTransform,
             null
           );
-          console.log(selPos);
           this.selecting = true;
           this.selectingStartX = selPos.x;
           this.selectingStartY = selPos.y;
@@ -756,6 +756,10 @@ export default {
               y: targetPos.y,
             });
           }
+          const arr = []
+          for (let i = 0; i < this.nseat; i++) {
+            arr.push(i);
+          }
           const newId = uuid();
           usePlanStore()
             .createArea(this.selectedZone, {
@@ -763,8 +767,9 @@ export default {
               rotation: 0,
               uuid: newId,
               position: {
-                x: targetPos.x - 40,
-                y: targetPos.y - 40
+                x: targetPos.x,
+                y: targetPos.y,
+                r: 20
               },
               text: {
                 position: { x: 0, y: 0 },
@@ -772,7 +777,17 @@ export default {
                 text: "",
               },
               roundTable: {
-                scale: 4
+                seats: arr.map((item, idx, arr) => {
+                  const degree = 2 * Math.PI / arr.length * idx;
+                  const uid = uuid();
+                  return {
+                    text: (idx + 1).toString(),
+                    x: 40 * Math.cos(degree),
+                    y: 40 * Math.sin(degree),
+                    r: 10,
+                    uid
+                  }
+                })
               }
             })
             .then(() => {
@@ -796,6 +811,10 @@ export default {
               y: targetPos.y,
             });
           }
+          const arr = []
+          for (let i = 0; i < this.nseat; i++) {
+            arr.push(i);
+          }
           const newId = uuid();
           usePlanStore()
             .createArea(this.selectedZone, {
@@ -804,7 +823,9 @@ export default {
               uuid: newId,
               position: {
                 x: targetPos.x - 40,
-                y: targetPos.y - 40
+                y: targetPos.y - 20,
+                width: 120,
+                height: 40
               },
               text: {
                 position: { x: 0, y: 0 },
@@ -812,7 +833,31 @@ export default {
                 text: "",
               },
               rectangleTable: {
-                scale: 4
+                seats: arr.map((item, idx, arr) => {
+                  const len = arr.length;
+                  const mid = Math.ceil(len / 2);
+                  const width = 120 - 10;
+                  const height = 40;
+                  console.log('sdh,', idx)
+                  let x;
+                  // if (len % 2 === 0) {
+                  x = (width / (mid - 1)) * (idx % mid);
+                  // }
+                  // else {
+                  //   x = (width / (mid - 1 - Math.floor(idx / mid))) * (idx % mid);
+                  // }
+                  const y = idx < mid ? -20 : 60;
+                  console.log('width, height', x, y)
+
+                  const uid = uuid();
+                  return {
+                    text: (idx + 1).toString(),
+                    x: x + 5,
+                    y,
+                    r: 10,
+                    uid
+                  }
+                })
               }
             })
             .then(() => {
@@ -999,7 +1044,6 @@ export default {
       }
     },
     mousemove(event) {
-      console.log('mousemove occurs')
       if (!this.svg) return;
       const store = useMainStore();
       // console.log(this.tool);
@@ -1054,7 +1098,6 @@ export default {
         case "select":
         case "seatselect":
           if (store.dragging) {
-            console.log('******', this.bSnap2Grid)
             store.moveDragging(
               pos.x,
               pos.y,

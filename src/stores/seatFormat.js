@@ -6,6 +6,7 @@ export const useSeatFormatStore = defineStore('seatformat', {
     rowCur: 1,
     seatsLabel: ['1, 2, 3, …', 'A, B, C, …', 'a, b, c, …'],
     seatCur: 0,
+    nseat: 6,
   }),
   actions: {
     changeRow(cur) {
@@ -14,5 +15,8 @@ export const useSeatFormatStore = defineStore('seatformat', {
     changeSeat(cur) {
       this.seatCur = cur;
     },
+    setNseat(seat) {
+      this.nseat = seat;
+    }
   },
 });

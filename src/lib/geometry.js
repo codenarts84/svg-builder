@@ -76,10 +76,10 @@ const rectangleBBox = (area) => {
 
 const roundTableBBox = (area) => {
   let abox = {
-    x: area.position.x,
-    y: area.position.y,
-    width: 80 * area.roundTable.scale / 4,
-    height: 80 * area.roundTable.scale / 4,
+    x: area.position.x - 50,
+    y: area.position.y - 50,
+    width: 100,
+    height: 100,
   };
   if (area.rotation) {
     abox = rotateRectangluarBox(area, abox);
@@ -90,9 +90,9 @@ const roundTableBBox = (area) => {
 const rectangleTableBBox = (area) => {
   let abox = {
     x: area.position.x,
-    y: area.position.y,
-    width: 80 * area.rectangleTable.scale / 4,
-    height: 80 * area.rectangleTable.scale / 4,
+    y: area.position.y - 40,
+    width: 120,
+    height: 100,
   };
   if (area.rotation) {
     abox = rotateRectangluarBox(area, abox);
