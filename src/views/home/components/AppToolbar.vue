@@ -1,31 +1,18 @@
 <template>
-  <v-toolbar
-    flat
-    style="position: fixed; opacity: 1; height: 50px; z-index: 999"
-  >
-    <FileTool
-      :addTextField="addTextField"
-      :addEllipse="addEllipse"
-      :addRectangle="addRectangle"
-      :onImportClick="onImportClick"
-      :textR="textR"
-      :textL="textL"
-      :textC="textC"
-    />
+  <v-toolbar flat style="position: fixed; opacity: 1; height: 50px; z-index: 999">
+    <FileTool :addTextField="addTextField" :addEllipse="addEllipse"
+      :addRectangle="addRectangle" :onImportClick="onImportClick" :textR="textR"
+      :textL="textL" :textC="textC" />
     <MainTools :removeItem="removeItem" />
     <!-- <v-spacer></v-spacer> -->
 
     <v-toolbar-title :style="toolbarTitleStyle">{{
-      boardName
+      boardStore.board_name
     }}</v-toolbar-title>
 
     <v-toolbar-items class="border-left">
-      <MagnifierComponent
-        :zoomIn="zoomIn"
-        :zoomOut="zoomOut"
-        :zoomTo="zoomTo"
-        :setTransfrom="setTransfrom"
-      />
+      <MagnifierComponent :zoomIn="zoomIn" :zoomOut="zoomOut" :zoomTo="zoomTo"
+        :setTransfrom="setTransfrom" />
     </v-toolbar-items>
     <v-toolbar-items class="border-left">
       <GridView />
@@ -96,16 +83,20 @@ const toolbarTitleStyle = computed(() => {
   display: flex;
   gap: 10px;
 }
+
 .v-toolbar__content {
   height: 50px !important;
 }
+
 .border-both {
   border-right: 2px solid rgba(255, 255, 255, 0.5);
   border-left: 2px solid rgb(255, 255, 255, 0.5);
 }
+
 .border-left {
   border-left: 2px solid rgb(255, 255, 255, 0.5);
 }
+
 .v-toolbar-title__placeholder {
   font-size: 16px;
   font-weight: bold;

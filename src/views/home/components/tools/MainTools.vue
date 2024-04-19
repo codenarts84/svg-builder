@@ -1,44 +1,34 @@
 <template>
   <v-toolbar-items class="border-left">
-    <v-btn
-      @click="changeTool('select')"
-      :class="tool == 'select' ? 'current-tool' : ''"
-    >
+    <v-btn @click="changeTool('select')"
+      :class="tool == 'select' ? 'current-tool' : ''">
       <v-tooltip activator="parent" location="bottom">Select</v-tooltip>
       <SelectionArrowIcon width="20px" height="20px" />
     </v-btn>
-    <v-btn
-      @click="changeTool('seatselect')"
-      :class="tool == 'seatselect' ? 'current-tool' : ''"
-    >
+    <v-btn @click="changeTool('seatselect')"
+      :class="tool == 'seatselect' ? 'current-tool' : ''">
       <v-tooltip activator="parent" location="bottom">Direct Select</v-tooltip>
       <DirectSelectionArrowIcon width="20px" height="20px" />
     </v-btn>
-    <v-btn
-      @click="changeTool('clip')"
-      :class="tool == 'clip' ? 'current-tool' : ''"
-    >
+    <v-btn @click="changeTool('clip')"
+      :class="tool == 'clip' ? 'current-tool' : ''">
       <v-tooltip activator="parent" location="bottom">Clip</v-tooltip>
       <CloneIcon width="20px" height="20px" />
     </v-btn>
-    <v-btn
-      @click="changeTool('redo')"
-      :class="tool == 'redo' ? 'current-tool' : ''"
-    >
+    <v-btn @click="changeTool('redo')"
+      :class="tool == 'redo' ? 'current-tool' : ''">
       <v-tooltip activator="parent" location="bottom">Undo</v-tooltip>
       <UndoIcon width="20px" height="20px" />
     </v-btn>
-    <v-btn
-      @click="changeTool('hand')"
-      :class="tool == 'hand' ? 'current-tool' : ''"
-    >
+    <v-btn @click="changeTool('hand')"
+      :class="tool == 'hand' ? 'current-tool' : ''">
       <v-tooltip activator="parent" location="bottom">Hand</v-tooltip>
       <HandIcon width="20px" height="20px" />
     </v-btn>
     <v-btn class="btn" @click.prevent="deleteObjects">
       <v-tooltip activator="parent" location="bottom">Delete</v-tooltip>
-      <TrashIcon width="20px" height="20px"
-    /></v-btn>
+      <TrashIcon width="20px" height="20px" />
+    </v-btn>
   </v-toolbar-items>
 </template>
 <script setup>
