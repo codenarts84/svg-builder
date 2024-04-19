@@ -501,6 +501,7 @@ export const usePlanStore = defineStore("plan", {
         z.areas.forEach((r) => {
           if (rowIds.includes(r.uuid)) {
             const res = [];
+            // if (shape === 'roundTable') {
             for (let si = 0; si < count; si++) {
               const uid = uuid();
               const degree = 2 * Math.PI / count * si;
@@ -513,6 +514,34 @@ export const usePlanStore = defineStore("plan", {
               })
             }
             r.roundTable.seats = res;
+            // }
+            // } else if (shape === 'rectangleTable') {
+            //   for (let idx = 0; idx < count; idx++) {
+            //     const len = count;
+            //     const mid = Math.ceil(len / 2);
+            //     const width = 120 - 10;
+            //     const height = 40;
+            //     console.log('sdh,', idx)
+            //     let x;
+            //     // if (len % 2 === 0) {
+            //     x = (width / (mid - 1)) * (idx % mid);
+            //     // }
+            //     // else {
+            //     //   x = (width / (mid - 1 - Math.floor(idx / mid))) * (idx % mid);
+            //     // }
+            //     const y = idx < mid ? -20 : 60;
+            //     console.log('width, height', x, y)
+
+            //     const uid = uuid();
+            //     return {
+            //       text: (idx + 1).toString(),
+            //       x: x + 5,
+            //       y,
+            //       r: 10,
+            //       uid
+            //     }
+            //   }
+            //   r.rectangleTable.seats = res;
           }
         });
       });

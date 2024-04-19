@@ -44,8 +44,6 @@ const selectedRows = () => {
       }
     }
   }
-  console.log('&&&&&&', plan.value.zones)
-  console.log('&&&&&&', res)
   return res;
 }
 

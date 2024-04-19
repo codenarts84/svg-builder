@@ -100,6 +100,6 @@ const changeTool = (tool) => store.changeTool(tool);
 }
 
 .current-tool {
-  background-color: #e7e7e7;
+  background-color: #97a2b6;
 }
 </style>

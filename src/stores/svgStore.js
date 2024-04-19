@@ -17,7 +17,7 @@ export const useSvgStore = defineStore("svgStore", () => {
 });
 
 export const useBoardStore = defineStore("myboard", () => {
-  const board_name = ref("My Board");
+  const board_name = ref("My Seating Chart");
   const width = ref(800);
   const height = ref(550);
   const hand_selected = ref(false);
