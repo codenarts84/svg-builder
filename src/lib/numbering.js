@@ -110,6 +110,7 @@ const ROW_NUMBERINGS = [
 const reverse = (array) => array.map((item, idx) => array[array.length - 1 - idx])
 
 export {
+  letterCounter,
   reverse,
   SEAT_NUMBERINGS,
   ROW_NUMBERINGS

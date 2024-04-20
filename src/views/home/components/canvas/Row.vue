@@ -1,21 +1,23 @@
 <template>
   <g :transform="transform" @mousedown="mousedown" @mouseup="mouseup"
     :class="classObject">
-    <text v-if="rowNumberStart" :x="rowNumberStart.x" :y="rowNumberStart.y"
-      dy=".3em" :font-size="rowNumberStart.fontSize"
-      :text-anchor="rowNumberStart.textAnchor"
-      :transform="rowNumberStart.transform" fill="#888">{{ rowContent
-      }}</text>
+    <g id="unique-id" class="row_group" data-row-label="">
+      <text class="row_lable" v-if="rowNumberStart" :x="rowNumberStart.x"
+        :y="rowNumberStart.y" dy=".3em" :font-size="rowNumberStart.fontSize"
+        :text-anchor="rowNumberStart.textAnchor"
+        :transform="rowNumberStart.transform" fill="#888">{{ rowContent
+        }}</text>
 
-    <text v-if="rowNumberEnd" :x="rowNumberEnd.x" :y="rowNumberEnd.y" dy=".3em"
-      :font-size="rowNumberEnd.fontSize" :text-anchor="rowNumberEnd.textAnchor"
-      :transform="rowNumberEnd.transform" fill="#888">{{ rowContent }}</text>
-    <Seat class="seat_group" v-for="s in row.seats" :seat="s" :key="s.uuid"
-      :zone="zone" @startDragging="startDragging" :row_number="row.row_number"
-      data-object-type="seat_group">
-    </Seat>
-    <!-- <path class="selection-line" v-if="selection.includes(row.uuid)"
+      <text class="row_lable" v-if="rowNumberEnd" :x="rowNumberEnd.x"
+        :y="rowNumberEnd.y" dy=".3em" :font-size="rowNumberEnd.fontSize"
+        :text-anchor="rowNumberEnd.textAnchor" :transform="rowNumberEnd.transform"
+        fill="#888">{{ rowContent }}</text>
+      <Seat class="seat_group" v-for="s in row.seats" :seat="s" :key="s.uuid"
+        :zone="zone" @startDragging="startDragging" :row_number="row.row_number">
+      </Seat>
+      <!-- <path class="selection-line" v-if="selection.includes(row.uuid)"
       :d="selectionLinePath"></path> -->
+    </g>
   </g>
 </template>
 <script>
@@ -171,11 +173,13 @@ export default {
       // if (this.seatCur === 0) {
       //   content = this.row.row_number;
       // } else if (this.seatCur === 1) {
-      //   content = letterCounter(parseInt(this.row.row_number), 'A')
       // } else {
       //   content = letterCounter(parseInt(this.row.row_number), 'a')
       // }
-      return this.row.row_number;
+      // return letterCounter(parseInt(this.row.row_number), 'A')
+      // return letterCounter(parseInt(this.row.row_number), 'A');
+      return letterCounter(parseInt(this.row.row_number), 'A');
+      // return this.row.row_number;
     },
 
     classObject() {
