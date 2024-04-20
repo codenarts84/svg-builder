@@ -695,7 +695,7 @@ export default {
             this.zoomTransform,
             null
           );
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             drawPos = findClosestGridPoint({
               x: drawPos.x,
               y: drawPos.y,
@@ -715,7 +715,7 @@ export default {
             this.zoomTransform,
             zone
           );
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             targetPos = findClosestGridPoint({
               x: targetPos.x,
               y: targetPos.y,
@@ -751,7 +751,7 @@ export default {
             this.zoomTransform,
             zone
           );
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             targetPos = findClosestGridPoint({
               x: targetPos.x,
               y: targetPos.y,
@@ -806,7 +806,7 @@ export default {
             this.zoomTransform,
             zone
           );
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             targetPos = findClosestGridPoint({
               x: targetPos.x,
               y: targetPos.y,
@@ -876,7 +876,7 @@ export default {
             this.zoomTransform,
             zone
           );
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             targetPos = findClosestGridPoint({
               x: targetPos.x,
               y: targetPos.y,
@@ -916,7 +916,7 @@ export default {
             this.zoomTransform,
             zone
           );
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             targetPos = findClosestGridPoint({
               x: targetPos.x,
               y: targetPos.y,
@@ -959,7 +959,7 @@ export default {
             this.zoomTransform,
             null
           );
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             clickPos = findClosestGridPoint({
               x: clickPos.x,
               y: clickPos.y,
@@ -988,7 +988,7 @@ export default {
             this.zoomTransform,
             null
           );
-          if (event.shiftKey)
+          if (event.shiftKey || this.bSnap2Grid)
             rowPos = findClosestGridPoint({
               x: rowPos.x,
               y: rowPos.y,
@@ -1012,7 +1012,7 @@ export default {
             this.zoomTransform,
             null
           );
-          if (event.shiftKey)
+          if (event.shiftKey || this.bSnap2Grid)
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
 
           this.rowBlockDrawing = true;
@@ -1032,7 +1032,7 @@ export default {
             this.zoomTransform,
             null
           );
-          if (event.shiftKey)
+          if (event.shiftKey || this.bSnap2Grid)
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
 
           this.stgrowBlockDrawing = true;
@@ -1163,7 +1163,7 @@ export default {
         case "circle":
         case "ellipse":
           if (!this.drawing) return false;
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
           }
           this.drawingCurrentX = pos.x;
@@ -1173,7 +1173,7 @@ export default {
         case "rowCircleFixedCenter":
           if (this.tool !== "rowCircle" && this.tool !== "rowCircleFixedCenter")
             return false;
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
           }
           this.drawingCurrentX = pos.x;
@@ -1181,7 +1181,7 @@ export default {
           break;
         case "row":
           if (!this.rowDrawing) return false;
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             // Snap to 5° intervals
             const dx = pos.x - this.drawingStartX;
             const dy = pos.y - this.drawingStartY;
@@ -1210,7 +1210,7 @@ export default {
           break;
         case "rows":
           if (!this.rowBlockDrawing) return false;
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
           }
           this.drawingCurrentX = pos.x;
@@ -1218,7 +1218,7 @@ export default {
           break;
         case "stgrows":
           if (!this.stgrowBlockDrawing) return false;
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
           }
           this.drawingCurrentX = pos.x;
@@ -1235,7 +1235,7 @@ export default {
             break;
           }
           if (!this.polygonDrawing) return false;
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             // Snap to 5° intervals
             const dx =
               pos.x - this.polygonPoints[this.polygonPoints.length - 1].x;
@@ -1424,7 +1424,7 @@ export default {
         case "circle":
         case "ellipse":
           if (!this.drawing) return false;
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
           }
           if (this.tool === "rectangle") {
@@ -1469,7 +1469,7 @@ export default {
                 });
               });
           } else if (this.tool === "circle") {
-            if (event.shiftKey) {
+            if (event.shiftKey || this.bSnap2Grid) {
               pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
             }
             const radius = round(
@@ -1509,7 +1509,7 @@ export default {
                 });
               });
           } else if (this.tool === "ellipse") {
-            if (event.shiftKey) {
+            if (event.shiftKey || this.bSnap2Grid) {
               pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
             }
             const w = Math.abs(pos.x - this.drawingStartX);
@@ -1582,7 +1582,7 @@ export default {
               };
             };
             let comparepos = pos;
-            if (event.shiftKey) {
+            if (event.shiftKey || this.bSnap2Grid) {
               pos = polysnap(pos, 1);
               if (pp.length > 1) {
                 comparepos = polysnap(pos, 2);
@@ -1601,7 +1601,7 @@ export default {
             }
           } else {
             this.polygonDrawing = true;
-            if (event.shiftKey) {
+            if (event.shiftKey || this.bSnap2Grid) {
               pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
             }
             this.polygonPoints = [pos];
@@ -1610,7 +1610,7 @@ export default {
         case "rows":
           // if mouseup is in same spot as mousedown, keep drawing, as this
           // was the original behaviour with click-draw-click vs. mousedown-draw-mouseup
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
           }
           if (this.drawingStartX === pos.x && this.drawingStartY === pos.y) {
@@ -1640,7 +1640,7 @@ export default {
         case "stgrows":
           // if mouseup is in same spot as mousedown, keep drawing, as this
           // was the original behaviour with click-draw-click vs. mousedown-draw-mouseup
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
           }
           if (this.drawingStartX === pos.x && this.drawingStartY === pos.y) {
@@ -1670,7 +1670,7 @@ export default {
         case "row":
           // if mouseup is in same spot as mousedown, keep drawing, as this
           // was the original behaviour with click-draw-click vs. mousedown-draw-mouseup
-          if (event.shiftKey) {
+          if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
           }
           if (this.drawingStartX === pos.x && this.drawingStartY === pos.y) {

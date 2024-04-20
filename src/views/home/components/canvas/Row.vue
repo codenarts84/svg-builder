@@ -218,8 +218,10 @@ export default {
   unmounted() { },
   methods: {
     startDragging(uuid, zone, event) {
-      // console.log('row start dragging');
-      this.$emit("startDragging", uuid, zone, event);
+      console.log('row start dragging');
+      if (useMainStore().tool === "select") {
+        this.$emit("startDragging", uuid, zone, event);
+      }
     },
     mouseup(event) {
       if (event.ctrlKey || event.metaKey) {
