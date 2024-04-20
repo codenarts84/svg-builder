@@ -2,7 +2,7 @@
   <div class="c-status-bar">
     <div class="left-container">
       <span class="hint" v-if="selection.length">
-        {{ totalSeatsCount }} objects
+        Seats: {{ selection.length }}
       </span>
 
       <span v-if="selectionIsPolygon">
@@ -137,8 +137,8 @@
         <span class="hint">Click anywhere to add a new text object</span>
       </span>
     </div>
-    <span class="selected-hint" v-if="selection.length">
-      Seats: {{ selection.length }}
+    <span class="selected-hint">
+      {{ totalSeatsCount }} Seats
     </span>
 
     <!-- Additional tool conditions -->

@@ -272,13 +272,18 @@ export const usePlanStore = defineStore("plan", {
         }
       }
       // Assume there's an `unselect` action
-      this.unselect({ uuids: objects });
+      // this.unselect(objects);
+      useMainStore().unselect(objects);
+      console.log('delete Obejct', useMainStore().selection);
       this.persistPlan();
     },
 
-    unselect(uuids) {
-      console.log("unselected", uuids);
-    },
+    // unselect(uuids) {
+    //   // let res = useMainStore().selection;
+    //   // uuids.forEach(uuid => res = res.filter(uid => uid !== uuid));
+    //   // useMainStore().setSelection(res);
+    //   // this.persistPlan();
+    // },
 
     recordHistoryState(json) {
       this.undoStack.push(json);
