@@ -3,12 +3,12 @@
     <circle :id="seatID" :fill="seatColor ? 'white' : 'white'"
       :cx="seat.position.x" :cy="seat.position.y" :r="radius"
       :stroke="category ? 'none' : '#000'" style="stroke-width: 1px"
-      :data-seat-label="seat.seat_number" :data-row-label="row_number"
-      data-section-label="Center">
+      data-seat-label="" data-row-label="" data-section-label=""
+      data-section-abc="" data-category-name="" data-category-abv="">
     </circle>
-    <text :fill="textColor ? 'black' : 'black'" :x="seat.position.x"
-      :y="seat.position.y" text-anchor="middle" font-size="10px"
-      font-family="sans-serif" dy=".3em" class="seat_label">
+    <text class="seat_label" :fill="textColor ? 'black' : 'black'"
+      :x="seat.position.x" :y="seat.position.y" text-anchor="middle"
+      font-size="10px" font-family="sans-serif" dy=".3em">
       {{ textContent }}
     </text>
   </g>
@@ -18,6 +18,7 @@ import { contrast, hex2rgb } from "@/lib/colors";
 import { useMainStore } from "@/stores";
 import { usePlanStore } from "@/stores/plan";
 import { computed } from "vue";
+import { letterCounter } from "@/lib/numbering";
 
 export default {
   name: "SeatComp",
@@ -52,14 +53,15 @@ export default {
       };
     },
     textContent() {
-      let content = this.seat.seat_number;
-      if (this.seat.flag) {
-        content = this.seat.flag;
-      }
-      if (this.seat.start_direction) {
-        content = this.seat.start_direction;
-      }
-      return content;
+      // let content = this.seat.seat_number;
+      // if (this.seat.flag) {
+      //   content = this.seat.flag;
+      // }
+      // if (this.seat.start_direction) {
+      //   content = this.seat.start_direction;
+      // }
+      // return content;
+      return letterCounter(this.seat.seat_number, 'A');
     },
     category() {
       return this.getCategoryByName(this.seat.category);
