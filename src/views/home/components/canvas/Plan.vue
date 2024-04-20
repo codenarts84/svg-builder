@@ -1763,8 +1763,8 @@ export default {
       const panPadding = viewportHeight * -10;
       this.defaultScale = this.plan.size.height
         ? Math.min(
-          viewportWidth / this.plan.size.width,
-          viewportHeight / this.plan.size.height
+          (viewportWidth - 130) / this.plan.size.width,
+          (viewportHeight - 130) / this.plan.size.height
         )
         : 1;
       // console.log("here`````````````````");
@@ -2222,6 +2222,16 @@ export default {
           fill="black" dy=".3em" style="z-index: 99">
           {{ rowBlockRows * rowBlockSeats }} Seats
         </text>
+        <rect v-if="rowBlockSeats + rowBlockRows >= 7"
+          :x="(rowSeatSpacing * rowBlockSeats) / 2 - 25 - 12.5"
+          :y="(rowSpacing * rowBlockRows) / 2 - 25" width="50" height="25"
+          fill="#00c"></rect>
+        <text v-if="rowBlockSeats + rowBlockRows >= 7"
+          :x="(rowSeatSpacing * rowBlockSeats) / 2 - 12.5"
+          :y="(rowSpacing * rowBlockRows) / 2 - 12.5" text-anchor="middle"
+          fill="#fff" dy=".3em">
+          {{ rowBlockRows }} × {{ rowBlockSeats }}
+        </text>
       </g>
       <g class="rows-preview" v-if="tool === 'stgrows' && stgrowBlockDrawing"
         :transform="rowBlockTransform">
@@ -2241,7 +2251,7 @@ export default {
               :cy="rowSpacing * (rid - 1)" r="10">
             </circle>
           </g>
-          <!-- <rect v-if="stgrowBlockSeats + stgrowBlockRows >= 7"
+          <rect v-if="stgrowBlockSeats + stgrowBlockRows >= 7"
             :x="(rowSeatSpacing * stgrowBlockSeats) / 2 - 25 - 12.5"
             :y="(rowSpacing * stgrowBlockRows) / 2 - 25" width="50" height="25"
             fill="#00c"></rect>
@@ -2250,7 +2260,7 @@ export default {
             :y="(rowSpacing * stgrowBlockRows) / 2 - 12.5" text-anchor="middle"
             fill="#fff" dy=".3em">
             {{ stgrowBlockRows }} × {{ stgrowBlockSeats }}
-          </text> -->
+          </text>
         </g>
         <text v-if="stgrowBlockRows * stgrowBlockSeats > 0" :x="10" :y="-30"
           fill="black" dy=".3em" style="z-index: 99">
