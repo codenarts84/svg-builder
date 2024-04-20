@@ -172,7 +172,7 @@ export default {
       this.$emit("insert-point", { point: newPoint, index: pid });
     },
     mousedownPolygonPoint(event, pid) {
-      console.log("edge");
+      // console.log("edge");
       if (event.which === 2) {
         // Middle click
         this.$emit("delete-point", pid);
@@ -191,7 +191,7 @@ export default {
       }
 
       if (this.store.tool === "select") {
-        console.log('zonearea', this.area, this.zone, this.selection)
+        // console.log('zonearea', this.area, this.zone, this.selection)
         this.$emit("startDragging", this.area.uuid, this.zone, event);
         event.stopPropagation();
         return true;

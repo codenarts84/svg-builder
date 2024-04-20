@@ -109,7 +109,7 @@ export default {
         }
         return true;
       } else if (useMainStore().tool === "select" && interval < 500) {
-        console.log(interval);
+        // console.log(interval);
         // doubleclick
         useMainStore().changeTool("seatselect");
         useMainStore().toggleSelection([this.seat.uuid], false, this.zone.uuid);
@@ -123,12 +123,12 @@ export default {
         // this is a panning event
         return false;
       }
-      if (useMainStore().tool === "seatselect") {
-        this.$emit("startDragging", this.seat.uuid, this.zone, event);
-        event.stopPropagation();
-        return true;
-      }
-      return false;
+      // if (useMainStore().tool === "select" || useMainStore().tool === "seatselect") {
+      this.$emit("startDragging", this.seat.uuid, this.zone, event);
+      event.stopPropagation();
+      return true;
+      // }
+      // return false;
     },
   },
 };

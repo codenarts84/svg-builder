@@ -65,7 +65,7 @@ export default ({
   },
   methods: {
     handleChange(newValue) {
-      console.log(newValue)
+      // console.log(newValue)
     },
     setRowNumbering(val) {
       let numbering = ROW_NUMBERINGS.find(n => n.id === val.target.value);
