@@ -77,7 +77,7 @@ export const usePlanStore = defineStore("plan", {
                 const sname = `${z.name}>${r.row_number}>${s.seat_number}`;
                 if (!s.seat_guid) {
                   errors.push({
-                    text: `Seat ${escape(z.name)} > ${r.row_number} > ${s.seat_number
+                    text: `Seat ${(z.name)} > ${r.row_number} > ${s.seat_number
                       } has no seat ID.`,
                     uuid: s.uuid,
                     tool: "seatselect",
@@ -481,6 +481,7 @@ export const usePlanStore = defineStore("plan", {
     },
 
     renumberSeats(rowIds, numbering, startAt, reversed) {
+      console.log('aaaaaaaaaaaaa')
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid) && r.seats.length) {

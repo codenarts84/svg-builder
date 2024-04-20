@@ -13,9 +13,16 @@
           ></v-text-field> -->
           <!-- <v-select v-model="curRow" @change="changeRow"
             :items="rowsLabel"></v-select> -->
-          <v-btn @click="changeSeat(0)">{{ seatsLabel[0] }}</v-btn>
+          <!-- <v-btn @click="changeSeat(0)">{{ seatsLabel[0] }}</v-btn>
           <v-btn @click="changeSeat(1)">{{ seatsLabel[1] }}</v-btn>
-          <v-btn @click="changeSeat(2)">{{ seatsLabel[2] }}</v-btn>
+          <v-btn @click="changeSeat(2)">{{ seatsLabel[2] }}</v-btn> -->
+          <select class="toolbox-input" @input="setSeatNumbering($event)">
+            <option v-for="numbering in seatNumberings" :key="numbering"
+              option-label="label" name="seat_numbering"
+              :value="numbering.id ? numbering.id : null">
+              {{ numbering.label }}
+            </option>
+          </select>
         </v-col>
         <v-col cols="12" sm="6"> Seat Label Location </v-col>
         <v-col cols="12" sm="6">
@@ -39,19 +46,39 @@
 
 <script>
 import { useSeatFormatStore } from '@/stores/seatFormat';
+import { usePlanStore } from '@/stores/plan';
+import { SEAT_NUMBERINGS } from '@/lib/numbering';
+import { tickStep } from 'd3';
 
 export default ({
-  data() {
-    return {
-      cur: null
-    }
-  },
   setup() {
     const seatStore = useSeatFormatStore();
+    const planStore = usePlanStore();
     return {
       seatsLabel: seatStore.seatsLabel,
       changeSeat: seatStore.changeSeat,
+      planStore,
     }
   },
+  data() {
+    return {
+      // cur: null
+      seatNumberings: SEAT_NUMBERINGS
+    }
+  },
+
+  props: {
+    rows: Array
+  },
+
+  methods: {
+    setSeatNumbering(val) {
+      // let numbering = SEAT_NUMBERINGS.find(n => n.id === val.target.value);
+      // this.planStore.modifyRows(this.rows.map(r => r.uuid), numbering, 1, false);
+
+      let numbering = SEAT_NUMBERINGS.find(n => n.id === val.target.value)
+      this.planStore.renumberSeats(this.rows.map(r => r.uuid), numbering, 1, false);
+    }
+  }
 })
 </script>
