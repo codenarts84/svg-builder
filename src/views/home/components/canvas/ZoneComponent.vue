@@ -27,7 +27,7 @@ const props = defineProps({
 
 const store = useMainStore();
 
-console.log("Zone", props.zone);
+// console.log("Zone", props.zone);
 
 // Computed properties
 const lockedZones = computed(() => store.lockedZones);

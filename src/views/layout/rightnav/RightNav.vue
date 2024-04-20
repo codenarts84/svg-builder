@@ -48,8 +48,8 @@ const selectedRows = () => {
 
 const selected = () => {
   const res = []
-  console.log('selected******')
-  console.log(selection, selection.value.length);
+  // console.log('selected******')
+  // console.log(selection, selection.value.length);
   if (selection.value.length) {
     for (const z of plan.value.zones) {
       for (const r of z.areas) {
@@ -59,7 +59,7 @@ const selected = () => {
       }
     }
   }
-  console.log('sdh', res)
+  // console.log('sdh', res)
   return res;
 }
 

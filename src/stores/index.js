@@ -67,7 +67,7 @@ export const useMainStore = defineStore({
 
   actions: {
     loadPlan(plan) {
-      console.log(plan);
+      // console.log(plan);
       const temp = usePlanStore();
       temp.loadPlan(plan);
       this.selectedZone = temp.plan.zones[0].uuid;
@@ -129,7 +129,12 @@ export const useMainStore = defineStore({
     },
 
     setSelection(uuids, addition, zone) {
-      console.log(addition, zone, this.selection);
+      // if (uuids.length) console.log('setSelection in store', uuids);
+      // console.log(addition, zone, this.selection);
+      // console.log('store setselection', uuids, this.selection, addition);
+
+
+      this.selection = [];
       if (addition && this.selection.length > 0) {
         for (const uuid of uuids) {
           if (!this.selection.includes(uuid)) {
@@ -184,14 +189,14 @@ export const useMainStore = defineStore({
         this.selection = [];
       }
       this.tool = tool;
-      console.log('changed tool', tool)
+      // console.log('changed tool', tool)
     },
     clearSelection() {
       this.selection = [];
     },
 
     startDragging(uuid, addition, x, y, zone) {
-      console.log('selection start here!!!')
+      // console.log('selection start here!!!')
       if (!this.selection.includes(uuid)) {
         if (addition) this.selection.push(uuid);
         else {
@@ -200,12 +205,12 @@ export const useMainStore = defineStore({
         }
         this.ignoreNextSelection = true;
       }
+      // console.log(this.selection)
       this.dragging = true;
       this.draggingPolygonPoint = false;
       this.dragged = false;
       this.dragStartX = x;
       this.dragStartY = y;
-      console.log(this.selection)
     },
     startDraggingPolygonPoint(uuid, pid, addition, x, y, zone) {
       if (!this.selection.includes(uuid)) {
@@ -374,7 +379,7 @@ export const useMainStore = defineStore({
     },
     moveDragging(x, y, snap, zoomLevel) {
       // console.log('move Dragging HERE?');
-      console.log(snap)
+      // console.log(snap)
       if (!this.dragging) return;
       let dx = x - this.dragStartX;
       let dy = y - this.dragStartY;

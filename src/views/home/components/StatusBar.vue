@@ -2,7 +2,7 @@
   <div class="c-status-bar">
     <div class="left-container">
       <span class="hint" v-if="selection.length">
-        {{ selection.length }} objects selected
+        {{ totalSeatsCount }} objects
       </span>
 
       <span v-if="selectionIsPolygon">
@@ -175,6 +175,32 @@ export default {
     return { tool, selection, zoomTransform, dragging, plan };
   },
   computed: {
+    totalSeatsCount() {
+      let seats = 0;
+      let qa = 0;
+      for (const z of this.plan.zones) {
+        for (const s of z.rows) {
+          seats += s.seats.length;
+        }
+        for (const a of z.areas) {
+          if (a.shape === 'roundTable') {
+            seats += a.roundTable.seats.length;
+          } else if (a.shape === 'rectangleTable') {
+            seats += a.rectangleTable.seats.length;
+          } else if (a.shape === 'gaSquare') {
+            qa++;
+          } else if (a.shape === 'gaCircle') {
+            qa++;
+          }
+        }
+      }
+      return seats;
+    },
+    selectedSeatsCount() {
+      let seats = 0;
+      let qa = 0;
+      return `Seats: ${seats} | GA Seats: ${qa}`;
+    },
     selectionIsPolygon() {
       if (!this.plan && !this.plan.zones) return false;
 

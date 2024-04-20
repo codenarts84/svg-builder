@@ -161,9 +161,9 @@ export const usePlanStore = defineStore("plan", {
         try {
           const rowids = [];
           zone = this._plan.zones.find((z) => z.uuid === zone);
-          console.log(rows);
+          // console.log(rows);
           for (const rix of [...Array(rows).keys()]) {
-            console.log(rix)
+            // console.log(rix)
             let row = {};
             if (rix % 2 === 0) {
               row = {
@@ -481,12 +481,12 @@ export const usePlanStore = defineStore("plan", {
     },
 
     renumberSeats(rowIds, numbering, startAt, reversed) {
-      console.log('aaaaaaaaaaaaa')
+      // console.log('aaaaaaaaaaaaa')
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid) && r.seats.length) {
             const numbers = numbering.compute(r.seats, startAt);
-            console.log(r.seats, numbers);
+            // console.log(r.seats, numbers);
             r.seats.forEach((s) => {
               s.seat_number = reversed ? numbers.pop() : numbers.shift();
               s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
@@ -597,7 +597,7 @@ export const usePlanStore = defineStore("plan", {
             uuid: uuid(),
           };
           for (const [six, spos] of seats.entries()) {
-            console.log(six, spos);
+            // console.log(six, spos);
             row.seats.push({
               seat_number: (six + 1).toString(),
               seat_guid: uuid(),

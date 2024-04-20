@@ -1,38 +1,20 @@
 <template>
-  <AppToolbar
-    :importSVG="importSVG"
-    :zoomIn="zoomIn"
-    :setTransfrom="setTransfrom"
-    :zoomOut="zoomOut"
-    :zoomTo="zoomTo"
-    :textL="textL"
-    :textR="textR"
-    :textC="textC"
-    :addTextField="addTextField"
-    :addRectangle="addRectangle"
-    :addEllipse="addEllipse"
-    :removeItem="removeItem"
-    :downloadSVG="handleDownloadSVG"
-    :onImportClick="onImportClick"
-  />
-  <v-layout
-    style="
+  <AppToolbar :importSVG="importSVG" :zoomIn="zoomIn" :setTransfrom="setTransfrom"
+    :zoomOut="zoomOut" :zoomTo="zoomTo" :textL="textL" :textR="textR"
+    :textC="textC" :addTextField="addTextField" :addRectangle="addRectangle"
+    :addEllipse="addEllipse" :removeItem="removeItem"
+    :downloadSVG="handleDownloadSVG" :onImportClick="onImportClick" />
+  <v-layout style="
       height: calc(100vh - 50px);
       /* top: 50px; */
       /* position: absolute; */
       width: calc(100% - 300px);
-    "
-  >
+    ">
     <RightNav />
     <div class="main-pan">
-      <HandMenu
-        :addTextField="addTextField"
-        :addEllipse="addEllipse"
-        :addRectangle="addRectangle"
-        :textR="textR"
-        :textL="textL"
-        :textC="textC"
-      />
+      <HandMenu :addTextField="addTextField" :addEllipse="addEllipse"
+        :addRectangle="addRectangle" :textR="textR" :textL="textL"
+        :textC="textC" />
       <!-- <MainZone style="padding: 100px"></MainZone> -->
       <!-- <Toolbar></Toolbar> -->
       <Plan ref="planref"></Plan>
@@ -82,7 +64,7 @@ const addTextField = () => TestEdt.value.addTextField();
 const onImportClick = () => TestEdt.value.onImportClick();
 const handleDownloadSVG = () => {
   if (TestEdt.value) {
-    console.log(TestEdt.value);
+    // console.log(TestEdt.value);
     TestEdt.value.downloadSVG();
   } else {
     console.error("TestEdt component is not yet mounted or available.");

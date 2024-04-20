@@ -467,6 +467,7 @@ export default {
     },
     selectionBoundary() {
       const bboxes = this.selectionBoxes;
+      // console.log('selectionBoundary??', bboxes);
       if (bboxes.length === 0) return null;
       const minx = Math.min(...bboxes.map((s) => s.x));
       const miny = Math.min(...bboxes.map((s) => s.y));
@@ -512,7 +513,7 @@ export default {
       () => this.tool,
       (newValue, oldValue) => {
         if (!oldValue || newValue !== oldValue) {
-          console.log("This is the tool", this.tool, oldValue, newValue);
+          // console.log("This is the tool", this.tool, oldValue, newValue);
           this.drawing = false;
           this.selecting = false;
           this.rowBlockDrawing = false;
@@ -526,7 +527,7 @@ export default {
   unmounted() {
     // window.removeEventListener("resize", this.createZoom);
     window.removeEventListener("keydown", this.hotkey);
-    console.log("unMounted");
+    // console.log("unMounted");
     this.unwatch();
     this.unwatchTool();
   },
@@ -606,12 +607,13 @@ export default {
         (drawPos.y - this.resizingOriginY) *
         (drawPos.y - this.resizingOriginY)
       );
-      console.log(this.resizingStartDistance);
+      // console.log(this.resizingStartDistance);
       return true;
     },
 
     startDragging(uuid, zone, event) {
-      console.log('startdragging here!!!')
+      // console.log('startdragging here!!!')
+      // console.log(store.selection);
       if (!this.svg) return;
       if (event) {
         const svgbox = this.getSvgRect();
@@ -660,8 +662,7 @@ export default {
         return;
       }
       const svgbox = this.getSvgRect(); //this.getSvgRect();
-      console.log(svgbox);
-
+      // console.log(svgbox);
 
       const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
       switch (this.tool) {
@@ -838,7 +839,7 @@ export default {
                   const mid = Math.ceil(len / 2);
                   const width = 120 - 10;
                   const height = 40;
-                  console.log('sdh,', idx)
+                  // console.log('sdh,', idx)
                   let x;
                   // if (len % 2 === 0) {
                   x = (width / (mid - 1)) * (idx % mid);
@@ -847,7 +848,7 @@ export default {
                   //   x = (width / (mid - 1 - Math.floor(idx / mid))) * (idx % mid);
                   // }
                   const y = idx < mid ? -20 : 60;
-                  console.log('width, height', x, y)
+                  // console.log('width, height', x, y)
 
                   const uid = uuid();
                   return {
@@ -1065,7 +1066,9 @@ export default {
         let angle = -Math.atan(
           (this.rotatingOriginX - pos.x) / (this.rotatingOriginY - pos.y)
         );
-        if (event.shiftKey) {
+
+        if (event.shiftKey || this.bSnap2Grid) {
+          // console.log('rotating')
           // Snap to 5° intervals
           if (angle < 0) angle += 2 * Math.PI;
           angle -= angle % ((5 / 180) * Math.PI);
@@ -1097,6 +1100,7 @@ export default {
       switch (this.tool) {
         case "select":
         case "seatselect":
+          // console.log('plan mousemove')
           if (store.dragging) {
             store.moveDragging(
               pos.x,
@@ -1109,10 +1113,14 @@ export default {
             this.selectingCurrentY = pos.y;
 
             let uuids = [];
+            // console.log([...uuids]);
             const xmin = Math.min(this.selectingStartX, this.selectingCurrentX);
             const ymin = Math.min(this.selectingStartY, this.selectingCurrentY);
             const xmax = Math.max(this.selectingStartX, this.selectingCurrentX);
             const ymax = Math.max(this.selectingStartY, this.selectingCurrentY);
+            // console.log(uuids, xmin, ymin, xmax, ymax);
+
+
             for (const z of this.plan.zones) {
               if (this.lockedZones.includes(z.uuid)) continue;
               for (const r of z.rows) {
@@ -1144,14 +1152,8 @@ export default {
                 }
               }
             }
+            // console.log(this.selectedZone)
 
-            // console.log(
-            //   "mousemove",
-            //   uuids,
-            //   this.selectedZone,
-            //   event.shiftKey,
-            //   store.selectedZone
-            // );
             store.setSelection(uuids, this.selectedZone, event.shiftKey);
           } else {
             return false;
@@ -1303,7 +1305,9 @@ export default {
       const interval = new Date().getTime() - this.lastMouseUp;
       this.lastMouseUp = new Date().getTime();
       switch (this.tool) {
+        case "select":
         case "seatselect":
+          // console.log('mouseup here')
           if (store.dragging) {
             store.stopDragging();
           } else if (this.selecting) {
@@ -1352,66 +1356,70 @@ export default {
                 }
               }
             }
-            // console.log("Selectseat", uuids, this.selectedZone, event.shiftKey);
 
+            // console.log('SeatSelect', uuids, this.selectedZone);
             store.setSelection(uuids, this.selectedZone, event.shiftKey);
+            // console.log("Selectseat here");
+            // console.log(store.selection)
             return true;
           }
           return false;
-        case "select":
-          if (store.dragging) {
-            store.stopDragging();
-          } else if (this.selecting) {
-            this.selecting = false;
-            let uuids = [];
-            const xmin = Math.min(this.selectingStartX, this.selectingCurrentX);
-            const ymin = Math.min(this.selectingStartY, this.selectingCurrentY);
-            const xmax = Math.max(this.selectingStartX, this.selectingCurrentX);
-            const ymax = Math.max(this.selectingStartY, this.selectingCurrentY);
-            for (const z of this.plan.zones) {
-              if (this.lockedZones.includes(z.uuid)) continue;
-              for (const r of z.rows) {
-                for (const s of r.seats) {
-                  if (
-                    z.position.x +
-                    r.position.x +
-                    s.position.x +
-                    (s.radius || 10) >=
-                    xmin &&
-                    z.position.x +
-                    r.position.x +
-                    s.position.x -
-                    (s.radius || 10) <=
-                    xmax &&
-                    z.position.y +
-                    r.position.y +
-                    s.position.y +
-                    (s.radius || 10) >=
-                    ymin &&
-                    z.position.y +
-                    r.position.y +
-                    s.position.y -
-                    (s.radius || 10) <=
-                    ymax &&
-                    !uuids.includes(r.uuid)
-                  ) {
-                    uuids.push(r.uuid);
-                  }
-                }
-              }
-              for (const a of z.areas) {
-                if (testOverlap(a, z, xmin, ymin, xmax, ymax)) {
-                  // console.log("HERE??");
-                  uuids.push(a.uuid);
-                }
-              }
-            }
+        // case "select":
+        //   // console.log('plan select')
+        //   if (store.dragging) {
+        //     store.stopDragging();
+        //   } else if (this.selecting) {
+        //     this.selecting = false;
+        //     let uuids = [];
+        //     const xmin = Math.min(this.selectingStartX, this.selectingCurrentX);
+        //     const ymin = Math.min(this.selectingStartY, this.selectingCurrentY);
+        //     const xmax = Math.max(this.selectingStartX, this.selectingCurrentX);
+        //     const ymax = Math.max(this.selectingStartY, this.selectingCurrentY);
+        //     for (const z of this.plan.zones) {
+        //       if (this.lockedZones.includes(z.uuid)) continue;
+        //       for (const r of z.rows) {
+        //         for (const s of r.seats) {
+        //           if (
+        //             z.position.x +
+        //             r.position.x +
+        //             s.position.x +
+        //             (s.radius || 10) >=
+        //             xmin &&
+        //             z.position.x +
+        //             r.position.x +
+        //             s.position.x -
+        //             (s.radius || 10) <=
+        //             xmax &&
+        //             z.position.y +
+        //             r.position.y +
+        //             s.position.y +
+        //             (s.radius || 10) >=
+        //             ymin &&
+        //             z.position.y +
+        //             r.position.y +
+        //             s.position.y -
+        //             (s.radius || 10) <=
+        //             ymax &&
+        //             !uuids.includes(r.uuid)
+        //           ) {
+        //             uuids.push(r.uuid);
+        //           }
+        //         }
+        //       }
+        //       for (const a of z.areas) {
+        //         if (testOverlap(a, z, xmin, ymin, xmax, ymax)) {
+        //           // console.log("HERE??");
+        //           uuids.push(a.uuid);
+        //         }
+        //       }
+        //     }
 
-            // console.log("Select", uuids, this.selectedZone, event.shiftKey);
-            store.setSelection(uuids, this.selectedZone, event.shiftKey);
-            return true;
-          }
-          return false;
+        //     // console.log(uuids, this.selectedZone);
+        //     // console.log("Select", uuids, this.selectedZone, event.shiftKey);
+        //     store.setSelection(uuids, this.selectedZone, event.shiftKey);
+        //     return true;
+        //   }
+        //   return false;
         case "rectangle":
         case "circle":
         case "ellipse":
@@ -1759,7 +1767,7 @@ export default {
           viewportHeight / this.plan.size.height
         )
         : 1;
-      console.log("here`````````````````");
+      // console.log("here`````````````````");
       this.zoom = d3
         .zoom()
         .scaleExtent([
@@ -1844,7 +1852,7 @@ export default {
       const svg = d3.select(this.svg).call(this.zoom);
       svg.on("touchmove.zoom", null);
 
-      console.log("successed", this.zoom);
+      // console.log("successed", this.zoom);
     },
 
     hotkey(event) {
@@ -2042,22 +2050,22 @@ export default {
     },
 
     scaleBy(temp, factor) {
-      console.log(temp, factor);
+      // console.log(temp, factor);
       d3.select(temp).transition().call(this.zoom.scaleBy, factor);
     },
 
     scaleTo(temp, factor) {
-      console.log(temp, factor);
+      // console.log(temp, factor);
       d3.select(temp).transition().call(this.zoom.scaleTo, factor);
     },
 
-    testFunc() {
-      console.log("This is the test Func");
-    },
+    // testFunc() {
+    //   console.log("This is the test Func");
+    // },
   },
 
   mounted() {
-    console.log("Mounted");
+    // console.log("Mounted");
     this.createZoom();
     // window.addEventListener("resize", this.createZoom);
     window.addEventListener("keydown", this.hotkey);
@@ -2103,9 +2111,13 @@ export default {
       <ZoneComponent v-for="z in plan.zones" :zone="z" :key="z.uuid"
         :startDragging="startDragging"
         :startDraggingPolygonPoint="startDraggingPolygonPoint"></ZoneComponent>
-      <rect class="selection-box" v-for="b in selectionBoxesVisible"
+      <!-- <rect class="selection-box" v-for="b in selectionBoxesVisible"
         :x="b.x - 1.5" :y="b.y - 1.5" :width="b.width + 3" :height="b.height + 3"
-        :key="b" fill="none"></rect>
+        :key="b" fill="none"></rect> -->
+
+      <circle class="selection-box" v-for="b in selectionBoxesVisible" :key="b"
+        :cx="b.x + 10" :cy="b.y + 10" fill="none" r="10"></circle>
+
       <line class="selection-rotate-handle-connector"
         v-if="selection.length && selectionBoundary" :x1="rotateHandle.x"
         :y1="rotateHandle.y" :x2="rotatingOriginX
