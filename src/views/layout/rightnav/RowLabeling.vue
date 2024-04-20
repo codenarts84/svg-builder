@@ -11,9 +11,9 @@
           <!-- <v-btn @click="changeRow(0)">{{ rowsLabel[0] }}</v-btn>
           <v-btn @click="changeRow(1)">{{ rowsLabel[1] }}</v-btn>
           <v-btn @click="changeRow(2)">{{ rowsLabel[2] }}</v-btn> -->
-          <select class="toolbox-input" @input="setSeatNumbering($event)">
-            <option v-for="numbering in seatNumberings" :key="numbering"
-              option-label="label" name="seat_numbering"
+          <select class="toolbox-input" @input="setRowNumbering($event)">
+            <option v-for="numbering in rowNumberings" :key="numbering"
+              option-label="label" name="row_numbering"
               :value="numbering.id ? numbering.id : null">
               {{ numbering.label }}
             </option>
@@ -40,7 +40,7 @@
 </style>
 
 <script>
-import { SEAT_NUMBERINGS } from '@/lib/numbering';
+import { ROW_NUMBERINGS, SEAT_NUMBERINGS } from '@/lib/numbering';
 import { useSeatFormatStore } from '@/stores/seatFormat';
 import { usePlanStore } from '@/stores/plan';
 
@@ -57,7 +57,7 @@ export default ({
   data() {
     return {
       // selectedItem: this.rowsLabel[0]
-      seatNumberings: SEAT_NUMBERINGS
+      rowNumberings: ROW_NUMBERINGS
     }
   },
   props: {
@@ -67,9 +67,9 @@ export default ({
     handleChange(newValue) {
       console.log(newValue)
     },
-    setSeatNumbering(val) {
-      let numbering = SEAT_NUMBERINGS.find(n => n.id === val.target.value);
-      this.planstore.renumberSeats(this.rows.map(r => r.uuid), numbering, 1, false)
+    setRowNumbering(val) {
+      let numbering = ROW_NUMBERINGS.find(n => n.id === val.target.value);
+      this.planstore.renumberRows(this.rows.map(r => r.uuid), numbering, 1, false)
     }
   }
 })

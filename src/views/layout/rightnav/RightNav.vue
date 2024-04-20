@@ -12,7 +12,7 @@
     <v-divider></v-divider>
     <RowLabeling :rows="selectedRows()" />
     <v-divider></v-divider>
-    <SeatLabeling />
+    <SeatLabeling :rows="selectedRows()" />
   </v-navigation-drawer>
 </template>
 
@@ -34,7 +34,6 @@ const plan = ref(computed(() => planstore.plan));
 
 const selectedRows = () => {
   const res = []
-  console.log(selection)
   if (selection.value.length) {
     for (const z of plan.value.zones) {
       for (const r of z.rows) {
