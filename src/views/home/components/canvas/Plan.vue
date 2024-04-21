@@ -506,6 +506,8 @@ export default {
   created() {
     // window.addEventListener("resize", this.createZoom);
     // window.addEventListener("keydown", this.hotkey);
+    window.localStorage.setItem('snap_enabled', true);
+    window.localStorage.setItem('grid_enabled', true);
     this.unwatch = watch(this.planSize, (newValue, oldValue) => {
       if (
         !oldValue ||
@@ -779,7 +781,7 @@ export default {
               position: {
                 x: targetPos.x,
                 y: targetPos.y,
-                r: 20
+                r: 35
               },
               text: {
                 position: { x: 0, y: 0 },
@@ -834,8 +836,8 @@ export default {
               position: {
                 x: targetPos.x - 40,
                 y: targetPos.y - 20,
-                width: 120,
-                height: 40
+                width: 140,
+                height: 60
               },
               text: {
                 position: { x: 0, y: 0 },
@@ -846,8 +848,8 @@ export default {
                 seats: arr.map((item, idx, arr) => {
                   const len = arr.length;
                   const mid = Math.ceil(len / 2);
-                  const width = 120 - 10;
-                  const height = 40;
+                  const width = 140 - 30;
+                  const height = 60;
                   // console.log('sdh,', idx)
                   let x;
                   // if (len % 2 === 0) {
@@ -856,13 +858,13 @@ export default {
                   // else {
                   //   x = (width / (mid - 1 - Math.floor(idx / mid))) * (idx % mid);
                   // }
-                  const y = idx < mid ? -20 : 60;
+                  const y = idx < mid ? -5 : 65;
                   // console.log('width, height', x, y)
 
                   const uid = uuid();
                   return {
                     text: (idx + 1).toString(),
-                    x: x + 5,
+                    x: x + 15,
                     y,
                     r: 10,
                     uid
@@ -1109,6 +1111,71 @@ export default {
       }
       switch (this.tool) {
         case "select":
+          if (store.dragging) {
+            store.moveDragging(
+              pos.x,
+              pos.y,
+              event.shiftKey || this.bSnap2Grid,
+              this.zoomTransform.k
+            );
+          } else if (this.selecting) {
+            this.selectingCurrentX = pos.x;
+            this.selectingCurrentY = pos.y;
+
+            let uuids = [];
+            // console.log([...uuids]);
+            const xmin = Math.min(this.selectingStartX, this.selectingCurrentX);
+            const ymin = Math.min(this.selectingStartY, this.selectingCurrentY);
+            const xmax = Math.max(this.selectingStartX, this.selectingCurrentX);
+            const ymax = Math.max(this.selectingStartY, this.selectingCurrentY);
+            // console.log(uuids, xmin, ymin, xmax, ymax);
+
+
+            for (const z of this.plan.zones) {
+              if (this.lockedZones.includes(z.uuid)) continue;
+              for (const r of z.rows) {
+                for (const s of r.seats) {
+                  if (
+                    z.position.x +
+                    r.position.x +
+                    s.position.x +
+                    (s.radius || 10) >=
+                    xmin &&
+                    z.position.x +
+                    r.position.x +
+                    s.position.x -
+                    (s.radius || 10) <=
+                    xmax &&
+                    z.position.y +
+                    r.position.y +
+                    s.position.y +
+                    (s.radius || 10) >=
+                    ymin &&
+                    z.position.y +
+                    r.position.y +
+                    s.position.y -
+                    (s.radius || 10) <=
+                    ymax &&
+                    !uuids.includes(r.uuid)
+                  ) {
+                    uuids.push(r.uuid);
+                  }
+                }
+              }
+              for (const a of z.areas) {
+                if (testOverlap(a, z, xmin, ymin, xmax, ymax)) {
+                  // console.log("HERE??");
+                  uuids.push(a.uuid);
+                }
+              }
+            }
+
+            // console.log(this.selectedZone)
+            store.setSelection(uuids, this.selectedZone, event.shiftKey);
+          } else {
+            return false;
+          }
+          break;
         case "seatselect":
           // console.log('plan mousemove')
           if (store.dragging) {
@@ -1376,6 +1443,7 @@ export default {
 
             // console.log('SeatSelect', uuids, this.selectedZone);
             store.setSelection(uuids, this.selectedZone, event.shiftKey);
+            console.log(this.selection);
             // console.log("Selectseat here");
             // console.log(store.selection)
             return true;
@@ -1433,6 +1501,7 @@ export default {
 
             // console.log(uuids, this.selectedZone);
             // console.log("Select", uuids, this.selectedZone, event.shiftKey);
+            // console.log(this.selectedZone);
             store.setSelection(uuids, this.selectedZone, event.shiftKey);
             return true;
           }
@@ -2255,7 +2324,7 @@ export default {
           rowDrawingSeats[0].x) /
           rowDrawingSeats.length +
           rowDrawPosition.x +
-          30
+          10
           " :y="(rowDrawingSeats[rowDrawingSeats.length - 1].y -
     rowDrawingSeats[0].y) /
     rowDrawingSeats.length +
@@ -2274,11 +2343,9 @@ export default {
             :cx="rowSeatSpacing * (sid - 1)" :cy="rowSpacing * (rid - 1)" r="10">
           </circle>
         </g>
-        <rect v-if="rowBlockSeats + rowBlockRows > 0" :x="10" :y="-50" width="50"
-          height="25" fill="#00c"></rect>
-        <text v-if="rowBlockSeats + rowBlockRows > 0" :x="33" :y="-50 + 12.5"
-          text-anchor="middle" fill="#fff" dy=".3em">
-          {{ rowBlockRows }} × {{ rowBlockSeats }}
+        <text v-if="rowBlockRows * rowBlockSeats > 0" :x="10" :y="-30"
+          fill="black" dy=".3em" style="z-index: 99">
+          {{ rowBlockRows }} × {{ rowBlockSeats }} Seats
         </text>
         <!-- <text v-if="rowBlockRows * rowBlockSeats > 0" :x="10" :y="-30"
           fill="black" dy=".3em" style="z-index: 99">
@@ -2328,11 +2395,15 @@ export default {
           fill="black" dy=".3em" style="z-index: 99">
           {{ stgrowBlockRows * stgrowBlockSeats }} Seats
         </text> -->
-        <rect v-if="stgrowBlockSeats + stgrowBlockRows > 0" :x="10" :y="-50"
+        <!-- <rect v-if="stgrowBlockSeats + stgrowBlockRows > 0" :x="10" :y="-50"
           width="50" height="25" fill="#00c"></rect>
         <text v-if="stgrowBlockSeats + stgrowBlockRows > 0" :x="33"
           :y="-50 + 12.5" text-anchor="middle" fill="#fff" dy=".3em">
           {{ stgrowBlockRows }} × {{ stgrowBlockSeats }}
+        </text> -->
+        <text v-if="stgrowBlockRows * stgrowBlockSeats > 0" :x="10" :y="-30"
+          fill="black" dy=".3em" style="z-index: 99">
+          {{ stgrowBlockRows }} × {{ stgrowBlockSeats }} Seats
         </text>
       </g>
 

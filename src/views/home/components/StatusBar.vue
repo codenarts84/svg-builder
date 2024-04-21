@@ -171,6 +171,24 @@ export default {
 
     return { tool, selection, zoomTransform, dragging, plan };
   },
+  methods: {
+    selectionCount(uuids, addition) {
+      let res = 0;
+      if (addition && this.selection.length > 0) {
+        for (const uuid of uuids) {
+          if (!this.selection.includes(uuid)) {
+            res++;
+            this.selection.push(uuid);
+          }
+        }
+      } else {
+        this.selectedZone = addition;
+        this.selection = uuids;
+        res = uuids.length;
+      }
+      return res;
+    }
+  },
   computed: {
     seatStatus() {
       let seats = 0;
@@ -191,7 +209,20 @@ export default {
           }
         }
       }
-      return `Seats: ${seats} (${this.selection.length}) | GA Seats: ${qa * 200}`
+      // let allSelection = this.selection;
+      // let selected = 0;
+      // console.log('seatStatus')
+      // for (const z of this.plan.zones) {
+      //   for (const s of z.rows) {
+      //     const idx = allSelection.findIndex(item => item.uuid === s.uuid);
+      //     if (idx !== -1) {
+      //       selected += s.seats.length;
+      //       allSelection.splice(idx, 1);
+      //     }
+      //   }
+      // }
+      // selected += allSelection.length;
+      return `Seats: ${seats} () | GA Seats: ${qa * 200}`
     },
     totalSeatsCount() {
       let seats = 0;

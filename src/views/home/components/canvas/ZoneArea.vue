@@ -51,7 +51,8 @@
     </g>
 
     <g v-if="area.shape === 'rectangleTable'">
-      <rect :x="0" :y="0" :width="120" :height="40" fill="#ffffff" stroke="#000"
+      <rect :x="0" :y="0" :width="area.position.width"
+        :height="area.position.height" fill="#ffffff" stroke="#000"
         stroke-width="1"></rect>
       <circle v-for="item in area.rectangleTable.seats" :key="item" :cx="item.x"
         :cy="item.y" :r="item.r" stroke="#000" style="stroke-width: 1px;"

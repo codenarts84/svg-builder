@@ -18,8 +18,10 @@ export const useMainStore = defineStore({
   id: "main",
   state: () => ({
     zoomTransform: d3.zoomTransform({ k: 1, x: 0, y: 0 }),
-    grid: (window.localStorage.getItem("grid_enabled") || "false") === "true",
-    snap: (window.localStorage.getItem("snap_enabled") || "false") === "true",
+    // grid: (window.localStorage.getItem("grid_enabled") || "false") === "true",
+    // snap: (window.localStorage.getItem("snap_enabled") || "false") === "true",
+    grid: true,
+    snap: true,
     clipboardAreas: [],
     clipboardRows: [],
     tool: "select",
@@ -132,7 +134,6 @@ export const useMainStore = defineStore({
       // if (uuids.length) console.log('setSelection in store', uuids);
       // console.log(addition, zone, this.selection);
       // console.log('store setselection', uuids, this.selection, addition);
-
 
       this.selection = [];
       if (addition && this.selection.length > 0) {
