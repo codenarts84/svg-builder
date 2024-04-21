@@ -196,7 +196,7 @@ export const useMainStore = defineStore({
     },
 
     startDragging(uuid, addition, x, y, zone) {
-      // console.log('selection start here!!!')
+      console.log('selection start here!!!')
       if (!this.selection.includes(uuid)) {
         if (addition) this.selection.push(uuid);
         else {

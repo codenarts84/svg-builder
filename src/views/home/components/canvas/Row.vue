@@ -7,7 +7,6 @@
         :text-anchor="rowNumberStart.textAnchor"
         :transform="rowNumberStart.transform" fill="#888">{{ rowContent
         }}</text>
-
       <text class="row_lable" v-if="rowNumberEnd" :x="rowNumberEnd.x"
         :y="rowNumberEnd.y" dy=".3em" :font-size="rowNumberEnd.fontSize"
         :text-anchor="rowNumberEnd.textAnchor" :transform="rowNumberEnd.transform"
@@ -15,8 +14,8 @@
       <Seat class="seat_group" v-for="s in row.seats" :seat="s" :key="s.uuid"
         :zone="zone" @startDragging="startDragging" :row_number="row.row_number">
       </Seat>
-      <!-- <path class="selection-line" v-if="selection.includes(row.uuid)"
-      :d="selectionLinePath"></path> -->
+      <path class="selection-line" v-if="selection.includes(row.uuid)"
+        :d="selectionLinePath"></path>
     </g>
   </g>
 </template>
@@ -221,44 +220,46 @@ export default {
   unmounted() { },
   methods: {
     startDragging(uuid, zone, event) {
-      console.log('row start dragging');
+      // console.log('row start dragging');
       if (useMainStore().tool === "select") {
         this.$emit("startDragging", uuid, zone, event);
       }
     },
     mouseup(event) {
+      // console.log('row mouseup')
       if (event.ctrlKey || event.metaKey) {
         // this is a panning event
         return false;
       }
       const interval = new Date().getTime() - this.lastMouseUp;
       this.lastMouseUp = new Date().getTime();
-      // if (useMainStore().tool === "select") {
-      if (!useMainStore().dragged) {
-        useMainStore().toggleSelection(
-          [this.row.uuid],
-          event.shiftKey,
-          this.zone.uuid
-        );
+      if (useMainStore().tool === "select") {
+        if (!useMainStore().dragged) {
+          useMainStore().toggleSelection(
+            [this.row.uuid],
+            event.shiftKey,
+            this.zone.uuid
+          );
+        }
+        if (useMainStore().dragging) {
+          useMainStore().stopDragging();
+        }
+        return true;
       }
-      if (useMainStore().dragging) {
-        useMainStore().stopDragging();
-      }
-      return true;
-      // }
-      // return false;
+      return false;
     },
     mousedown(event) {
+      // console.log('row mousedown')
       if (event.ctrlKey || event.metaKey) {
         // this is a panning event
         return false;
       }
-      // if (useMainStore().tool === "select") {
-      this.$emit("startDragging", this.row.uuid, this.zone, event);
-      event.stopPropagation();
-      return true;
-      // }
-      // return false;
+      if (useMainStore().tool === "select") {
+        this.$emit("startDragging", this.row.uuid, this.zone, event);
+        event.stopPropagation();
+        return true;
+      }
+      return false;
     },
 
 

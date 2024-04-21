@@ -158,9 +158,14 @@ export default {
   computed: {
     mainclasses() {
       return {
-        movable: this.tool === "select" || this.tool === "seatselect",
+        // move cursor
+        movable: this.tool === "select",
         "zoom-transform": true,
       };
+    },
+
+    currentToolStatus() {
+      return this.tool === "seatselect" ? false : true;
     },
 
     selectionIncludesNoSeats() {
@@ -397,6 +402,7 @@ export default {
                 ...r.seats.map((s) => s.position.y + (s.radius || 10))
               );
               res.push({
+                bStatus: false,
                 visible: false,
                 x: z.position.x + r.position.x + minx,
                 y: z.position.y + r.position.y + miny,
@@ -407,6 +413,7 @@ export default {
             for (const s of r.seats) {
               if (this.selection.includes(s.uuid)) {
                 res.push({
+                  bStatus: false,
                   visible: true,
                   x:
                     z.position.x +
@@ -458,6 +465,7 @@ export default {
               abox.x += z.position.x;
               abox.y += z.position.y;
               abox.visible = true;
+              abox.bStatus = true;
               res.push(abox);
             }
           }
@@ -1063,17 +1071,18 @@ export default {
       );
       const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
 
-      if (this.rotating) {
+      if (this.rotating && this.tool !== "seatselect") {
         let angle = -Math.atan(
           (this.rotatingOriginX - pos.x) / (this.rotatingOriginY - pos.y)
         );
 
-        if (event.shiftKey || this.bSnap2Grid) {
-          // console.log('rotating')
-          // Snap to 5° intervals
-          if (angle < 0) angle += 2 * Math.PI;
-          angle -= angle % ((5 / 180) * Math.PI);
-        }
+        // rotate-setting
+        // if (event.shiftKey || this.bSnap2Grid) {
+        // console.log('rotating')
+        // Snap to 5° intervals
+        if (angle < 0) angle += 2 * Math.PI;
+        angle -= angle % ((5 / 180) * Math.PI);
+        // }
         if (pos.y > this.rotatingOriginY) angle += Math.PI;
         const store = useMainStore();
         store.moveRotating(
@@ -1182,8 +1191,10 @@ export default {
           break;
         case "row":
           if (!this.rowDrawing) return false;
-          if (event.shiftKey || this.bSnap2Grid) {
-            // Snap to 5° intervals
+          // rotate-setting
+          // if (event.shiftKey || this.bSnap2Grid) {
+          // Snap to 5° intervals
+          {
             const dx = pos.x - this.drawingStartX;
             const dy = pos.y - this.drawingStartY;
             let angle = (-Math.atan(dx / dy) / Math.PI) * 180;
@@ -1204,10 +1215,11 @@ export default {
             this.drawingCurrentY =
               this.drawingStartY +
               Math.sign(dy) * distance * Math.cos((angle / 180) * Math.PI);
-          } else {
-            this.drawingCurrentX = pos.x;
-            this.drawingCurrentY = pos.y;
           }
+          // } else {
+          //   this.drawingCurrentX = pos.x;
+          //   this.drawingCurrentY = pos.y;
+          // }
           break;
         case "rows":
           if (!this.rowBlockDrawing) return false;
@@ -1236,8 +1248,11 @@ export default {
             break;
           }
           if (!this.polygonDrawing) return false;
-          if (event.shiftKey || this.bSnap2Grid) {
-            // Snap to 5° intervals
+
+          // rotate-setting
+          // if (event.shiftKey || this.bSnap2Grid) {
+          // Snap to 5° intervals
+          {
             const dx =
               pos.x - this.polygonPoints[this.polygonPoints.length - 1].x;
             const dy =
@@ -1260,10 +1275,11 @@ export default {
             this.drawingCurrentY =
               this.polygonPoints[this.polygonPoints.length - 1].y +
               Math.sign(dy) * distance * Math.cos((angle / 180) * Math.PI);
-          } else {
-            this.drawingCurrentX = pos.x;
-            this.drawingCurrentY = pos.y;
           }
+          // } else {
+          //   this.drawingCurrentX = pos.x;
+          //   this.drawingCurrentY = pos.y;
+          // }
           break;
       }
     },
@@ -1306,7 +1322,7 @@ export default {
       const interval = new Date().getTime() - this.lastMouseUp;
       this.lastMouseUp = new Date().getTime();
       switch (this.tool) {
-        case "select":
+        // case "select":
         case "seatselect":
           // console.log('mouseup here')
           if (store.dragging) {
@@ -1365,62 +1381,62 @@ export default {
             return true;
           }
           return false;
-        // case "select":
-        //   // console.log('plan select')
-        //   if (store.dragging) {
-        //     store.stopDragging();
-        //   } else if (this.selecting) {
-        //     this.selecting = false;
-        //     let uuids = [];
-        //     const xmin = Math.min(this.selectingStartX, this.selectingCurrentX);
-        //     const ymin = Math.min(this.selectingStartY, this.selectingCurrentY);
-        //     const xmax = Math.max(this.selectingStartX, this.selectingCurrentX);
-        //     const ymax = Math.max(this.selectingStartY, this.selectingCurrentY);
-        //     for (const z of this.plan.zones) {
-        //       if (this.lockedZones.includes(z.uuid)) continue;
-        //       for (const r of z.rows) {
-        //         for (const s of r.seats) {
-        //           if (
-        //             z.position.x +
-        //             r.position.x +
-        //             s.position.x +
-        //             (s.radius || 10) >=
-        //             xmin &&
-        //             z.position.x +
-        //             r.position.x +
-        //             s.position.x -
-        //             (s.radius || 10) <=
-        //             xmax &&
-        //             z.position.y +
-        //             r.position.y +
-        //             s.position.y +
-        //             (s.radius || 10) >=
-        //             ymin &&
-        //             z.position.y +
-        //             r.position.y +
-        //             s.position.y -
-        //             (s.radius || 10) <=
-        //             ymax &&
-        //             !uuids.includes(r.uuid)
-        //           ) {
-        //             uuids.push(r.uuid);
-        //           }
-        //         }
-        //       }
-        //       for (const a of z.areas) {
-        //         if (testOverlap(a, z, xmin, ymin, xmax, ymax)) {
-        //           // console.log("HERE??");
-        //           uuids.push(a.uuid);
-        //         }
-        //       }
-        //     }
+        case "select":
+          // console.log('plan select')
+          if (store.dragging) {
+            store.stopDragging();
+          } else if (this.selecting) {
+            this.selecting = false;
+            let uuids = [];
+            const xmin = Math.min(this.selectingStartX, this.selectingCurrentX);
+            const ymin = Math.min(this.selectingStartY, this.selectingCurrentY);
+            const xmax = Math.max(this.selectingStartX, this.selectingCurrentX);
+            const ymax = Math.max(this.selectingStartY, this.selectingCurrentY);
+            for (const z of this.plan.zones) {
+              if (this.lockedZones.includes(z.uuid)) continue;
+              for (const r of z.rows) {
+                for (const s of r.seats) {
+                  if (
+                    z.position.x +
+                    r.position.x +
+                    s.position.x +
+                    (s.radius || 10) >=
+                    xmin &&
+                    z.position.x +
+                    r.position.x +
+                    s.position.x -
+                    (s.radius || 10) <=
+                    xmax &&
+                    z.position.y +
+                    r.position.y +
+                    s.position.y +
+                    (s.radius || 10) >=
+                    ymin &&
+                    z.position.y +
+                    r.position.y +
+                    s.position.y -
+                    (s.radius || 10) <=
+                    ymax &&
+                    !uuids.includes(r.uuid)
+                  ) {
+                    uuids.push(r.uuid);
+                  }
+                }
+              }
+              for (const a of z.areas) {
+                if (testOverlap(a, z, xmin, ymin, xmax, ymax)) {
+                  // console.log("HERE??");
+                  uuids.push(a.uuid);
+                }
+              }
+            }
 
-        //     // console.log(uuids, this.selectedZone);
-        //     // console.log("Select", uuids, this.selectedZone, event.shiftKey);
-        //     store.setSelection(uuids, this.selectedZone, event.shiftKey);
-        //     return true;
-        //   }
-        //   return false;
+            // console.log(uuids, this.selectedZone);
+            // console.log("Select", uuids, this.selectedZone, event.shiftKey);
+            store.setSelection(uuids, this.selectedZone, event.shiftKey);
+            return true;
+          }
+          return false;
         case "rectangle":
         case "circle":
         case "ellipse":
@@ -1766,7 +1782,7 @@ export default {
             rotation: 0,
             uuid: newId,
             position: {
-              x: this.plan.size.width / 2 + 100,
+              x: this.plan.size.width / 2,
               y: 100,
             },
             text: {
@@ -2140,16 +2156,26 @@ export default {
       <ZoneComponent v-for="z in plan.zones" :zone="z" :key="z.uuid"
         :startDragging="startDragging"
         :startDraggingPolygonPoint="startDraggingPolygonPoint"></ZoneComponent>
+
+      <g v-for="b in selectionBoxesVisible" :key="b">
+        <rect class="selection-box" v-if="b.bStatus" :x="b.x - 1.5" :y="b.y - 1.5"
+          :width="b.width + 3" :height="b.height + 3" :key="b" fill="none"></rect>
+
+        <circle class="selection-box" :key="b" v-if="!b.bStatus" :cx="b.x + 10"
+          :cy="b.y + 10" fill="none" r="10">
+        </circle>
+      </g>
       <!-- <rect class="selection-box" v-for="b in selectionBoxesVisible"
-        :x="b.x - 1.5" :y="b.y - 1.5" :width="b.width + 3" :height="b.height + 3"
-        :key="b" fill="none"></rect> -->
+        v-if="b.bStatus" :x="b.x - 1.5" :y="b.y - 1.5" :width="b.width + 3"
+        :height="b.height + 3" :key="b" fill="none"></rect>
 
       <circle class="selection-box" v-for="b in selectionBoxesVisible" :key="b"
-        :cx="b.x + 10" :cy="b.y + 10" fill="none" r="10"></circle>
+        v-if="b.bStatus" :cx="b.x + 10" :cy="b.y + 10" fill="none" r="10">
+      </circle> -->
 
       <line class="selection-rotate-handle-connector"
-        v-if="selection.length && selectionBoundary" :x1="rotateHandle.x"
-        :y1="rotateHandle.y" :x2="rotatingOriginX
+        v-if="selection.length && selectionBoundary && currentToolStatus"
+        :x1="rotateHandle.x" :y1="rotateHandle.y" :x2="rotatingOriginX
           ? rotatingOriginX
           : selectionBoundary.x + selectionBoundary.width / 2
           " :y2="rotatingOriginY
@@ -2157,10 +2183,11 @@ export default {
     : selectionBoundary.y + selectionBoundary.height / 2
     "></line>
       <circle class="selection-rotate-handle"
-        v-if="selection.length && selectionBoundary" :cx="rotateHandle.x"
-        :cy="rotateHandle.y" r="5" @mousedown="startRotating"></circle>
+        v-if="selection.length && selectionBoundary && currentToolStatus"
+        :cx="rotateHandle.x" :cy="rotateHandle.y" r="5"
+        @mousedown="startRotating"></circle>
       <circle class="selection-rotate-handle-end"
-        v-if="selection.length && selectionBoundary" :cx="rotatingOriginX
+        v-if="selection.length && selectionBoundary && currentToolStatus" :cx="rotatingOriginX
           ? rotatingOriginX
           : selectionBoundary.x + selectionBoundary.width / 2
           " :cy="rotatingOriginY
@@ -2247,11 +2274,17 @@ export default {
             :cx="rowSeatSpacing * (sid - 1)" :cy="rowSpacing * (rid - 1)" r="10">
           </circle>
         </g>
-        <text v-if="rowBlockRows * rowBlockSeats > 0" :x="10" :y="-30"
+        <rect v-if="rowBlockSeats + rowBlockRows > 0" :x="10" :y="-50" width="50"
+          height="25" fill="#00c"></rect>
+        <text v-if="rowBlockSeats + rowBlockRows > 0" :x="33" :y="-50 + 12.5"
+          text-anchor="middle" fill="#fff" dy=".3em">
+          {{ rowBlockRows }} × {{ rowBlockSeats }}
+        </text>
+        <!-- <text v-if="rowBlockRows * rowBlockSeats > 0" :x="10" :y="-30"
           fill="black" dy=".3em" style="z-index: 99">
           {{ rowBlockRows * rowBlockSeats }} Seats
-        </text>
-        <rect v-if="rowBlockSeats + rowBlockRows >= 7"
+        </text> -->
+        <!-- <rect v-if="rowBlockSeats + rowBlockRows >= 7"
           :x="(rowSeatSpacing * rowBlockSeats) / 2 - 25 - 12.5"
           :y="(rowSpacing * rowBlockRows) / 2 - 25" width="50" height="25"
           fill="#00c"></rect>
@@ -2260,7 +2293,7 @@ export default {
           :y="(rowSpacing * rowBlockRows) / 2 - 12.5" text-anchor="middle"
           fill="#fff" dy=".3em">
           {{ rowBlockRows }} × {{ rowBlockSeats }}
-        </text>
+        </text> -->
       </g>
       <g class="rows-preview" v-if="tool === 'stgrows' && stgrowBlockDrawing"
         :transform="rowBlockTransform">
@@ -2280,7 +2313,7 @@ export default {
               :cy="rowSpacing * (rid - 1)" r="10">
             </circle>
           </g>
-          <rect v-if="stgrowBlockSeats + stgrowBlockRows >= 7"
+          <!-- <rect v-if="stgrowBlockSeats + stgrowBlockRows >= 7"
             :x="(rowSeatSpacing * stgrowBlockSeats) / 2 - 25 - 12.5"
             :y="(rowSpacing * stgrowBlockRows) / 2 - 25" width="50" height="25"
             fill="#00c"></rect>
@@ -2289,11 +2322,17 @@ export default {
             :y="(rowSpacing * stgrowBlockRows) / 2 - 12.5" text-anchor="middle"
             fill="#fff" dy=".3em">
             {{ stgrowBlockRows }} × {{ stgrowBlockSeats }}
-          </text>
+          </text> -->
         </g>
-        <text v-if="stgrowBlockRows * stgrowBlockSeats > 0" :x="10" :y="-30"
+        <!-- <text v-if="stgrowBlockRows * stgrowBlockSeats > 0" :x="10" :y="-30"
           fill="black" dy=".3em" style="z-index: 99">
           {{ stgrowBlockRows * stgrowBlockSeats }} Seats
+        </text> -->
+        <rect v-if="stgrowBlockSeats + stgrowBlockRows > 0" :x="10" :y="-50"
+          width="50" height="25" fill="#00c"></rect>
+        <text v-if="stgrowBlockSeats + stgrowBlockRows > 0" :x="33"
+          :y="-50 + 12.5" text-anchor="middle" fill="#fff" dy=".3em">
+          {{ stgrowBlockRows }} × {{ stgrowBlockSeats }}
         </text>
       </g>
 
