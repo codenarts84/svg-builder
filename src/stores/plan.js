@@ -4,7 +4,7 @@ import Vue, { ref } from "vue";
 import { v4 as uuid } from "uuid";
 import Ajv from "ajv";
 import schema from "../schema/seating-plan.schema.json";
-import { reverse, SEAT_NUMBERINGS } from "@/lib/numbering";
+import { letterCounter, reverse, SEAT_NUMBERINGS } from "@/lib/numbering";
 import { useMainStore } from ".";
 
 // This is certainly not a best practice, but we don't want these two reactive for performance reasons
@@ -131,7 +131,8 @@ export const usePlanStore = defineStore("plan", {
           for (const rix of [...Array(rows).keys()]) {
             const row = {
               position: { x: position.x, y: position.y + rix * row_spacing },
-              row_number: (rix + 1).toString(),
+              // row_number: (rix + 1).toString(),
+              row_number: letterCounter(rix + 1, 'A'),
               row_number_position: "both",
               seats: [],
               uuid: uuid(),

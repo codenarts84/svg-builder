@@ -5,12 +5,12 @@
       <text class="row_lable" v-if="rowNumberStart" :x="rowNumberStart.x"
         :y="rowNumberStart.y" dy=".3em" :font-size="rowNumberStart.fontSize"
         :text-anchor="rowNumberStart.textAnchor"
-        :transform="rowNumberStart.transform" fill="#888">{{ rowContent
+        :transform="rowNumberStart.transform" fill="#888">{{ row.row_number
         }}</text>
       <text class="row_lable" v-if="rowNumberEnd" :x="rowNumberEnd.x"
         :y="rowNumberEnd.y" dy=".3em" :font-size="rowNumberEnd.fontSize"
         :text-anchor="rowNumberEnd.textAnchor" :transform="rowNumberEnd.transform"
-        fill="#888">{{ rowContent }}</text>
+        fill="#888">{{ row.row_number }}</text>
       <Seat class="seat_group" v-for="s in row.seats" :seat="s" :key="s.uuid"
         :zone="zone" @startDragging="startDragging" :row_number="row.row_number">
       </Seat>
