@@ -1,9 +1,6 @@
 <template>
   <div class="c-status-bar">
     <div class="left-container">
-      <span class="hint" v-if="selection.length">
-        Seats: {{ selection.length }}
-      </span>
 
       <span v-if="selectionIsPolygon">
         <span class="hint">Move nodes by dragging</span>
@@ -138,7 +135,7 @@
       </span>
     </div>
     <span class="selected-hint">
-      {{ totalSeatsCount }} Seats
+      {{ seatStatus }}
     </span>
 
     <!-- Additional tool conditions -->
@@ -175,6 +172,27 @@ export default {
     return { tool, selection, zoomTransform, dragging, plan };
   },
   computed: {
+    seatStatus() {
+      let seats = 0;
+      let qa = 0;
+      for (const z of this.plan.zones) {
+        for (const s of z.rows) {
+          seats += s.seats.length;
+        }
+        for (const a of z.areas) {
+          if (a.shape === 'roundTable') {
+            seats += a.roundTable.seats.length;
+          } else if (a.shape === 'rectangleTable') {
+            seats += a.rectangleTable.seats.length;
+          } else if (a.shape === 'gaSquare') {
+            qa++;
+          } else if (a.shape === 'gaCircle') {
+            qa++;
+          }
+        }
+      }
+      return `Seats: ${seats} (${this.selection.length}) | GA Seats: ${qa * 200}`
+    },
     totalSeatsCount() {
       let seats = 0;
       let qa = 0;
