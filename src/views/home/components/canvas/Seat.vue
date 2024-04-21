@@ -61,7 +61,8 @@ export default {
       //   content = this.seat.start_direction;
       // }
       // return content;
-      return letterCounter(this.seat.seat_number, 'A');
+      return this.seat.seat_number;
+      // return letterCounter(this.seat.seat_number, 'A');
     },
     category() {
       return this.getCategoryByName(this.seat.category);

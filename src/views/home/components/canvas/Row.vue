@@ -179,7 +179,6 @@ export default {
       // return letterCounter(parseInt(this.row.row_number), 'A')
       // return letterCounter(parseInt(this.row.row_number), 'A');
       return letterCounter(parseInt(this.row.row_number), 'A');
-      // return this.row.row_number;
     },
 
     classObject() {

@@ -505,6 +505,7 @@ export default {
         newValue.height !== oldValue.height
       ) {
         nextTick(() => {
+          this.createStage();
           this.createZoom(); // Make sure this.createZoom() is compatible with the composition API
         });
       }
@@ -1755,7 +1756,36 @@ export default {
       );
     },
 
+    createStage() {
+      console.log('createStage')
+      const newId = 'b6ea4e4c-4bbc-45eb-ab8d-53fae88c5363#';
+      if (this.plan.zones[0].areas.findIndex(item => item.uuid === newId) === -1) {
+        usePlanStore()
+          .createArea(this.selectedZone, {
+            shape: "text",
+            rotation: 0,
+            uuid: newId,
+            position: {
+              x: this.plan.size.width / 2 + 100,
+              y: 100,
+            },
+            text: {
+              position: { x: 0, y: 0 },
+              color: "#333333",
+              text: "STAGE",
+              size: 40,
+            },
+          })
+          .then(() => {
+            this.$nextTick(() => {
+              this.store.toggleSelection([newId], this.selectedZone, false);
+            });
+          });
+      }
+    },
+
     createZoom() {
+      console.log('createZoom')
       if (!this.svg) return;
 
       const viewportHeight = this.svg.clientHeight;
@@ -2066,6 +2096,7 @@ export default {
 
   mounted() {
     // console.log("Mounted");
+    this.createStage();
     this.createZoom();
     // window.addEventListener("resize", this.createZoom);
     window.addEventListener("keydown", this.hotkey);
@@ -2106,8 +2137,6 @@ export default {
       <rect v-if="grid" :width="plan.size.width" :height="plan.size.height"
         fill="url(#grid)" :cursor="cursor">
       </rect>
-      <text :x="plan.size.width / 2 - 50" y="100" font-size="40"
-        fill="fcfcfc">STAGE</text>
       <ZoneComponent v-for="z in plan.zones" :zone="z" :key="z.uuid"
         :startDragging="startDragging"
         :startDraggingPolygonPoint="startDraggingPolygonPoint"></ZoneComponent>
