@@ -210,15 +210,19 @@ export default {
         }
       }
 
-      let allSelection = this.selection;
       let selected = 0;
-      for (const z of this.plan.zones) {
-        for (const s of z.rows) {
-          const idx = allSelection.findIndex(item => item === s.uuid);
-          if (idx !== -1) {
-            selected += s.seats.length;
+      if (this.tool !== 'seatselect') {
+        let allSelection = this.selection;
+        for (const z of this.plan.zones) {
+          for (const s of z.rows) {
+            const idx = allSelection.findIndex(item => item === s.uuid);
+            if (idx !== -1) {
+              selected += s.seats.length;
+            }
           }
         }
+      } else {
+        selected = this.selection.length;
       }
       return `Seats: ${seats} (${selected}) | GA Seats: ${qa * 200}`
     },
