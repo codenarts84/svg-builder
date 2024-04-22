@@ -169,7 +169,8 @@ export const usePlanStore = defineStore("plan", {
             if (rix % 2 === 0) {
               row = {
                 position: { x: position.x, y: position.y + rix * row_spacing },
-                row_number: (rix + 1).toString(),
+                // row_number: (rix + 1).toString(),
+                row_number: letterCounter(rix + 1, 'A'),
                 row_number_position: "both",
                 seats: [],
                 uuid: uuid(),
@@ -178,6 +179,7 @@ export const usePlanStore = defineStore("plan", {
               for (const six of [...Array(seats).keys()]) {
                 row.seats.push({
                   seat_number: (six + 1).toString(),
+                  // row_number: letterCounter(rix + 1, 'A'),
                   seat_guid: uuid(),
                   uuid: uuid(),
                   position: { x: six * seat_spacing, y: 0 },
@@ -187,7 +189,8 @@ export const usePlanStore = defineStore("plan", {
             } else {
               row = {
                 position: { x: position.x + 10, y: position.y + rix * row_spacing },
-                row_number: (rix + 1).toString(),
+                // row_number: (rix + 1).toString(),
+                row_number: letterCounter(rix + 1, 'A'),
                 row_number_position: "both",
                 seats: [],
                 uuid: uuid(),
@@ -597,7 +600,7 @@ export const usePlanStore = defineStore("plan", {
           zone = this._plan.zones.find((z) => z.uuid === zone);
           const row = {
             position: { x: position.x, y: position.y },
-            row_number: "1",
+            row_number: "A",
             row_number_position: "both",
             seats: [],
             uuid: uuid(),

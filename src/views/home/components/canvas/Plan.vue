@@ -1109,6 +1109,7 @@ export default {
         );
         this.resizingStartDistance = distance;
       }
+
       switch (this.tool) {
         case "select":
           if (store.dragging) {
@@ -1129,7 +1130,6 @@ export default {
             const xmax = Math.max(this.selectingStartX, this.selectingCurrentX);
             const ymax = Math.max(this.selectingStartY, this.selectingCurrentY);
             // console.log(uuids, xmin, ymin, xmax, ymax);
-
 
             for (const z of this.plan.zones) {
               if (this.lockedZones.includes(z.uuid)) continue;
@@ -1297,6 +1297,7 @@ export default {
           this.drawingCurrentY = pos.y;
           break;
         case "stgrows":
+          console.log('stgrows')
           if (!this.stgrowBlockDrawing) return false;
           if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
@@ -2226,21 +2227,21 @@ export default {
         :startDragging="startDragging"
         :startDraggingPolygonPoint="startDraggingPolygonPoint"></ZoneComponent>
 
-      <g v-for="b in selectionBoxesVisible" :key="b">
+      <!-- <g v-for="b in selectionBoxesVisible" :key="b">
         <rect class="selection-box" v-if="b.bStatus" :x="b.x - 1.5" :y="b.y - 1.5"
           :width="b.width + 3" :height="b.height + 3" :key="b" fill="none"></rect>
 
         <circle class="selection-box" :key="b" v-if="!b.bStatus" :cx="b.x + 10"
           :cy="b.y + 10" fill="none" r="10">
         </circle>
-      </g>
-      <!-- <rect class="selection-box" v-for="b in selectionBoxesVisible"
-        v-if="b.bStatus" :x="b.x - 1.5" :y="b.y - 1.5" :width="b.width + 3"
-        :height="b.height + 3" :key="b" fill="none"></rect>
+      </g> -->
+      <rect class="selection-box" v-for="b in selectionBoxesVisible"
+        :x="b.x - 1.5" :y="b.y - 1.5" :width="b.width + 3" :height="b.height + 3"
+        :key="b" fill="none"></rect>
 
       <circle class="selection-box" v-for="b in selectionBoxesVisible" :key="b"
-        v-if="b.bStatus" :cx="b.x + 10" :cy="b.y + 10" fill="none" r="10">
-      </circle> -->
+        :cx="b.x + 10" :cy="b.y + 10" fill="none" r="10">
+      </circle>
 
       <line class="selection-rotate-handle-connector"
         v-if="selection.length && selectionBoundary && currentToolStatus"
