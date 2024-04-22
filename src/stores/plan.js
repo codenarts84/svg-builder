@@ -20,6 +20,7 @@ export const usePlanStore = defineStore("plan", {
         width: 0,
         height: 0,
       },
+      name: "My Charting Board"
     },
     validationErrors: undefined,
     hasUndo: false,
@@ -351,7 +352,28 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
+    modifyTextSize(areas, args) {
+      for (const a of areas) {
+        a.text.size = args;
+      }
+      this.persistPlan();
+    },
+    modifyTextColor(areas, args) {
+      for (const a of areas) {
+        a.text.color = args;
+      }
+      this.persistPlan();
+    },
+
+    modifyText(areas, args) {
+      for (const a of areas) {
+        a.text.text = args;
+      }
+      this.persistPlan();
+    },
+
     modifyAreas(areaIds, args) {
+      console.log(areaIds, args)
       this._plan.zones.forEach((z) => {
         z.areas.forEach((a) => {
           if (areaIds.includes(a.uuid)) {

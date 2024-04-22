@@ -129,6 +129,7 @@ const gaCircleBBox = (area) => {
 
 const textBBox = (area, text, size) => {
   const width = estimateTextWidth(text, size);
+  console.log(width)
   let abox = {
     x: area.position.x + area.text.position.x - width / 2,
     y: area.position.y + area.text.position.y - size / 2,
