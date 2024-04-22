@@ -2239,9 +2239,9 @@ export default {
         :x="b.x - 1.5" :y="b.y - 1.5" :width="b.width + 3" :height="b.height + 3"
         :key="b" fill="none"></rect>
 
-      <circle class="selection-box" v-for="b in selectionBoxesVisible" :key="b"
+      <!-- <circle class="selection-box" v-for="b in selectionBoxesVisible" :key="b"
         :cx="b.x + 10" :cy="b.y + 10" fill="none" r="10">
-      </circle>
+      </circle> -->
 
       <line class="selection-rotate-handle-connector"
         v-if="selection.length && selectionBoundary && currentToolStatus"
