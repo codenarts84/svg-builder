@@ -1,5 +1,5 @@
 <template>
-  <v-btn @click="toggleGrid">
+  <v-btn @click="toggleGrid" :class="grid ? 'current-tool' : ''">
     <v-tooltip activator="parent" location="bottom">Grid</v-tooltip>
     <v-icon v-if="grid == true" color="black" icon="mdi-grid"
       size="large"></v-icon>

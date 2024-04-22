@@ -31,118 +31,6 @@ import { useSeatFormatStore } from "@/stores/seatFormat";
 
 const round = (fl, places) => Number(fl.toFixed(places ? places : 0));
 
-const getRowNumber = (row, end) => {
-  if (
-    row.row_number_position !== "both" &&
-    row.row_number_position !== (end ? "end" : "start")
-  )
-    return null;
-
-  if (row.seats.length == 1) {
-    const distFactor = 2; // Determined by "what looks good?" with lots of real plans
-    const idxedge = end ? row.seats.length - 1 : 0;
-    const linevec = [25, 0];
-    const linelen = Math.sqrt(linevec[0] * linevec[0] + linevec[1] * linevec[1]);
-    const linevec_normed = [
-      round(linevec[0] / linelen, 8), // prevent floating point issues
-      round(linevec[1] / linelen, 8),
-    ];
-
-
-    let x =
-      row.seats[idxedge].position.x +
-      linevec_normed[0] * distFactor * 10;
-    let y =
-      row.seats[idxedge].position.y +
-      linevec_normed[1] * distFactor * 10;
-    let flipped = linevec_normed[0] < 0;
-
-    let transform = "";
-    let theta = -Math.atan(linevec_normed[0] / linevec_normed[1]);
-    theta -= ((Math.sign(theta) >= 0 ? 1 : -1) * Math.PI) / 2; // Do not use Math.sign directly to multiply because Math.sign(0)==0
-    if (Math.abs(Math.abs(theta) - Math.PI / 2) < 0.0001) {
-      // 90°
-      if (linevec_normed[1] > 0 !== end) {
-        // right of stage
-        theta += Math.PI;
-      }
-      flipped = end;
-    }
-    if (Math.abs(theta) > 0.0001) {
-      transform = `rotate(${(theta / Math.PI) * 180}, ${x}, ${y})`;
-    }
-    if (end) {
-      x -= 40;
-    }
-    return {
-      x, y,
-      textAnchor: end ? "end" : "start",
-      transform: transform,
-    }
-  }
-
-  if (row.seats.length < 2) return null;
-
-
-  // To determine the *position* of the row number, we calculate the vector from the second-outmost
-  // seat to the outmost seat and extend it by distFactor times the radius of the outmost seat.
-  const distFactor = 2; // Determined by "what looks good?" with lots of real plans
-  const idxedge = end ? row.seats.length - 1 : 0;
-  const idxcomp = end ? row.seats.length - 2 : 1;
-  const linevec = [
-    row.seats[idxedge].position.x - row.seats[idxcomp].position.x,
-    row.seats[idxedge].position.y - row.seats[idxcomp].position.y,
-  ];
-  const linelen = Math.sqrt(linevec[0] * linevec[0] + linevec[1] * linevec[1]);
-  const linevec_normed = [
-    round(linevec[0] / linelen, 8), // prevent floating point issues
-    round(linevec[1] / linelen, 8),
-  ];
-
-  const x =
-    row.seats[idxedge].position.x +
-    linevec_normed[0] * distFactor * (row.seats[idxedge].radius || 10);
-  const y =
-    row.seats[idxedge].position.y +
-    linevec_normed[1] * distFactor * (row.seats[idxedge].radius || 10);
-
-  // To support upside-down rows properly, we base the text-anchor on the vector, not on the end flag
-  let flipped = linevec_normed[0] < 0;
-
-  // To determine the *rotation* of the row number, we compute the angle between the vector from the
-  // second-outmost seat to the outmost seat and the vertical axis.
-  // We then rotate the result 90° in the direction of the vertical axis, because we want our vector
-  // to be the text's length axis, not it's size axis.
-  // We use atan(), which only returns results between -90° and 90°. This is nice, because it mean
-  // we'll never render text which is upside down, but alwas favor the direction most suitable to read.
-  // The exception is if we have a perfectly vertical row, in which case it is unclear whether -90° or 90°
-  // is easier to read. Visually, it looks nice if the text is rotated in the way that it is correct
-  // "looking from the stage". We don't know where the stage is, so we're assuming the order of the seats
-  // in the row is "left to right" (looking from the seat to the stage), because that's the most likely way
-  // to create the row.
-  let transform = "";
-  let theta = -Math.atan(linevec_normed[0] / linevec_normed[1]);
-  theta -= ((Math.sign(theta) >= 0 ? 1 : -1) * Math.PI) / 2; // Do not use Math.sign directly to multiply because Math.sign(0)==0
-  if (Math.abs(Math.abs(theta) - Math.PI / 2) < 0.0001) {
-    // 90°
-    if (linevec_normed[1] > 0 !== end) {
-      // right of stage
-      theta += Math.PI;
-    }
-    flipped = end;
-  }
-  if (Math.abs(theta) > 0.0001) {
-    transform = `rotate(${(theta / Math.PI) * 180}, ${x}, ${y})`;
-  }
-
-  return {
-    x,
-    y,
-    textAnchor: flipped ? "end" : "start",
-    transform: transform,
-  };
-};
-
 export default {
   name: "SeatComp",
   components: { Seat },
@@ -156,6 +44,7 @@ export default {
     const storeSeatFormat = useSeatFormatStore();
 
     return {
+      tool: store.tool,
       selection,
       seatCur: storeSeatFormat.seatCur
     };
@@ -201,12 +90,11 @@ export default {
       return `translate(${this.row.position.x}, ${this.row.position.y})`;
     },
     rowNumberStart() {
-      const temp = getRowNumber(this.row, false);
-      // console.log('Start', temp);
+      const temp = this.getRowNumber(this.row, false);
       return temp
     },
     rowNumberEnd() {
-      const temp = getRowNumber(this.row, true);
+      const temp = this.getRowNumber(this.row, true);
       // console.log('End', temp);
       return temp
     },
@@ -219,6 +107,143 @@ export default {
   mounted() { },
   unmounted() { },
   methods: {
+    getRowNumber(row, end) {
+      if (
+        row.row_number_position !== "both" &&
+        row.row_number_position !== (end ? "end" : "start")
+      )
+        return null;
+
+      if (row.seats.length == 1) {
+        const distFactor = 2; // Determined by "what looks good?" with lots of real plans
+        const idxedge = end ? row.seats.length - 1 : 0;
+        const linevec = [25, 0];
+        const linelen = Math.sqrt(linevec[0] * linevec[0] + linevec[1] * linevec[1]);
+        const linevec_normed = [
+          round(linevec[0] / linelen, 8), // prevent floating point issues
+          round(linevec[1] / linelen, 8),
+        ];
+
+
+        let x =
+          row.seats[idxedge].position.x +
+          linevec_normed[0] * distFactor * 10;
+        let y =
+          row.seats[idxedge].position.y +
+          linevec_normed[1] * distFactor * 10;
+        let flipped = linevec_normed[0] < 0;
+
+        let transform = "";
+        let theta = -Math.atan(linevec_normed[0] / linevec_normed[1]);
+        theta -= ((Math.sign(theta) >= 0 ? 1 : -1) * Math.PI) / 2; // Do not use Math.sign directly to multiply because Math.sign(0)==0
+        if (Math.abs(Math.abs(theta) - Math.PI / 2) < 0.0001) {
+          // 90°
+          if (linevec_normed[1] > 0 !== end) {
+            // right of stage
+            theta += Math.PI;
+          }
+          flipped = end;
+        }
+        if (Math.abs(theta) > 0.0001) {
+          transform = `rotate(${(theta / Math.PI) * 180}, ${x}, ${y})`;
+        }
+        if (end) {
+          x -= 40;
+        }
+        return {
+          x, y,
+          textAnchor: end ? "end" : "start",
+          transform: transform,
+        }
+      }
+
+      if (row.seats.length < 2) return null;
+
+
+      // To determine the *position* of the row number, we calculate the vector from the second-outmost
+      // seat to the outmost seat and extend it by distFactor times the radius of the outmost seat.
+      const distFactor = 2; // Determined by "what looks good?" with lots of real plans
+      const idxedge = end ? row.seats.length - 1 : 0;
+      const idxcomp = end ? row.seats.length - 2 : 1;
+      const linevec = [
+        row.seats[idxedge].position.x - row.seats[idxcomp].position.x,
+        row.seats[idxedge].position.y - row.seats[idxcomp].position.y,
+      ];
+      const linelen = Math.sqrt(linevec[0] * linevec[0] + linevec[1] * linevec[1]);
+      const linevec_normed = [
+        round(linevec[0] / linelen, 8), // prevent floating point issues
+        round(linevec[1] / linelen, 8),
+      ];
+
+      const x =
+        row.seats[idxedge].position.x +
+        linevec_normed[0] * distFactor * (row.seats[idxedge].radius || 10);
+      const y =
+        row.seats[idxedge].position.y +
+        linevec_normed[1] * distFactor * (row.seats[idxedge].radius || 10);
+
+      // To support upside-down rows properly, we base the text-anchor on the vector, not on the end flag
+      let flipped = linevec_normed[0] < 0;
+
+      // To determine the *rotation* of the row number, we compute the angle between the vector from the
+      // second-outmost seat to the outmost seat and the vertical axis.
+      // We then rotate the result 90° in the direction of the vertical axis, because we want our vector
+      // to be the text's length axis, not it's size axis.
+      // We use atan(), which only returns results between -90° and 90°. This is nice, because it mean
+      // we'll never render text which is upside down, but alwas favor the direction most suitable to read.
+      // The exception is if we have a perfectly vertical row, in which case it is unclear whether -90° or 90°
+      // is easier to read. Visually, it looks nice if the text is rotated in the way that it is correct
+      // "looking from the stage". We don't know where the stage is, so we're assuming the order of the seats
+      // in the row is "left to right" (looking from the seat to the stage), because that's the most likely way
+      // to create the row.
+      let transform = "";
+      let theta = -Math.atan(linevec_normed[0] / linevec_normed[1]);
+      theta -= ((Math.sign(theta) >= 0 ? 1 : -1) * Math.PI) / 2; // Do not use Math.sign directly to multiply because Math.sign(0)==0
+      if (Math.abs(Math.abs(theta) - Math.PI / 2) < 0.0001) {
+        // 90°
+        if (linevec_normed[1] > 0 !== end) {
+          // right of stage
+          theta += Math.PI;
+        }
+        flipped = end;
+      }
+      if (Math.abs(theta) > 0.0001) {
+        transform = `rotate(${(theta / Math.PI) * 180}, ${x}, ${y})`;
+      }
+
+      if (this.tool !== 'stgrows') {
+        return {
+          x,
+          y,
+          textAnchor: flipped ? "end" : "start",
+          transform: transform,
+        };
+      } else {
+        if (this.getRowNumASCII(row.row_number) % 2) {
+          return {
+            x: x,
+            y: y,
+            textAnchor: flipped ? "end" : "start",
+            transform: transform,
+          }
+        }
+        else {
+          return {
+            x: flipped ? x - 10 : x + 15,
+            y: y,
+            textAnchor: flipped ? "end" : "start",
+            transform: transform,
+          }
+        }
+      }
+    },
+    getRowNumASCII(str) {
+      let sum = 0;
+      for (let i = 0; i < str.length; i++) {
+        sum += str.charCodeAt(i); // Add the ASCII value of each character
+      }
+      return str.length % 2 ? sum % 2 : sum % 2 - 1;
+    },
     startDragging(uuid, zone, event) {
       // console.log('row start dragging');
       if (useMainStore().tool === "select") {
