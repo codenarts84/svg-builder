@@ -209,20 +209,18 @@ export default {
           }
         }
       }
-      // let allSelection = this.selection;
-      // let selected = 0;
-      // console.log('seatStatus')
-      // for (const z of this.plan.zones) {
-      //   for (const s of z.rows) {
-      //     const idx = allSelection.findIndex(item => item.uuid === s.uuid);
-      //     if (idx !== -1) {
-      //       selected += s.seats.length;
-      //       allSelection.splice(idx, 1);
-      //     }
-      //   }
-      // }
-      // selected += allSelection.length;
-      return `Seats: ${seats} () | GA Seats: ${qa * 200}`
+
+      let allSelection = this.selection;
+      let selected = 0;
+      for (const z of this.plan.zones) {
+        for (const s of z.rows) {
+          const idx = allSelection.findIndex(item => item === s.uuid);
+          if (idx !== -1) {
+            selected += s.seats.length;
+          }
+        }
+      }
+      return `Seats: ${seats} (${selected}) | GA Seats: ${qa * 200}`
     },
     totalSeatsCount() {
       let seats = 0;
