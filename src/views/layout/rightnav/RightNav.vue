@@ -2,7 +2,8 @@
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
     <v-divider></v-divider>
-    <RowComponent :rows="selected()" />
+    <TextComponent :areas="selectedAreas()" />
+    <RowComponent :rows="selectedRows()" />
     <v-divider></v-divider>
     <ShapeComponent />
     <v-divider></v-divider>
@@ -24,6 +25,7 @@ import SectionLabel from "./SectionLabel.vue";
 import TagsComponent from "./TagsComponent.vue";
 import RowLabeling from "./RowLabeling.vue";
 import SeatLabeling from "./SeatLabeling.vue";
+import TextComponent from './TextComponent.vue';
 import { useMainStore } from "@/stores";
 import { usePlanStore } from '@/stores/plan';
 
@@ -31,6 +33,19 @@ const store = useMainStore();
 const planstore = usePlanStore();
 const selection = ref(computed(() => store.selection));
 const plan = ref(computed(() => planstore.plan));
+
+const selectedAreas = () => {
+  const r = []
+  if (selection.value.length) {
+    for (const z of plan.value.zones) {
+      for (const a of z.areas) {
+        if (selection.value.includes(a.uuid))
+          r.push(a)
+      }
+    }
+  }
+  return r
+}
 
 const selectedRows = () => {
   const res = []

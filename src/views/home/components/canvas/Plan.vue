@@ -746,6 +746,7 @@ export default {
                 position: { x: 0, y: 0 },
                 color: "#333333",
                 text: "Text",
+                size: 16,
               },
             })
             .then(() => {
@@ -1843,7 +1844,7 @@ export default {
     },
 
     createStage() {
-      console.log('createStage')
+      // console.log('createStage')
       const newId = 'b6ea4e4c-4bbc-45eb-ab8d-53fae88c5363#';
       if (this.plan.zones[0].areas.findIndex(item => item.uuid === newId) === -1) {
         usePlanStore()
@@ -1871,7 +1872,7 @@ export default {
     },
 
     createZoom() {
-      console.log('createZoom')
+      // console.log('createZoom')
       if (!this.svg) return;
 
       const viewportHeight = this.svg.clientHeight;
