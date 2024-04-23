@@ -5,19 +5,19 @@
       <v-row style="display: flex; justify-content: center; align-items: center">
         <v-col cols="12" sm="6"> Text </v-col>
         <v-col cols="12" sm="6">
-          <input class="custom-small-text-field" type="text" name="row_spacing"
+          <input class="v-custom-input" type="text" name="row_spacing"
             :value="textValue" @input="setText" />
         </v-col>
         <v-col cols="12" sm="6"> Text size </v-col>
         <v-col cols="12" sm="6">
-          <!-- <v-text-field class="custom-small-text-field" variant="outlined"
+          <!-- <v-text-field class="v-custom-input" variant="outlined"
             type="number" density="compact"></v-text-field> -->
-          <input class="custom-small-text-field" type="number" name="row_spacing"
+          <input class="v-custom-input" type="number" name="row_spacing"
             :value="textSize" @input="setTextSize" />
         </v-col>
         <v-col cols="12" sm="6"> Text color </v-col>
         <v-col cols="12" sm="6">
-          <input class="custom-small-text-field" type="color" name="row_spacing"
+          <input class="v-custom-input" type="color" name="row_spacing"
             :value="textColor" @input="setTextColor" />
         </v-col>
 
@@ -65,19 +65,18 @@ export default defineComponent({
   },
   methods: {
     setTextSize(e) {
-      this.planStore.modifyTextSize(this.areas, e.target.value)
+      console.log(e.target.value, typeof (e.target.value))
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__size: parseInt(e.target.value) })
     },
     setText(e) {
-      console.log(this.areas);
-      this.planStore.modifyText(this.areas, e.target.value)
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__text: e.target.value })
     },
     setTextColor(e) {
-      this.planStore.modifyTextColor(this.areas, e.target.value)
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__color: e.target.value })
     },
   },
   computed: {
     textValue() {
-      console.log(this.areas)
       return groupValue(this.areas, a => a.text ? a.text.text : undefined)
     },
     textSize() {

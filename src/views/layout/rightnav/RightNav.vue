@@ -1,19 +1,25 @@
 <template>
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
+    <RowComponent v-if="selection.length && selectedRows().length"
+      :rows="selectedRows()" />
     <v-divider></v-divider>
-    <TextComponent :areas="selectedAreas()" />
-    <RowComponent :rows="selectedRows()" />
+    <RowLabeling v-if="selection.length && selectedRows().length"
+      :rows="selectedRows()" />
     <v-divider></v-divider>
-    <ShapeComponent />
+    <SeatLabeling v-if="selection.length && selectedSeats().length"
+      :rows="selectedRows()" />
+    <!-- <v-divider></v-divider> -->
+    <!-- <v-divider></v-divider> -->
+    <!-- <ShapeComponent /> -->
     <v-divider></v-divider>
-    <SectionLabel />
+    <TextComponent v-if="selection.length && selectedAreas().length"
+      :areas="selectedAreas()" />
+    <!-- <SectionLabel /> -->
     <v-divider></v-divider>
-    <TagsComponent />
+    <!-- <TagsComponent /> -->
+    <CategoryComponent v-if="selection.length" :seats="selectedSeats()" />
     <v-divider></v-divider>
-    <RowLabeling :rows="selectedRows()" />
-    <v-divider></v-divider>
-    <SeatLabeling :rows="selectedRows()" />
   </v-navigation-drawer>
 </template>
 
@@ -26,6 +32,7 @@ import TagsComponent from "./TagsComponent.vue";
 import RowLabeling from "./RowLabeling.vue";
 import SeatLabeling from "./SeatLabeling.vue";
 import TextComponent from './TextComponent.vue';
+import CategoryComponent from './CategoryComponent.vue'
 import { useMainStore } from "@/stores";
 import { usePlanStore } from '@/stores/plan';
 
@@ -33,6 +40,23 @@ const store = useMainStore();
 const planstore = usePlanStore();
 const selection = ref(computed(() => store.selection));
 const plan = ref(computed(() => planstore.plan));
+
+
+const selectedSeats = () => {
+  const res = []
+  if (selection.value.length) {
+    for (const z of plan.value.zones) {
+      for (const r of z.rows) {
+        for (const s of r.seats) {
+          if (selection.value.includes(r.uuid) || selection.value.includes(s.uuid)) {
+            res.push(s)
+          }
+        }
+      }
+    }
+  }
+  return res
+}
 
 const selectedAreas = () => {
   const r = []

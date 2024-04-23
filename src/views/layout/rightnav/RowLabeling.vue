@@ -5,13 +5,7 @@
       <v-row style="display: flex; justify-content: center; align-items: center">
         <v-col cols="12" sm="6"> Row label </v-col>
         <v-col cols="12" sm="6">
-          <!-- <v-combobox v-model="selectedItem" :items="rowsLabel" label="Select..."
-            @change="handleChange">
-          </v-combobox> -->
-          <!-- <v-btn @click="changeRow(0)">{{ rowsLabel[0] }}</v-btn>
-          <v-btn @click="changeRow(1)">{{ rowsLabel[1] }}</v-btn>
-          <v-btn @click="changeRow(2)">{{ rowsLabel[2] }}</v-btn> -->
-          <select class="toolbox-input" @input="setRowNumbering">
+          <select class="toolbox-input v-custom-input" @input="setRowNumbering">
             <option v-for="numbering in rowNumberings" :key="numbering"
               option-label="label" name="row_numbering"
               :value="numbering.id ? numbering.id : null">
@@ -21,30 +15,47 @@
         </v-col>
         <v-col cols="12" sm="6"> Start At </v-col>
         <v-col cols="12" sm="6">
-          <input class="custom-small-text-field" type="number"
+          <input class="custom-small-text-field v-custom-input" type="number"
             name="row_numbering_start_at"
             :value="rowNumbering ? rowNumbering.startAt : null"
             @input="setRowNumberingStartAt" />
         </v-col>
         <v-col cols="12" sm="6"> Label Direction </v-col>
         <v-col cols="12" sm="6">
-          <input type="checkbox"
-            :value="rowNumbering ? rowNumbering.reversed : false"
-            @change="setRowNumberingReversed" name="row_numbering_reversed" />
-        </v-col>
-        <!-- <v-col cols="12" sm="6"> Row Label Location </v-col>
-        <v-col cols="12" sm="6"> -->
-        <!-- <v-select :items="['Both', 'Right', 'Left']" density="compact">
-          </v-select> -->
-
-        <!-- <select class="toolbox-input" @input="rowLabelStatus">
-            <option v-for="numbering in rowNumberings" :key="numbering"
-              option-label="label" name="row_numbering"
-              :value="numbering.id ? numbering.id : null">
-              {{ numbering.label }}
+          <!-- <select class="v-custom-input" @input="setRowNumberingReversed"
+            :value="rowNumbering ? rowNumbering.reversed : false">
+            <option v-for="label in labelDirection" :value="label.value"
+              :key="label">
+              {{ label.text }}
+            </option>
+          </select> -->
+          <select class="v-custom-input" @input="setRowNumberingReversed">
+            <option v-for="label in labelDirection" :value="label.value"
+              :key="label">
+              {{ label.text }}
             </option>
           </select>
-        </v-col> -->
+        </v-col>
+
+
+        <v-col cols="12" sm="6"> Row Label Location </v-col>
+        <v-col cols="12" sm="6">
+          <select class="toolbox-input v-custom-input"
+            @input="handleLabelLocation">
+            <option v-for="op in labelDisplay" :key="op" :value="op.value">
+              {{ op.text }}
+            </option>
+          </select>
+        </v-col>
+        <v-col cols="12" sm="6"> Skip Letters </v-col>
+        <v-col cols="12" sm="6">
+          <input type="checkbox" />
+        </v-col>
+        <v-col cols="12" sm="6"> Rotate Label with Element </v-col>
+        <v-col cols="12" sm="6">
+          <input type="checkbox" />
+        </v-col>
+
       </v-row>
     </v-container>
   </div>
@@ -61,6 +72,7 @@
 </style>
 
 <script>
+import { ref } from 'vue'
 import { reverse, ROW_NUMBERINGS, SEAT_NUMBERINGS } from '@/lib/numbering';
 import { useSeatFormatStore } from '@/stores/seatFormat';
 import { usePlanStore } from '@/stores/plan';
@@ -102,19 +114,38 @@ export default ({
     return {
       // rowsLabel: seatStore.rowsLabel,
       // changeRow: seatStore.changeRow,
-      planstore
+      planstore,
     }
   },
   data() {
+    const labelDirection = [{
+      text: 'Ascending', value: false
+    }, {
+      text: 'Descending', value: true
+    }]
+    const labelDisplay = [{
+      text: 'None', value: 0, left: false, right: false,
+    }, {
+      text: 'Left', value: 1, left: true, right: false,
+    }, {
+      text: 'Right', value: 2, left: false, right: true,
+    }, {
+      text: 'Both', value: 3, left: true, right: true,
+    }]
     return {
       // selectedItem: this.rowsLabel[0]
-      rowNumberings: ROW_NUMBERINGS
+      rowNumberings: ROW_NUMBERINGS,
+      labelDirection,
+      labelDisplay
     }
   },
   props: {
     rows: Array
   },
   computed: {
+    rowLabel() {
+      return groupValue(this.rows, row => (row.row_label || ''))
+    },
     rowLabelStatus() {
       if (this.rowNumberPositionStart() && this.rowNumberPositionEnd()) return "Both";
       else if (this.rowNumberPositionStart()) return "Left";
@@ -142,16 +173,51 @@ export default ({
       }
       return undefined
     },
+
     rowNumberPositionStart() {
       return groupValue(this.rows, row => row.row_number_position === 'start' || row.row_number_position === 'both')
     },
     rowNumberPositionEnd() {
       return groupValue(this.rows, row => row.row_number_position === 'end' || row.row_number_position === 'both')
     },
+    seatNumbering() {
+      return groupValue(this.rows, row => {
+        for (let numbering of SEAT_NUMBERINGS) {
+          try {
+            let guessedStartAt = numbering.findStartAt(row.seats[0].seat_number)
+            let guessedNumbers = numbering.compute(row.seats, guessedStartAt)
+            if (row.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx]).length === row.seats.length) {
+              return { scheme: numbering, reversed: false, startAt: guessedStartAt }
+            }
+
+            let seatsReversed = reverse(row.seats)
+            let guessedStartAtRev = numbering.findStartAt(seatsReversed[0].seat_number)
+            let guessedNumbersRev = numbering.compute(seatsReversed, guessedStartAtRev)
+            if (seatsReversed.filter((s, idx) => s.seat_number === guessedNumbersRev[idx]).length === row.seats.length) {
+              return { scheme: numbering, reversed: true, startAt: guessedStartAtRev }
+            }
+          } catch (e) {
+            console.warn('Crash while trying to test seat numbering schema', numbering, e)
+          }
+        }
+        return undefined
+      })
+      // skip ?
+    },
   },
   methods: {
     handleChange(newValue) {
       // console.log(newValue)
+    },
+    handleLabelLocation(e) {
+
+      const val = this.labelDisplay.filter(i => i.value == e.target.value)[0];
+      this.setRowNumberPositionStart(val.left);
+      this.setRowNumberPositionEnd(val.right);
+
+    },
+    setLabelDirection(e) {
+
     },
     setRowNumbering(val) {
       let numbering = ROW_NUMBERINGS.find(n => n.id === val.target.value);
@@ -164,10 +230,22 @@ export default ({
       }
     },
     setRowNumberingReversed(val) {
-      console.log(val.target.value)
-      if (this.seatNumbering) {
-        this.planstore.renumberRows(this.rows.map(r => r.uuid), this.rowNumbering.scheme, this.rowNumbering.startAt, val.target.value)
+      const value = val.target.value === 'true';
+      if (this.rowNumbering) {
+        this.planstore.renumberRows(this.rows.map(r => r.uuid), this.rowNumbering.scheme, this.rowNumbering.startAt, value)
       }
+    },
+    setRowNumberPositionStart(val) {
+      if (this.rowNumberPositionEnd)
+        this.planstore.modifyRows({ rowIds: this.rows.map(r => r.uuid), row_number_position: val ? 'both' : 'end' })
+      else
+        this.planstore.modifyRows({ rowIds: this.rows.map(r => r.uuid), row_number_position: val ? 'start' : null })
+    },
+    setRowNumberPositionEnd(val) {
+      if (this.rowNumberPositionStart)
+        this.planstore.modifyRows({ rowIds: this.rows.map(r => r.uuid), row_number_position: val ? 'both' : 'start' })
+      else
+        this.planstore.modifyRows({ rowIds: this.rows.map(r => r.uuid), row_number_position: val ? 'end' : null })
     },
   }
 })

@@ -5,21 +5,20 @@
       <v-row style="display: flex; justify-content: center; align-items: center">
         <v-col cols="12" sm="6"> Number of seats </v-col>
         <v-col cols="12" sm="6">
-          <v-text-field class="custom-small-text-field" variant="outlined"
-            type="number" density="compact"
-            @input="handle_seat_num_changed"></v-text-field>
+          <input class="custom-small-text-field v-custom-input" type="number"
+            name="number_seats" :value="numberSeats" @input="setNumberSeats" />
         </v-col>
         <v-col cols="12" sm="6"> Curve </v-col>
         <v-col cols="12" sm="6">
           <!-- <v-text-field class="custom-small-text-field" variant="outlined"
             type="number" density="compact"></v-text-field> -->
-          <input class="custom-small-text-field" type="number" name="row_spacing"
-            :value="seatSpacing" @input="setSeatSpacing" />
+          <input class="custom-small-text-field v-custom-input" type="number"
+            name="row_spacing" :value="seatSpacing" @input="setSeatSpacing" />
         </v-col>
         <v-col cols="12" sm="6"> Seats spacing </v-col>
         <v-col cols="12" sm="6">
-          <input class="custom-small-text-field" type="number" name="row_spacing"
-            :value="seatSpacing" @input="setSeatSpacing" />
+          <input class="custom-small-text-field v-custom-input" type="number"
+            name="row_spacing" :value="seatSpacing" @input="setSeatSpacing" />
         </v-col>
 
         <!-- <v-col cols="12" sm="6">
@@ -33,6 +32,15 @@
 </template>
 
 <style>
+.v-custom-input {
+  width: 100%;
+  padding: 8px 16px;
+  border: 2px solid light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
+  border-radius: 5px;
+  outline: none;
+  transition: 0.15s opacity cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .v-input__details {
   display: none;
 }
@@ -103,7 +111,6 @@ export default defineComponent({
   },
   methods: {
     onChange(e) {
-      console.log(e.target.value)
       this.testInput = e.target.value;
     },
 
@@ -116,11 +123,17 @@ export default defineComponent({
       this.planStore.respaceRows(this.rows.map(r => r.uuid), e.target.value)
     },
     setSeatSpacing(e) {
-      console.log(e)
       this.planStore.respaceSeats(this.rows.map(r => r.uuid), e.target.value)
     },
+    setNumberSeats() {
+    }
   },
   computed: {
+    numberSeats() {
+      return groupValue(this.rows, row => {
+        return row.seats.length;
+      })
+    },
     seatSpacing() {
       return groupValue(this.rows, row => {
         let minSpace = null;
