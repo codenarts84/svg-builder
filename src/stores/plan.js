@@ -35,6 +35,7 @@ export const usePlanStore = defineStore("plan", {
     getCategoryByName: (state) => (category) => {
       return state._plan.categories.find((c) => c.name === category);
     },
+    categories: (state) => state._plan.categories
   },
   actions: {
     persistPlan(skipHistory = false) {
@@ -300,7 +301,7 @@ export const usePlanStore = defineStore("plan", {
       this.hasRedo = false;
     },
 
-    modifyRows(rowIds, args) {
+    modifyRows({ rowIds, ...args }) {
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid)) {
@@ -325,7 +326,7 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
-    modifySeats(seatIds, args) {
+    modifySeats({ seatIds, ...args }) {
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           r.seats.forEach((s) => {
@@ -372,8 +373,8 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
-    modifyAreas(areaIds, args) {
-      console.log(areaIds, args)
+    modifyAreas({ areaIds, ...args }) {
+      // console.log(areaIds, args)
       this._plan.zones.forEach((z) => {
         z.areas.forEach((a) => {
           if (areaIds.includes(a.uuid)) {
@@ -489,6 +490,7 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
+
     renumberRows(rowIds, numbering, startAt, reversed) {
       const rows = [];
       this._plan.zones.forEach((z) => {
@@ -512,7 +514,6 @@ export const usePlanStore = defineStore("plan", {
     },
 
     renumberSeats(rowIds, numbering, startAt, reversed) {
-      // console.log('aaaaaaaaaaaaa')
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid) && r.seats.length) {

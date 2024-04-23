@@ -16,7 +16,8 @@
           <!-- <v-btn @click="changeSeat(0)">{{ seatsLabel[0] }}</v-btn>
           <v-btn @click="changeSeat(1)">{{ seatsLabel[1] }}</v-btn>
           <v-btn @click="changeSeat(2)">{{ seatsLabel[2] }}</v-btn> -->
-          <select class="toolbox-input" @input="setSeatNumbering($event)">
+          <select class="toolbox-input v-custom-input"
+            @input="setSeatNumbering($event)">
             <option v-for="numbering in seatNumberings" :key="numbering"
               option-label="label" name="seat_numbering"
               :value="numbering.id ? numbering.id : null">
@@ -26,21 +27,21 @@
         </v-col>
         <v-col cols="12" sm="6"> Start At </v-col>
         <v-col cols="12" sm="6">
-          <input class="custom-small-text-field" type="number"
+          <input class="custom-small-text-field v-custom-input" type="number"
             name="row_numbering_start_at"
             :value="seatNumbering ? seatNumbering.startAt : null"
             @input="setSeatNumberingStartAt" />
         </v-col>
+
         <v-col cols="12" sm="6"> Label Direction </v-col>
         <v-col cols="12" sm="6">
-          <input type="checkbox"
-            :value="seatNumbering ? seatNumbering.reversed : false"
-            @change="setSeatNumberingReversed" name="seat_numbering_reversed" />
-        </v-col>
-        <v-col cols="12" sm="6"> Seat Label Location </v-col>
-        <v-col cols="12" sm="6">
-          <v-select :items="['Both', 'Right', 'Left']"
-            density="compact"></v-select>
+          <select class="v-custom-input" @input="setSeatNumberingReversed"
+            :value="seatNumbering ? seatNumbering.reversed : false">
+            <option v-for="label in labelDirection" :value="label.value"
+              :key="label">
+              {{ label.text }}
+            </option>
+          </select>
         </v-col>
       </v-row>
     </v-container>
@@ -105,9 +106,25 @@ export default ({
     }
   },
   data() {
+    const labelDirection = [{
+      text: 'Ascending', value: false
+    }, {
+      text: 'Descending', value: true
+    }]
+    const labelDisplay = [{
+      text: 'None', value: 0, left: false, right: false,
+    }, {
+      text: 'Left', value: 1, left: true, right: false,
+    }, {
+      text: 'Right', value: 2, left: false, right: true,
+    }, {
+      text: 'Both', value: 3, left: true, right: true,
+    }]
     return {
       // cur: null
-      seatNumberings: SEAT_NUMBERINGS
+      seatNumberings: SEAT_NUMBERINGS,
+      labelDirection,
+      labelDisplay
     }
   },
 
@@ -149,8 +166,9 @@ export default ({
       }
     },
     setSeatNumberingReversed(val) {
+      const value = val.target.value === 'true';
       if (this.seatNumbering) {
-        this.planStore.renumberSeats(this.rows.map(r => r.uuid), this.seatNumbering.scheme, this.seatNumbering.startAt, val.target.value)
+        this.planStore.renumberSeats(this.rows.map(r => r.uuid), this.seatNumbering.scheme, this.seatNumbering.startAt, value)
       }
     },
     setSeatNumbering(val) {
@@ -159,7 +177,7 @@ export default ({
 
       let numbering = SEAT_NUMBERINGS.find(n => n.id === val.target.value)
       this.planStore.renumberSeats(this.rows.map(r => r.uuid), numbering, 1, false);
-    }
+    },
   }
 })
 </script>
