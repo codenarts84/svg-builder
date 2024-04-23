@@ -7,7 +7,7 @@
     <!-- <v-spacer></v-spacer> -->
 
     <v-toolbar-title :style="toolbarTitleStyle">{{
-      boardStore.board_name
+      boardName
     }}</v-toolbar-title>
 
     <v-toolbar-items class="border-left">

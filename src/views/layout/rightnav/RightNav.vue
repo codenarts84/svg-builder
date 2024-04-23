@@ -9,17 +9,21 @@
     <v-divider></v-divider>
     <SeatLabeling v-if="selection.length && selectedSeats().length"
       :rows="selectedRows()" />
-    <!-- <v-divider></v-divider> -->
-    <!-- <v-divider></v-divider> -->
-    <!-- <ShapeComponent /> -->
+    <v-divider></v-divider>
+    <ShapeComponent />
+    <v-divider></v-divider>
+    <SectionLabel />
+    <!-- <SectionComponent v-if="selection.length && selectedSeats().length"
+      :rows="selectedRows()" /> -->
+    <v-divider></v-divider>
+    <TagsComponent />
     <v-divider></v-divider>
     <TextComponent v-if="selection.length && selectedAreas().length"
       :areas="selectedAreas()" />
-    <!-- <SectionLabel /> -->
     <v-divider></v-divider>
-    <!-- <TagsComponent /> -->
     <CategoryComponent v-if="selection.length" :seats="selectedSeats()" />
     <v-divider></v-divider>
+
   </v-navigation-drawer>
 </template>
 
@@ -33,6 +37,7 @@ import RowLabeling from "./RowLabeling.vue";
 import SeatLabeling from "./SeatLabeling.vue";
 import TextComponent from './TextComponent.vue';
 import CategoryComponent from './CategoryComponent.vue'
+import SectionComponent from './SectionComponent.vue';
 import { useMainStore } from "@/stores";
 import { usePlanStore } from '@/stores/plan';
 

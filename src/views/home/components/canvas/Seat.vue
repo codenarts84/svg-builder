@@ -3,7 +3,8 @@
     <circle :id="seatID" :fill="seatColor" :cx="seat.position.x"
       :cy="seat.position.y" :r="radius" :stroke="category ? 'none' : '#000'"
       style="stroke-width: 1px" data-seat-label="" data-row-label=""
-      data-section-label="" data-section-abv="" data-category-name=""
+      :data-section-label="seat.section_label"
+      :data-section-abv="seat.section_abv" data-category-name=""
       data-category-abv="">
     </circle>
     <text class="seat_label" :fill="textColor ? 'black' : 'black'"
