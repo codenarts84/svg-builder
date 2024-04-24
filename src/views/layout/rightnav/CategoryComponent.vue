@@ -3,14 +3,14 @@
     <CategoryLabelModel />
     <v-container>
       <v-row style="display: flex; justify-content: center; align-items: center">
-        <v-col cols="12" sm="6"> Category </v-col>
-        <v-col cols="12" sm="6">
-          <select class="v-custom-input" @input="setCategory">
-            <option v-for="op in category" :key="op">
-              <!-- {{ op.name }} -->
-              <div class="category-color">{{ op.name }}</div>
+        <v-col cols="12" sm="12">
+          <!-- <select class="v-custom-input" @input="setCategory">
+            <option v-for="op in category" :key="op" :value="op.name">
+              {{ op.name }}
             </option>
-          </select>
+          </select> -->
+          <DropDown :selection="selectedItem" :options="category"
+            :setCategory="setCategory" />
         </v-col>
       </v-row>
     </v-container>
@@ -27,10 +27,12 @@
 import { defineComponent, computed, ref, withDirectives } from 'vue';
 import { usePlanStore } from '@/stores/plan';
 import CategoryLabelModel from './CategoryLabelModel.vue'
+import DropDown from '../../home/components/DropDown.vue';
 
 export default {
   components: {
-    CategoryLabelModel
+    CategoryLabelModel,
+    DropDown
   },
   props: {
     seats: Array,
@@ -49,12 +51,13 @@ export default {
   },
   methods: {
     setCategory(val) {
-      this.planStore.modifySeats({ seatIds: this.seats.map(s => s.uuid), category: val.target.value })
+      this.planStore.modifySeats({ seatIds: this.seats.map(s => s.uuid), category: val })
     },
   },
   computed: {
+    selectedItem() {
+      return this.category.find(i => this.seats[0].category === i.name)
+    }
   }
 };
 </script>
-
-<style></style>
