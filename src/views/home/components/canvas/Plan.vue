@@ -361,6 +361,7 @@ export default {
       }
     },
     stgrowBlockSeats() {
+      console.log('stgrowBlockSeats')
       if (this.stgrowBlockDrawing) {
         return Math.ceil(
           Math.abs(this.drawingCurrentX - this.drawingStartX) /
@@ -371,6 +372,7 @@ export default {
       }
     },
     stgrowBlockSeats1() {
+      console.log('stgrowBlockSeats1')
       if (this.stgrowBlockDrawing) {
         return Math.ceil(
           Math.abs(this.drawingCurrentX - this.drawingStartX) /
@@ -549,6 +551,7 @@ export default {
       store.setZoomTransform(t);
     },
 
+
     startRotating(event) {
       if (!this.svg) return;
       if (event.ctrlKey || event.metaKey) {
@@ -623,7 +626,7 @@ export default {
     },
 
     startDragging(uuid, zone, event) {
-      // console.log('startdragging here!!!')
+      console.log('startdragging here!!!')
       // console.log(store.selection);
       if (!this.svg) return;
       if (event) {
@@ -1079,6 +1082,7 @@ export default {
           (this.rotatingOriginX - pos.x) / (this.rotatingOriginY - pos.y)
         );
 
+
         // rotate-setting
         // if (event.shiftKey || this.bSnap2Grid) {
         // console.log('rotating')
@@ -1093,6 +1097,8 @@ export default {
           this.rotatingOriginY,
           angle - this.rotatingStartAngle
         );
+
+        // console.log('sec', angle, this.rotatingStartAngle);
         this.rotatingStartAngle = angle;
         this.rotatingHandleX = pos.x;
         this.rotatingHandleY = pos.y;

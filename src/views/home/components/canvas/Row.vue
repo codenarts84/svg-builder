@@ -5,12 +5,14 @@
       <text class="row_lable" v-if="rowNumberStart" :x="rowNumberStart.x"
         :y="rowNumberStart.y" dy=".3em" :font-size="rowNumberStart.fontSize"
         :text-anchor="rowNumberStart.textAnchor"
-        :transform="rowNumberStart.transform" fill="#888">{{ row.row_number
+        :transform="rotate ? rowNumberStart.transform : ''" fill="#888">{{
+          row.row_number
         }}</text>
       <text class="row_lable" v-if="rowNumberEnd" :x="rowNumberEnd.x"
         :y="rowNumberEnd.y" dy=".3em" :font-size="rowNumberEnd.fontSize"
-        :text-anchor="rowNumberEnd.textAnchor" :transform="rowNumberEnd.transform"
-        fill="#888">{{ row.row_number }}</text>
+        :text-anchor="rowNumberEnd.textAnchor"
+        :transform="rotate ? rowNumberEnd.transform : ''" fill="#888">{{
+          row.row_number }}</text>
       <Seat class="seat_group" v-for="s in row.seats" :seat="s" :key="s.uuid"
         :zone="zone" @startDragging="startDragging" :row_number="row.row_number">
       </Seat>
@@ -88,6 +90,9 @@ export default {
     },
     transform() {
       return `translate(${this.row.position.x}, ${this.row.position.y})`;
+    },
+    rotate() {
+      return this.row.rotate_label;
     },
     rowNumberStart() {
       const temp = this.getRowNumber(this.row, false);
