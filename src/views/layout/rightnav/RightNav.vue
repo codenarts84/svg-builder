@@ -4,19 +4,20 @@
     <RowComponent v-if="selection.length && selectedRows().length"
       :rows="selectedRows()" />
     <v-divider></v-divider>
+    <ShapeComponent v-if="selection.length && selectedRows().length"
+      :rows="selectedRows()" />
+    <v-divider></v-divider>
     <RowLabeling v-if="selection.length && selectedRows().length"
       :rows="selectedRows()" />
     <v-divider></v-divider>
     <SeatLabeling v-if="selection.length && selectedSeats().length"
       :rows="selectedRows()" />
     <v-divider></v-divider>
-    <ShapeComponent />
-    <v-divider></v-divider>
-    <SectionLabel />
+    <SectionLabel v-if="selection.length" :rows="selectedRows()" />
     <!-- <SectionComponent v-if="selection.length && selectedSeats().length"
       :rows="selectedRows()" /> -->
     <v-divider></v-divider>
-    <TagsComponent />
+    <TagsComponent v-if="selection.length" :rows="selectedRows()" />
     <v-divider></v-divider>
     <TextComponent v-if="selection.length && selectedAreas().length"
       :areas="selectedAreas()" />

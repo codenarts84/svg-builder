@@ -49,11 +49,11 @@
         </v-col>
         <v-col cols="12" sm="6"> Skip Letters </v-col>
         <v-col cols="12" sm="6">
-          <input type="checkbox" />
+          <input type="text" class="v-custom-input" @input="handleSkipLetter" />
         </v-col>
         <v-col cols="12" sm="6"> Rotate Label with Element </v-col>
         <v-col cols="12" sm="6">
-          <input type="checkbox" />
+          <input type="checkbox" v-model="rotate" @change="handle_rotate" />
         </v-col>
 
       </v-row>
@@ -72,10 +72,11 @@
 </style>
 
 <script>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { reverse, ROW_NUMBERINGS, SEAT_NUMBERINGS } from '@/lib/numbering';
 import { useSeatFormatStore } from '@/stores/seatFormat';
 import { usePlanStore } from '@/stores/plan';
+import { useMainStore } from '@/stores/index';
 
 const groupValue = (rows, mapper) => {
   let lastFound = undefined
@@ -111,10 +112,12 @@ export default ({
   setup() {
     const seatStore = useSeatFormatStore();
     const planstore = usePlanStore();
+    const mainStore = useMainStore();
     return {
       // rowsLabel: seatStore.rowsLabel,
       // changeRow: seatStore.changeRow,
       planstore,
+      mainStore,
     }
   },
   data() {
@@ -122,7 +125,7 @@ export default ({
       text: 'Ascending', value: false
     }, {
       text: 'Descending', value: true
-    }]
+    }];
     const labelDisplay = [{
       text: 'None', value: 0, left: false, right: false,
     }, {
@@ -131,12 +134,14 @@ export default ({
       text: 'Right', value: 2, left: false, right: true,
     }, {
       text: 'Both', value: 3, left: true, right: true,
-    }]
+    }];
+    const rotate = ref(false);
     return {
       // selectedItem: this.rowsLabel[0]
       rowNumberings: ROW_NUMBERINGS,
       labelDirection,
-      labelDisplay
+      labelDisplay,
+      rotate
     }
   },
   props: {
@@ -206,6 +211,12 @@ export default ({
     },
   },
   methods: {
+    handle_rotate() {
+      this.planstore.setRotateLabel(this.rows.map(i => i.uuid), this.rotate);
+    },
+    handleSkipLetter(e) {
+      // this.rowNumberings = this.rowNumbering.filter(item => !e.target.value.split(',').includes(item))
+    },
     handleChange(newValue) {
       // console.log(newValue)
     },

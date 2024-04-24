@@ -11,7 +11,8 @@
             type="number"
             density="compact"
           ></v-text-field> -->
-          <input class="custom-small-text-field" type="number" name="rotate" />
+          <input class="v-custom-input" type="number" name="rotate"
+            :value="rotate" @input="handleRotate" />
         </v-col>
       </v-row>
     </v-container>
@@ -27,3 +28,22 @@
   padding: 5px;
 }
 </style>
+
+<script setup>
+import { defineProps, computed } from 'vue'
+import { usePlanStore } from '@/stores/plan.js';
+
+const planStore = usePlanStore();
+
+
+const props = defineProps({
+  rows: Array
+})
+
+const rotate = computed(() => {
+})
+
+const handleRotate = (e) => {
+  (props.rows.map(i => i.uuid), e.target.value);
+}
+</script>

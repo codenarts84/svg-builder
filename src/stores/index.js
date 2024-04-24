@@ -36,6 +36,7 @@ export const useMainStore = defineStore({
     dragStartX: 0,
     dragStartY: 0,
     plan: planStore.plan,
+    section_label: window.localStorage.getItem('section_label') ? JSON.parse(window.localStorage.getItem('section_label')) : []
   }),
 
   getters: {
@@ -68,6 +69,7 @@ export const useMainStore = defineStore({
   },
 
   actions: {
+
     loadPlan(plan) {
       // console.log(plan);
       const temp = usePlanStore();
@@ -83,6 +85,17 @@ export const useMainStore = defineStore({
     toggleSnap() {
       this.snap = !this.snap;
       window.localStorage.setItem("snap_enabled", this.snap ? "true" : "false");
+    },
+
+    setSectionLabel(s) {
+      this.section_label = s;
+      window.localStorage.setItem("section_label", JSON.stringify(s));
+    },
+
+    removeSectionLabel(id) {
+      console.log(id, 'okay')
+      this.section_label = this.section_label.filter(i => i.id !== id)
+      window.localStorage.setItem("sectin_label", this.section_label);
     },
 
     disableGrid() {

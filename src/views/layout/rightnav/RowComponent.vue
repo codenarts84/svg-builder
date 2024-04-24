@@ -5,8 +5,9 @@
       <v-row style="display: flex; justify-content: center; align-items: center">
         <v-col cols="12" sm="6"> Number of seats </v-col>
         <v-col cols="12" sm="6">
-          <input class="custom-small-text-field v-custom-input" type="number"
-            name="number_seats" :value="numberSeats" @input="setNumberSeats" />
+          <!-- <input class="custom-small-text-field v-custom-input" type="number"
+            name="number_seats" :value="numberSeats" @input="setNumberSeats" /> -->
+          <v-btn @click="addSeat">Add Seat</v-btn>
         </v-col>
         <v-col cols="12" sm="6"> Curve </v-col>
         <v-col cols="12" sm="6">
@@ -125,7 +126,13 @@ export default defineComponent({
     setSeatSpacing(e) {
       this.planStore.respaceSeats(this.rows.map(r => r.uuid), e.target.value)
     },
-    setNumberSeats() {
+    setNumberSeats(e) {
+      if (e.target.value > 0) {
+        this.planStore.changeNumberSeats(this.rows.map(r => r.uuid), e.target.value)
+      }
+    },
+    addSeat() {
+      this.planStore.addSeat(this.rows.map(r => r.uuid));
     }
   },
   computed: {
@@ -135,7 +142,7 @@ export default defineComponent({
       })
     },
     seatSpacing() {
-      return groupValue(this.rows, row => {
+      return Math.floor(groupValue(this.rows, row => {
         let minSpace = null;
         for (let si = 1; si < row.seats.length; si++) {
           let space = round(Math.sqrt(
@@ -147,7 +154,7 @@ export default defineComponent({
           }
         }
         return minSpace ? minSpace : 25;
-      });
+      }));
     },
 
     rowSpacing() {

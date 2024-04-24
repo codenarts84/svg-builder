@@ -138,6 +138,7 @@ export const usePlanStore = defineStore("plan", {
               row_number_position: "both",
               seats: [],
               uuid: uuid(),
+              // rotation: 0
             };
             for (const six of [...Array(seats).keys()]) {
               row.seats.push({
@@ -176,6 +177,7 @@ export const usePlanStore = defineStore("plan", {
                 row_number_position: "both",
                 seats: [],
                 uuid: uuid(),
+                // rotation: 0
               }
 
               for (const six of [...Array(seats).keys()]) {
@@ -196,6 +198,7 @@ export const usePlanStore = defineStore("plan", {
                 row_number_position: "both",
                 seats: [],
                 uuid: uuid(),
+                // rotation: 0
               };
               for (const six of [...Array(seats - 1).keys()]) {
                 row.seats.push({
@@ -426,7 +429,6 @@ export const usePlanStore = defineStore("plan", {
             let newnumber = "?";
             for (let numbering of SEAT_NUMBERINGS) {
               try {
-                numbering = SEAT_NUMBERINGS.find((n) => n.id === "alpha");
                 let guessedStartAt = numbering.findStartAt(
                   r.seats[0].seat_number
                 );
@@ -490,6 +492,20 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
+    addSectionLabel(rowIds, label, abv) {
+      console.log(label, abv)
+      this._plan.zones.forEach((z) => {
+        z.rows.forEach((r) => {
+          if (rowIds.includes(r.uuid) && r.seats.length) {
+            r.seats.forEach((s) => {
+              s.section_label = label;
+              s.section_abv = abv;
+            });
+          }
+        });
+      });
+      this.persistPlan();
+    },
 
     renumberRows(rowIds, numbering, startAt, reversed) {
       const rows = [];
@@ -527,6 +543,111 @@ export const usePlanStore = defineStore("plan", {
         });
       });
       this.persistPlan();
+    },
+
+    changeNumberSeats(rowIds, value) {
+      value = Math.max(1, value);
+      this._plan.zones.forEach((z) => {
+        z.rows.forEach((r) => {
+          if (rowIds.includes(r.uuid) && r.seats.length) {
+            // add seats
+            if (r.seats.length === value) return;
+            const cnt = Math.abs(r.seats.length - value);
+            if (r.seats.length < value) {
+              let newPositions = []
+              if (r.seats.length === 1) {
+                for (let i = 0; i < cnt; i++) {
+                  newPositions.push({ x: r.seats[0].x + 25 * (i + 1), y: r.seats[0].y })
+                  console.log('newposition', r.seats.length)
+                }
+              } else {
+                const dx =
+                  r.seats[r.seats.length - 1].position.x -
+                  r.seats[r.seats.length - 2].position.x;
+                const dy =
+                  r.seats[r.seats.length - 1].position.y -
+                  r.seats[r.seats.length - 2].position.y;
+                for (let i = 0; i < cnt; i++) {
+                  newPositions.push({
+                    x: r.seats[r.seats.length - 1].position.x + dx,
+                    y: r.seats[r.seats.length - 1].position.y + dy,
+                  });
+                }
+              }
+              let newnumber = [];
+              for (let numbering of SEAT_NUMBERINGS) {
+                try {
+                  let guessedStartAt = numbering.findStartAt(r.seats[0].seat_number)
+
+                  let guessedNumbers = numbering.compute(r.seats, guessedStartAt);
+                  if (
+                    r.seats.filter(
+                      (s, idx) => s.seat_number === guessedNumbers[idx]
+                    ).length === r.seats.length
+                  ) {
+                    let newNumbers = numbering.compute(
+                      r.seats.concat([{}]),
+                      guessedStartAt
+                    );
+                    newnumber = newNumbers.slice(newNumbers.length - 1, newNumbers.length - 1 + cnt);
+                    break;
+                  }
+
+                  let seatsReversed = [...r.seats].reverse();
+                  let guessedStartAtRev = numbering.findStartAt(
+                    seatsReversed[0].seat_number
+                  );
+                  let guessedNumbersRev = numbering.compute(
+                    seatsReversed,
+                    guessedStartAtRev
+                  );
+                  if (
+                    seatsReversed.filter(
+                      (s, idx) => s.seat_number === guessedNumbersRev[idx]
+                    ).length === r.seats.length
+                  ) {
+                    let newNumbers = numbering.compute(
+                      seatsReversed.concat([{}]),
+                      guessedStartAtRev
+                    );
+                    for (const s of r.seats) {
+                      s.seat_number = newNumbers.pop();
+                      s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+                    }
+                    newnumber = newNumbers.slice(0, cnt);
+                    break;
+                  }
+                } catch (e) {
+                  console.warn(
+                    "Crash while trying to test seat numbering schema",
+                    numbering,
+                    e
+                  );
+                }
+              }
+
+              for (let i = 0; i < cnt; i++) {
+                r.seats.push({
+                  seat_number: newnumber[i],
+                  seat_guid: `${z.zone_id}-${r.row_number}-${newnumber[i]}`,
+                  uuid: uuid(),
+                  position: newPositions[i],
+                  category: r.seats[r.seats.length - 1].category,
+                });
+              }
+            }
+            // remove seats
+            else {
+              // r.seats = r.seats.slice(0, cnt);
+              for (let i = 0; i < cnt; i++) {
+                r.seats.pop();
+              }
+            }
+
+            this.persistPlan();
+          }
+        })
+      })
     },
 
     renumberCircleSeats(rowIds, count) {
@@ -627,6 +748,7 @@ export const usePlanStore = defineStore("plan", {
             row_number_position: "both",
             seats: [],
             uuid: uuid(),
+            // rotation: 0,
           };
           for (const [six, spos] of seats.entries()) {
             // console.log(six, spos);
@@ -741,6 +863,34 @@ export const usePlanStore = defineStore("plan", {
       if (width) this._plan.size.width = width;
       if (height) this._plan.size.height = height;
       window.dispatchEvent(new Event("resize"));
+      this.persistPlan();
+    },
+
+    setTag(rowIds, value) {
+      this._plan.zones.forEach((z) => {
+        z.rows.forEach((r) => {
+          if (rowIds.includes(r.uuid) && r.seats.length > 0) {
+            r.seats.forEach(s => {
+              s.tag_name = value;
+            })
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+    rowRotate(rowIds, angle) {
+      console.log('rotate+')
+    },
+
+    setRotateLabel(rowIds, value) {
+      this._plan.zones.forEach((z) => {
+        z.rows.forEach((r) => {
+          if (rowIds.includes(r.uuid)) {
+            r.rotate_label = value;
+          }
+        });
+      });
       this.persistPlan();
     },
 

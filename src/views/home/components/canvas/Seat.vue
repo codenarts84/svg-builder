@@ -12,6 +12,9 @@
       font-size="10px" font-family="sans-serif" dy=".3em">
       {{ textContent }}
     </text>
+    <circle v-if="seat.tag_name" :fill="seatColor" :cx="seat.position.x"
+      :cy="seat.position.y + 7" :r="3" :stroke="'#000'" style="stroke-width: 1px">
+    </circle>
   </g>
 </template>
 <script>
