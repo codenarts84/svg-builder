@@ -939,13 +939,14 @@ export const usePlanStore = defineStore("plan", {
         if (this._plan.categories.filter((c) => c.name === newname).length) {
           // duplicate name, ignore
           // todo: error message
-        }
-        cat.name = newname;
-        for (const z of this._plan.zones) {
-          for (const r of z.rows) {
-            for (const s of r.seats) {
-              if (s.category === oldname) {
-                s.category = newname;
+        } else {
+          cat.name = newname;
+          for (const z of this._plan.zones) {
+            for (const r of z.rows) {
+              for (const s of r.seats) {
+                if (s.category === oldname) {
+                  s.category = newname;
+                }
               }
             }
           }

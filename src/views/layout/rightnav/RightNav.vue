@@ -1,6 +1,9 @@
 <template>
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
+
+    <CategoryComponent v-if="selection.length" :seats="selectedSeats()" />
+    <v-divider></v-divider>
     <RowComponent v-if="selection.length && selectedRows().length"
       :rows="selectedRows()" />
     <v-divider></v-divider>
@@ -22,8 +25,7 @@
     <TextComponent v-if="selection.length && selectedAreas().length"
       :areas="selectedAreas()" />
     <v-divider></v-divider>
-    <CategoryComponent v-if="selection.length" :seats="selectedSeats()" />
-    <v-divider></v-divider>
+
 
   </v-navigation-drawer>
 </template>
