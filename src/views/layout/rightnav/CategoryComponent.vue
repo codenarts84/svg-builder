@@ -1,14 +1,15 @@
 <template>
   <div style="padding: 15px 10px; text-align: left">
-    <h4>Category</h4>
+    <CategoryLabelModel />
     <v-container>
       <v-row style="display: flex; justify-content: center; align-items: center">
         <v-col cols="12" sm="6"> Category </v-col>
         <v-col cols="12" sm="6">
           <select class="v-custom-input" @input="setCategory">
-            <option v-for="op in category" :key="op">{{ op.name }}</option>
-            <!-- <option>1</option>
-            <option>2</option> -->
+            <option v-for="op in category" :key="op">
+              <!-- {{ op.name }} -->
+              <div class="category-color">{{ op.name }}</div>
+            </option>
           </select>
         </v-col>
       </v-row>
@@ -25,8 +26,12 @@
 <script>
 import { defineComponent, computed, ref, withDirectives } from 'vue';
 import { usePlanStore } from '@/stores/plan';
+import CategoryLabelModel from './CategoryLabelModel.vue'
 
-export default defineComponent({
+export default {
+  components: {
+    CategoryLabelModel
+  },
   props: {
     seats: Array,
   },
@@ -49,5 +54,7 @@ export default defineComponent({
   },
   computed: {
   }
-});
+};
 </script>
+
+<style></style>
