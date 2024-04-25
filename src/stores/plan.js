@@ -403,6 +403,7 @@ export const usePlanStore = defineStore("plan", {
     },
 
     addSeat(rowIds) {
+      console.log('addseat')
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid) && r.seats.length) {
@@ -410,7 +411,7 @@ export const usePlanStore = defineStore("plan", {
 
             // Figure out new position
             if (r.seats.length === 1) {
-              newposition = { x: r.seats[0].x + 25, y: r.seats[0].y };
+              newposition = { x: r.seats[0].position.x + 25, y: r.seats[0].position.y };
             } else {
               const dx =
                 r.seats[r.seats.length - 1].position.x -
@@ -443,6 +444,7 @@ export const usePlanStore = defineStore("plan", {
                     guessedStartAt
                   );
                   newnumber = newNumbers[newNumbers.length - 1];
+                  console.log('newNumber', newNumbers)
                   break;
                 }
 
@@ -479,9 +481,11 @@ export const usePlanStore = defineStore("plan", {
               }
             }
 
+
             r.seats.push({
               seat_number: newnumber,
-              seat_guid: `${z.zone_id}-${r.row_number}-${newnumber}`,
+              // seat_guid: `${z.zone_id}-${r.row_number}-${newnumber}`,
+              seat_guid: uuid(),
               uuid: uuid(),
               position: newposition,
               category: r.seats[r.seats.length - 1].category,
@@ -553,12 +557,14 @@ export const usePlanStore = defineStore("plan", {
             // add seats
             if (r.seats.length === value) return;
             const cnt = Math.abs(r.seats.length - value);
+
+
+            let newnumber = [];
             if (r.seats.length < value) {
               let newPositions = []
               if (r.seats.length === 1) {
                 for (let i = 0; i < cnt; i++) {
-                  newPositions.push({ x: r.seats[0].x + 25 * (i + 1), y: r.seats[0].y })
-                  console.log('newposition', r.seats.length)
+                  newPositions.push({ x: r.seats[0].position.x + 25 * (i + 1), y: r.seats[0].position.y })
                 }
               } else {
                 const dx =
@@ -567,14 +573,16 @@ export const usePlanStore = defineStore("plan", {
                 const dy =
                   r.seats[r.seats.length - 1].position.y -
                   r.seats[r.seats.length - 2].position.y;
+
                 for (let i = 0; i < cnt; i++) {
                   newPositions.push({
-                    x: r.seats[r.seats.length - 1].position.x + dx,
-                    y: r.seats[r.seats.length - 1].position.y + dy,
+                    x: r.seats[r.seats.length - 1].position.x + dx * (i + 1),
+                    y: r.seats[r.seats.length - 1].position.y + dy * (i + 1),
                   });
                 }
               }
-              let newnumber = [];
+
+
               for (let numbering of SEAT_NUMBERINGS) {
                 try {
                   let guessedStartAt = numbering.findStartAt(r.seats[0].seat_number)
@@ -585,11 +593,17 @@ export const usePlanStore = defineStore("plan", {
                       (s, idx) => s.seat_number === guessedNumbers[idx]
                     ).length === r.seats.length
                   ) {
+                    const temp = []
+                    for (let i = 0; i < cnt; i++) {
+                      temp.push({})
+                    }
                     let newNumbers = numbering.compute(
-                      r.seats.concat([{}]),
+                      r.seats.concat(temp),
                       guessedStartAt
                     );
-                    newnumber = newNumbers.slice(newNumbers.length - 1, newNumbers.length - 1 + cnt);
+
+                    newnumber = newNumbers.slice(r.seats.length, r.seats.length + cnt + 1);
+                    console.log('newNumber', newnumber)
                     break;
                   }
 
@@ -612,7 +626,8 @@ export const usePlanStore = defineStore("plan", {
                     );
                     for (const s of r.seats) {
                       s.seat_number = newNumbers.pop();
-                      s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+                      // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+                      s.seat_guid = uuid();
                     }
                     newnumber = newNumbers.slice(0, cnt);
                     break;
@@ -626,10 +641,12 @@ export const usePlanStore = defineStore("plan", {
                 }
               }
 
+
               for (let i = 0; i < cnt; i++) {
                 r.seats.push({
                   seat_number: newnumber[i],
-                  seat_guid: `${z.zone_id}-${r.row_number}-${newnumber[i]}`,
+                  // seat_guid: `${z.zone_id}-${r.row_number}-${newnumber[i]}`,
+                  seat_guid: uuid(),
                   uuid: uuid(),
                   position: newPositions[i],
                   category: r.seats[r.seats.length - 1].category,
@@ -643,7 +660,6 @@ export const usePlanStore = defineStore("plan", {
                 r.seats.pop();
               }
             }
-
             this.persistPlan();
           }
         })
