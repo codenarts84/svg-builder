@@ -19,7 +19,6 @@ function reverseLetterCounter(letters) {
   return n;
 }
 
-
 const SEAT_NUMBERINGS = [
   {
     id: 'natural',

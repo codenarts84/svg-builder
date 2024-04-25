@@ -28,13 +28,14 @@
               <tr v-for="(ca, idx) in categories" :key="ca">
                 <td class="left-container-td"></td>
                 <td class="color-container-td">
-                  <div class="colorcontainer"><input type="color"
-                      :value="ca.color"
+                  <div class="colorcontainer"><input class="category-input"
+                      type="color" :value="ca.color"
                       @input="(e) => handle_change_color(e, idx)" />
                   </div>
                 </td>
-                <td class="input-container-td"><input type="text" name="inputForm"
-                    :value="ca.name" @input="(e) => handle_change_name(e, idx)">
+                <td class="input-container-td"><input class="category-input"
+                    type="text" name="inputForm" :value="ca.name"
+                    @input="(e) => handle_change_name(e, idx)">
                 </td>
                 <td class="delete-container-td">
                   <div class="delete-container-div">
@@ -135,7 +136,7 @@ const handle_create_category = () => {
   font-weight: bold;
 }
 
-input[type=text] {
+.category-input {
   width: 100%;
   padding: 6px 10px;
   margin: 8px 0;
@@ -144,7 +145,7 @@ input[type=text] {
   border-radius: 5px;
 }
 
-input[type=text]:focus {
+.category-input:focus {
   outline: 3px solid #bae0ff;
 }
 
