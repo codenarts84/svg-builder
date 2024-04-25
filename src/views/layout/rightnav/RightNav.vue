@@ -5,30 +5,35 @@
     <CategoryComponent
       v-if="selection.length && (selectedRows().length || selectedSeats().length)"
       :seats="selectedSeats()" />
-    <v-divider></v-divider>
+    <v-divider
+      v-if="selection.length && (selectedRows().length || selectedSeats().length)"></v-divider>
+
     <RowComponent v-if="selection.length && selectedRows().length"
       :rows="selectedRows()" />
-    <v-divider></v-divider>
+    <v-divider v-if="selection.length && selectedRows().length"></v-divider>
+
     <ShapeComponent v-if="selection.length && selectedRows().length"
       :rows="selectedRows()" :temp_Rotate="temp_Rotate" />
-    <v-divider></v-divider>
-    <RowLabeling v-if="selection.length && selectedRows().length"
-      :rows="selectedRows()" />
-    <v-divider></v-divider>
-    <SeatLabeling v-if="selection.length && selectedSeats().length"
-      :rows="selectedRows()" />
-    <v-divider></v-divider>
+    <v-divider v-if="selection.length && selectedRows().length"></v-divider>
+
     <SectionLabel v-if="selection.length" :rows="selectedRows()" />
     <!-- <SectionComponent v-if="selection.length && selectedSeats().length"
       :rows="selectedRows()" /> -->
-    <v-divider></v-divider>
+    <v-divider v-if="selection.length"></v-divider>
+
     <TagsComponent v-if="selection.length" :rows="selectedRows()" />
-    <v-divider></v-divider>
+    <v-divider v-if="selection.length"></v-divider>
+
+    <RowLabeling v-if="selection.length && selectedRows().length"
+      :rows="selectedRows()" />
+    <v-divider v-if="selection.length && selectedRows().length"></v-divider>
+
+    <SeatLabeling v-if="selection.length && selectedSeats().length"
+      :rows="selectedRows()" />
+    <v-divider v-if="selection.length && selectedSeats().length"></v-divider>
+
     <TextComponent v-if="selection.length && selectedAreas().length"
       :areas="selectedAreas()" />
-    <v-divider></v-divider>
-
-
   </v-navigation-drawer>
 </template>
 

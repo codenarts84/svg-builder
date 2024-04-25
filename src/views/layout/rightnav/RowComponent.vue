@@ -121,11 +121,7 @@ export default defineComponent({
     },
 
     setCurve(val) {
-      if (val.target.value === 0) this.store.circleRows(-1000, -1000, false);
-      else {
-        const value = val.target.value * 10;
-        this.store.circleRows(value, value, false);
-      }
+      this.store.curveRows(10);
     },
 
     handle_seat_num_changed(e) {

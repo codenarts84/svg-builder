@@ -281,6 +281,70 @@ export const useMainStore = defineStore({
       }
     },
 
+    calculateSemiCircleParts(a, b, n) {
+      // Check if the number of parts is valid
+      if (n <= 0) {
+        console.error("Number of parts should be greater than 0");
+        return [];
+      }
+
+      // Calculate the angle increment
+      const angleIncrement = Math.PI / n;
+
+      // Array to store the coordinates of intersection points
+      const points = [];
+
+      // Calculate intersection points
+      for (let i = 0; i <= n; i++) {
+        const angle = i * angleIncrement;
+        const x = a * Math.cos(angle);
+        const y = b * Math.sin(angle);
+        points.push({ x, y });
+      }
+
+      return points;
+    },
+
+    curveRows(b) {
+      const temp = usePlanStore();
+      for (const z of temp.plan.zones) {
+        if (this.lockedZones.includes(z.uuid)) continue;
+        for (const r of z.rows) {
+          if (!this.selection.includes(r.uuid) || r.seats.length < 2) {
+            continue;
+          }
+
+          // Our circle line segment starts with the first seat of the row
+          const firstx = r.seats[0].position.x;
+          const firsty = r.seats[0].position.y;
+
+          // and ends with the last seat of the row (at least in the non-fixedCenter case)
+          const lastx = r.seats[r.seats.length - 1].position.x;
+          const lasty = r.seats[r.seats.length - 1].position.y;
+
+          // The distance between those two points is e.g. our minimum diameter
+          const distance = Math.sqrt(
+            (lastx - firstx) * (lastx - firstx) +
+            (lasty - firsty) * (lasty - firsty)
+          );
+
+          const a = distance / 2;
+
+          console.log(a, b)
+
+          const points = this.calculateSemiCircleParts(a, b, r.seats.length);
+          r.seats.forEach((i, idx) => {
+            i.position.x = (firstx + lastx) / 2 + points[idx].x
+            i.position.y = (firsty + lasty) / 2 + points[idx].y
+          })
+          // console.log(points)
+        }
+      }
+
+      planStore.persistPlan();
+    },
+
+
     circleRows(tx, ty, fixedCenter) {
       /**
        * Align all currently selected rows along a circle line with radius specified by target position {tx, ty}
