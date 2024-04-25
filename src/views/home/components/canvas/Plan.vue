@@ -47,6 +47,8 @@ export default {
     const rotating = ref(false);
     const rotatingOriginX = ref(0);
     const rotatingOriginY = ref(0);
+    const temp_ox = ref(0);
+    const temp_oy = ref(0);
     const rotatingHandleX = ref(0);
     const rotatingHandleY = ref(0);
     const rotatingStartAngle = ref(0);
@@ -109,6 +111,8 @@ export default {
       selectedZone,
       lockedZones,
       grid,
+      temp_ox,
+      temp_oy,
       // unwatch,
       // unwatchTool,
       // createZoom,
@@ -477,7 +481,6 @@ export default {
     },
     selectionBoundary() {
       const bboxes = this.selectionBoxes;
-      // console.log('selectionBoundary??', bboxes);
       if (bboxes.length === 0) return null;
       const minx = Math.min(...bboxes.map((s) => s.x));
       const miny = Math.min(...bboxes.map((s) => s.y));
@@ -570,6 +573,11 @@ export default {
         this.selectionBoundary.x + this.selectionBoundary.width / 2;
       this.rotatingOriginY =
         this.selectionBoundary.y + this.selectionBoundary.height / 2;
+      useMainStore().set_Ox(this.rotatingOriginX);
+      useMainStore().set_Oy(this.rotatingOriginY);
+      // this.temp_ox = this.selectionBoundary.x + this.selectionBoundary.width / 2;
+      // this.temp_oy = this.selectionBoundary.y + this.selectionBoundary.height / 2;
+      // console.log('When', this.rotatingOriginX)
       this.rotatingStartAngle = 0;
       this.rotatingHandleX = drawPos.x;
       this.rotatingHandleY = drawPos.y;
@@ -697,6 +705,14 @@ export default {
           this.selectingStartY = selPos.y;
           this.selectingCurrentX = selPos.x;
           this.selectingCurrentY = selPos.y;
+
+
+          // this.rotatingOriginX =
+          //   this.selectionBoundary.x + this.selectionBoundary.width / 2;
+          // this.rotatingOriginY =
+          //   this.selectionBoundary.y + this.selectionBoundary.height / 2;
+          // console.log('Here?')
+          // console.log(this.rotatingOriginX);
           break;
         }
         case "rectangle":
@@ -1059,6 +1075,15 @@ export default {
         }
       }
     },
+    temp_Rotate(val) {
+      const store = useMainStore();
+      console.log(this.temp_ox, store.temp_ox);
+      store.moveRotating(
+        store.temp_ox,
+        store.temp_oy,
+        val * Math.PI / 180
+      );
+    },
     mousemove(event) {
       if (!this.svg) return;
       const store = useMainStore();
@@ -1126,6 +1151,12 @@ export default {
               event.shiftKey || this.bSnap2Grid,
               this.zoomTransform.k
             );
+            console.log('akfAjej', this.selectionBoundary)
+            if (this.selectionBoundary) {
+              useMainStore().set_Ox(this.selectionBoundary.x + this.selectionBoundary.width / 2);
+              useMainStore().set_Oy(this.selectionBoundary.y + this.selectionBoundary.height / 2);
+            }
+
           } else if (this.selecting) {
             this.selectingCurrentX = pos.x;
             this.selectingCurrentY = pos.y;
@@ -1178,10 +1209,18 @@ export default {
             }
 
             // console.log(this.selectedZone)
+            //Edit Here plz
+
+            if (this.selectionBoundary) {
+              useMainStore().set_Ox(this.selectionBoundary.x + this.selectionBoundary.width / 2);
+              useMainStore().set_Oy(this.selectionBoundary.y + this.selectionBoundary.height / 2);
+            }
             store.setSelection(uuids, this.selectedZone, event.shiftKey);
+
           } else {
             return false;
           }
+
           break;
         case "seatselect":
           // console.log('plan mousemove')
@@ -1510,6 +1549,7 @@ export default {
             // console.log(uuids, this.selectedZone);
             // console.log("Select", uuids, this.selectedZone, event.shiftKey);
             // console.log(this.selectedZone);
+
             store.setSelection(uuids, this.selectedZone, event.shiftKey);
             return true;
           }
@@ -2232,7 +2272,8 @@ export default {
       </rect>
       <ZoneComponent v-for="z in plan.zones" :zone="z" :key="z.uuid"
         :startDragging="startDragging"
-        :startDraggingPolygonPoint="startDraggingPolygonPoint"></ZoneComponent>
+        :startDraggingPolygonPoint="startDraggingPolygonPoint" :ox="temp_ox"
+        :oy="temp_oy" :selectionBoundary="selectionBoundary"></ZoneComponent>
 
       <!-- <g v-for="b in selectionBoxesVisible" :key="b">
         <rect class="selection-box" v-if="b.bStatus" :x="b.x - 1.5" :y="b.y - 1.5"

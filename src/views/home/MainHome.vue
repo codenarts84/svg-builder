@@ -10,7 +10,7 @@
       /* position: absolute; */
       width: calc(100% - 300px);
     ">
-    <RightNav />
+    <RightNav :temp_Rotate="temp_Rotate" />
     <div class="main-pan">
       <HandMenu :addTextField="addTextField" :addEllipse="addEllipse"
         :addRectangle="addRectangle" :textR="textR" :textL="textL"
@@ -100,6 +100,7 @@ const zoomOut = () => {
   // planref.value.scaleTo(planref.value, 1);
   planref.value.scaleBy(planref.value, 0.9);
 };
+const temp_Rotate = (v) => planref.value.temp_Rotate(v);
 
 const zoomTo = (v) => planref.value.scaleTo(planref.value, v);
 

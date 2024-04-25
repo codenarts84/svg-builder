@@ -7,7 +7,8 @@
     <ZoneArea v-for="a in zone.areas" :key="a.uuid" :area="a" :zone="zone"
       @startDragging="startDragging"
       @startDraggingPolygonPoint="startDraggingPolygonPoint"></ZoneArea>
-    <Row v-for="r in zone.rows" :key="r.uuid" :row="r" :zone="zone"
+    <Row v-for="r in zone.rows" :key="r.uuid" :row="r" :zone="zone" :ox="ox"
+      :selectionBoundary="selectionBoundary" :oy="oy"
       @startDragging="startDragging"></Row>
   </g>
 </template>
@@ -23,11 +24,15 @@ const props = defineProps({
   zone: Object,
   startDragging: Function,
   startDraggingPolygonPoint: Function,
+  ox: Number,
+  oy: Number,
+  selectionBoundary: Object
 });
 
 const store = useMainStore();
 
 // console.log("Zone", props.zone);
+
 
 // Computed properties
 const lockedZones = computed(() => store.lockedZones);

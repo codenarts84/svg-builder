@@ -8,7 +8,7 @@
       :rows="selectedRows()" />
     <v-divider></v-divider>
     <ShapeComponent v-if="selection.length && selectedRows().length"
-      :rows="selectedRows()" />
+      :rows="selectedRows()" :temp_Rotate="temp_Rotate" />
     <v-divider></v-divider>
     <RowLabeling v-if="selection.length && selectedRows().length"
       :rows="selectedRows()" />
@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, defineProps } from 'vue'
 import RowComponent from "./RowComponent.vue";
 import ShapeComponent from "./ShapeComponent.vue";
 import SectionLabel from "./SectionLabel.vue";
@@ -49,6 +49,10 @@ const planstore = usePlanStore();
 const selection = ref(computed(() => store.selection));
 const plan = ref(computed(() => planstore.plan));
 
+
+const props = defineProps({
+  temp_Rotate: Function,
+});
 
 const selectedSeats = () => {
   const res = []

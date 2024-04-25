@@ -11,8 +11,10 @@
             type="number"
             density="compact"
           ></v-text-field> -->
+          <!-- <v-btn @click="testFunc">Check</v-btn>
+          <h5>{{ rotate_val }}</h5> -->
           <input class="v-custom-input" type="number" name="rotate"
-            :value="rotate" @input="handleRotate" />
+            :value="rotate_val" @input="handleRotate" />
         </v-col>
       </v-row>
     </v-container>
@@ -32,18 +34,36 @@
 <script setup>
 import { defineProps, computed } from 'vue'
 import { usePlanStore } from '@/stores/plan.js';
+import { useMainStore } from '@/stores';
 
 const planStore = usePlanStore();
 
 
 const props = defineProps({
-  rows: Array
+  rows: Array,
+  temp_Rotate: Function,
 })
+
+// const testFunc = () => {
+//   console.log('This is testFunc');
+//   console.log(props.rows);
+// }
+
+const rotate_val = computed(() => props.rows.length ? props.rows[0].rotation : '0');
 
 const rotate = computed(() => {
 })
 
 const handleRotate = (e) => {
-  (props.rows.map(i => i.uuid), e.target.value);
+  // console.log('this is handle Rotate');
+  const val = e.target.value;
+  if (!val) return;
+  const temp = val - rotate_val.value;
+  // console.log(val, rotate_val.value, temp);
+  props.temp_Rotate(temp);
+  // const currrent_deg = rotate_val;
+
+  // console.log('uuid', props.rows[0].uuid);
+
 }
 </script>
