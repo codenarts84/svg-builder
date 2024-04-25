@@ -24,14 +24,14 @@
 <script>
 import Seat from "./Seat";
 import { useMainStore } from "@/stores";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { letterCounter } from "@/lib/numbering";
 import { useSeatFormatStore } from "@/stores/seatFormat";
 
 // import { mapState } from "vuex";
 // import { positionInZone } from "../../lib/geometry";
-
 const round = (fl, places) => Number(fl.toFixed(places ? places : 0));
+
 
 export default {
   name: "SeatComp",
@@ -39,16 +39,23 @@ export default {
   props: {
     row: Object,
     zone: Object,
+    ox: Number,
+    oy: Number,
+    selectionBoundary: Object
   },
   setup() {
     const store = useMainStore();
     const selection = computed(() => store.selection);
     const storeSeatFormat = useSeatFormatStore();
+    const temp_ox = ref(0);
+    const temp_oy = ref(0);
 
     return {
       tool: store.tool,
       selection,
-      seatCur: storeSeatFormat.seatCur
+      seatCur: storeSeatFormat.seatCur,
+      temp_ox,
+      temp_oy,
     };
   },
   data() {
@@ -261,6 +268,21 @@ export default {
         // this is a panning event
         return false;
       }
+      console.log('dyskej')
+      setTimeout(() => {
+        if (this.selectionBoundary) {
+
+          // const temp = this.selectionBoundary;
+          this.temp_ox = this.selectionBoundary.x + this.selectionBoundary.width / 2;
+          this.temp_oy = this.selectionBoundary.y + this.selectionBoundary.height / 2;
+          const store = useMainStore();
+          store.set_Ox(this.temp_ox);
+          store.set_Oy(this.temp_oy);
+          // console.log('Aha', temp)
+        }
+      }, 100);
+
+
       const interval = new Date().getTime() - this.lastMouseUp;
       this.lastMouseUp = new Date().getTime();
       if (useMainStore().tool === "select") {
@@ -270,6 +292,7 @@ export default {
             event.shiftKey,
             this.zone.uuid
           );
+
         }
         if (useMainStore().dragging) {
           useMainStore().stopDragging();
@@ -280,6 +303,19 @@ export default {
     },
     mousedown(event) {
       // console.log('row mousedown')
+      setTimeout(() => {
+        if (this.selectionBoundary) {
+
+          // const temp = this.selectionBoundary;
+          this.temp_ox = this.selectionBoundary.x + this.selectionBoundary.width / 2;
+          this.temp_oy = this.selectionBoundary.y + this.selectionBoundary.height / 2;
+          const store = useMainStore();
+          store.set_Ox(this.temp_ox);
+          store.set_Oy(this.temp_oy);
+          // console.log('Aha', temp)
+        }
+      }, 100);
+
       if (event.ctrlKey || event.metaKey) {
         // this is a panning event
         return false;

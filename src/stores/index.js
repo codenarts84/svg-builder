@@ -36,7 +36,9 @@ export const useMainStore = defineStore({
     dragStartX: 0,
     dragStartY: 0,
     plan: planStore.plan,
-    section_label: window.localStorage.getItem('section_label') ? JSON.parse(window.localStorage.getItem('section_label')) : []
+    section_label: window.localStorage.getItem('section_label') ? JSON.parse(window.localStorage.getItem('section_label')) : [],
+    temp_ox: 0,
+    temp_oy: 0
   }),
 
   getters: {
@@ -69,6 +71,14 @@ export const useMainStore = defineStore({
   },
 
   actions: {
+
+    set_Ox(v) {
+      this.temp_ox = v;
+    },
+    set_Oy(v) {
+      this.temp_oy = v;
+    },
+
 
     loadPlan(plan) {
       // console.log(plan);
@@ -572,6 +582,7 @@ export const useMainStore = defineStore({
 
           if (rdx) r.position.x += rdx;
           if (rdy) r.position.y += rdy;
+          r.rotation = Math.round((r.rotation + deg + 360) % 360);
         }
 
         for (const area of z.areas) {

@@ -14,7 +14,7 @@
           <!-- <v-text-field class="custom-small-text-field" variant="outlined"
             type="number" density="compact"></v-text-field> -->
           <input class="custom-small-text-field v-custom-input" type="number"
-            name="row_spacing" :value="seatSpacing" @input="setSeatSpacing" />
+            name="row_spacing" />
         </v-col>
         <v-col cols="12" sm="6"> Seats spacing </v-col>
         <v-col cols="12" sm="6">
