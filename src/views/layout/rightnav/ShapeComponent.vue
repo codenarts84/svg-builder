@@ -51,18 +51,14 @@ const props = defineProps({
 
 const rotate_val = computed(() => props.rows.length ? props.rows[0].rotation : '0');
 
-const rotate = computed(() => {
-})
-
 const handleRotate = (e) => {
   // console.log('this is handle Rotate');
   const val = e.target.value;
-  if (!val) return;
+  // if (!val) return;
   const temp = val - rotate_val.value;
   // console.log(val, rotate_val.value, temp);
   props.temp_Rotate(temp);
   // const currrent_deg = rotate_val;
-
   // console.log('uuid', props.rows[0].uuid);
 
 }

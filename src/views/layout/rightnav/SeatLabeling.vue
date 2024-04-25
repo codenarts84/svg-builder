@@ -27,9 +27,9 @@
         </v-col>
         <v-col cols="12" sm="6"> Start At </v-col>
         <v-col cols="12" sm="6">
-          <input class="custom-small-text-field v-custom-input" type="number"
+          <input class="custom-small-text-field v-custom-input"
             name="row_numbering_start_at"
-            :value="seatNumbering ? seatNumbering.startAt : null"
+            :value="seatNumbering ? seatNumbering.start : null"
             @input="setSeatNumberingStartAt" />
         </v-col>
 
@@ -61,7 +61,7 @@
 <script>
 import { useSeatFormatStore } from '@/stores/seatFormat';
 import { usePlanStore } from '@/stores/plan';
-import { SEAT_NUMBERINGS, reverse } from '@/lib/numbering';
+import { SEAT_NUMBERINGS, reverse, letterCounter } from '@/lib/numbering';
 import { tickStep } from 'd3';
 
 const groupValue = (rows, mapper) => {
@@ -140,14 +140,26 @@ export default ({
             let guessedStartAt = numbering.findStartAt(row.seats[0].seat_number)
             let guessedNumbers = numbering.compute(row.seats, guessedStartAt)
             if (row.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx]).length === row.seats.length) {
-              return { scheme: numbering, reversed: false, startAt: guessedStartAt }
+              let start = ''
+              if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
+              else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
+              else if (numbering.id === 'odd') start = guessedStartAt * 2;
+              else start = guessedStartAt
+
+              return { scheme: numbering, reversed: false, startAt: guessedStartAt, start }
             }
 
             let seatsReversed = reverse(row.seats)
             let guessedStartAtRev = numbering.findStartAt(seatsReversed[0].seat_number)
             let guessedNumbersRev = numbering.compute(seatsReversed, guessedStartAtRev)
             if (seatsReversed.filter((s, idx) => s.seat_number === guessedNumbersRev[idx]).length === row.seats.length) {
-              return { scheme: numbering, reversed: true, startAt: guessedStartAtRev }
+              let start = ''
+              if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
+              else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
+              else if (numbering.id === 'odd') start = guessedStartAt * 2;
+              else start = guessedStartAt
+
+              return { scheme: numbering, reversed: true, startAt: guessedStartAtRev, start }
             }
           } catch (e) {
             console.warn('Crash while trying to test seat numbering schema', numbering, e)
@@ -160,9 +172,10 @@ export default ({
   },
 
   methods: {
-    setSeatNumberingStartAt(val) {
+    setSeatNumberingStartAt(e) {
       if (this.seatNumbering) {
-        this.planStore.renumberSeats(this.rows.map(r => r.uuid), this.seatNumbering.scheme, val.target.value, this.seatNumbering.reversed)
+        const le = this.seatNumbering.scheme.findStartAt(e.target.value)
+        this.planStore.renumberSeats(this.rows.map(r => r.uuid), this.seatNumbering.scheme, le, this.seatNumbering.reversed)
       }
     },
     setSeatNumberingReversed(val) {

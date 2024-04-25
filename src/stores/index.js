@@ -285,6 +285,7 @@ export const useMainStore = defineStore({
       /**
        * Align all currently selected rows along a circle line with radius specified by target position {tx, ty}
        */
+
       const temp = usePlanStore();
       for (const z of temp.plan.zones) {
         if (this.lockedZones.includes(z.uuid)) continue;

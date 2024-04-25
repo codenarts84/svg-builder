@@ -56,7 +56,10 @@ export default {
   },
   computed: {
     selectedItem() {
-      // return this.category.find(i => this.seats[0].category === i.name)
+      if (this.category) {
+        return this.category.find(i => this.seats[0].category === i.name)
+      }
+      return ''
     }
   }
 };

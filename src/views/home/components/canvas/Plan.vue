@@ -1077,13 +1077,22 @@ export default {
     },
     temp_Rotate(val) {
       const store = useMainStore();
-      console.log(this.temp_ox, store.temp_ox);
       store.moveRotating(
         store.temp_ox,
         store.temp_oy,
         val * Math.PI / 180
       );
     },
+
+    // Curve() {
+    //   const store = useMainStore();
+    //   store.circleRows(
+    //     10,
+    //     10,
+    //     false
+    //   );
+    // },
+
     mousemove(event) {
       if (!this.svg) return;
       const store = useMainStore();

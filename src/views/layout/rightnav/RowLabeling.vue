@@ -15,9 +15,9 @@
         </v-col>
         <v-col cols="12" sm="6"> Start At </v-col>
         <v-col cols="12" sm="6">
-          <input class="custom-small-text-field v-custom-input" type="number"
+          <input class="custom-small-text-field v-custom-input"
             name="row_numbering_start_at"
-            :value="rowNumbering ? rowNumbering.startAt : null"
+            :value="rowNumbering ? rowNumbering.start : null"
             @input="setRowNumberingStartAt" />
         </v-col>
         <v-col cols="12" sm="6"> Label Direction </v-col>
@@ -73,7 +73,7 @@
 
 <script>
 import { ref, computed } from 'vue'
-import { reverse, ROW_NUMBERINGS, SEAT_NUMBERINGS } from '@/lib/numbering';
+import { letterCounter, reverse, ROW_NUMBERINGS, SEAT_NUMBERINGS } from '@/lib/numbering';
 import { useSeatFormatStore } from '@/stores/seatFormat';
 import { usePlanStore } from '@/stores/plan';
 import { useMainStore } from '@/stores/index';
@@ -163,14 +163,24 @@ export default ({
           let guessedStartAt = numbering.findStartAt(this.rows[0].row_number)
           let guessedNumbers = numbering.compute(this.rows, guessedStartAt)
           if (this.rows.filter((r, idx) => r.row_number === guessedNumbers[idx]).length === this.rows.length) {
-            return { scheme: numbering, reversed: false, startAt: guessedStartAt }
+            let start = ''
+            if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
+            else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
+            else if (numbering.id === 'odd') start = guessedStartAt * 2;
+            else start = guessedStartAt
+            return { scheme: numbering, reversed: false, startAt: guessedStartAt, start }
           }
 
           let rowsReversed = reverse(this.rows)
           let guessedStartAtRev = numbering.findStartAt(rowsReversed[0].row_number)
           let guessedNumbersRev = numbering.compute(rowsReversed, guessedStartAtRev)
           if (rowsReversed.filter((r, idx) => r.row_number === guessedNumbersRev[idx]).length === this.rows.length) {
-            return { scheme: numbering, reversed: true, startAt: guessedStartAtRev }
+            let start = ''
+            if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
+            else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
+            else if (numbering.id === 'odd') start = guessedStartAt * 2;
+            else start = guessedStartAt
+            return { scheme: numbering, reversed: true, startAt: guessedStartAtRev, start }
           }
         } catch (e) {
           console.warn('Crash while trying to test row numbering schema', numbering, e)
@@ -236,7 +246,9 @@ export default ({
     },
     setRowNumberingStartAt(e) {
       if (this.rowNumbering) {
-        this.planstore.renumberRows(this.rows.map(r => r.uuid), this.rowNumbering.scheme, e.target.value, this.rowNumbering.reversed)
+        const le = this.rowNumbering.scheme.findStartAt(e.target.value)
+        // console.log(e.target.value, this.rowNumbering.scheme)
+        this.planstore.renumberRows(this.rows.map(r => r.uuid), this.rowNumbering.scheme, le, this.rowNumbering.reversed)
         // this.planstore.renumberRows(this.rows.map(r => r.uuid), this.rowNumbering.scheme, val, this.rowNumbering.reversed)
       }
     },

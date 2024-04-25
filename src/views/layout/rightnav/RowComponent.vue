@@ -5,16 +5,17 @@
       <v-row style="display: flex; justify-content: center; align-items: center">
         <v-col cols="12" sm="6"> Number of seats </v-col>
         <v-col cols="12" sm="6">
-          <!-- <input class="custom-small-text-field v-custom-input" type="number"
-            name="number_seats" :value="numberSeats" @input="setNumberSeats" /> -->
-          <v-btn @click="addSeat">Add Seat</v-btn>
+          <input class="custom-small-text-field v-custom-input" type="number"
+            min="1" name="number_seats" :value="numberSeats"
+            @input="setNumberSeats" />
+          <!-- <v-btn @click="addSeat">Add Seat</v-btn> -->
         </v-col>
         <v-col cols="12" sm="6"> Curve </v-col>
         <v-col cols="12" sm="6">
           <!-- <v-text-field class="custom-small-text-field" variant="outlined"
             type="number" density="compact"></v-text-field> -->
           <input class="custom-small-text-field v-custom-input" type="number"
-            name="row_spacing" />
+            name="row_spacing" @input="setCurve" />
         </v-col>
         <v-col cols="12" sm="6"> Seats spacing </v-col>
         <v-col cols="12" sm="6">
@@ -55,6 +56,8 @@
 import { defineComponent, computed, ref } from 'vue';
 import { useSeatFormatStore } from '@/stores/seatFormat';
 import { usePlanStore } from '@/stores/plan';
+import { useMainStore } from '@/stores';
+import { flatGroup } from 'd3';
 // import NumberInput from '../../home/components/NumberInput.vue';
 const round = (fl, places) => Number(fl.toFixed(places ? places : 0))
 
@@ -99,12 +102,14 @@ export default defineComponent({
     const nseat = computed(() => seatStore.nseat);
     const setNseat = seatStore.setNseat;
     const planStore = usePlanStore();
+    const store = useMainStore();
 
 
     return {
       nseat,
       planStore,
       setNseat,
+      store
     };
   },
   props: {
@@ -113,6 +118,14 @@ export default defineComponent({
   methods: {
     onChange(e) {
       this.testInput = e.target.value;
+    },
+
+    setCurve(val) {
+      if (val.target.value === 0) this.store.circleRows(-1000, -1000, false);
+      else {
+        const value = val.target.value * 10;
+        this.store.circleRows(value, value, false);
+      }
     },
 
     handle_seat_num_changed(e) {
