@@ -305,7 +305,23 @@ export const useMainStore = defineStore({
       return points;
     },
 
-    curveRows(b) {
+    calculateEllipsePoints(a, b, n) {
+      const semiEllipsePoints = [];
+      const semiEllipseLength = Math.PI * (3 * (a + b) - Math.sqrt((3 * a + b) * (a + 3 * b)));
+      const sectionLength = semiEllipseLength / n;
+
+      for (let i = 0; i < n; i++) {
+        const angle = (i / n) * Math.PI; // Angle for the current section
+        const x = a * Math.cos(angle); // x-coordinate
+        const y = b * Math.sin(angle); // y-coordinate
+
+        semiEllipsePoints.push({ x, y });
+      }
+
+      return semiEllipsePoints;
+    },
+
+    curveRows(s) {
       const temp = usePlanStore();
       for (const z of temp.plan.zones) {
         if (this.lockedZones.includes(z.uuid)) continue;
@@ -328,22 +344,30 @@ export const useMainStore = defineStore({
             (lasty - firsty) * (lasty - firsty)
           );
 
-          const a = distance / 2;
+          const alpha = Math.atan((lasty - firsty) / (lastx - firstx))
+          // console.log('alpha', alpha)
 
-          console.log(a, b)
+          const centerX = (firstx + lastx) / 2;
+          const centerY = (firsty + lasty) / 2;
+          const width = distance;
+          const height = s * 50;
+          const a = width / 2;
+          const b = height / 2;
+          const numCircles = r.seats.length;
 
-          const points = this.calculateSemiCircleParts(a, b, r.seats.length);
-          r.seats.forEach((i, idx) => {
-            i.position.x = (firstx + lastx) / 2 + points[idx].x
-            i.position.y = (firsty + lasty) / 2 + points[idx].y
-          })
-          // console.log(points)
+          for (let i = 0; i < numCircles; i++) {
+            const theta = (i / (numCircles - 1)) * Math.PI; // Angle from 0 to PI
+            const x = centerX + a * Math.cos(theta); // X coordinate on the ellipse
+            const y = centerY + b * Math.sin(theta); // Y coordinate on the ellipse
+            // newPosition.push({ style: { top: y + 'px', left: x + 'px' } });
+            r.seats[i].position.x = x;
+            r.seats[i].position.y = y;
+          }
         }
       }
 
       planStore.persistPlan();
     },
-
 
     circleRows(tx, ty, fixedCenter) {
       /**

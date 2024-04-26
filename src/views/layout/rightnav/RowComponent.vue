@@ -121,7 +121,7 @@ export default defineComponent({
     },
 
     setCurve(val) {
-      this.store.curveRows(10);
+      this.store.curveRows(val.target.value);
     },
 
     handle_seat_num_changed(e) {
