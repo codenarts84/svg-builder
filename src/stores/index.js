@@ -491,7 +491,6 @@ export const useMainStore = defineStore({
       planStore.persistPlan();
     },
     moveDragging(x, y, snap, zoomLevel) {
-      // console.log('move Dragging HERE?');
       // console.log(snap)
       if (!this.dragging) return;
       let dx = x - this.dragStartX;
@@ -720,13 +719,17 @@ export const useMainStore = defineStore({
 
             switch (area.shape) {
               case "rectangle":
+              case "gaSquare":
                 area.rectangle.width *= factor;
                 area.rectangle.height *= factor;
+                area.text.position.x = round(area.rectangle.width / 2, 4);
+                area.text.position.y = round(area.rectangle.height / 2, 4);
                 break;
               case "circle":
                 area.circle.radius *= factor;
                 break;
               case "ellipse":
+              case "gaCircle":
                 area.ellipse.radius.x *= factor;
                 area.ellipse.radius.y *= factor;
                 break;
@@ -736,12 +739,12 @@ export const useMainStore = defineStore({
                   p.y *= factor;
                 }
                 break;
-              case "gaSquare":
-                area.gaSquare.scale *= factor;
-                break;
-              case "gaCircle":
-                area.gaCircle.scale *= factor;
-                break;
+              // case "gaSquare":
+              //   area.gaSquare.scale *= factor;
+              //   break;
+              // case "gaCircle":
+              //   area.gaCircle.scale *= factor;
+              //   break;
               case "text":
                 area.text.size =
                   (area.text.size ? area.text.size : 16) * factor;

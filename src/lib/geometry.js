@@ -100,33 +100,6 @@ const rectangleTableBBox = (area) => {
   return abox;
 }
 
-const gaSquareBBox = (area) => {
-  let abox = {
-    x: area.position.x,
-    y: area.position.y,
-    width: 80 * area.gaSquare.scale / 4,
-    height: 80 * area.gaSquare.scale / 4,
-  };
-  if (area.rotation) {
-    abox = rotateRectangluarBox(area, abox);
-  }
-  return abox;
-}
-
-const gaCircleBBox = (area) => {
-  let abox = {
-    x: area.position.x,
-    y: area.position.y,
-    width: 80 * area.gaCircle.scale / 4,
-    height: 80 * area.gaCircle.scale / 4,
-  };
-  if (area.rotation) {
-    abox = rotateRectangluarBox(area, abox);
-  }
-  return abox;
-}
-
-
 const textBBox = (area, text, size) => {
   const width = estimateTextWidth(text, size);
   let abox = {
@@ -238,7 +211,7 @@ const testOverlap = (area, zone, xmin, ymin, xmax, ymax) => {
       xmax - xmin,
       ymax - ymin
     );
-  } else if (area.shape === "ellipse") {
+  } else if (area.shape === "ellipse" || area.shape === "gaCircle") {
     // the intersection library only does axis-oriented ellipses… so what do we do? we rotate our rectangle instead…
     return polygonEllipse(
       rotatePolygon(
@@ -257,7 +230,7 @@ const testOverlap = (area, zone, xmin, ymin, xmax, ymax) => {
       area.ellipse.radius.x,
       area.ellipse.radius.y
     );
-  } else if (area.shape === "rectangle") {
+  } else if (area.shape === "rectangle" || area.shape === "gaSquare") {
     return rotatePolygon(
       [
         {
@@ -360,6 +333,4 @@ export {
   testOverlap,
   roundTableBBox,
   rectangleTableBBox,
-  gaSquareBBox,
-  gaCircleBBox
 };

@@ -1,6 +1,7 @@
 <template>
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
+    <GAComponent />
 
     <CategoryComponent
       v-if="selection.length && (selectedRows().length || selectedSeats().length)"
@@ -48,6 +49,7 @@ import SeatLabeling from "./SeatLabeling.vue";
 import TextComponent from './TextComponent.vue';
 import CategoryComponent from './CategoryComponent.vue'
 import SectionComponent from './SectionComponent.vue';
+import GAComponent from './GAComponent.vue';
 import { useMainStore } from "@/stores";
 import { usePlanStore } from '@/stores/plan';
 

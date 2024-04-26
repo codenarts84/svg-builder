@@ -13,8 +13,6 @@ import {
   textBBox,
   roundTableBBox,
   rectangleTableBBox,
-  gaSquareBBox,
-  gaCircleBBox,
 } from "@/lib/geometry";
 import { v4 as uuid } from "uuid";
 import * as d3 from "d3";
@@ -448,10 +446,9 @@ export default {
                   width: 2 * a.circle.radius,
                   height: 2 * a.circle.radius,
                 };
-              } else if (a.shape === "ellipse") {
-
+              } else if (a.shape === "ellipse" || a.shape === "gaCircle") {
                 abox = ellipseBBox(a);
-              } else if (a.shape === "rectangle") {
+              } else if (a.shape === "rectangle" || a.shape === "gaSquare") {
                 abox = rectangleBBox(a);
               } else if (a.shape === "polygon") {
                 abox = polygonBBox(a);
@@ -462,10 +459,6 @@ export default {
                 abox = roundTableBBox(a);
               } else if (a.shape === 'rectangleTable') {
                 abox = rectangleTableBBox(a);
-              } else if (a.shape === 'gaSquare') {
-                abox = gaSquareBBox(a);
-              } else if (a.shape === 'gaCircle') {
-                abox = gaCircleBBox(a);
               }
               //COME HERE
               abox.x += z.position.x;
@@ -706,7 +699,6 @@ export default {
           this.selectingCurrentX = selPos.x;
           this.selectingCurrentY = selPos.y;
 
-
           // this.rotatingOriginX =
           //   this.selectionBoundary.x + this.selectionBoundary.width / 2;
           // this.rotatingOriginY =
@@ -715,6 +707,8 @@ export default {
           // console.log(this.rotatingOriginX);
           break;
         }
+        case "gaCircle":
+        case "gaSquare":
         case "rectangle":
         case "circle":
         case "ellipse": {
@@ -890,86 +884,6 @@ export default {
                     uid
                   }
                 })
-              }
-            })
-            .then(() => {
-              this.$nextTick(() => {
-                store.toggleSelection([newId], this.selectedZone, false);
-              });
-            });
-          break;
-        }
-
-        case "gaSquare": {
-          let targetPos = positionInZone(
-            event.clientX - svgbox.x,
-            event.clientY - svgbox.y,
-            this.zoomTransform,
-            zone
-          );
-          if (event.shiftKey || this.bSnap2Grid) {
-            targetPos = findClosestGridPoint({
-              x: targetPos.x,
-              y: targetPos.y,
-            });
-          }
-          const newId = uuid();
-          usePlanStore()
-            .createArea(this.selectedZone, {
-              shape: "gaSquare",
-              rotation: 0,
-              uuid: newId,
-              position: {
-                x: targetPos.x - 40,
-                y: targetPos.y - 40
-              },
-              text: {
-                position: { x: 0, y: 0 },
-                color: "#333333",
-                text: "",
-              },
-              gaSquare: {
-                scale: 4
-              }
-            })
-            .then(() => {
-              this.$nextTick(() => {
-                store.toggleSelection([newId], this.selectedZone, false);
-              });
-            });
-          break;
-        }
-
-        case "gaCircle": {
-          let targetPos = positionInZone(
-            event.clientX - svgbox.x,
-            event.clientY - svgbox.y,
-            this.zoomTransform,
-            zone
-          );
-          if (event.shiftKey || this.bSnap2Grid) {
-            targetPos = findClosestGridPoint({
-              x: targetPos.x,
-              y: targetPos.y,
-            });
-          }
-          const newId = uuid();
-          usePlanStore()
-            .createArea(this.selectedZone, {
-              shape: "gaCircle",
-              rotation: 0,
-              uuid: newId,
-              position: {
-                x: targetPos.x - 40,
-                y: targetPos.y - 40
-              },
-              text: {
-                position: { x: 0, y: 0 },
-                color: "#333333",
-                text: "",
-              },
-              gaCircle: {
-                scale: 4
               }
             })
             .then(() => {
@@ -1291,6 +1205,8 @@ export default {
             return false;
           }
           break;
+        case "gaCircle":
+        case "gaSquare":
         case "rectangle":
         case "circle":
         case "ellipse":
@@ -1563,6 +1479,8 @@ export default {
             return true;
           }
           return false;
+        case "gaCircle":
+        case "gaSquare":
         case "rectangle":
         case "circle":
         case "ellipse":
@@ -1573,7 +1491,7 @@ export default {
           if (this.tool === "rectangle") {
             const w = Math.abs(pos.x - this.drawingStartX);
             const h = Math.abs(pos.y - this.drawingStartY);
-            if (w < 1 || h < 1) {
+            if (w < 5 || h < 5) {
               this.drawing = false;
               return; // probably a misclick
             }
@@ -1611,7 +1529,47 @@ export default {
                   store.toggleSelection([newId], this.selectedZone, false);
                 });
               });
-          } else if (this.tool === "circle") {
+          } else if (this.tool === "gaSquare") {
+            const w = Math.abs(pos.x - this.drawingStartX);
+            const h = Math.abs(pos.y - this.drawingStartY);
+            if (w < 5 || h < 5) {
+              this.drawing = false;
+              return; // probably a misclick
+            }
+            usePlanStore()
+              .createArea(this.selectedZone, {
+                shape: "gaSquare",
+                color: "#cccccc", // todo: use previously used color
+                border_color: "#000000", // todo: use previously used color
+                rotation: 0,
+                uuid: newId,
+                position: {
+                  x: round(
+                    Math.min(pos.x, this.drawingStartX) - zone.position.x,
+                    4
+                  ),
+                  y: round(
+                    Math.min(pos.y, this.drawingStartY) - zone.position.y,
+                    4
+                  ),
+                },
+                text: {
+                  position: { x: round(w / 2, 4), y: round(h / 2, 4) },
+                  color: "#333333",
+                  text: "GA",
+                },
+                rectangle: {
+                  width: round(w, 4),
+                  height: round(h, 4),
+                },
+              })
+              .then(() => {
+                this.$nextTick(() => {
+                  store.toggleSelection([newId], this.selectedZone, false);
+                });
+              });
+          }
+          else if (this.tool === "circle") {
             if (event.shiftKey || this.bSnap2Grid) {
               pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
             }
@@ -1657,7 +1615,7 @@ export default {
             }
             const w = Math.abs(pos.x - this.drawingStartX);
             const h = Math.abs(pos.y - this.drawingStartY);
-            if (w < 1 || h < 1) {
+            if (w < 5 || h < 5) {
               this.drawing = false;
               return; // probably a misclick
             }
@@ -1676,6 +1634,44 @@ export default {
                   position: { x: 0, y: 0 },
                   color: "#333333",
                   text: "",
+                },
+                ellipse: {
+                  radius: {
+                    x: round(w, 4),
+                    y: round(h, 4),
+                  },
+                },
+              })
+              .then(() => {
+                this.$nextTick(() => {
+                  store.toggleSelection([newId], this.selectedZone, false);
+                });
+              });
+          } else if (this.tool === "gaCircle") {
+            if (event.shiftKey || this.bSnap2Grid) {
+              pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
+            }
+            const w = Math.abs(pos.x - this.drawingStartX);
+            const h = Math.abs(pos.y - this.drawingStartY);
+            if (w < 5 || h < 5) {
+              this.drawing = false;
+              return; // probably a misclick
+            }
+            usePlanStore()
+              .createArea(this.selectedZone, {
+                shape: "gaCircle",
+                color: "#cccccc", // todo: use previously used color
+                border_color: "#000000", // todo: use previously used color
+                rotation: 0,
+                uuid: newId,
+                position: {
+                  x: round(this.drawingStartX - zone.position.x, 4),
+                  y: round(this.drawingStartY - zone.position.y, 4),
+                },
+                text: {
+                  position: { x: 0, y: 0 },
+                  color: "#333333",
+                  text: "GA",
                 },
                 ellipse: {
                   radius: {
@@ -2345,7 +2341,8 @@ export default {
         :x="selectionBoundary.x + selectionBoundary.width - 1.5"
         :y="selectionBoundary.y + selectionBoundary.height - 1.5" :width="6"
         :height="6" fill="none" @mousedown="startResizing($event, 'se')"></rect>
-      <rect class="preview" v-if="tool == 'rectangle' && drawing"
+      <rect class="preview"
+        v-if="(tool == 'rectangle' || tool == 'gaSquare') && drawing"
         :x="Math.min(drawingStartX, drawingCurrentX)"
         :y="Math.min(drawingStartY, drawingCurrentY)"
         :width="Math.abs(drawingStartX - drawingCurrentX)"
@@ -2356,7 +2353,8 @@ export default {
           Math.pow(drawingStartY - drawingCurrentY, 2)
         )
           "></circle>
-      <ellipse class="preview" v-if="tool == 'ellipse' && drawing"
+      <ellipse class="preview"
+        v-if="(tool == 'ellipse' || tool == 'gaCircle') && drawing"
         :cx="drawingStartX" :cy="drawingStartY"
         :rx="Math.abs(drawingStartX - drawingCurrentX)"
         :ry="Math.abs(drawingStartY - drawingCurrentY)"></ellipse>

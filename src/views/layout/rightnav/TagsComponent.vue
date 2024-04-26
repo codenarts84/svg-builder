@@ -12,7 +12,8 @@
       </v-chip-group> -->
       <v-row>
         <v-col cols="12">
-          <select class="toolbox-input v-custom-input" @input="setTagName">
+          <select class="toolbox-input v-custom-input" v-model="selected"
+            @change="selected_change">
             <option v-for="tag in tags" :key="tag" option-label="label"
               name="tag_name" :value="tag">
               {{ tag }}
@@ -42,10 +43,16 @@ const tags = ref([
   "Partial View",
   "Folding Chair",
 ]);
+const selected = ref('')
 
-const setTagName = (e) => {
-  planstore.setTag(props.rows.map(i => i.uuid), e.target.value);
+const selected_change = () => {
+
+  planstore.setTag(props.rows.map(i => i.uuid), selected.value);
 }
+// const setTagName = (e) => {
+//   console.log(selected.value)
+//   planstore.setTag(props.rows.map(i => i.uuid), e.target.value);
+// }
 </script>
 
 <style>
