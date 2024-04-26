@@ -1,18 +1,18 @@
 <template>
   <div style="display: flex; justify-content: space-between; align-items: center">
     <h4>Categories</h4>
-    <v-btn class="btn" @click="dialog = true" size="small" variant="standard"
-      style="padding: 0px"><v-icon color="black" icon="mdi-plus"
-        size="large"></v-icon>
+    <v-btn class="btn" @click="dialog = true" size="small" variant="flat"
+      style="padding: 0px"><v-icon icon="mdi-cog"></v-icon>Manage
     </v-btn>
   </div>
   <div class="text-center">
     <v-dialog v-model="dialog" width="600">
       <v-card class="v-card-container">
+        <div class="close-btn">
+          <v-btn density="comfortable" icon="$close" variant="plain"
+            @click="dialog = false"></v-btn>
+        </div>
         <div class="text-center">
-          <v-btn @click="dialog = false">
-            <v-icon icon="mdi-close"></v-icon>
-          </v-btn>
           <h2 class="category-title">Categories</h2>
           <p class="category-description">Categories can have pricing assigned
             when rendering the chart for a
@@ -39,7 +39,8 @@
                 </td>
                 <td class="delete-container-td">
                   <div class="delete-container-div">
-                    <v-btn @click="() => handle_delete(idx)">
+                    <v-btn v-if="delete_btn(idx)"
+                      @click="() => handle_delete(idx)">
                       <v-icon icon="mdi-delete"></v-icon>
                     </v-btn>
                   </div>
@@ -66,13 +67,26 @@ const props = defineProps({
 const planStore = usePlanStore();
 const categories = computed(() => planStore.categories);
 
+const assigned_category = (categoryName) => {
+  for (const z of planStore._plan.zones) {
+    for (const r of z.rows) {
+      for (const s of r.seats) {
+        if (s.category === categoryName) return false;
+      }
+    }
+  }
+  return true;
+}
+
+const delete_btn = ((idx) => {
+  console.log(categories.value[idx])
+  const bStatus = assigned_category(categories.value[idx].name);
+  return bStatus;
+})
+
 
 const handle_change_name = (e, idx) => {
-  // if (categories.value.findIndex(i => i.name === e.target.value) === -1) {
   planStore.changeCategory(categories.value[idx].name, e.target.value, categories.value[idx].color);
-  // } else {
-  //   alert('Category is already exist')
-  // }
 }
 
 const handle_change_color = (e, idx) => {
@@ -85,11 +99,18 @@ const handle_delete = (idx) => {
 
 const handle_create_category = () => {
   let color = Math.floor(Math.random() * 16777215).toString(16);
-  if (categories.value.findIndex(i => i.name === 'New Category') === -1) {
-    planStore.createCategory('New Category', `#${color}`)
-  } else {
-    alert('Category is already exist')
+  const newName = getUniqueCategoryName('New Category');
+  planStore.createCategory(newName, `#${color}`);
+}
+
+const getUniqueCategoryName = name => {
+  let newName = name;
+  let counter = 1;
+  while (categories.value.some(category => category.name === newName)) {
+    newName = `${name} ${counter}`;
+    counter++;
   }
+  return newName;
 }
 </script>
 
@@ -194,5 +215,10 @@ td {
 
 .category-title {
   margin: 10px 0;
+}
+
+.close-btn {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

@@ -403,7 +403,6 @@ export const usePlanStore = defineStore("plan", {
     },
 
     addSeat(rowIds) {
-      console.log('addseat')
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid) && r.seats.length) {

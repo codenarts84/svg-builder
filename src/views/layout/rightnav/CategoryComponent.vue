@@ -43,7 +43,7 @@ export default {
   },
   setup() {
     const planStore = usePlanStore();
-    const category = planStore.categories;
+    const category = computed(() => planStore.categories);
     return {
       planStore,
       category
