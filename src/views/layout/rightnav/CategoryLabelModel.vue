@@ -7,17 +7,21 @@
   </div>
   <div class="text-center">
     <v-dialog v-model="dialog" width="600">
-      <v-card class="v-card-container">
+      <v-card class="v-card-container" height="600">
         <div class="close-btn">
           <v-btn density="comfortable" icon="$close" variant="plain"
             @click="dialog = false"></v-btn>
         </div>
         <div class="text-center">
           <h2 class="category-title">Categories</h2>
-          <p class="category-description">Categories can have pricing assigned
-            when rendering the chart for a
-            specific event, thus defining the pricing for objects assigned to each
-            category</p>
+          <p class="category-description">
+            Categories are used to alert users of different pricing options
+            available. Example, If most seats are Standard Pricing of Adult $12
+            and
+            Child $8 but your front 2 rows are Premium with Adult $15 and Child
+            $13,
+            Create one Premium category and one Standard category for your chart.
+          </p>
         </div>
         <div class="widget-container">
           <div class="widget-body">
@@ -28,9 +32,16 @@
               <tr v-for="(ca, idx) in categories" :key="ca">
                 <td class="left-container-td"></td>
                 <td class="color-container-td">
-                  <div class="colorcontainer"><input class="category-input"
-                      type="color" :value="ca.color"
+                  <div class="colorcontainer">
+                    <!-- <DropDown :selection="selectedItem" :options="category_colors"
+                      :setCategory="setCategory" :direction="true" /> -->
+                    <input class="category-input" type="color" :value="ca.color"
                       @input="(e) => handle_change_color(e, idx)" />
+                    <!-- <select>
+                    <option>red</option>
+                    <option>green</option>
+                    <option>blue</option>
+                  </select> -->
                   </div>
                 </td>
                 <td class="input-container-td"><input class="category-input"
@@ -56,16 +67,29 @@
 
 
 <script setup>
-import { ref, defineProps, computed } from "vue";
+import { ref, defineProps, computed, defineComponent } from "vue";
 import { v4 as uuid } from "uuid";
 import { usePlanStore } from '@/stores/plan.js'
+import DropDown from '../../home/components/DropDown.vue';
 const dialog = ref(false);
+
+const category_colors = ref([
+  { color: '#0000ff', name: 'blue' },
+  { color: '#ff0000', name: 'red' },
+  { color: '#00ff00', name: 'green' }
+])
+const components = defineComponent({
+  DropDown
+})
 
 const props = defineProps({
 });
 
 const planStore = usePlanStore();
 const categories = computed(() => planStore.categories);
+
+const setCategory = val => {
+}
 
 const assigned_category = (categoryName) => {
   for (const z of planStore._plan.zones) {

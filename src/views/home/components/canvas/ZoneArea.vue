@@ -4,14 +4,36 @@
     <circle v-if="area.shape === 'circle'" :fill="area.color || '#888888'"
       :stroke="area.border_color || '#888888'" cx="0" cy="0"
       :r="area.circle.radius" stroke-width="2px"></circle>
-    <ellipse v-if="area.shape === 'ellipse'" :fill="area.color || '#888888'"
-      :stroke="area.border_color || '#888888'" cx="0" cy="0"
-      :rx="area.ellipse.radius.x" :ry="area.ellipse.radius.y" stroke-width="2px">
-    </ellipse>
-    <rect v-if="area.shape === 'rectangle'" :fill="area.color || '#888888'"
-      :stroke="area.border_color || '#888888'" x="0" y="0"
-      :width="area.rectangle.width" :height="area.rectangle.height"
-      stroke-width="2px"></rect>
+    <g v-if="area.shape === 'ellipse' || area.shape === 'gaCircle'">
+      <ellipse :stroke="area.border_color || '#888888'" cx="0" cy="0"
+        :fill="area.color || '#888888'" :rx="area.ellipse.radius.x"
+        :ry="area.ellipse.radius.y" :stroke-width="area.stroke_width || '2px'">
+      </ellipse>
+      <text v-if="area.text.text" :x="area.text.position.x"
+        :y="area.text.position.y" :font-size="area.text.size || 16"
+        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        :fill="area.text.color || '#888888'">
+        {{ area.text.text }}
+      </text>
+    </g>
+    <!-- <rect v-if="area.shape === 'rectangle' || area.shape === 'gaSquare'"
+      :fill="area.color || '#888888'" :stroke="area.border_color || '#888888'"
+      x="0" y="0" :width="area.rectangle.width" :height="area.rectangle.height"
+      stroke-width="2px"></rect> -->
+    <g v-if="area.shape === 'rectangle' || area.shape === 'gaSquare'">
+      <rect :fill="area.color || '#888888'"
+        :stroke="area.border_color || '#888888'" x="0" y="0"
+        :width="area.rectangle.width" :height="area.rectangle.height"
+        :stroke-width="area.stroke_width || '2px'"></rect>
+      <text v-if="area.text.text" :x="area.text.position.x"
+        :y="area.text.position.y" :font-size="area.text.size || 16"
+        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        :fill="area.text.color || '#888888'">
+        {{ area.text.text }}
+      </text>
+    </g>
+
+
     <polygon v-if="area.shape === 'polygon'" :fill="area.color || '#888888'"
       :stroke="area.border_color || '#888888'" :points="polygonPoints"
       stroke-width="2px"></polygon>
@@ -41,53 +63,27 @@
       <circle :cx="0" :cy="0" :r="area.position.r" fill="#ffffff" stroke="#000"
         stroke-width="1">
       </circle>
-      <circle v-for="item in area.roundTable.seats" :key="item" :cx="item.x"
-        :cy="item.y" :r="item.r" stroke="#000" style="stroke-width: 1px;"
-        fill="#ffffff" stroke-width="1">
+      <circle v-for="     item      in      area.roundTable.seats     "
+        :key="item" :cx="item.x" :cy="item.y" :r="item.r" stroke="#000"
+        style="stroke-width: 1px;" fill="#ffffff" stroke-width="1">
       </circle>
-      <text fill="black" v-for="item in area.roundTable.seats" :x="item.x"
-        :y="item.y" text-anchor="middle" font-size="10px" font-family="sans-serif"
-        :key="item" dy=".3em">{{ item.text }}</text>
+      <text fill="black" v-for="     item      in      area.roundTable.seats     "
+        :x="item.x" :y="item.y" text-anchor="middle" font-size="10px"
+        font-family="sans-serif" :key="item" dy=".3em">{{ item.text }}</text>
     </g>
 
     <g v-if="area.shape === 'rectangleTable'">
       <rect :x="0" :y="0" :width="area.position.width"
         :height="area.position.height" fill="#ffffff" stroke="#000"
         stroke-width="1"></rect>
-      <circle v-for="item in area.rectangleTable.seats" :key="item" :cx="item.x"
-        :cy="item.y" :r="item.r" stroke="#000" style="stroke-width: 1px;"
-        fill="#ffffff" stroke-width="1">
+      <circle v-for="     item      in      area.rectangleTable.seats     "
+        :key="item" :cx="item.x" :cy="item.y" :r="item.r" stroke="#000"
+        style="stroke-width: 1px;" fill="#ffffff" stroke-width="1">
       </circle>
-      <text fill="black" v-for="item in area.rectangleTable.seats" :x="item.x"
+      <text fill="black"
+        v-for="     item      in      area.rectangleTable.seats     " :x="item.x"
         :y="item.y" text-anchor="middle" font-size="10px" font-family="sans-serif"
         :key="item" dy=".3em">{{ item.text }}</text>
-    </g>
-
-    <g v-if="area.shape === 'gaSquare'"
-      :transform="`scale(${area.gaSquare.scale})`" :x="area.position.x"
-      :y="area.position.y">
-      <path d="M0,0v20h20V0H0z M19,19H1V1h18V19z" />
-      <path
-        d="M6.2,13.6c1.2,0,2.2-0.5,2.9-1.1v-3h-3v1.1h1.8V12c-0.4,0.3-1,0.5-1.7,0.5c-1.4,0-2.4-1.1-2.4-2.5v0c0-1.3,1-2.5,2.3-2.5
-		c0.9,0,1.4,0.3,2,0.8l0.8-0.9c-0.7-0.6-1.5-1-2.7-1C4.1,6.4,2.5,8,2.5,10v0C2.5,12.1,4,13.6,6.2,13.6z" />
-      <path
-        d="M12.1,11.8h3.3l0.7,1.7h1.3l-3.1-7.1h-1.1l-3.1,7.1h1.3L12.1,11.8z M13.8,7.9l1.2,2.8h-2.4L13.8,7.9z" />
-    </g>
-
-    <g v-if="area.shape === 'gaCircle'"
-      :transform="`scale(${area.gaCircle.scale})`" :x="area.position.x"
-      :y="area.position.y">
-
-      <g>
-        <path d="M10,0.8c5.1,0,9.2,4.1,9.2,9.2s-4.1,9.2-9.2,9.2S0.8,15.1,0.8,10S4.9,0.8,10,0.8 M10,0C4.5,0,0,4.5,0,10s4.5,10,10,10
-		s10-4.5,10-10S15.5,0,10,0L10,0z" />
-      </g>
-      <path
-        d="M6.2,13.6c1.2,0,2.2-0.5,2.9-1.1v-3h-3v1.1h1.8V12c-0.4,0.3-1,0.5-1.7,0.5c-1.4,0-2.4-1.1-2.4-2.5v0c0-1.3,1-2.5,2.3-2.5
-	c0.9,0,1.4,0.3,2,0.8l0.8-0.9c-0.7-0.6-1.5-1-2.7-1C4.1,6.4,2.5,8,2.5,10v0C2.5,12.1,4,13.6,6.2,13.6z" />
-      <path
-        d="M12.1,11.8h3.3l0.7,1.7h1.3l-3.1-7.1h-1.1l-3.1,7.1h1.3L12.1,11.8z M13.8,7.9l1.2,2.8h-2.4L13.8,7.9z" />
-
     </g>
 
     <text v-if="area.shape === 'text' && area.text && area.text.text"
@@ -100,12 +96,13 @@
       area.polygon &&
       area.polygon.points
       ">
-      <rect class="polygon-point-handle" v-for="(p, pid) in area.polygon.points"
+      <rect class="polygon-point-handle"
+        v-for="(     p, pid     ) in      area.polygon.points     "
         :key="'point-handle-' + pid" :x="p.x - 3" :y="p.y - 3" width="6"
         height="6" @mousedown="mousedownPolygonPoint($event, pid)"></rect>
       <rect class="polygon-new-point-handle"
-        v-for="(p, pid) in area.polygon.points" :key="'new-point-handle-' + pid"
-        :x="(p.x + getNextPoint(pid).x) / 2 - 2"
+        v-for="(     p, pid     ) in      area.polygon.points     "
+        :key="'new-point-handle-' + pid" :x="(p.x + getNextPoint(pid).x) / 2 - 2"
         :y="(p.y + getNextPoint(pid).y) / 2 - 2" width="4" height="4"
         @mousedown="insertPolygonPointBefore($event, pid)"></rect>
     </g>

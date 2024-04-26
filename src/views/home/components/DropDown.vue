@@ -11,7 +11,8 @@
       </div>
       <i class="fa fa-chevron-down"></i>
     </div>
-    <div class="dropdown-menu" v-show="isOpen">
+    <div :class="!direction ? 'dropdown-menu' : 'dropdown-menu-top'"
+      v-show="isOpen">
       <template v-for="(option, index) in options" :key="index">
         <div class="dropdown-item" @click="() => selectOption(option)">
           <div class="dropdown-color">
@@ -31,7 +32,8 @@ export default {
   props: {
     options: Array,
     setCategory: Function,
-    selection: String
+    selection: String,
+    direction: Boolean
   },
 
   data() {
@@ -44,7 +46,6 @@ export default {
       this.isOpen = !this.isOpen;
     },
     selectOption(option) {
-      this.isOpen = false;
       this.setCategory(option.name);
     }
   }
@@ -69,6 +70,20 @@ export default {
 .dropdown-menu {
   position: absolute;
   top: 100%;
+  left: 0;
+  z-index: 1000;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 4px;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdown-menu-top {
+  position: absolute;
+  bottom: 0;
   left: 0;
   z-index: 1000;
   background-color: #fff;
