@@ -1,7 +1,9 @@
 <template>
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
-    <GAComponent />
+    <!-- <GAComponent v-if="selection.length" /> -->
+
+    <AreaTool v-if="selection.length" :areas="selectedAreas()" />
 
     <CategoryComponent
       v-if="selection.length && (selectedRows().length || selectedSeats().length)"
@@ -48,10 +50,11 @@ import RowLabeling from "./RowLabeling.vue";
 import SeatLabeling from "./SeatLabeling.vue";
 import TextComponent from './TextComponent.vue';
 import CategoryComponent from './CategoryComponent.vue'
-import SectionComponent from './SectionComponent.vue';
 import GAComponent from './GAComponent.vue';
+import AreaTool from './AreaTool.vue';
 import { useMainStore } from "@/stores";
 import { usePlanStore } from '@/stores/plan';
+import { area } from 'd3';
 
 const store = useMainStore();
 const planstore = usePlanStore();
