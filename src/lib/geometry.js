@@ -254,7 +254,7 @@ const testOverlap = (area, zone, xmin, ymin, xmax, ymax) => {
       zone.position.x + area.position.x,
       zone.position.y + area.position.y
     ).some((p) => p.x >= xmin && p.x <= xmax && p.y >= ymin && p.y <= ymax);
-  } else if (area.shape === "polygon") {
+  } else if (area.shape === "polygon" || area.shape === "gaPolygon") {
     return rotatePolygon(
       area.polygon.points.map((p) => ({
         x: zone.position.x + area.position.x + p.x,

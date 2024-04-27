@@ -13,7 +13,7 @@
         {{ area.text.text }}
       </text>
     </g>
-    <g v-if="area.shape === 'ellipse' || area.shape === 'gaCircle'">
+    <g v-if="area.shape === 'ellipse'">
       <ellipse :stroke="area.border_color || '#888888'" cx="0" cy="0"
         :fill="area.color || '#888888'" :rx="area.ellipse.radius.x"
         :ry="area.ellipse.radius.y" :stroke-width="area.border_width || '2px'">
@@ -25,11 +25,28 @@
         {{ area.text.text }}
       </text>
     </g>
+
+
+    <g v-if="area.shape === 'gaCircle'">
+      <ellipse :stroke="area.border_color || '#888888'" cx="0" cy="0"
+        :fill="area.color || '#888888'" :rx="area.ellipse.radius.x"
+        :ry="area.ellipse.radius.y" :stroke-width="area.border_width || '2px'"
+        :data-section="area.section || ''" :data-category="area.category || ''"
+        :data-abv="area.abbreviation || ''">
+      </ellipse>
+      <text v-if="area.text.text" :x="area.text.position.x"
+        :y="area.text.position.y" :font-size="area.text.size || 16"
+        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        :fill="area.text.color || '#888888'">
+        {{ area.text.text }}
+      </text>
+    </g>
+
     <!-- <rect v-if="area.shape === 'rectangle' || area.shape === 'gaSquare'"
       :fill="area.color || '#888888'" :stroke="area.border_color || '#888888'"
       x="0" y="0" :width="area.rectangle.width" :height="area.rectangle.height"
       stroke-width="2px"></rect> -->
-    <g v-if="area.shape === 'rectangle' || area.shape === 'gaSquare'">
+    <g v-if="area.shape === 'rectangle'">
       <rect :fill="area.color || '#888888'"
         :stroke="area.border_color || '#888888'" x="0" y="0"
         :width="area.rectangle.width" :height="area.rectangle.height"
@@ -42,10 +59,48 @@
       </text>
     </g>
 
+    <g v-if="area.shape === 'gaSquare'">
+      <rect :fill="area.color || '#888888'"
+        :stroke="area.border_color || '#888888'" x="0" y="0"
+        :width="area.rectangle.width" :height="area.rectangle.height"
+        :stroke-width="area.border_width || '2px'"
+        :data-section="area.section || ''" :data-category="area.category || ''"
+        :data-abv="area.abbreviation || ''"></rect>
+      <text v-if="area.text.text" :x="area.text.position.x"
+        :y="area.text.position.y" :font-size="area.text.size || 16"
+        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        :fill="area.text.color || '#888888'">
+        {{ area.text.text }}
+      </text>
+    </g>
 
-    <polygon v-if="area.shape === 'polygon'" :fill="area.color || '#888888'"
-      :stroke="area.border_color || '#888888'" :points="polygonPoints"
-      :stroke-width="area.border_width || '2px'"></polygon>
+    <g v-if="area.shape === 'polygon'">
+      <polygon :fill="area.color || '#888888'"
+        :stroke="area.border_color || '#888888'" :points="polygonPoints"
+        :stroke-width="area.border_width || '2px'"></polygon>
+      <text v-if="area.text.text" :x="area.text.position.x"
+        :y="area.text.position.y" :font-size="area.text.size || 16"
+        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        :fill="area.text.color || '#888888'">
+        {{ area.text.text }}
+      </text>
+    </g>
+
+    <g v-if="area.shape === 'gaPolygon'">
+      <polygon :fill="area.color || '#888888'"
+        :stroke="area.border_color || '#888888'" :points="polygonPoints"
+        :stroke-width="area.border_width || '2px'"
+        :data-section="area.section || ''" :data-category="area.category || ''"
+        :data-abv="area.abbreviation || ''"></polygon>
+      <text v-if="area.text.text" :x="area.text.position.x"
+        :y="area.text.position.y" :font-size="area.text.size || 16"
+        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        :fill="area.text.color || '#888888'">
+        {{ area.text.text }}
+      </text>
+    </g>
+
+
     <!-- <g v-if="area.shape === 'roundTable'"
       :transform="`scale(${area.roundTable.scale})`" :x="area.position.x"
       :y="area.position.y">
@@ -178,7 +233,7 @@ export default {
       this.$emit("insert-point", { point: newPoint, index: pid });
     },
     mousedownPolygonPoint(event, pid) {
-      // console.log("edge");
+      console.log("edge");
       if (event.which === 2) {
         // Middle click
         this.$emit("delete-point", pid);

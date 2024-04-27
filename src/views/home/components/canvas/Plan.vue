@@ -450,7 +450,7 @@ export default {
                 abox = ellipseBBox(a);
               } else if (a.shape === "rectangle" || a.shape === "gaSquare") {
                 abox = rectangleBBox(a);
-              } else if (a.shape === "polygon") {
+              } else if (a.shape === "polygon" || a.shape === "gaPolygon") {
                 abox = polygonBBox(a);
               } else if (a.shape === "text") {
                 const s = a.text.size || 16;
@@ -1277,6 +1277,7 @@ export default {
           this.drawingCurrentY = pos.y;
           break;
         case "polygon":
+        case "gaPolygon":
           if (store.dragging) {
             store.moveDragging(
               pos.x,
@@ -1726,14 +1727,80 @@ export default {
                 comparepos = polysnap(pos, 2);
               }
             }
+            // if (
+            //   comparepos.x ===
+            //   this.polygonPoints[this.polygonPoints.length - 1].x &&
+            //   comparepos.y ===
+            //   this.polygonPoints[this.polygonPoints.length - 1].y
+            // )
             if (
-              comparepos.x ===
-              this.polygonPoints[this.polygonPoints.length - 1].x &&
-              comparepos.y ===
-              this.polygonPoints[this.polygonPoints.length - 1].y
+              Math.abs(comparepos.x - this.polygonPoints[this.polygonPoints.length - 1].x) < 5
+              && Math.abs(comparepos.y - this.polygonPoints[this.polygonPoints.length - 1].y) < 5
             ) {
               // "Double click"
               this.finishPolygon();
+            } else {
+              this.polygonPoints.push(pos);
+            }
+          } else {
+            this.polygonDrawing = true;
+            if (event.shiftKey || this.bSnap2Grid) {
+              pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
+            }
+            this.polygonPoints = [pos];
+          }
+          break;
+        case "gaPolygon":
+          if (store.dragging) {
+            store.stopDragging();
+            break;
+          }
+          if (this.polygonDrawing) {
+            const pp = this.polygonPoints;
+            const polysnap = (pos, offset) => {
+              // Snap to 5° intervals, and snap to grid length when at x*90°
+              const dx = pos.x - pp[pp.length - offset].x;
+              const dy = pos.y - pp[pp.length - offset].y;
+              let angle = (-Math.atan(dx / dy) / Math.PI) * 180;
+              let distance = Math.sqrt(dx * dx + dy * dy);
+              if (angle < 0) angle += 360;
+              angle -= angle % 5;
+              if (
+                Math.round(Math.abs(angle)) === 90 ||
+                Math.round(Math.abs(angle)) === 0 ||
+                Math.round(Math.abs(angle)) === 180 ||
+                Math.round(Math.abs(angle)) === 270
+              ) {
+                distance = Math.round(distance / 10) * 10;
+              }
+              return {
+                x:
+                  pp[pp.length - offset].x -
+                  Math.sign(dy) * distance * Math.sin((angle / 180) * Math.PI),
+                y:
+                  pp[pp.length - offset].y +
+                  Math.sign(dy) * distance * Math.cos((angle / 180) * Math.PI),
+              };
+            };
+            let comparepos = pos;
+            if (event.shiftKey || this.bSnap2Grid) {
+              pos = polysnap(pos, 1);
+              if (pp.length > 1) {
+                comparepos = polysnap(pos, 2);
+              }
+            }
+            // if (
+            //   comparepos.x ===
+            //   this.polygonPoints[this.polygonPoints.length - 1].x &&
+            //   comparepos.y ===
+            //   this.polygonPoints[this.polygonPoints.length - 1].y
+            // )
+            if (
+              Math.abs(comparepos.x - this.polygonPoints[this.polygonPoints.length - 1].x) < 5
+              && Math.abs(comparepos.y - this.polygonPoints[this.polygonPoints.length - 1].y) < 5
+            ) {
+              // "Double click"
+              this.finishGAPolygon();
             } else {
               this.polygonPoints.push(pos);
             }
@@ -1863,6 +1930,47 @@ export default {
             position: { x: (maxx - minx) / 2, y: (maxy - miny) / 2 },
             color: "#333333",
             text: "",
+          },
+          polygon: {
+            points: this.polygonPoints.map((p) => ({
+              x: p.x - minx,
+              y: p.y - miny,
+            })),
+          },
+        })
+        .then(() => {
+          this.$nextTick(() => {
+            const store = useMainStore();
+            store.toggleSelection([newId], this.selectedZone, false);
+          });
+        });
+    },
+
+
+    finishGAPolygon() {
+      const newId = uuid();
+      const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
+      this.polygonDrawing = false;
+
+      const minx = Math.min(...this.polygonPoints.map((p) => p.x));
+      const miny = Math.min(...this.polygonPoints.map((p) => p.y));
+      const maxx = Math.max(...this.polygonPoints.map((p) => p.x));
+      const maxy = Math.max(...this.polygonPoints.map((p) => p.y));
+      usePlanStore()
+        .createArea(this.selectedZone, {
+          shape: "gaPolygon",
+          color: "#cccccc", // todo: use previously used color
+          border_color: "#000001", // todo: use previously used color
+          rotation: 0,
+          uuid: newId,
+          position: {
+            x: minx - zone.position.x,
+            y: miny - zone.position.y,
+          },
+          text: {
+            position: { x: (maxx - minx) / 2, y: (maxy - miny) / 2 },
+            color: "#333333",
+            text: "GA",
           },
           polygon: {
             points: this.polygonPoints.map((p) => ({
@@ -2358,6 +2466,8 @@ export default {
         :rx="Math.abs(drawingStartX - drawingCurrentX)"
         :ry="Math.abs(drawingStartY - drawingCurrentY)"></ellipse>
       <polygon class="preview" v-if="tool === 'polygon' && polygonDrawing" x="0"
+        y="0" :points="polygonPreviewPoints"></polygon>
+      <polygon class="preview" v-if="tool === 'gaPolygon' && polygonDrawing" x="0"
         y="0" :points="polygonPreviewPoints"></polygon>
       <g class="row-circle-preview"
         v-if="tool === 'rowCircle' || tool === 'rowCircleFixedCenter'">

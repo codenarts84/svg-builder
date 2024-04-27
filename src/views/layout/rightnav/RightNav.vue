@@ -1,9 +1,12 @@
 <template>
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
-    <!-- <GAComponent v-if="selection.length" /> -->
+    <GAComponent v-if="selection.length && selectedGA().length"
+      :areas="selectedGA()" />
 
-    <AreaTool v-if="selection.length" :areas="selectedAreas()" />
+    <AreaTool v-if="selection.length && selectedAreas().length"
+      :areas="selectedAreas()" />
+    <v-divider v-if="selection.length && selectedAreas().length"></v-divider>
 
     <CategoryComponent
       v-if="selection.length && (selectedRows().length || selectedSeats().length)"
@@ -20,8 +23,6 @@
     <v-divider v-if="selection.length && selectedRows().length"></v-divider>
 
     <SectionLabel v-if="selection.length" :rows="selectedRows()" />
-    <!-- <SectionComponent v-if="selection.length && selectedSeats().length"
-      :rows="selectedRows()" /> -->
     <v-divider v-if="selection.length"></v-divider>
 
     <TagsComponent v-if="selection.length" :rows="selectedRows()" />
@@ -78,6 +79,20 @@ const selectedSeats = () => {
     }
   }
   return res
+}
+
+const selectedGA = () => {
+  const r = [];
+  if (selection.value.length) {
+    for (const z of plan.value.zones) {
+      for (const a of z.areas) {
+        if (selection.value.includes(a.uuid) && (a.shape === 'gaCircle' || a.shape === 'gaSquare' || a.shape === 'gaPolygon'))
+          r.push(a)
+      }
+    }
+  }
+
+  return r;
 }
 
 const selectedAreas = () => {

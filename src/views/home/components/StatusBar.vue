@@ -191,26 +191,35 @@ export default {
   },
   computed: {
     seatStatus() {
-      let seats = 0;
+      let total = 0;
+      let selected = 0;
       let qa = 0;
       for (const z of this.plan.zones) {
         for (const s of z.rows) {
-          seats += s.seats.length;
+          total += s.seats.length;
         }
+
         for (const a of z.areas) {
-          if (a.shape === 'roundTable') {
-            seats += a.roundTable.seats.length;
-          } else if (a.shape === 'rectangleTable') {
-            seats += a.rectangleTable.seats.length;
-          } else if (a.shape === 'gaSquare') {
-            qa++;
-          } else if (a.shape === 'gaCircle') {
-            qa++;
+          if (a.shape === 'gaSquare' || a.shape === 'gaCircle' || a.shape === 'gaPolygon') {
+            qa += a.capacity;
           }
         }
+        // for (const a of z.areas) {
+        //   if (a.shape === 'gaSquare' || a.shape === 'gaCircle' || a.shape === 'gaPolygon') {
+        //     total += a.capacity;
+        //   }
+        // if (a.shape === 'roundTable') {
+        //   seats += a.roundTable.seats.length;
+        // } else if (a.shape === 'rectangleTable') {
+        //   seats += a.rectangleTable.seats.length;
+        // } else if (a.shape === 'gaSquare') {
+        //   qa++;
+        // } else if (a.shape === 'gaCircle') {
+        //   qa++;
+        // }
+        // }
       }
 
-      let selected = 0;
       if (this.tool !== 'seatselect') {
         let allSelection = this.selection;
         for (const z of this.plan.zones) {
@@ -224,7 +233,8 @@ export default {
       } else {
         selected = this.selection.length;
       }
-      return `Seats: ${seats} (${selected}) | GA Seats: ${qa * 200}`
+
+      return `Seats: ${total} (${selected}) | GA Seats: ${qa}`
     },
     totalSeatsCount() {
       let seats = 0;
