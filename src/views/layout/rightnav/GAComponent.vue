@@ -1,7 +1,7 @@
 <template>
   <div style="padding: 15px 10px; text-align: left">
     <h4>
-      Additional Option for GA
+      GA Option
     </h4>
     <v-container>
       <v-row style="display: flex; justify-content: center; align-items: center">

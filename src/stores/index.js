@@ -719,6 +719,9 @@ export const useMainStore = defineStore({
 
             switch (area.shape) {
               case "rectangle":
+                area.rectangle.width *= factor;
+                area.rectangle.height *= factor;
+                break;
               case "gaSquare":
                 area.rectangle.width *= factor;
                 area.rectangle.height *= factor;

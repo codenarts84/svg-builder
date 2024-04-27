@@ -1,20 +1,22 @@
 <template>
   <g class="area" :transform="transform" @mousedown="mousedown" @mouseup="mouseup"
     :class="classes">
-    <circle v-if="area.shape === 'circle'" :fill="area.color || '#888888'"
-      :stroke="area.border_color || '#888888'" cx="0" cy="0"
-      :r="area.circle.radius" stroke-width="2px"></circle>
-    <g v-if="area.shape === 'ellipse' || area.shape === 'gaCircle'">
-      <ellipse :stroke="area.border_color || '#888888'" cx="0" cy="0"
-        :fill="area.color || '#888888'" :rx="area.ellipse.radius.x"
-        :ry="area.ellipse.radius.y" :stroke-width="area.stroke_width || '2px'">
-      </ellipse>
+    <g v-if="area.shape === 'circle'">
+      <circle :fill="area.color || '#888888'"
+        :stroke="area.border_color || '#888888'" cx="0" cy="0"
+        :r="area.circle.radius" stroke-width="2px"></circle>
       <text v-if="area.text.text" :x="area.text.position.x"
         :y="area.text.position.y" :font-size="area.text.size || 16"
         text-anchor="middle" font-family="sans-serif" dy=".3em"
         :fill="area.text.color || '#888888'">
         {{ area.text.text }}
       </text>
+    </g>
+    <g v-if="area.shape === 'ellipse' || area.shape === 'gaCircle'">
+      <ellipse :stroke="area.border_color || '#888888'" cx="0" cy="0"
+        :fill="area.color || '#888888'" :rx="area.ellipse.radius.x"
+        :ry="area.ellipse.radius.y" :stroke-width="area.stroke_width || '2px'">
+      </ellipse>
     </g>
     <!-- <rect v-if="area.shape === 'rectangle' || area.shape === 'gaSquare'"
       :fill="area.color || '#888888'" :stroke="area.border_color || '#888888'"
