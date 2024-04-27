@@ -6,12 +6,6 @@
     <v-container>
       <v-row style="display: flex; justify-content: center; align-items: center">
 
-        <v-col cols="12" sm="6"> Rotation </v-col>
-        <v-col cols="12" sm="6">
-          <input type="number" class="v-custom-input" name="rotation"
-            :value="rotation" @input="setRotation" />
-        </v-col>
-
         <v-col cols="12" sm="6" v-if="shape === 'rectangle'"> Width </v-col>
         <v-col cols="12" sm="6" v-if="shape === 'rectangle'">
           <input type="number" class="v-custom-input" name="width" :value="width"
@@ -42,28 +36,28 @@
             :value="radiusY" @input="setRadiusY" />
         </v-col>
 
-        <v-col cols="12" sm="6" v-if="shape !== 'text'"> label Color </v-col>
-        <v-col cols="12" sm="6" v-if="shape !== 'text'">
-          <input class="v-custom-input" type="color" name="labelColor"
-            :value="color || '#ccc'" @input="setColor" />
+        <v-col cols="12" sm="6"> Rotation </v-col>
+        <v-col cols="12" sm="6">
+          <input type="number" class="v-custom-input" name="rotation"
+            :value="rotation" @input="setRotation" />
         </v-col>
 
-        <v-col cols="12" sm="6" v-if="shape !== 'text'"> label Border </v-col>
-        <v-col cols="12" sm="6" v-if="shape !== 'text'">
-          <input class="v-custom-input" type="color" name="labelBorder"
-            :value="borderColor || '#ccc'" @input="setBorderColor" />
-        </v-col>
-
-        <v-col cols="12" sm="6"> label Text </v-col>
+        <v-col cols="12" sm="6"> Text </v-col>
         <v-col cols="12" sm="6">
           <input class="v-custom-input" name="text_value" :value="textValue"
             @input="setText" />
         </v-col>
 
-        <v-col cols="12" sm="6"> label Text size </v-col>
+        <v-col cols="12" sm="6"> Text size </v-col>
         <v-col cols="12" sm="6">
           <input type="number" class="v-custom-input" name="text_size"
             :value="textSize" @input="setTextSize" />
+        </v-col>
+
+        <v-col cols="12" sm="6"> Text Color </v-col>
+        <v-col cols="12" sm="6">
+          <input class="v-custom-input" type="color" name="text_color"
+            :value="textColor || '#ccc'" @input="setTextColor" />
         </v-col>
 
         <v-col cols="12" sm="6"> label Text position (x) </v-col>
@@ -78,10 +72,22 @@
             @input="setTextY" />
         </v-col>
 
-        <v-col cols="12" sm="6"> label Text Color </v-col>
+        <v-col cols="12" sm="6"> Stroke Width </v-col>
         <v-col cols="12" sm="6">
-          <input class="v-custom-input" type="color" name="text_color"
-            :value="textColor || '#ccc'" @input="setTextColor" />
+          <input type="number" class="v-custom-input" name="text_size"
+            :value="borderWidth" @input="setBorderWidth" />
+        </v-col>
+
+        <v-col cols="12" sm="6" v-if="shape !== 'text'"> Stroke Color </v-col>
+        <v-col cols="12" sm="6" v-if="shape !== 'text'">
+          <input class="v-custom-input" type="color" name="labelBorder"
+            :value="borderColor || '#ccc'" @input="setBorderColor" />
+        </v-col>
+
+        <v-col cols="12" sm="6" v-if="shape !== 'text'"> Fill Color </v-col>
+        <v-col cols="12" sm="6" v-if="shape !== 'text'">
+          <input class="v-custom-input" type="color" name="labelColor"
+            :value="color || '#ccc'" @input="setColor" />
         </v-col>
 
       </v-row>
@@ -129,6 +135,9 @@ export default {
     borderColor() {
       return groupValue(this.areas, a => a.border_color)
     },
+    borderWidth() {
+      return groupValue(this.areas, a => a.border_width)
+    },
     textColor() {
       return groupValue(this.areas, a => a.text ? a.text.color : undefined)
     },
@@ -165,8 +174,10 @@ export default {
       this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), color: e.target.value })
     },
     setBorderColor(e) {
-      console.log(e.target.value);
       this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), border_color: e.target.value })
+    },
+    setBorderWidth(e) {
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), border_width: parseInt(e.target.value) })
     },
     setRotation(e) {
       console.log(typeof (parseInt(e.target.value)))
@@ -176,7 +187,7 @@ export default {
       this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__color: e.target.value })
     },
     setText(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__text: parseInt(e.target.value) })
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__text: e.target.value })
     },
     setTextSize(e) {
       this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__size: parseInt(e.target.value) })
@@ -202,7 +213,6 @@ export default {
     setRadiusY(e) {
       this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), ellipse__radius__y: parseInt(e.target.value) })
     },
-
   }
 }
 

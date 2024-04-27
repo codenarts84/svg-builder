@@ -35,8 +35,6 @@
       :rows="selectedRows()" />
     <v-divider v-if="selection.length && selectedSeats().length"></v-divider>
 
-    <TextComponent v-if="selection.length && selectedAreas().length"
-      :areas="selectedAreas()" />
   </v-navigation-drawer>
 </template>
 

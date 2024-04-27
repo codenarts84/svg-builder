@@ -1568,8 +1568,7 @@ export default {
                   store.toggleSelection([newId], this.selectedZone, false);
                 });
               });
-          }
-          else if (this.tool === "circle") {
+          } else if (this.tool === "circle") {
             if (event.shiftKey || this.bSnap2Grid) {
               pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
             }
