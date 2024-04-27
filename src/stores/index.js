@@ -56,6 +56,7 @@ export const useMainStore = defineStore({
         case "rectangleTable":
         case "gaSquare":
         case "gaCircle":
+        case "gaPolygon":
         case "rows":
         case "row":
         case "stgrows":

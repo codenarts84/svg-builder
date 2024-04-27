@@ -72,8 +72,8 @@
             @input="setTextY" />
         </v-col>
 
-        <v-col cols="12" sm="6"> Stroke Width </v-col>
-        <v-col cols="12" sm="6">
+        <v-col cols="12" sm="6" v-if="shape !== 'text'"> Stroke Width </v-col>
+        <v-col cols="12" sm="6" v-if="shape !== 'text'">
           <input type="number" class="v-custom-input" name="text_size"
             :value="borderWidth" @input="setBorderWidth" />
         </v-col>
@@ -136,7 +136,7 @@ export default {
       return groupValue(this.areas, a => a.border_color)
     },
     borderWidth() {
-      return groupValue(this.areas, a => a.border_width)
+      return groupValue(this.areas, a => a.border_width) || 2
     },
     textColor() {
       return groupValue(this.areas, a => a.text ? a.text.color : undefined)

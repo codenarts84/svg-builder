@@ -37,6 +37,13 @@
         <GaCircleIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
+    <v-list-item @click="changeTool('gaPolygon')"
+      :class="tool == 'gaPolygon' ? 'current-tool' : ''">
+      <v-list-item-title>
+        <v-tooltip activator="parent" location="right">GA Polygon</v-tooltip>
+        <v-icon color="black" icon="mdi-shape-polygon-plus" size="large"></v-icon>
+      </v-list-item-title>
+    </v-list-item>
     <v-list-item @click="changeTool('roundTable')"
       :class="tool == 'roundTable' ? 'current-tool' : ''">
       <v-list-item-title>
