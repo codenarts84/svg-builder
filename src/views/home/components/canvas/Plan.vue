@@ -906,7 +906,7 @@ export default {
                 y: 70
               },
               radius: 10,
-              text: (idx + 4).toString(),
+              text: (idx + 5).toString(),
               color: "#333333",
               uuid: uuid(),
               special: 'bottom'

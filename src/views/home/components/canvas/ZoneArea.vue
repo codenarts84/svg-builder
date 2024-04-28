@@ -122,20 +122,20 @@
       <rect :x="0" :y="0" :width="area.rectangleTable.width"
         :height="area.rectangleTable.height" fill="#ffffff" stroke="#000"
         stroke-width="1"></rect>
-      <g v-for="item in area.seats" :key="item"
+      <g v-for="(item, idx) in area.seats" :key="item"
         @mousedown="event => seat_mousedown(event, item.uuid)"
         @mouseup="event => seat_mouseup(event, item.uuid)">
-        <circle :id="`seat-rect-${item.text}`" :cx="item.position.x"
+        <circle :id="`seat-rect-${idx}`" :cx="item.position.x"
           :cy="item.position.y" :r="item.radius" stroke="#000"
           style="stroke-width: 1px;" :fill="seatColor(item.category)"
           stroke-width="1" :data-section-label="item.section_label"
           :data-section-abv="item.section_abv" data-category-name=""
           data-category-abv="">
         </circle>
+        <text fill="black" :x="item.position.x" :y="item.position.y"
+          text-anchor="middle" font-size="10px" font-family="sans-serif"
+          dy=".3em">{{ (idx + 1).toString() }}</text>
       </g>
-      <!-- <text fill="black" v-for=" item  in  area.seats " :x="item.position.x"
-        :y="item.y" text-anchor="middle" font-size="10px" font-family="sans-serif"
-        :key="item" dy=".3em">{{ item.text }}</text> -->
     </g>
 
     <text v-if="area.shape === 'text' && area.text && area.text.text"
