@@ -122,9 +122,7 @@
     </g> -->
 
     <g v-if="area.shape === 'roundTable'">
-      <!-- <circle :cx="area.position.x" :cy="area.position.y" :r="area.position.r">
-      </circle> -->
-      <circle :cx="0" :cy="0" :r="area.position.r" fill="#ffffff" stroke="#000"
+      <circle :cx="0" :cy="0" :r="area.radius" fill="#ffffff" stroke="#000"
         stroke-width="1">
       </circle>
       <circle v-for="item in area.roundTable.seats" :key="item" :cx="item.x"
