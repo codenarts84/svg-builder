@@ -2,7 +2,6 @@
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
 
-    <DropDown />
     <GAComponent v-if="selection.length && selectedGA().length"
       :areas="selectedGA()" />
 
@@ -27,10 +26,16 @@
       :rows="selectedRows()" :temp_Rotate="temp_Rotate" />
     <v-divider v-if="selection.length && selectedRows().length"></v-divider>
 
-    <SectionLabel v-if="selection.length" :rows="selectedRows()" />
-    <v-divider v-if="selection.length"></v-divider>
+    <SectionLabel v-if="selection.length && selectedRows().length"
+      :rows="selectedRows()" />
+    <v-divider v-if="selection.length && selectedRows().length"></v-divider>
 
-    <TagsComponent v-if="selection.length" :rows="selectedRows()" />
+    <SectionTableLabel v-if="selection.length && selectedTable().length"
+      :areas="selectedTable()" />
+    <v-divider v-if="selection.length && selectedRows().length"></v-divider>
+
+    <TagsComponent v-if="selection.length && selectedRows().length"
+      :rows="selectedRows()" />
     <v-divider v-if="selection.length"></v-divider>
 
     <RowLabeling v-if="selection.length && selectedRows().length"
@@ -56,6 +61,7 @@ import CategoryComponent from './CategoryComponent.vue'
 import GAComponent from './GAComponent.vue';
 import AreaTool from './AreaTool.vue';
 import TableToolsComponent from './TableToolsComponent';
+import SectionTableLabel from './SectionTableLabel.vue';
 import DropDown from '@/views/home/components/DropDown.vue';
 import { useMainStore } from "@/stores";
 import { usePlanStore } from '@/stores/plan';

@@ -646,7 +646,6 @@ export const usePlanStore = defineStore("plan", {
     },
 
     addSectionLabel(rowIds, label, abv) {
-      console.log(label, abv)
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid) && r.seats.length) {
@@ -656,6 +655,20 @@ export const usePlanStore = defineStore("plan", {
             });
           }
         });
+      });
+      this.persistPlan();
+    },
+
+    addTableSectionLabel(ids, label, abv) {
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach(r => {
+          if (ids.includes(r.uuid) && r.seats.length) {
+            r.seats.forEach((s) => {
+              s.section_label = label;
+              s.section_abv = abv;
+            });
+          }
+        })
       });
       this.persistPlan();
     },
