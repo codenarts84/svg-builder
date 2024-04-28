@@ -18,6 +18,10 @@
     <v-divider
       v-if="selection.length && (selectedRows().length || selectedSeats().length)"></v-divider>
 
+    <CategoryTable v-if="selection.length && (selectedTable().length)"
+      :areas="selectedTable()" />
+    <v-divider v-if="selection.length && (selectedTable().length)"></v-divider>
+
     <RowComponent v-if="selection.length && selectedRows().length"
       :rows="selectedRows()" />
     <v-divider v-if="selection.length && selectedRows().length"></v-divider>
@@ -66,6 +70,7 @@ import DropDown from '@/views/home/components/DropDown.vue';
 import { useMainStore } from "@/stores";
 import { usePlanStore } from '@/stores/plan';
 import { area } from 'd3';
+import CategoryTable from './CategoryTable.vue';
 
 const store = useMainStore();
 const planstore = usePlanStore();

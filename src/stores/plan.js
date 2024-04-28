@@ -304,6 +304,15 @@ export const usePlanStore = defineStore("plan", {
       this.hasRedo = false;
     },
 
+    setTableCategory(tables, val) {
+      tables.forEach(t => {
+        for (const s of t.seats) {
+          s.category = val;
+        }
+      })
+      this.persistPlan();
+    },
+
     modifyRows({ rowIds, ...args }) {
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {

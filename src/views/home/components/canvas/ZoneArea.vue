@@ -104,7 +104,8 @@
         @mousedown="event => seat_mousedown(event, item.uuid)"
         @mouseup="event => seat_mouseup(event, item.uuid)">
         <circle :cx="item.position.x" :cy="item.position.y" :r="item.r"
-          stroke="#000" style="stroke-width: 1px;" fill="#ffffff" stroke-width="1"
+          stroke="#000" style="stroke-width: 1px;"
+          :fill="seatColor(item.category)" stroke-width="1"
           :id="`seat-round-${item.text}`" :data-section-label="item.section_label"
           :data-section-abv="item.section_abv" data-category-name=""
           data-category-abv="">
@@ -126,8 +127,8 @@
         @mouseup="event => seat_mouseup(event, item.uuid)">
         <circle :id="`seat-rect-${item.text}`" :cx="item.position.x"
           :cy="item.position.y" :r="item.radius" stroke="#000"
-          style="stroke-width: 1px;" fill="#ffffff" stroke-width="1"
-          :data-section-label="item.section_label"
+          style="stroke-width: 1px;" :fill="seatColor(item.category)"
+          stroke-width="1" :data-section-label="item.section_label"
           :data-section-abv="item.section_abv" data-category-name=""
           data-category-abv="">
         </circle>
@@ -162,6 +163,7 @@
 
 <script>
 import { useMainStore } from "@/stores";
+import { usePlanStore } from "@/stores/plan";
 import { computed } from "vue";
 
 
@@ -173,9 +175,11 @@ export default {
   },
   setup() {
     const store = useMainStore();
+    const planStore = usePlanStore();
     const cursor = computed(() => store.cursor);
     const selection = computed(() => store.selection);
-    return { cursor, selection, store };
+    const getCategoryByName = computed(() => planStore.getCategoryByName);
+    return { cursor, selection, store, getCategoryByName };
   },
   computed: {
     isSelected() {
@@ -204,6 +208,12 @@ export default {
     },
   },
   methods: {
+    seatColor(category) {
+      if (category) {
+        return this.getCategoryByName(category).color
+      }
+      return '#fff';
+    },
     startDragging(uuid, zone, event) {
       this.$emit("startDragging", uuid, zone, event);
     },
