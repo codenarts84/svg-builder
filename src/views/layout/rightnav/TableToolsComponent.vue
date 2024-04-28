@@ -1,7 +1,7 @@
 <template>
   <div style="padding: 15px 10px; text-align: left">
     <h4>
-      Shape
+      Shape Setting
     </h4>
     <v-container>
 
@@ -33,44 +33,44 @@
 
         <v-col cols="12" sm="6" v-if="shape === 'roundTable'"> Capacity </v-col>
         <v-col cols="12" sm="6" v-if="shape === 'roundTable'">
-          <input type=" number" class="v-custom-input" name="rotation"
-            :value="category" @input="setCategory" />
+          <input type="number" class="v-custom-input" name="rotation"
+            :value="capacity" @input="setCapacity" />
         </v-col>
 
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'"> Top </v-col>
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'">
           <input type="number" class="v-custom-input" name="rotation"
-            :value="categoryT" @input="setCategoryT" />
+            :value="capacityT" @input="setCapacityT" />
         </v-col>
 
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'"> Bottom </v-col>
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'">
           <input type="number" class="v-custom-input" name="rotation"
-            :value="categoryB" @input="setCategoryB" />
+            :value="capacityB" @input="setCapacityB" />
         </v-col>
 
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'"> Left </v-col>
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'">
           <input type="number" class="v-custom-input" name="rotation"
-            :value="categoryL" @input="setCategoryL" />
+            :value="capacityL" @input="setCapacityL" />
         </v-col>
 
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'"> Right </v-col>
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'">
           <input type="number" class="v-custom-input" name="rotation"
-            :value="categoryR" @input="setCategoryR" />
+            :value="capacityR" @input="setCapacityR" />
         </v-col>
 
         <v-col cols="12" sm="6"> Label Name </v-col>
         <v-col cols="12" sm="6">
-          <input type="number" class="v-custom-input" name="rotation"
-            :value="label" @input="setLabel" />
+          <input class="v-custom-input" name="rotation" :value="label"
+            @input="setLabel" />
         </v-col>
 
         <v-col cols="12" sm="6"> Abbreviation </v-col>
         <v-col cols="12" sm="6">
-          <input type="number" class="v-custom-input" name="rotation"
-            :value="abbreviation" @input="setAbbreviation" />
+          <input class="v-custom-input" name="rotation" :value="abbreviation"
+            @input="setAbbreviation" />
         </v-col>
 
         <!-- <v-col cols="12" sm="6"> Position X </v-col>
@@ -148,6 +148,9 @@ export default {
     }
   },
   computed: {
+    shape() {
+      return groupValue(this.areas, a => a.shape)
+    },
     width() {
       return groupValue(this.areas, a => a.rectangleTable ? a.rectangleTable.width : 0)
     },
@@ -155,60 +158,57 @@ export default {
       return groupValue(this.areas, a => a.rectangleTable ? a.rectangleTable.height : 0)
     },
     radius() {
-      return groupValue(this.areas, a => a.roundTable ? a.roundTable.radius : 0)
+      return groupValue(this.areas, a => a.radius)
+    },
+    capacityT() {
+      return groupValue(this.areas, a => a.seats.filter(i => i.special === 'top').length)
+    },
+    capacityB() {
+      return groupValue(this.areas, a => a.seats.filter(i => i.special === 'bottom').length)
+    },
+    capacityR() {
+      return groupValue(this.areas, a => a.seats.filter(i => i.special === 'right').length)
+    },
+    capacityL() {
+      return groupValue(this.areas, a => a.seats.filter(i => i.special === 'left').length)
     },
     rotation() {
       return groupValue(this.areas, a => a.rotation)
     },
     capacity() {
-      return groupValue(this.areas, a => a.capacity ? a.capacity : 0)
+      return groupValue(this.areas, a => a.capacity)
     },
-
-
+    label() {
+      return groupValue(this.areas, a => a.label)
+    }
   },
   methods: {
-    setColor(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), color: e.target.value })
-    },
-    setBorderColor(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), border_color: e.target.value })
-    },
-    setBorderWidth(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), border_width: parseInt(e.target.value) })
-    },
     setRotation(e) {
-      console.log(typeof (parseInt(e.target.value)))
       this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), rotation: parseInt(e.target.value) })
     },
-    setTextColor(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__color: e.target.value })
-    },
-    setText(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__text: e.target.value })
-    },
-    setTextSize(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__size: parseInt(e.target.value) })
-    },
-    setTextX(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__position__x: parseInt(e.target.value) })
-    },
-    setTextY(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__position__y: parseInt(e.target.value) })
-    },
     setWidth(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), rectangle__width: parseInt(e.target.value) })
+      this.planStore.modifyRectangleTableWidth(this.areas, parseInt(e.target.value))
     },
     setHeight(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), rectangle__height: parseInt(e.target.value) })
+      this.planStore.modifyRectangleTableHeight(this.areas, parseInt(e.target.value))
     },
     setRadius(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), circle__radius: parseInt(e.target.value) })
+      this.planStore.modifyRoundTableRadius(this.areas, parseInt(e.target.value))
     },
-    setRadiusX(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), ellipse__radius__x: parseInt(e.target.value) })
+    setCapacity(e) {
+      this.planStore.renumberCircleSeats(this.areas.map(a => a.uuid), parseInt(e.target.value))
     },
-    setRadiusY(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), ellipse__radius__y: parseInt(e.target.value) })
+    setCapacityT(e) {
+      this.planStore.modifyRectangleTableCapacityT(this.areas, parseInt(e.target.value))
+    },
+    setCapacityB(e) {
+      this.planStore.modifyRectangleTableCapacityB(this.areas, parseInt(e.target.value))
+    },
+    setCapacityR(e) {
+      this.planStore.modifyRectangleTableCapacityR(this.areas, parseInt(e.target.value))
+    },
+    setCapacityL(e) {
+      this.planStore.modifyRectangleTableCapacityL(this.areas, parseInt(e.target.value))
     },
   }
 }

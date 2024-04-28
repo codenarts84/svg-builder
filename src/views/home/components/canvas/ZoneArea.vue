@@ -125,26 +125,27 @@
       <circle :cx="0" :cy="0" :r="area.radius" fill="#ffffff" stroke="#000"
         stroke-width="1">
       </circle>
-      <circle v-for="item in area.roundTable.seats" :key="item" :cx="item.x"
-        :cy="item.y" :r="item.r" stroke="#000" style="stroke-width: 1px;"
-        fill="#ffffff" stroke-width="1">
+      <circle v-for="item in area.seats" :key="item" :cx="item.x" :cy="item.y"
+        :r="item.r" stroke="#000" style="stroke-width: 1px;" fill="#ffffff"
+        stroke-width="1">
       </circle>
-      <text fill="black" v-for="item in area.roundTable.seats" :x="item.x"
-        :y="item.y" text-anchor="middle" font-size="10px" font-family="sans-serif"
-        :key="item" dy=".3em">{{ item.text }}</text>
+      <text fill="black" v-for="item in area.seats" :x="item.x" :y="item.y"
+        text-anchor="middle" font-size="10px" font-family="sans-serif" :key="item"
+        dy=".3em">{{ item.text }}</text>
     </g>
 
-    <g v-if="area.shape === 'rectangleTable'">
-      <rect :x="0" :y="0" :width="area.position.width"
-        :height="area.position.height" fill="#ffffff" stroke="#000"
+    <g v-if="area.shape === 'rectangleTable'"
+      :transform="`translate(${-area.rectangleTable.width / 2}, ${-area.rectangleTable.height / 2})`">
+      <rect :x="0" :y="0" :width="area.rectangleTable.width"
+        :height="area.rectangleTable.height" fill="#ffffff" stroke="#000"
         stroke-width="1"></rect>
-      <circle v-for=" item  in  area.rectangleTable.seats " :key="item"
-        :cx="item.x" :cy="item.y" :r="item.r" stroke="#000"
+      <circle v-for=" item in area.seats " :key="item" :cx="item.position.x"
+        :cy="item.position.y" :r="item.radius" stroke="#000"
         style="stroke-width: 1px;" fill="#ffffff" stroke-width="1">
       </circle>
-      <text fill="black" v-for=" item  in  area.rectangleTable.seats " :x="item.x"
+      <!-- <text fill="black" v-for=" item  in  area.seats " :x="item.position.x"
         :y="item.y" text-anchor="middle" font-size="10px" font-family="sans-serif"
-        :key="item" dy=".3em">{{ item.text }}</text>
+        :key="item" dy=".3em">{{ item.text }}</text> -->
     </g>
 
     <text v-if="area.shape === 'text' && area.text && area.text.text"
@@ -174,7 +175,6 @@
 import { useMainStore } from "@/stores";
 import { computed } from "vue";
 
-import TableRoundIcon from "@/assets/svgs/menuIcons/TableRoundIcon.vue";
 
 export default {
   name: "ZoneArea",

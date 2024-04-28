@@ -1,6 +1,8 @@
 <template>
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
+
+    <DropDown />
     <GAComponent v-if="selection.length && selectedGA().length"
       :areas="selectedGA()" />
 
@@ -8,8 +10,8 @@
       :areas="selectedAreas()" />
     <v-divider v-if="selection.length && selectedAreas().length"></v-divider>
 
-    <!-- <TableToolsComponent v-if="selection.length && selectedTable().length"
-      :areas="selectedTable()" /> -->
+    <TableToolsComponent v-if="selection.length && selectedTable().length"
+      :areas="selectedTable()" />
 
     <CategoryComponent
       v-if="selection.length && (selectedRows().length || selectedSeats().length)"
@@ -50,11 +52,11 @@ import SectionLabel from "./SectionLabel.vue";
 import TagsComponent from "./TagsComponent.vue";
 import RowLabeling from "./RowLabeling.vue";
 import SeatLabeling from "./SeatLabeling.vue";
-import TextComponent from './TextComponent.vue';
 import CategoryComponent from './CategoryComponent.vue'
 import GAComponent from './GAComponent.vue';
 import AreaTool from './AreaTool.vue';
 import TableToolsComponent from './TableToolsComponent';
+import DropDown from '@/views/home/components/DropDown.vue';
 import { useMainStore } from "@/stores";
 import { usePlanStore } from '@/stores/plan';
 import { area } from 'd3';
@@ -116,7 +118,7 @@ const selectedAreas = () => {
   if (selection.value.length) {
     for (const z of plan.value.zones) {
       for (const a of z.areas) {
-        if (selection.value.includes(a.uuid))
+        if (selection.value.includes(a.uuid) && a.shape !== 'roundTable' && a.shape !== 'rectangleTable')
           r.push(a)
       }
     }
