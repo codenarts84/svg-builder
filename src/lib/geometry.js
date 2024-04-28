@@ -93,11 +93,17 @@ const roundTableBBox = (area) => {
 }
 
 const rectangleTableBBox = (area) => {
+  const top = area.seats.some(i => i.special === 'top') ? 1 : 0;
+  const bottom = area.seats.some(i => i.special === 'bottom') ? 1 : 0;
+  const left = area.seats.some(i => i.special === 'left') ? 1 : 0;
+  const right = area.seats.some(i => i.special === 'right') ? 1 : 0;
+  const width = area.rectangleTable.width + 20 * (left + right);
+  const height = area.rectangleTable.height + 20 * (top + bottom);
   let abox = {
-    x: area.position.x,
-    y: area.position.y - 40,
-    width: 120,
-    height: 100,
+    x: area.position.x - area.rectangleTable.width / 2 - left * 20,
+    y: area.position.y - area.rectangleTable.height / 2 - top * 20,
+    width: width,
+    height: height,
   };
   if (area.rotation) {
     abox = rotateRectangluarBox(area, abox);
@@ -311,6 +317,38 @@ const testOverlap = (area, zone, xmin, ymin, xmax, ymax) => {
       xmax - xmin,
       ymax - ymin
     );
+  } else if (area.shape === "rectangleTable") {
+    const top = area.seats.some(i => i.special === 'top') ? 1 : 0;
+    const bottom = area.seats.some(i => i.special === 'bottom') ? 1 : 0;
+    const left = area.seats.some(i => i.special === 'left') ? 1 : 0;
+    const right = area.seats.some(i => i.special === 'right') ? 1 : 0;
+    const width = area.rectangleTable.width + 20 * (left + right);
+    const height = area.rectangleTable.height + 20 * (top + bottom);
+    const stX = area.position.x - area.rectangleTable.width / 2 - left * 20;
+    const stY = area.position.y - area.rectangleTable.height / 2 - top * 20;
+    return rotatePolygon(
+      [
+        {
+          x: zone.position.x + stX,
+          y: zone.position.y + stY,
+        },
+        {
+          x: zone.position.x + stX + width,
+          y: zone.position.y + stY,
+        },
+        {
+          x: zone.position.x + stX + width,
+          y: zone.position.y + stY + height,
+        },
+        {
+          x: zone.position.x + stX,
+          y: zone.position.y + stY + height,
+        },
+      ],
+      area.rotation,
+      zone.position.x + area.position.x,
+      zone.position.y + area.position.y
+    ).some((p) => p.x >= xmin && p.x <= xmax && p.y >= ymin && p.y <= ymax);
   }
 };
 

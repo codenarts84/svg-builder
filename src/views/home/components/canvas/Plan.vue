@@ -797,24 +797,23 @@ export default {
                 y: targetPos.y,
               },
               radius: 25,
+              capacity: 6,
               text: {
                 position: { x: 0, y: 0 },
                 color: "#333333",
                 text: "",
               },
-              roundTable: {
-                seats: arr.map((item, idx, arr) => {
-                  const degree = 2 * Math.PI / arr.length * idx;
-                  const uid = uuid();
-                  return {
-                    text: (idx + 1).toString(),
-                    x: 35 * Math.cos(degree),
-                    y: 35 * Math.sin(degree),
-                    r: 10,
-                    uid
-                  }
-                })
-              }
+              seats: arr.map((item, idx, arr) => {
+                const degree = 2 * Math.PI / arr.length * idx;
+                const uid = uuid();
+                return {
+                  text: (idx + 1).toString(),
+                  x: 35 * Math.cos(degree),
+                  y: 35 * Math.sin(degree),
+                  r: 10,
+                  uid
+                }
+              })
             })
             .then(() => {
               this.$nextTick(() => {
@@ -841,50 +840,64 @@ export default {
           for (let i = 0; i < this.nseat; i++) {
             arr.push(i);
           }
+          const dx = 120 / 3;
+          let top = []
+          for (let i = 0; i < 4; i++) top.push(i)
+          top = top.map((item, idx) => {
+            return {
+              position: {
+                x: idx * dx + 10,
+                y: -10
+              },
+              text: (idx + 1).toString(),
+              color: "#333333",
+              uuid: uuid(),
+              radius: 10,
+              special: 'top'
+            }
+          })
+          let bottom = []
+          for (let i = 0; i < 4; i++) bottom.push(i)
+          bottom = bottom.map((item, idx) => {
+            return {
+              position: {
+                x: idx * dx + 10,
+                y: 70
+              },
+              radius: 10,
+              text: (idx + 4).toString(),
+              color: "#333333",
+              uuid: uuid(),
+              special: 'bottom'
+            }
+          })
           const newId = uuid();
+
           usePlanStore()
             .createArea(this.selectedZone, {
               shape: "rectangleTable",
+              capacity: {
+                top: 4,
+                bottom: 4,
+                left: 0,
+                right: 0,
+              },
+              rectangleTable: {
+                width: 140,
+                height: 60,
+              },
               rotation: 0,
               uuid: newId,
               position: {
-                x: targetPos.x - 40,
-                y: targetPos.y - 20,
-                width: 140,
-                height: 60
+                x: targetPos.x,
+                y: targetPos.y,
               },
               text: {
                 position: { x: 0, y: 0 },
                 color: "#333333",
                 text: "",
               },
-              rectangleTable: {
-                seats: arr.map((item, idx, arr) => {
-                  const len = arr.length;
-                  const mid = Math.ceil(len / 2);
-                  const width = 140 - 30;
-                  const height = 60;
-                  // console.log('sdh,', idx)
-                  let x;
-                  // if (len % 2 === 0) {
-                  x = (width / (mid - 1)) * (idx % mid);
-                  // }
-                  // else {
-                  //   x = (width / (mid - 1 - Math.floor(idx / mid))) * (idx % mid);
-                  // }
-                  const y = idx < mid ? -5 : 65;
-                  // console.log('width, height', x, y)
-
-                  const uid = uuid();
-                  return {
-                    text: (idx + 1).toString(),
-                    x: x + 15,
-                    y,
-                    r: 10,
-                    uid
-                  }
-                })
-              }
+              seats: [...top, ...bottom]
             })
             .then(() => {
               this.$nextTick(() => {

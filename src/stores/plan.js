@@ -356,6 +356,176 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
+    modifyRectangleTableWidth(areas, w) {
+      areas.forEach(a => {
+        a.rectangleTable.width = w;
+        let top = a.seats.filter(item => item.special === 'top');
+        let bottom = a.seats.filter(item => item.special === 'bottom');
+        let left = a.seats.filter(item => item.special === 'left');
+        let right = a.seats.filter(item => item.special === 'right');
+        const dt = (w - 20) / (top.length - 1);
+        const db = (w - 20) / (bottom.length - 1);
+        top = top.map((item, idx) => {
+          item.position.x = dt * idx + 10;
+          return item;
+        })
+        bottom = bottom.map((item, idx) => {
+          item.position.x = db * idx + 10;
+          return item;
+        })
+        right = right.map((item, idx) => {
+          item.position.x = w + 10;
+          return item;
+        })
+        a.seats = [...top, ...bottom, ...left, ...right];
+      })
+      this.persistPlan();
+    },
+    modifyRectangleTableHeight(areas, h) {
+      areas.forEach(a => {
+        a.rectangleTable.height = h;
+        let top = a.seats.filter(item => item.special === 'top');
+        let bottom = a.seats.filter(item => item.special === 'bottom');
+        let left = a.seats.filter(item => item.special === 'left');
+        let right = a.seats.filter(item => item.special === 'right');
+        const dl = (h - 20) / (left.length - 1);
+        const dr = (h - 20) / (right.length - 1);
+        bottom = bottom.map((item, idx) => {
+          item.position.y = h + 10;
+          return item;
+        })
+        left = left.map((item, idx) => {
+          item.position.y = idx * dl + 10;
+          return item;
+        })
+        right = right.map((item, idx) => {
+          item.position.y = idx * dr + 10;
+          return item;
+        })
+        a.seats = [...top, ...bottom, ...left, ...right];
+      })
+      this.persistPlan();
+    },
+
+    modifyRectangleTableCapacityT(areas, val) {
+      areas.forEach(a => {
+        const width = a.rectangleTable.width;
+        let top = a.seats.filter(item => item.special === 'top');
+        const dt = (width - 20) / (val - 1)
+        top = Array(val).fill(0).map((item, idx) => {
+          return {
+            position: {
+              x: idx * dt + 10,
+              y: -10
+            },
+            radius: 10,
+            text: (idx + 4).toString(),
+            color: "#333333",
+            uuid: uuid(),
+            special: 'top'
+          }
+        })
+        const ss = a.seats.filter(item => item.special !== 'top')
+        a.seats = [...ss, ...top];
+      })
+      this.persistPlan();
+    },
+
+    modifyRectangleTableCapacityB(areas, val) {
+      areas.forEach(a => {
+        const width = a.rectangleTable.width;
+        const height = a.rectangleTable.height;
+        let bottom = a.seats.filter(item => item.special === 'bottom');
+        const db = (width - 20) / (val - 1)
+        bottom = Array(val).fill(0).map((item, idx) => {
+          return {
+            position: {
+              x: idx * db + 10,
+              y: height + 10
+            },
+            radius: 10,
+            text: (idx + 4).toString(),
+            color: "#333333",
+            uuid: uuid(),
+            special: 'bottom'
+          }
+        })
+        const ss = a.seats.filter(item => item.special !== 'bottom')
+        a.seats = [...ss, ...bottom];
+      })
+      this.persistPlan();
+    },
+
+    modifyRectangleTableCapacityR(areas, val) {
+      areas.forEach(a => {
+        const width = a.rectangleTable.width;
+        const height = a.rectangleTable.height;
+        let right = a.seats.filter(item => item.special === 'right');
+        const dr = (height - 20) / (val - 1)
+        right = Array(val).fill(0).map((item, idx) => {
+          return {
+            position: {
+              x: width + 10,
+              y: idx * dr + 10
+            },
+            radius: 10,
+            text: (idx + 4).toString(),
+            color: "#333333",
+            uuid: uuid(),
+            special: 'right'
+          }
+        })
+        const ss = a.seats.filter(item => item.special !== 'right')
+        a.seats = [...ss, ...right];
+      })
+      this.persistPlan();
+    },
+
+    modifyRectangleTableCapacityL(areas, val) {
+      areas.forEach(a => {
+        const width = a.rectangleTable.width;
+        const height = a.rectangleTable.height;
+        let left = a.seats.filter(item => item.special === 'left');
+        const dl = (height - 20) / (val - 1)
+        left = Array(val).fill(0).map((item, idx) => {
+          return {
+            position: {
+              x: -10,
+              y: idx * dl + 10
+            },
+            radius: 10,
+            text: (idx + 4).toString(),
+            color: "#333333",
+            uuid: uuid(),
+            special: 'left'
+          }
+        })
+        const ss = a.seats.filter(item => item.special !== 'left')
+        a.seats = [...ss, ...left];
+      })
+      this.persistPlan();
+
+    },
+
+
+    modifyRoundTableRadius(areas, r) {
+      areas.forEach(a => {
+        a.radius = r;
+        a.seats = a.seats.map((item, idx, arr) => {
+          const degree = 2 * Math.PI / arr.length * idx;
+          const uid = uuid();
+          return {
+            text: (idx + 1).toString(),
+            x: (r + 10) * Math.cos(degree),
+            y: (r + 10) * Math.sin(degree),
+            r: 10,
+            uid
+          }
+        })
+      })
+      this.persistPlan();
+    },
+
     modifyAreas({ areaIds, ...args }) {
       // console.log(areaIds, args)
       this._plan.zones.forEach((z) => {
@@ -650,19 +820,20 @@ export const usePlanStore = defineStore("plan", {
         z.areas.forEach((r) => {
           if (rowIds.includes(r.uuid)) {
             const res = [];
+            r.capacity = count;
             // if (shape === 'roundTable') {
             for (let si = 0; si < count; si++) {
               const uid = uuid();
               const degree = 2 * Math.PI / count * si;
               res.push({
                 text: (si + 1).toString(),
-                x: 40 * Math.cos(degree),
-                y: 40 * Math.sin(degree),
+                x: (r.radius + 10) * Math.cos(degree),
+                y: (r.radius + 10) * Math.sin(degree),
                 r: 10,
                 uid
               })
             }
-            r.roundTable.seats = res;
+            r.seats = res;
             // }
             // } else if (shape === 'rectangleTable') {
             //   for (let idx = 0; idx < count; idx++) {
