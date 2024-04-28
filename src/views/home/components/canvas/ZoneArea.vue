@@ -42,10 +42,6 @@
       </text>
     </g>
 
-    <!-- <rect v-if="area.shape === 'rectangle' || area.shape === 'gaSquare'"
-      :fill="area.color || '#888888'" :stroke="area.border_color || '#888888'"
-      x="0" y="0" :width="area.rectangle.width" :height="area.rectangle.height"
-      stroke-width="2px"></rect> -->
     <g v-if="area.shape === 'rectangle'">
       <rect :fill="area.color || '#888888'"
         :stroke="area.border_color || '#888888'" x="0" y="0"
@@ -100,49 +96,42 @@
       </text>
     </g>
 
-
-    <!-- <g v-if="area.shape === 'roundTable'"
-      :transform="`scale(${area.roundTable.scale})`" :x="area.position.x"
-      :y="area.position.y">
-      <path d="M17.5,7.5c-0.6,0-1.1,0.2-1.6,0.6l0,0l0,0c0.2,0.6,0.3,1.2,0.3,1.8c0,0.6-0.1,1.2-0.3,1.8l0,0l0,0c0.4,0.4,1,0.6,1.6,0.6
-		c1.4,0,2.5-1.1,2.5-2.5C20,8.6,18.9,7.5,17.5,7.5z" />
-      <path d="M4.1,11.9L4.1,11.9c-0.2-0.6-0.4-1.2-0.4-1.9c0-0.6,0.1-1.2,0.3-1.8l0,0l0,0c-0.4-0.4-1-0.6-1.6-0.6C1.1,7.5,0,8.6,0,10
-		c0,1.4,1.1,2.5,2.5,2.5C3.1,12.5,3.6,12.3,4.1,11.9L4.1,11.9z" />
-      <path d="M5.4,5.8L5.4,5.8L5.4,5.8c0.5-0.5,0.9-0.9,1.5-1.2C7.4,4.3,8,4.1,8.6,4l0,0l0,0c0.1-0.6,0-1.2-0.3-1.7
-		C7.7,1.1,6.2,0.7,5,1.3C3.8,2,3.4,3.5,4.1,4.7C4.4,5.2,4.9,5.6,5.4,5.8z" />
-      <path
-        d="M14.6,14.2L14.6,14.2L14.6,14.2c-0.5,0.5-0.9,0.9-1.5,1.2c-0.5,0.3-1.1,0.5-1.7,0.6l0,0l0,0c-0.1,0.6,0,1.2,0.3,1.7
-		c0.7,1.2,2.2,1.6,3.4,0.9c1.2-0.7,1.6-2.2,0.9-3.4C15.6,14.8,15.1,14.4,14.6,14.2z" />
-      <path d="M8.7,16L8.7,16c-0.7-0.1-1.3-0.3-1.8-0.6c-0.5-0.3-1-0.7-1.4-1.2l0,0l0,0c-0.5,0.2-1,0.6-1.3,1.1C3.4,16.5,3.8,18,5,18.7
-		c1.2,0.7,2.7,0.3,3.4-0.9C8.7,17.2,8.8,16.6,8.7,16L8.7,16z" />
-      <path d="M11.3,4L11.3,4c0.7,0.1,1.3,0.3,1.8,0.6c0.5,0.3,1,0.7,1.4,1.2l0,0l0,0c0.5-0.2,1-0.6,1.3-1.1C16.6,3.5,16.2,2,15,1.3
-		c-1.2-0.7-2.7-0.3-3.4,0.9C11.3,2.8,11.2,3.4,11.3,4L11.3,4z" />
-      <path d="M14.8,10c0-2.7-2.2-4.9-4.8-4.9S5.2,7.3,5.2,10s2.2,4.8,4.8,4.8S14.8,12.7,14.8,10z M10,14.1c-2.3,0-4.1-1.8-4.1-4.1
-		S7.7,5.9,10,5.9s4.1,1.8,4.1,4.1S12.3,14.1,10,14.1z" />
-    </g> -->
-
-    <g v-if="area.shape === 'roundTable'">
+    <g v-if="area.shape === 'roundTable'" class="table-seat">
       <circle :cx="0" :cy="0" :r="area.radius" fill="#ffffff" stroke="#000"
         stroke-width="1">
       </circle>
-      <circle v-for="item in area.seats" :key="item" :cx="item.x" :cy="item.y"
-        :r="item.r" stroke="#000" style="stroke-width: 1px;" fill="#ffffff"
-        stroke-width="1">
-      </circle>
-      <text fill="black" v-for="item in area.seats" :x="item.x" :y="item.y"
-        text-anchor="middle" font-size="10px" font-family="sans-serif" :key="item"
-        dy=".3em">{{ item.text }}</text>
+      <g v-for="item in area.seats" :key="item"
+        @mousedown="event => seat_mousedown(event, item.uuid)"
+        @mouseup="event => seat_mouseup(event, item.uuid)">
+        <circle :cx="item.position.x" :cy="item.position.y" :r="item.r"
+          stroke="#000" style="stroke-width: 1px;" fill="#ffffff" stroke-width="1"
+          :id="`seat-round-${item.text}`" :data-section-label="item.section_label"
+          :data-section-abv="item.section_abv" data-category-name=""
+          data-category-abv="">
+        </circle>
+        <text fill="black" :x="item.position.x" :y="item.position.y"
+          text-anchor="middle" font-size="10px" font-family="sans-serif"
+          :key="item" dy=".3em">{{
+            item.text }}</text>
+      </g>
     </g>
 
-    <g v-if="area.shape === 'rectangleTable'"
+    <g v-if="area.shape === 'rectangleTable'" class="table-seat"
       :transform="`translate(${-area.rectangleTable.width / 2}, ${-area.rectangleTable.height / 2})`">
       <rect :x="0" :y="0" :width="area.rectangleTable.width"
         :height="area.rectangleTable.height" fill="#ffffff" stroke="#000"
         stroke-width="1"></rect>
-      <circle v-for=" item in area.seats " :key="item" :cx="item.position.x"
-        :cy="item.position.y" :r="item.radius" stroke="#000"
-        style="stroke-width: 1px;" fill="#ffffff" stroke-width="1">
-      </circle>
+      <g v-for="item in area.seats" :key="item"
+        @mousedown="event => seat_mousedown(event, item.uuid)"
+        @mouseup="event => seat_mouseup(event, item.uuid)">
+        <circle :id="`seat-rect-${item.text}`" :cx="item.position.x"
+          :cy="item.position.y" :r="item.radius" stroke="#000"
+          style="stroke-width: 1px;" fill="#ffffff" stroke-width="1"
+          :data-section-label="item.section_label"
+          :data-section-abv="item.section_abv" data-category-name=""
+          data-category-abv="">
+        </circle>
+      </g>
       <!-- <text fill="black" v-for=" item  in  area.seats " :x="item.position.x"
         :y="item.y" text-anchor="middle" font-size="10px" font-family="sans-serif"
         :key="item" dy=".3em">{{ item.text }}</text> -->
@@ -257,6 +246,21 @@ export default {
       }
       return false;
     },
+
+    seat_mousedown(event, uuid) {
+      if (event.ctrlKey || event.metaKey) {
+        // this is a panning event
+        return false;
+      }
+      if (useMainStore().tool === "seatselect") {
+        this.$emit("startDragging", uuid, this.zone, event);
+        event.stopPropagation();
+        return true;
+      }
+      return false;
+    },
+
+    seat_mouseup(event) { }
   },
 };
 </script>

@@ -230,7 +230,7 @@ export const useMainStore = defineStore({
         }
         this.ignoreNextSelection = true;
       }
-      // console.log(this.selection)
+      // console.log('selection', this.selection)
       this.dragging = true;
       this.draggingPolygonPoint = false;
       this.dragged = false;

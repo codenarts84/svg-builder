@@ -406,7 +406,6 @@ export default {
                 ...r.seats.map((s) => s.position.y + (s.radius || 10))
               );
               res.push({
-                bStatus: false,
                 visible: false,
                 x: z.position.x + r.position.x + minx,
                 y: z.position.y + r.position.y + miny,
@@ -417,7 +416,6 @@ export default {
             for (const s of r.seats) {
               if (this.selection.includes(s.uuid)) {
                 res.push({
-                  bStatus: false,
                   visible: true,
                   x:
                     z.position.x +
@@ -464,8 +462,49 @@ export default {
               abox.x += z.position.x;
               abox.y += z.position.y;
               abox.visible = true;
-              abox.bStatus = true;
               res.push(abox);
+            } else if (a.shape === 'roundTable') {
+              for (const s of a.seats) {
+                if (this.selection.includes(s.uuid)) {
+                  res.push({
+                    visible: true,
+                    x:
+                      z.position.x +
+                      a.position.x +
+                      s.position.x -
+                      (s.radius || 10),
+                    y:
+                      z.position.y +
+                      a.position.y +
+                      s.position.y -
+                      (s.radius || 10),
+                    width: 2 * (s.radius || 10),
+                    height: 2 * (s.radius || 10),
+                  });
+                }
+              }
+            } else if (a.shape === 'rectangleTable') {
+              for (const s of a.seats) {
+                if (this.selection.includes(s.uuid)) {
+                  res.push({
+                    visible: true,
+                    x:
+                      z.position.x +
+                      a.position.x +
+                      s.position.x -
+                      (s.radius || 10) -
+                      a.rectangleTable.width / 2,
+                    y:
+                      z.position.y +
+                      a.position.y +
+                      s.position.y -
+                      (s.radius || 10) -
+                      a.rectangleTable.height / 2,
+                    width: 2 * (s.radius || 10),
+                    height: 2 * (s.radius || 10),
+                  });
+                }
+              }
             }
           }
         }
@@ -473,6 +512,7 @@ export default {
       return res;
     },
     selectionBoundary() {
+      // console.log('selectionBoundary')
       const bboxes = this.selectionBoxes;
       if (bboxes.length === 0) return null;
       const minx = Math.min(...bboxes.map((s) => s.x));
@@ -805,13 +845,14 @@ export default {
               },
               seats: arr.map((item, idx, arr) => {
                 const degree = 2 * Math.PI / arr.length * idx;
-                const uid = uuid();
                 return {
                   text: (idx + 1).toString(),
-                  x: 35 * Math.cos(degree),
-                  y: 35 * Math.sin(degree),
+                  position: {
+                    x: 35 * Math.cos(degree),
+                    y: 35 * Math.sin(degree),
+                  },
                   r: 10,
-                  uid
+                  uuid: uuid()
                 }
               })
             })

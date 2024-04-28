@@ -61,18 +61,6 @@
             :value="capacityR" @input="setCapacityR" />
         </v-col>
 
-        <v-col cols="12" sm="6"> Label Name </v-col>
-        <v-col cols="12" sm="6">
-          <input class="v-custom-input" name="rotation" :value="label"
-            @input="setLabel" />
-        </v-col>
-
-        <v-col cols="12" sm="6"> Abbreviation </v-col>
-        <v-col cols="12" sm="6">
-          <input class="v-custom-input" name="rotation" :value="abbreviation"
-            @input="setAbbreviation" />
-        </v-col>
-
         <!-- <v-col cols="12" sm="6"> Position X </v-col>
         <v-col cols="12" sm="6">
           <input type="number" class="v-custom-input" name="rotation"

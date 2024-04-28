@@ -268,7 +268,7 @@ export default {
         // this is a panning event
         return false;
       }
-      console.log('dyskej')
+
       setTimeout(() => {
         if (this.selectionBoundary) {
 
