@@ -76,13 +76,18 @@ const rectangleBBox = (area) => {
 
 const roundTableBBox = (area) => {
   let abox = {
-    x: area.position.x - 50,
-    y: area.position.y - 50,
-    width: 100,
-    height: 100,
+    x: area.position.x - area.radius - 20,
+    y: area.position.y - area.radius - 20,
+    width: (area.radius + 20) * 2,
+    height: (area.radius + 20) * 2,
   };
   if (area.rotation) {
-    abox = rotateRectangluarBox(area, abox);
+    // abox = {
+    //   x: (area.position.x - area.radius - 20) * Math.cos(area.rotation / 180 * Math.PI),
+    //   y: (area.position.y - area.radius - 20) * Math.sin(area.rotation / 180 * Math.PI),
+    //   width: (area.radius + 20) * 2,
+    // height: (area.radius + 20) * 2
+    // }
   }
   return abox;
 }
@@ -291,6 +296,16 @@ const testOverlap = (area, zone, xmin, ymin, xmax, ymax) => {
         zone.position.x + area.position.x,
         zone.position.y + area.position.y
       ).flatMap((p) => [p.x, p.y]),
+      xmin,
+      ymin,
+      xmax - xmin,
+      ymax - ymin
+    );
+  } else if (area.shape === "roundTable") {
+    return circleBox(
+      zone.position.x + area.position.x,
+      zone.position.y + area.position.y,
+      area.radius + 20,
       xmin,
       ymin,
       xmax - xmin,

@@ -627,7 +627,7 @@ export default {
     },
 
     startDragging(uuid, zone, event) {
-      console.log('startdragging here!!!')
+      // console.log('startdragging here!!!')
       // console.log(store.selection);
       if (!this.svg) return;
       if (event) {
@@ -795,8 +795,8 @@ export default {
               position: {
                 x: targetPos.x,
                 y: targetPos.y,
-                r: 35
               },
+              radius: 25,
               text: {
                 position: { x: 0, y: 0 },
                 color: "#333333",
@@ -808,8 +808,8 @@ export default {
                   const uid = uuid();
                   return {
                     text: (idx + 1).toString(),
-                    x: 40 * Math.cos(degree),
-                    y: 40 * Math.sin(degree),
+                    x: 35 * Math.cos(degree),
+                    y: 35 * Math.sin(degree),
                     r: 10,
                     uid
                   }
@@ -1544,6 +1544,7 @@ export default {
                 border_color: "#000000", // todo: use previously used color
                 rotation: 0,
                 uuid: newId,
+                capacity: 100,
                 position: {
                   x: round(
                     Math.min(pos.x, this.drawingStartX) - zone.position.x,
@@ -1663,6 +1664,7 @@ export default {
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
                 rotation: 0,
+                capacity: 100,
                 uuid: newId,
                 position: {
                   x: round(this.drawingStartX - zone.position.x, 4),
@@ -1963,6 +1965,7 @@ export default {
           border_color: "#000001", // todo: use previously used color
           rotation: 0,
           uuid: newId,
+          capacity: 100,
           position: {
             x: minx - zone.position.x,
             y: miny - zone.position.y,

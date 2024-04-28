@@ -492,7 +492,6 @@ export const useMainStore = defineStore({
       planStore.persistPlan();
     },
     moveDragging(x, y, snap, zoomLevel) {
-      // console.log(snap)
       if (!this.dragging) return;
       let dx = x - this.dragStartX;
       let dy = y - this.dragStartY;
@@ -743,12 +742,6 @@ export const useMainStore = defineStore({
                   p.y *= factor;
                 }
                 break;
-              // case "gaSquare":
-              //   area.gaSquare.scale *= factor;
-              //   break;
-              // case "gaCircle":
-              //   area.gaCircle.scale *= factor;
-              //   break;
               case "text":
                 area.text.size =
                   (area.text.size ? area.text.size : 16) * factor;

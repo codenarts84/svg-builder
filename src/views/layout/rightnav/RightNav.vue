@@ -8,6 +8,9 @@
       :areas="selectedAreas()" />
     <v-divider v-if="selection.length && selectedAreas().length"></v-divider>
 
+    <!-- <TableToolsComponent v-if="selection.length && selectedTable().length"
+      :areas="selectedTable()" /> -->
+
     <CategoryComponent
       v-if="selection.length && (selectedRows().length || selectedSeats().length)"
       :seats="selectedSeats()" />
@@ -51,6 +54,7 @@ import TextComponent from './TextComponent.vue';
 import CategoryComponent from './CategoryComponent.vue'
 import GAComponent from './GAComponent.vue';
 import AreaTool from './AreaTool.vue';
+import TableToolsComponent from './TableToolsComponent';
 import { useMainStore } from "@/stores";
 import { usePlanStore } from '@/stores/plan';
 import { area } from 'd3';
@@ -81,6 +85,19 @@ const selectedSeats = () => {
   return res
 }
 
+const selectedTable = () => {
+  const r = [];
+  if (selection.value.length) {
+    for (const z of plan.value.zones) {
+      for (const a of z.areas) {
+        if (selection.value.includes(a.uuid) && (a.shape === 'roundTable' || a.shape === 'rectangleTable'))
+          r.push(a)
+      }
+    }
+  }
+  return r;
+}
+
 const selectedGA = () => {
   const r = [];
   if (selection.value.length) {
@@ -91,7 +108,6 @@ const selectedGA = () => {
       }
     }
   }
-
   return r;
 }
 
