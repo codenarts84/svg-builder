@@ -420,6 +420,7 @@ export const usePlanStore = defineStore("plan", {
       areas.forEach(a => {
         const width = a.rectangleTable.width;
         let top = a.seats.filter(item => item.special === 'top');
+        const category = a.seats[a.seats.length - 1].category;
         const dt = (width - 20) / (val - 1)
         top = Array(val).fill(0).map((item, idx) => {
           return {
@@ -431,7 +432,8 @@ export const usePlanStore = defineStore("plan", {
             text: (idx + 4).toString(),
             color: "#333333",
             uuid: uuid(),
-            special: 'top'
+            special: 'top',
+            category
           }
         })
         const ss = a.seats.filter(item => item.special !== 'top')
@@ -445,6 +447,7 @@ export const usePlanStore = defineStore("plan", {
         const width = a.rectangleTable.width;
         const height = a.rectangleTable.height;
         let bottom = a.seats.filter(item => item.special === 'bottom');
+        const category = a.seats[a.seats.length - 1].category;
         const db = (width - 20) / (val - 1)
         bottom = Array(val).fill(0).map((item, idx) => {
           return {
@@ -456,7 +459,8 @@ export const usePlanStore = defineStore("plan", {
             text: (idx + 4).toString(),
             color: "#333333",
             uuid: uuid(),
-            special: 'bottom'
+            special: 'bottom',
+            category
           }
         })
         const ss = a.seats.filter(item => item.special !== 'bottom')
@@ -470,6 +474,7 @@ export const usePlanStore = defineStore("plan", {
         const width = a.rectangleTable.width;
         const height = a.rectangleTable.height;
         let right = a.seats.filter(item => item.special === 'right');
+        const category = a.seats[a.seats.length - 1].category;
         const dr = (height - 20) / (val - 1)
         right = Array(val).fill(0).map((item, idx) => {
           return {
@@ -481,7 +486,8 @@ export const usePlanStore = defineStore("plan", {
             text: (idx + 4).toString(),
             color: "#333333",
             uuid: uuid(),
-            special: 'right'
+            special: 'right',
+            category
           }
         })
         const ss = a.seats.filter(item => item.special !== 'right')
@@ -494,7 +500,8 @@ export const usePlanStore = defineStore("plan", {
       areas.forEach(a => {
         const width = a.rectangleTable.width;
         const height = a.rectangleTable.height;
-        let left = a.seats.filter(item => item.special === 'left');
+        let left = a.seats.filter(item => item.special === 'left')
+        const category = a.seats[a.seats.length - 1].category;
         const dl = (height - 20) / (val - 1)
         left = Array(val).fill(0).map((item, idx) => {
           return {
@@ -506,7 +513,8 @@ export const usePlanStore = defineStore("plan", {
             text: (idx + 4).toString(),
             color: "#333333",
             uuid: uuid(),
-            special: 'left'
+            special: 'left',
+            category
           }
         })
         const ss = a.seats.filter(item => item.special !== 'left')
@@ -845,14 +853,16 @@ export const usePlanStore = defineStore("plan", {
             r.capacity = count;
             // if (shape === 'roundTable') {
             for (let si = 0; si < count; si++) {
-              const uid = uuid();
               const degree = 2 * Math.PI / count * si;
               res.push({
                 text: (si + 1).toString(),
-                x: (r.radius + 10) * Math.cos(degree),
-                y: (r.radius + 10) * Math.sin(degree),
+                position: {
+                  x: (r.radius + 10) * Math.cos(degree),
+                  y: (r.radius + 10) * Math.sin(degree),
+                },
+                category: r.seats[r.seats.length - 1].category,
                 r: 10,
-                uid
+                uuid: uuid(),
               })
             }
             r.seats = res;
