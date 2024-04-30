@@ -1,17 +1,17 @@
-import { defineStore } from "pinia";
-import Vue, { ref } from "vue";
+import { defineStore } from 'pinia';
+import Vue, { ref } from 'vue';
 
-import { v4 as uuid } from "uuid";
-import Ajv from "ajv";
-import schema from "../schema/seating-plan.schema.json";
-import { letterCounter, reverse, SEAT_NUMBERINGS } from "@/lib/numbering";
-import { useMainStore } from ".";
+import { v4 as uuid } from 'uuid';
+import Ajv from 'ajv';
+import schema from '../schema/seating-plan.schema.json';
+import { letterCounter, reverse, SEAT_NUMBERINGS } from '@/lib/numbering';
+import { useMainStore } from '.';
 
 // This is certainly not a best practice, but we don't want these two reactive for performance reasons
 
-const zoneNameToID = (name) => name.replace(/[^0-9A-Za-z]/, "");
+const zoneNameToID = (name) => name.replace(/[^0-9A-Za-z]/, '');
 
-export const usePlanStore = defineStore("plan", {
+export const usePlanStore = defineStore('plan', {
   state: () => ({
     _plan: {
       zones: [],
@@ -20,7 +20,7 @@ export const usePlanStore = defineStore("plan", {
         width: 0,
         height: 0,
       },
-      name: "My Charting Board"
+      name: 'My Charting Board',
     },
     validationErrors: undefined,
     hasUndo: false,
@@ -35,12 +35,12 @@ export const usePlanStore = defineStore("plan", {
     getCategoryByName: (state) => (category) => {
       return state._plan.categories.find((c) => c.name === category);
     },
-    categories: (state) => state._plan.categories
+    categories: (state) => state._plan.categories,
   },
   actions: {
     persistPlan(skipHistory = false) {
       const s = JSON.stringify(this._plan);
-      localStorage.setItem("frontrow2.editor.plan", s);
+      localStorage.setItem('frontrow2.editor.plan', s);
 
       if (!skipHistory) {
         this.recordHistoryState(s);
@@ -79,10 +79,9 @@ export const usePlanStore = defineStore("plan", {
                 const sname = `${z.name}>${r.row_number}>${s.seat_number}`;
                 if (!s.seat_guid) {
                   errors.push({
-                    text: `Seat ${(z.name)} > ${r.row_number} > ${s.seat_number
-                      } has no seat ID.`,
+                    text: `Seat ${z.name} > ${r.row_number} > ${s.seat_number} has no seat ID.`,
                     uuid: s.uuid,
-                    tool: "seatselect",
+                    tool: 'seatselect',
                   });
                 } else if (
                   seatGuids.has(s.seat_guid) &&
@@ -91,14 +90,14 @@ export const usePlanStore = defineStore("plan", {
                   errors.push({
                     text: `Seat ID "${s.seat_guid}" is not unique! This will lead to errors when people try to book these seats. (Seen again in "${z.name}" > "${r.row_number}" > "${s.seat_number}")`,
                     uuid: s.uuid,
-                    tool: "seatselect",
+                    tool: 'seatselect',
                   });
                   errorIds.add(s.seat_guid);
                 } else if (seatNames.has(sname) && !errorIds.has(sname)) {
                   errors.push({
                     text: `You have multiple seats with zone "${z.name}", row "${r.row_number}", and seat "${s.seat_number}". This is going to be very confusing.`,
                     uuid: s.uuid,
-                    tool: "seatselect",
+                    tool: 'seatselect',
                   });
                   errorIds.add(sname);
                 }
@@ -113,7 +112,7 @@ export const usePlanStore = defineStore("plan", {
           this.setValidationErrors([
             {
               text:
-                "JSON schema validation error (contact support for help): " +
+                'JSON schema validation error (contact support for help): ' +
                 ajv.errorsText(ajv.errors),
             },
           ]);
@@ -135,10 +134,10 @@ export const usePlanStore = defineStore("plan", {
               position: { x: position.x, y: position.y + rix * row_spacing },
               // row_number: (rix + 1).toString(),
               row_number: letterCounter(rix + 1, 'A'),
-              row_number_position: "both",
+              row_number_position: 'both',
               seats: [],
               uuid: uuid(),
-              rotation: 0
+              rotation: 0,
             };
             for (const six of [...Array(seats).keys()]) {
               row.seats.push({
@@ -146,7 +145,7 @@ export const usePlanStore = defineStore("plan", {
                 seat_guid: uuid(),
                 uuid: uuid(),
                 position: { x: six * seat_spacing, y: 0 },
-                category: "",
+                category: '',
               });
             }
             this.createRowAfter(zone.uuid, row, false);
@@ -174,11 +173,11 @@ export const usePlanStore = defineStore("plan", {
                 position: { x: position.x, y: position.y + rix * row_spacing },
                 // row_number: (rix + 1).toString(),
                 row_number: letterCounter(rix + 1, 'A'),
-                row_number_position: "both",
+                row_number_position: 'both',
                 seats: [],
                 uuid: uuid(),
                 // rotation: 0
-              }
+              };
 
               for (const six of [...Array(seats).keys()]) {
                 row.seats.push({
@@ -187,15 +186,18 @@ export const usePlanStore = defineStore("plan", {
                   seat_guid: uuid(),
                   uuid: uuid(),
                   position: { x: six * seat_spacing, y: 0 },
-                  category: "",
+                  category: '',
                 });
               }
             } else {
               row = {
-                position: { x: position.x + 10, y: position.y + rix * row_spacing },
+                position: {
+                  x: position.x + 10,
+                  y: position.y + rix * row_spacing,
+                },
                 // row_number: (rix + 1).toString(),
                 row_number: letterCounter(rix + 1, 'A'),
-                row_number_position: "both",
+                row_number_position: 'both',
                 seats: [],
                 uuid: uuid(),
                 // rotation: 0
@@ -206,7 +208,7 @@ export const usePlanStore = defineStore("plan", {
                   seat_guid: uuid(),
                   uuid: uuid(),
                   position: { x: six * seat_spacing, y: 0 },
-                  category: "",
+                  category: '',
                 });
               }
             }
@@ -305,11 +307,18 @@ export const usePlanStore = defineStore("plan", {
     },
 
     setTableCategory(tables, val) {
-      tables.forEach(t => {
+      tables.forEach((t) => {
         for (const s of t.seats) {
           s.category = val;
         }
-      })
+      });
+      this.persistPlan();
+    },
+
+    setGACategory(areas, val) {
+      areas.forEach((a) => {
+        a.category = val;
+      });
       this.persistPlan();
     },
 
@@ -318,9 +327,9 @@ export const usePlanStore = defineStore("plan", {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid)) {
             for (const arg in args) {
-              if (arg.includes("__")) {
+              if (arg.includes('__')) {
                 let inner = r;
-                const argparts = arg.split("__");
+                const argparts = arg.split('__');
                 argparts.forEach((part, index) => {
                   if (index === argparts.length - 1) {
                     inner[part] = args[arg];
@@ -344,9 +353,9 @@ export const usePlanStore = defineStore("plan", {
           r.seats.forEach((s) => {
             if (seatIds.includes(s.uuid)) {
               for (const arg in args) {
-                if (arg.includes("__")) {
+                if (arg.includes('__')) {
                   let inner = s;
-                  const argparts = arg.split("__");
+                  const argparts = arg.split('__');
                   argparts.forEach((part, index) => {
                     if (index === argparts.length - 1) {
                       inner[part] = args[arg];
@@ -366,180 +375,188 @@ export const usePlanStore = defineStore("plan", {
     },
 
     modifyRectangleTableWidth(areas, w) {
-      areas.forEach(a => {
+      areas.forEach((a) => {
         a.rectangleTable.width = w;
-        let top = a.seats.filter(item => item.special === 'top');
-        let bottom = a.seats.filter(item => item.special === 'bottom');
-        let left = a.seats.filter(item => item.special === 'left');
-        let right = a.seats.filter(item => item.special === 'right');
+        let top = a.seats.filter((item) => item.special === 'top');
+        let bottom = a.seats.filter((item) => item.special === 'bottom');
+        let left = a.seats.filter((item) => item.special === 'left');
+        let right = a.seats.filter((item) => item.special === 'right');
         const dt = (w - 20) / (top.length - 1);
         const db = (w - 20) / (bottom.length - 1);
         top = top.map((item, idx) => {
           item.position.x = dt * idx + 10;
           return item;
-        })
+        });
         bottom = bottom.map((item, idx) => {
           item.position.x = db * idx + 10;
           return item;
-        })
+        });
         right = right.map((item, idx) => {
           item.position.x = w + 10;
           return item;
-        })
+        });
         a.seats = [...top, ...bottom, ...left, ...right];
-      })
+      });
       this.persistPlan();
     },
     modifyRectangleTableHeight(areas, h) {
-      areas.forEach(a => {
+      areas.forEach((a) => {
         a.rectangleTable.height = h;
-        let top = a.seats.filter(item => item.special === 'top');
-        let bottom = a.seats.filter(item => item.special === 'bottom');
-        let left = a.seats.filter(item => item.special === 'left');
-        let right = a.seats.filter(item => item.special === 'right');
+        let top = a.seats.filter((item) => item.special === 'top');
+        let bottom = a.seats.filter((item) => item.special === 'bottom');
+        let left = a.seats.filter((item) => item.special === 'left');
+        let right = a.seats.filter((item) => item.special === 'right');
         const dl = (h - 20) / (left.length - 1);
         const dr = (h - 20) / (right.length - 1);
         bottom = bottom.map((item, idx) => {
           item.position.y = h + 10;
           return item;
-        })
+        });
         left = left.map((item, idx) => {
           item.position.y = idx * dl + 10;
           return item;
-        })
+        });
         right = right.map((item, idx) => {
           item.position.y = idx * dr + 10;
           return item;
-        })
+        });
         a.seats = [...top, ...bottom, ...left, ...right];
-      })
+      });
       this.persistPlan();
     },
 
     modifyRectangleTableCapacityT(areas, val) {
-      areas.forEach(a => {
+      areas.forEach((a) => {
         const width = a.rectangleTable.width;
-        let top = a.seats.filter(item => item.special === 'top');
+        let top = a.seats.filter((item) => item.special === 'top');
         const category = a.seats[a.seats.length - 1].category;
-        const dt = (width - 20) / (val - 1)
-        top = Array(val).fill(0).map((item, idx) => {
-          return {
-            position: {
-              x: idx * dt + 10,
-              y: -10
-            },
-            radius: 10,
-            text: (idx + 4).toString(),
-            color: "#333333",
-            uuid: uuid(),
-            special: 'top',
-            category
-          }
-        })
-        const ss = a.seats.filter(item => item.special !== 'top')
+        const dt = (width - 20) / (val - 1);
+        top = Array(val)
+          .fill(0)
+          .map((item, idx) => {
+            return {
+              position: {
+                x: idx * dt + 10,
+                y: -10,
+              },
+              radius: 10,
+              text: (idx + 4).toString(),
+              color: '#333333',
+              uuid: uuid(),
+              special: 'top',
+              category,
+            };
+          });
+        const ss = a.seats.filter((item) => item.special !== 'top');
         a.seats = [...ss, ...top];
-      })
+      });
       this.persistPlan();
     },
 
     modifyRectangleTableCapacityB(areas, val) {
-      areas.forEach(a => {
+      areas.forEach((a) => {
         const width = a.rectangleTable.width;
         const height = a.rectangleTable.height;
-        let bottom = a.seats.filter(item => item.special === 'bottom');
+        let bottom = a.seats.filter((item) => item.special === 'bottom');
         const category = a.seats[a.seats.length - 1].category;
-        const db = (width - 20) / (val - 1)
-        bottom = Array(val).fill(0).map((item, idx) => {
-          return {
-            position: {
-              x: idx * db + 10,
-              y: height + 10
-            },
-            radius: 10,
-            text: (idx + 4).toString(),
-            color: "#333333",
-            uuid: uuid(),
-            special: 'bottom',
-            category
-          }
-        })
-        const ss = a.seats.filter(item => item.special !== 'bottom')
+        const db = (width - 20) / (val - 1);
+        bottom = Array(val)
+          .fill(0)
+          .map((item, idx) => {
+            return {
+              position: {
+                x: idx * db + 10,
+                y: height + 10,
+              },
+              radius: 10,
+              text: (idx + 4).toString(),
+              color: '#333333',
+              uuid: uuid(),
+              special: 'bottom',
+              category,
+            };
+          });
+        const ss = a.seats.filter((item) => item.special !== 'bottom');
         a.seats = [...ss, ...bottom];
-      })
+      });
       this.persistPlan();
     },
 
     modifyRectangleTableCapacityR(areas, val) {
-      areas.forEach(a => {
+      areas.forEach((a) => {
         const width = a.rectangleTable.width;
         const height = a.rectangleTable.height;
-        let right = a.seats.filter(item => item.special === 'right');
+        let right = a.seats.filter((item) => item.special === 'right');
         const category = a.seats[a.seats.length - 1].category;
-        const dr = (height - 20) / (val - 1)
-        right = Array(val).fill(0).map((item, idx) => {
-          return {
-            position: {
-              x: width + 10,
-              y: idx * dr + 10
-            },
-            radius: 10,
-            text: (idx + 4).toString(),
-            color: "#333333",
-            uuid: uuid(),
-            special: 'right',
-            category
-          }
-        })
-        const ss = a.seats.filter(item => item.special !== 'right')
+        const dr = (height - 20) / (val - 1);
+        right = Array(val)
+          .fill(0)
+          .map((item, idx) => {
+            return {
+              position: {
+                x: width + 10,
+                y: idx * dr + 10,
+              },
+              radius: 10,
+              text: (idx + 4).toString(),
+              color: '#333333',
+              uuid: uuid(),
+              special: 'right',
+              category,
+            };
+          });
+        const ss = a.seats.filter((item) => item.special !== 'right');
         a.seats = [...ss, ...right];
-      })
+      });
       this.persistPlan();
     },
 
     modifyRectangleTableCapacityL(areas, val) {
-      areas.forEach(a => {
+      areas.forEach((a) => {
         const width = a.rectangleTable.width;
         const height = a.rectangleTable.height;
-        let left = a.seats.filter(item => item.special === 'left')
+        let left = a.seats.filter((item) => item.special === 'left');
         const category = a.seats[a.seats.length - 1].category;
-        const dl = (height - 20) / (val - 1)
-        left = Array(val).fill(0).map((item, idx) => {
-          return {
-            position: {
-              x: -10,
-              y: idx * dl + 10
-            },
-            radius: 10,
-            text: (idx + 4).toString(),
-            color: "#333333",
-            uuid: uuid(),
-            special: 'left',
-            category
-          }
-        })
-        const ss = a.seats.filter(item => item.special !== 'left')
+        const dl = (height - 20) / (val - 1);
+        left = Array(val)
+          .fill(0)
+          .map((item, idx) => {
+            return {
+              position: {
+                x: -10,
+                y: idx * dl + 10,
+              },
+              radius: 10,
+              text: (idx + 4).toString(),
+              color: '#333333',
+              uuid: uuid(),
+              special: 'left',
+              category,
+            };
+          });
+        const ss = a.seats.filter((item) => item.special !== 'left');
         a.seats = [...ss, ...left];
-      })
+      });
       this.persistPlan();
-
     },
 
-
     modifyRoundTableRadius(areas, r) {
-      areas.forEach(a => {
+      areas.forEach((a) => {
         a.radius = r;
         a.seats = a.seats.map((item, idx, arr) => {
-          const degree = 2 * Math.PI / arr.length * idx;
+          const degree = ((2 * Math.PI) / arr.length) * idx;
           const uid = uuid();
           return {
             text: (idx + 1).toString(),
-            x: (r + 10) * Math.cos(degree),
-            y: (r + 10) * Math.sin(degree),
+            position: {
+              x: (r + 10) * Math.cos(degree),
+              y: (r + 10) * Math.sin(degree),
+            },
             r: 10,
-            uid
-          }
-        })
-      })
+            uid,
+          };
+        });
+      });
       this.persistPlan();
     },
 
@@ -549,9 +566,9 @@ export const usePlanStore = defineStore("plan", {
         z.areas.forEach((a) => {
           if (areaIds.includes(a.uuid)) {
             for (const arg in args) {
-              if (arg.includes("__")) {
+              if (arg.includes('__')) {
                 let inner = a;
-                const argparts = arg.split("__");
+                const argparts = arg.split('__');
                 argparts.forEach((part, index) => {
                   if (index === argparts.length - 1) {
                     inner[part] = args[arg];
@@ -577,7 +594,10 @@ export const usePlanStore = defineStore("plan", {
 
             // Figure out new position
             if (r.seats.length === 1) {
-              newposition = { x: r.seats[0].position.x + 25, y: r.seats[0].position.y };
+              newposition = {
+                x: r.seats[0].position.x + 25,
+                y: r.seats[0].position.y,
+              };
             } else {
               const dx =
                 r.seats[r.seats.length - 1].position.x -
@@ -593,7 +613,7 @@ export const usePlanStore = defineStore("plan", {
 
             // Assuming SEAT_NUMBERINGS is available and imported
             //Changed here
-            let newnumber = "?";
+            let newnumber = '?';
             for (let numbering of SEAT_NUMBERINGS) {
               try {
                 let guessedStartAt = numbering.findStartAt(
@@ -610,7 +630,7 @@ export const usePlanStore = defineStore("plan", {
                     guessedStartAt
                   );
                   newnumber = newNumbers[newNumbers.length - 1];
-                  console.log('newNumber', newNumbers)
+                  console.log('newNumber', newNumbers);
                   break;
                 }
 
@@ -640,13 +660,12 @@ export const usePlanStore = defineStore("plan", {
                 }
               } catch (e) {
                 console.warn(
-                  "Crash while trying to test seat numbering schema",
+                  'Crash while trying to test seat numbering schema',
                   numbering,
                   e
                 );
               }
             }
-
 
             r.seats.push({
               seat_number: newnumber,
@@ -678,14 +697,14 @@ export const usePlanStore = defineStore("plan", {
 
     addTableSectionLabel(ids, label, abv) {
       this._plan.zones.forEach((z) => {
-        z.areas.forEach(r => {
+        z.areas.forEach((r) => {
           if (ids.includes(r.uuid) && r.seats.length) {
             r.seats.forEach((s) => {
               s.section_label = label;
               s.section_abv = abv;
             });
           }
-        })
+        });
       });
       this.persistPlan();
     },
@@ -737,13 +756,15 @@ export const usePlanStore = defineStore("plan", {
             if (r.seats.length === value) return;
             const cnt = Math.abs(r.seats.length - value);
 
-
             let newnumber = [];
             if (r.seats.length < value) {
-              let newPositions = []
+              let newPositions = [];
               if (r.seats.length === 1) {
                 for (let i = 0; i < cnt; i++) {
-                  newPositions.push({ x: r.seats[0].position.x + 25 * (i + 1), y: r.seats[0].position.y })
+                  newPositions.push({
+                    x: r.seats[0].position.x + 25 * (i + 1),
+                    y: r.seats[0].position.y,
+                  });
                 }
               } else {
                 const dx =
@@ -761,28 +782,35 @@ export const usePlanStore = defineStore("plan", {
                 }
               }
 
-
               for (let numbering of SEAT_NUMBERINGS) {
                 try {
-                  let guessedStartAt = numbering.findStartAt(r.seats[0].seat_number)
+                  let guessedStartAt = numbering.findStartAt(
+                    r.seats[0].seat_number
+                  );
 
-                  let guessedNumbers = numbering.compute(r.seats, guessedStartAt);
+                  let guessedNumbers = numbering.compute(
+                    r.seats,
+                    guessedStartAt
+                  );
                   if (
                     r.seats.filter(
                       (s, idx) => s.seat_number === guessedNumbers[idx]
                     ).length === r.seats.length
                   ) {
-                    const temp = []
+                    const temp = [];
                     for (let i = 0; i < cnt; i++) {
-                      temp.push({})
+                      temp.push({});
                     }
                     let newNumbers = numbering.compute(
                       r.seats.concat(temp),
                       guessedStartAt
                     );
 
-                    newnumber = newNumbers.slice(r.seats.length, r.seats.length + cnt + 1);
-                    console.log('newNumber', newnumber)
+                    newnumber = newNumbers.slice(
+                      r.seats.length,
+                      r.seats.length + cnt + 1
+                    );
+                    console.log('newNumber', newnumber);
                     break;
                   }
 
@@ -813,13 +841,12 @@ export const usePlanStore = defineStore("plan", {
                   }
                 } catch (e) {
                   console.warn(
-                    "Crash while trying to test seat numbering schema",
+                    'Crash while trying to test seat numbering schema',
                     numbering,
                     e
                   );
                 }
               }
-
 
               for (let i = 0; i < cnt; i++) {
                 r.seats.push({
@@ -841,8 +868,8 @@ export const usePlanStore = defineStore("plan", {
             }
             this.persistPlan();
           }
-        })
-      })
+        });
+      });
     },
 
     renumberCircleSeats(rowIds, count) {
@@ -853,7 +880,7 @@ export const usePlanStore = defineStore("plan", {
             r.capacity = count;
             // if (shape === 'roundTable') {
             for (let si = 0; si < count; si++) {
-              const degree = 2 * Math.PI / count * si;
+              const degree = ((2 * Math.PI) / count) * si;
               res.push({
                 text: (si + 1).toString(),
                 position: {
@@ -863,7 +890,7 @@ export const usePlanStore = defineStore("plan", {
                 category: r.seats[r.seats.length - 1].category,
                 r: 10,
                 uuid: uuid(),
-              })
+              });
             }
             r.seats = res;
             // }
@@ -899,7 +926,6 @@ export const usePlanStore = defineStore("plan", {
       });
       this.persistPlan();
     },
-
 
     respaceRows(rowIds, spacing) {
       spacing = Math.max(spacing, 1); // Ensure spacing is at least 1
@@ -942,8 +968,8 @@ export const usePlanStore = defineStore("plan", {
           zone = this._plan.zones.find((z) => z.uuid === zone);
           const row = {
             position: { x: position.x, y: position.y },
-            row_number: "A",
-            row_number_position: "both",
+            row_number: 'A',
+            row_number_position: 'both',
             seats: [],
             uuid: uuid(),
             rotation: 0,
@@ -955,7 +981,7 @@ export const usePlanStore = defineStore("plan", {
               seat_guid: uuid(),
               uuid: uuid(),
               position: { x: spos.x, y: spos.y },
-              category: "",
+              category: '',
             });
           }
 
@@ -1060,7 +1086,7 @@ export const usePlanStore = defineStore("plan", {
     setPlanSize(width, height) {
       if (width) this._plan.size.width = width;
       if (height) this._plan.size.height = height;
-      window.dispatchEvent(new Event("resize"));
+      window.dispatchEvent(new Event('resize'));
       this.persistPlan();
     },
 
@@ -1068,9 +1094,9 @@ export const usePlanStore = defineStore("plan", {
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid) && r.seats.length > 0) {
-            r.seats.forEach(s => {
+            r.seats.forEach((s) => {
               s.tag_name = value;
-            })
+            });
           }
         });
       });
@@ -1078,7 +1104,7 @@ export const usePlanStore = defineStore("plan", {
     },
 
     rowRotate(rowIds, angle) {
-      console.log('rotate+')
+      console.log('rotate+');
     },
 
     setRotateLabel(rowIds, value) {

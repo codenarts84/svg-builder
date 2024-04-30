@@ -363,7 +363,6 @@ export default {
       }
     },
     stgrowBlockSeats() {
-      console.log('stgrowBlockSeats')
       if (this.stgrowBlockDrawing) {
         return Math.ceil(
           Math.abs(this.drawingCurrentX - this.drawingStartX) /
@@ -374,12 +373,12 @@ export default {
       }
     },
     stgrowBlockSeats1() {
-      console.log('stgrowBlockSeats1')
       if (this.stgrowBlockDrawing) {
-        return Math.ceil(
+        const res = Math.ceil(
           Math.abs(this.drawingCurrentX - this.drawingStartX) /
           this.rowSeatSpacing
-        ) - 1;
+        )
+        return res > 0 ? res - 1 : 0;
       } else {
         return 0;
       }
@@ -2595,23 +2594,13 @@ export default {
               :cy="rowSpacing * (rid - 1)" r="10">
             </circle>
           </g>
-          <g v-else>
+          <g v-if="rid % 2 === 0">
             <circle class="seat-preview" v-for="sid in stgrowBlockSeats1"
               :key="sid"
               :cx="rid % 2 ? rowSeatSpacing * (sid - 1) : rowSeatSpacing * (sid - 1) + rowSeatSpacing / 2"
               :cy="rowSpacing * (rid - 1)" r="10">
             </circle>
           </g>
-          <!-- <rect v-if="stgrowBlockSeats + stgrowBlockRows >= 7"
-            :x="(rowSeatSpacing * stgrowBlockSeats) / 2 - 25 - 12.5"
-            :y="(rowSpacing * stgrowBlockRows) / 2 - 25" width="50" height="25"
-            fill="#00c"></rect>
-          <text v-if="stgrowBlockSeats + stgrowBlockRows >= 7"
-            :x="(rowSeatSpacing * stgrowBlockSeats) / 2 - 12.5"
-            :y="(rowSpacing * stgrowBlockRows) / 2 - 12.5" text-anchor="middle"
-            fill="#fff" dy=".3em">
-            {{ stgrowBlockRows }} × {{ stgrowBlockSeats }}
-          </text> -->
         </g>
         <!-- <text v-if="stgrowBlockRows * stgrowBlockSeats > 0" :x="10" :y="-30"
           fill="black" dy=".3em" style="z-index: 99">

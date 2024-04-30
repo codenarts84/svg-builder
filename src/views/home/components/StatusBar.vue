@@ -202,6 +202,10 @@ export default {
         for (const a of z.areas) {
           if (a.shape === 'gaSquare' || a.shape === 'gaCircle' || a.shape === 'gaPolygon') {
             qa += a.capacity;
+          } else if (a.shape === 'roundTable') {
+            total += a.capacity;
+          } else if (a.shape === 'rectangleTable') {
+            total += a.seats.length;
           }
         }
         // for (const a of z.areas) {

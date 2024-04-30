@@ -6,14 +6,18 @@
     <v-container>
       <v-row style="display: flex; justify-content: center; align-items: center">
 
-        <v-col cols="12" sm="6" v-if="shape === 'rectangle'"> Width </v-col>
-        <v-col cols="12" sm="6" v-if="shape === 'rectangle'">
+        <v-col cols="12" sm="6"
+          v-if="shape === 'rectangle' || shape === 'gaSquare'"> Width </v-col>
+        <v-col cols="12" sm="6"
+          v-if="shape === 'rectangle' || shape === 'gaSquare'">
           <input type="number" min="1" class="v-custom-input" name="width"
             :value="width" @input="setWidth" />
         </v-col>
 
-        <v-col cols="12" sm="6" v-if="shape === 'rectangle'"> Height </v-col>
-        <v-col cols="12" sm="6" v-if="shape === 'rectangle'">
+        <v-col cols="12" sm="6"
+          v-if="shape === 'rectangle' || shape === 'gaSquare'"> Height </v-col>
+        <v-col cols="12" sm="6"
+          v-if="shape === 'rectangle' || shape === 'gaSquare'">
           <input type="number" min="1" class="v-custom-input" name="height"
             :value="height" @input="setHeight" />
         </v-col>
@@ -24,14 +28,18 @@
             :value="radius" @input="setRadius" />
         </v-col>
 
-        <v-col cols="12" sm="6" v-if="shape === 'ellipse'"> Radius X </v-col>
-        <v-col cols="12" sm="6" v-if="shape === 'ellipse'">
+        <v-col cols="12" sm="6"
+          v-if="shape === 'ellipse' || shape === 'gaCircle'"> Radius X </v-col>
+        <v-col cols="12" sm="6"
+          v-if="shape === 'ellipse' || shape === 'gaCircle'">
           <input type="number" min="1" class="v-custom-input" name="radius_x"
             :value="radiusX" @input="setRadiusX" />
         </v-col>
 
-        <v-col cols="12" sm="6" v-if="shape === 'ellipse'"> Radius Y </v-col>
-        <v-col cols="12" sm="6" v-if="shape === 'ellipse'">
+        <v-col cols="12" sm="6"
+          v-if="shape === 'ellipse' || shape === 'gaCircle'"> Radius Y </v-col>
+        <v-col cols="12" sm="6"
+          v-if="shape === 'ellipse' || shape === 'gaCircle'">
           <input type="number" min="1" class="v-custom-input" name="radius_y"
             :value="radiusY" @input="setRadiusY" />
         </v-col>

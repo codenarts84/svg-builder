@@ -339,36 +339,67 @@ export const useMainStore = defineStore({
           const lastx = r.seats[r.seats.length - 1].position.x;
           const lasty = r.seats[r.seats.length - 1].position.y;
 
-          // The distance between those two points is e.g. our minimum diameter
-          const distance = Math.sqrt(
-            (lastx - firstx) * (lastx - firstx) +
-            (lasty - firsty) * (lasty - firsty)
-          );
+          const a = Math.sqrt((firstx - lastx) * (firstx - lastx) + (firsty - lasty) * (firstx - lasty)) / 2
+          const b = s;
 
-          const alpha = Math.atan((lasty - firsty) / (lastx - firstx))
-          // console.log('alpha', alpha)
-
-          const centerX = (firstx + lastx) / 2;
-          const centerY = (firsty + lasty) / 2;
-          const width = distance;
-          const height = s * 50;
-          const a = width / 2;
-          const b = height / 2;
           const numCircles = r.seats.length;
-
+          const res = this.drawRotatedEllipse(a, b, Math.PI / 2, r.seats.length)
           for (let i = 0; i < numCircles; i++) {
-            const theta = (i / (numCircles - 1)) * Math.PI; // Angle from 0 to PI
-            const x = centerX + a * Math.cos(theta); // X coordinate on the ellipse
-            const y = centerY + b * Math.sin(theta); // Y coordinate on the ellipse
+            // const alpha = startAngle + (i / (numCircles - 1)) * angle ; // Angle from 0 to PI
+            // const x = centerX + radius * Math.cos(alpha); // X coordinate on the ellipse
+            // const y = centerY + radius * Math.sin(alpha); // Y coordinate on the ellipse
             // newPosition.push({ style: { top: y + 'px', left: x + 'px' } });
-            r.seats[i].position.x = x;
-            r.seats[i].position.y = y;
+            r.seats[i].position.x = res[i].x;
+            r.seats[i].position.y = res[i].y;
           }
         }
       }
 
       planStore.persistPlan();
     },
+
+    drawRotatedEllipse(a, b, angle, numPoints) {
+      // var canvas = document.getElementById("ellipseCanvas");
+      // var ctx = canvas.getContext("2d");
+      // ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // ctx.save(); // Save the current transformation state
+      // ctx.translate(canvas.width / 2, canvas.height / 2); // Move the origin to the center of the canvas
+      // ctx.rotate(angle); // Rotate the canvas by the specified angle (in radians)
+      // ctx.beginPath();
+      const res = [];
+      var angleIncrement = Math.PI / (numPoints - 1); // Angle increment for the specified number of points
+      var xPrev = a * Math.cos(0);
+      var yPrev = b * Math.sin(0);
+
+      res.push({x:xPrev, y:yPrev});
+      let ang = 0;
+
+      // ctx.moveTo(xPrev, -yPrev); // Start at the first point
+      for (var i = 1; i < numPoints; i++) {
+          ang = angleIncrement * i;
+          var x = a * Math.cos(ang);
+          var y = b * Math.sin(ang);
+          res.push({x, y:-y})
+          // ctx.lineTo(x, -y); // Draw the next point
+      }
+      return res;
+      // ctx.stroke();
+      // Draw points as circles
+      // var pointSize = 4;
+      // ctx.fillStyle = "red";
+      // var xPrev = a * Math.cos(0);
+      // var yPrev = b * Math.sin(0);
+      // for (var i = 1; i < numPoints; i++) {
+      //     var angle = angleIncrement * i;
+      //     var x = a * Math.cos(angle);
+      //     var y = b * Math.sin(angle);
+      //     ctx.beginPath();
+      //     ctx.arc(x, -y, pointSize, 0, Math.PI * 2, true);
+      //     ctx.fill();
+      // }
+      // ctx.restore(); // Restore the previous transformation state
+  },
+
 
     circleRows(tx, ty, fixedCenter) {
       /**
