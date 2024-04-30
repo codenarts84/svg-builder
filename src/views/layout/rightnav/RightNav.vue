@@ -2,6 +2,9 @@
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
 
+    <!-- <DropDownComponent
+      :options="[{ name: 'Option 1', color: '#00ff00' }, { name: 'Option 2', color: '#ffff00' }]" /> -->
+
     <GAComponent v-if="selection.length && selectedGA().length"
       :areas="selectedGA()" />
 
@@ -66,7 +69,7 @@ import GAComponent from './GAComponent.vue';
 import AreaTool from './AreaTool.vue';
 import TableToolsComponent from './TableToolsComponent';
 import SectionTableLabel from './SectionTableLabel.vue';
-import DropDown from '@/views/home/components/DropDown.vue';
+import DropDownComponent from '@/views/home/components/DropDownComponent.vue';
 import { useMainStore } from "@/stores";
 import { usePlanStore } from '@/stores/plan';
 import { area } from 'd3';
@@ -108,7 +111,9 @@ const selectedTable = () => {
       }
     }
   }
-  return r;
+  if (r.length === selection.value.length)
+    return r;
+  return []
 }
 
 const selectedGA = () => {
@@ -121,7 +126,9 @@ const selectedGA = () => {
       }
     }
   }
-  return r;
+  if (r.length === selection.value.length)
+    return r;
+  return []
 }
 
 const selectedAreas = () => {
@@ -134,7 +141,9 @@ const selectedAreas = () => {
       }
     }
   }
-  return r
+  if (r.length === selection.value.length)
+    return r
+  return []
 }
 
 const selectedRows = () => {

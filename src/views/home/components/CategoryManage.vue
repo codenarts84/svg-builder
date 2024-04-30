@@ -67,16 +67,11 @@
 
 <script setup>
 import { ref, defineProps, computed, defineComponent } from "vue";
-import { v4 as uuid } from "uuid";
 import { usePlanStore } from '@/stores/plan.js'
 import DropDown from '../../home/components/DropDown.vue';
+import { isoFormat } from "d3";
 const dialog = ref(false);
 
-const category_colors = ref([
-  { color: '#0000ff', name: 'blue' },
-  { color: '#ff0000', name: 'red' },
-  { color: '#00ff00', name: 'green' }
-])
 const components = defineComponent({
   DropDown
 })
@@ -87,14 +82,19 @@ const props = defineProps({
 const planStore = usePlanStore();
 const categories = computed(() => planStore.categories);
 
-const setCategory = val => {
-}
-
 const assigned_category = (categoryName) => {
   for (const z of planStore._plan.zones) {
     for (const r of z.rows) {
       for (const s of r.seats) {
-        if (s.category === categoryName) return false;
+        if (s?.category === categoryName) return false;
+      }
+    }
+    for (const a of z.areas) {
+      if (a.seats) {
+        for (const s of a.seats)
+          if (s?.category === categoryName) return false;
+      } else {
+        if (a.category === categoryName) return false;
       }
     }
   }
@@ -102,7 +102,6 @@ const assigned_category = (categoryName) => {
 }
 
 const delete_btn = ((idx) => {
-  console.log(categories.value[idx])
   const bStatus = assigned_category(categories.value[idx].name);
   return bStatus;
 })

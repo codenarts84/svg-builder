@@ -36,11 +36,6 @@
 
 <style>
 .v-custom-input {
-  /* width: 100%;
-  padding: 8px 16px;
-  outline: none;
-  transition: 0.15s opacity cubic-bezier(0.4, 0, 0.2, 1); */
-
   width: 100%;
   padding: 6px 10px;
   margin: 8px 0;
@@ -50,15 +45,8 @@
   border-radius: 5px;
 }
 
-
-
 .v-custom-input:focus {
   outline: 3px solid #bae0ff;
-}
-
-
-.v-input__details {
-  display: none;
 }
 
 .v-col-sm-6 {
@@ -135,7 +123,8 @@ export default defineComponent({
     },
 
     setCurve(val) {
-      this.store.curveRows(val.target.value);
+      const value = val.target.value * 10;
+      this.store.curveRows(value);
     },
 
     handle_seat_num_changed(e) {

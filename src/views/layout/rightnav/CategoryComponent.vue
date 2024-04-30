@@ -4,13 +4,7 @@
     <v-container>
       <v-row style="display: flex; justify-content: center; align-items: center">
         <v-col cols="12" sm="12">
-          <!-- <select class="v-custom-input" @input="setCategory">
-            <option v-for="op in category" :key="op" :value="op.name">
-              {{ op.name }}
-            </option>
-          </select> -->
-          <DropDown :selection="selectedItem" :options="category"
-            :setCategory="setCategory" />
+          <DropDownComponent :options="category" :setCategory="setCategory" />
         </v-col>
       </v-row>
     </v-container>
@@ -28,11 +22,12 @@ import { defineComponent, computed, ref, withDirectives } from 'vue';
 import { usePlanStore } from '@/stores/plan';
 import CategoryLabelModel from './CategoryLabelModel.vue'
 import DropDown from '../../home/components/DropDown.vue';
+import DropDownComponent from '@/views/home/components/DropDownComponent.vue';
 
 export default {
   components: {
     CategoryLabelModel,
-    DropDown
+    DropDownComponent
   },
   props: {
     seats: Array,

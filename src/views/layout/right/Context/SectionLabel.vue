@@ -4,17 +4,9 @@
     <v-container>
       <template v-for="tag in tags" :key="tag.id">
         <v-row>
-          <!-- <v-col cols="12">
-            <v-btn class="btn-label" @click="() => setTag(tag.id)">{{ tag.label
-            }}({{ tag.abv }})</v-btn>
-          </v-col>
-          <v-col cols="3">
-            <v-btn @click="() => removeTag(tag.id)">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </v-col> -->
           <v-col class="section-container" cols="12">
-            <v-btn class="section-btn" @click="() => setTag(tag.id)">{{ tag.label
+            <v-btn class="section-btn" @click="() => handle_tag(tag.id)">{{
+              tag.label
             }}({{ tag.abv }})</v-btn>
             <v-btn @click="() => removeTag(tag.id)" density="comfortable"
               icon="$delete" variant="plain"></v-btn>
@@ -24,28 +16,13 @@
     </v-container>
   </div>
 </template>
-<!--
-<script setup>
-import { ref, computed } from "vue";
-import SectionLabelModal from "./SectionLabelModal.vue";
-import { useMainStore } from "@/stores";
-const mainStore = useMainStore();
-const tags = computed(() => mainStore.section_label)
-const addTags = (v) => {
-  tags.value.push(v);
-  mainStore.setSectionLabel(tags.value);
-};
-
-const handleClicked = (e) => {
-  console.log(e);
-}
-</script> -->
 
 <script>
 import { ref, computed } from "vue";
-import SectionLabelModal from "./SectionLabelModal.vue";
 import { useMainStore } from "@/stores";
 import { usePlanStore } from "@/stores/plan";
+// import SectionLabelModal from "./SectionLabelModal.vue";
+import SectionLabelModal from './SectionLabelModel.vue'
 export default {
   components: {
     SectionLabelModal
@@ -63,16 +40,15 @@ export default {
     }
   },
   props: {
-    rows: Array
+    rows: Array,
+    setTag: Function,
   },
   methods: {
     removeTag(id) {
       this.mainStore.removeSectionLabel(id);
     },
-    setTag(id) {
-      const tag = this.tags.find(i => i.id === id);
-      if (tag)
-        this.planStore.addSectionLabel(this.rows.map(i => i.uuid), tag.label, tag.abv)
+    handle_tag(id) {
+      this.setTag(id);
     },
     addTags(v) {
       this.tags.push(v);
