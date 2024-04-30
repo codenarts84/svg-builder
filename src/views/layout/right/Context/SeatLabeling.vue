@@ -17,7 +17,8 @@
           <v-btn @click="changeSeat(1)">{{ seatsLabel[1] }}</v-btn>
           <v-btn @click="changeSeat(2)">{{ seatsLabel[2] }}</v-btn> -->
           <select class="toolbox-input v-custom-input"
-            @input="setSeatNumbering($event)">
+            @input="setSeatNumbering($event)"
+            :value="seatNumbering ? seatNumbering.scheme.id : null">
             <option v-for="numbering in seatNumberings" :key="numbering"
               option-label="label" name="seat_numbering"
               :value="numbering.id ? numbering.id : null">

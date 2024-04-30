@@ -35,7 +35,8 @@ import { usePlanStore } from '@/stores/plan';
 const planstore = usePlanStore();
 
 const props = defineProps({
-  rows: Array
+  rows: Array,
+  selectedTag: String
 })
 const tags = ref([
   "Wheelchair",
@@ -43,7 +44,7 @@ const tags = ref([
   "Partial View",
   "Folding Chair",
 ]);
-const selected = ref('')
+const selected = ref(props.selectedTag)
 
 const selected_change = () => {
 

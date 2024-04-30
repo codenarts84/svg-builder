@@ -695,6 +695,18 @@ export const usePlanStore = defineStore('plan', {
       this.persistPlan();
     },
 
+    addGASectionLabel(areaIds, label, abv) {
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((r) => {
+          if (areaIds.includes(r.uuid)) {
+            r.section = label;
+            r.abbreviation = abv;
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
     addTableSectionLabel(ids, label, abv) {
       this._plan.zones.forEach((z) => {
         z.areas.forEach((r) => {

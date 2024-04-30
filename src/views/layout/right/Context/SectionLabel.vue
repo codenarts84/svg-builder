@@ -40,7 +40,6 @@ export default {
     }
   },
   props: {
-    rows: Array,
     setTag: Function,
   },
   methods: {
