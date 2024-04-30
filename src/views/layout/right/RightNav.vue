@@ -2,6 +2,8 @@
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
 
+    <TestSelection />
+
     <RowTools v-if="selectedRows().length" :rows="selectedRows()"
       :seats="selectedSeats()" :temp_Rotate="temp_Rotate" />
 
@@ -23,6 +25,7 @@ import SeatTools from './SeatTools.vue';
 import GATools from "./GATools.vue";
 import TableTools from './TableTools';
 import AreaTools from './AreaTools';
+import TestSelection from './TestSelection.vue';
 
 import { useMainStore } from '@/stores';
 import { usePlanStore } from '@/stores/plan';

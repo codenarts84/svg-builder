@@ -5,7 +5,8 @@
       <v-row style="display: flex; justify-content: center; align-items: center">
         <v-col cols="12" sm="6"> Row label </v-col>
         <v-col cols="12" sm="6">
-          <select class="toolbox-input v-custom-input" @input="setRowNumbering">
+          <select class="toolbox-input v-custom-input" @input="setRowNumbering"
+            :value="rowNumbering ? rowNumbering.scheme.id : null">
             <option v-for="numbering in rowNumberings" :key="numbering"
               option-label="label" name="row_numbering"
               :value="numbering.id ? numbering.id : null">
@@ -29,7 +30,8 @@
               {{ label.text }}
             </option>
           </select> -->
-          <select class="v-custom-input" @input="setRowNumberingReversed">
+          <select class="v-custom-input" @input="setRowNumberingReversed"
+            :value="rowNumbering ? rowNumbering.reversed : false">
             <option v-for="label in labelDirection" :value="label.value"
               :key="label">
               {{ label.text }}
@@ -41,7 +43,7 @@
         <v-col cols="12" sm="6"> Row Label Location </v-col>
         <v-col cols="12" sm="6">
           <select class="toolbox-input v-custom-input"
-            @input="handleLabelLocation">
+            @input="handleLabelLocation" :value="labelLocation">
             <option v-for="op in labelDisplay" :key="op" :value="op.value">
               {{ op.text }}
             </option>
@@ -148,6 +150,12 @@ export default ({
     rows: Array
   },
   computed: {
+    labelLocation() {
+      if (this.rowNumberPositionStart && this.rowNumberPositionEnd) return 3;
+      else if (this.rowNumberPositionStart) return 1;
+      else if (this.rowNumberPositionEnd) return 2;
+      else return 0;
+    },
     rowLabel() {
       return groupValue(this.rows, row => (row.row_label || ''))
     },

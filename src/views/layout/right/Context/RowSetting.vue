@@ -15,7 +15,7 @@
           <!-- <v-text-field class="custom-small-text-field" variant="outlined"
             type="number" density="compact"></v-text-field> -->
           <input class="custom-small-text-field v-custom-input" type="number"
-            name="row_spacing" @input="setCurve" />
+            name="row_spacing" @input="setCurve" min="-10" max="10" />
         </v-col>
         <v-col cols="12" sm="6"> Seats spacing </v-col>
         <v-col cols="12" sm="6">
@@ -123,7 +123,7 @@ export default defineComponent({
     },
 
     setCurve(val) {
-      const value = val.target.value * 10;
+      const value = parseInt(val.target.value);
       this.store.curveRows(value);
     },
 

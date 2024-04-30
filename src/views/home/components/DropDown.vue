@@ -1,10 +1,10 @@
 <template>
   <div class="dropdown">
     <div @click="toggleDropdown" class="dropdown-toggle" id="dropdownMenuButton">
-      <template v-if="selectedOption">
-        <div class="color" :style="{ 'background-color': selectedOption?.color }">
+      <template v-if="selected">
+        <div class="color" :style="{ 'background-color': selected?.color }">
         </div>
-        <span class="name">{{ selectedOption?.name }}</span>
+        <span class="name">{{ selected?.name }}</span>
       </template>
       <template v-else>
         <div class="color-space"></div>
@@ -24,22 +24,26 @@
 
 <script setup>
 
-import { ref, defineProps } from 'vue';
-
+import { ref, defineProps, computed } from 'vue';
+import { usePlanStore } from '@/stores/plan';
+const planStore = usePlanStore();
+const category = computed(() => planStore.categories);
 const show = ref(false);
-const selectedOption = ref(null);
 
 const props = defineProps({
   options: Array,
-  setCategory: Function
+  setCategory: Function,
+  selectedOption: String
 })
+
+const selected = ref(computed(() => category.value.find(item => item.name === props.selectedOption)));
 
 const toggleDropdown = () => {
   show.value = !show.value;
 }
 
 const handleItemClick = (option) => {
-  selectedOption.value = option;
+  selected.value = option;
   show.value = false;
   props.setCategory(option.name);
 }

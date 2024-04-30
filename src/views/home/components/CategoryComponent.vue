@@ -4,7 +4,8 @@
     <v-container>
       <v-row style="display: flex; justify-content: center; align-items: center">
         <v-col cols="12" sm="12">
-          <DropDown :options="category" :setCategory="setCategory" />
+          <DropDown :options="category" :setCategory="setCategory"
+            :selectedOption="selectedCategory" />
         </v-col>
       </v-row>
     </v-container>
@@ -28,6 +29,7 @@ const category = computed(() => planStore.categories);
 
 const props = defineProps({
   setCategory: Function,
+  selectedCategory: String
 })
 
 </script>
