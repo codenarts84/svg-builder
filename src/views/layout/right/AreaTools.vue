@@ -1,6 +1,6 @@
 <template>
   <div>
-    <AreaPanel :areas="areas" />
+    <AreaPanel :areas="areas" :temp_Rotate="temp_Rotate" />
   </div>
 </template>
 
@@ -9,7 +9,8 @@ import { computed, ref, defineProps } from 'vue';
 import AreaPanel from './Context/AreaPanel.vue';
 
 const props = defineProps({
-  areas: Array
+  areas: Array,
+  temp_Rotate: Function
 })
 
 </script>

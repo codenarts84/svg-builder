@@ -119,6 +119,7 @@ const groupValue = (areas, mapper) => {
 export default {
   props: {
     areas: Array,
+    temp_Rotate: Function,
   },
   data() {
     return {
@@ -176,6 +177,11 @@ export default {
     radiusY() {
       return groupValue(this.areas, a => a.ellipse ? a.ellipse.radius.y : 0)
     },
+    rotate_val() {
+      console.log(typeof (this.areas[0].rotation), this.areas[0].rotation)
+      if (this.areas[0].rotation) return this.areas[0].rotation;
+      return 0;
+    }
   },
   methods: {
     setColor(e) {
@@ -188,8 +194,10 @@ export default {
       this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), border_width: parseInt(e.target.value) })
     },
     setRotation(e) {
-      console.log(typeof (parseInt(e.target.value)))
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), rotation: parseInt(e.target.value) })
+      // this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), rotation: parseInt(e.target.value) })
+      const val = parseInt(e.target.value);
+      const temp = val - this.rotate_val;
+      this.temp_Rotate(temp);
     },
     setTextColor(e) {
       this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__color: e.target.value })

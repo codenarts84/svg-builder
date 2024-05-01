@@ -176,7 +176,7 @@ export const usePlanStore = defineStore('plan', {
                 row_number_position: 'both',
                 seats: [],
                 uuid: uuid(),
-                // rotation: 0
+                rotation: 0,
               };
 
               for (const six of [...Array(seats).keys()]) {
@@ -200,7 +200,7 @@ export const usePlanStore = defineStore('plan', {
                 row_number_position: 'both',
                 seats: [],
                 uuid: uuid(),
-                // rotation: 0
+                rotation: 0,
               };
               for (const six of [...Array(seats - 1).keys()]) {
                 row.seats.push({

@@ -4,7 +4,7 @@
       :selectedCategory="selectedCategory()" />
     <SectionLabel :setTag="setTag" />
     <GAPanel :areas="areas" />
-    <AreaPanel :areas="areas" />
+    <AreaPanel :areas="areas" :temp_Rotate="temp_Rotate" />
   </div>
 </template>
 
@@ -22,7 +22,8 @@ const mainStore = useMainStore();
 const category = planStore.categories;
 
 const props = defineProps({
-  areas: Array
+  areas: Array,
+  temp_Rotate: Function,
 })
 
 const groupValue = (rows, mapper) => {

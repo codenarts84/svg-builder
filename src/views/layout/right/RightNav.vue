@@ -8,11 +8,13 @@
 
     <!-- <SeatTools v-if="selectedSeats().length" :seats="selectedSeats()" /> -->
 
-    <GATools v-if="selectedGA().length" :areas="selectedGA()" />
+    <GATools v-if="selectedGA().length" :areas="selectedGA()"
+      :temp_Rotate="temp_Rotate" />
 
     <TableTools v-if="selectedTable().length" :areas="selectedTable()" />
 
-    <AreaTools v-if="selectedAreas().length" :areas="selectedAreas()" />
+    <AreaTools v-if="selectedAreas().length" :areas="selectedAreas()"
+      :temp_Rotate="temp_Rotate" />
 
   </v-navigation-drawer>
 </template>

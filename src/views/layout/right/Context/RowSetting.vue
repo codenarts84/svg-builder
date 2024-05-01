@@ -106,7 +106,6 @@ export default defineComponent({
     const planStore = usePlanStore();
     const store = useMainStore();
 
-
     return {
       nseat,
       planStore,

@@ -1,6 +1,4 @@
 import Vue from 'vue';
-import mathjs from 'mathjs';
-// import Vuex from "vuex";
 
 import { defineStore } from 'pinia';
 import { round } from '../lib/numbers';
@@ -12,8 +10,70 @@ import {
 } from '../lib/geometry';
 import { v4 as uuid } from 'uuid';
 import { usePlanStore } from './plan';
+const mathjs = require('mathjs');
 
 const planStore = usePlanStore();
+const minimum = 0.0001;
+const nextX = (x0, a, b, R) => {
+  let l = x0;
+  let r = x0 + R;
+  const f = (x) => a * x * x - b;
+
+  let y0 = f(x0);
+
+  const d = (x, y) => {
+    return (x - x0) * (x - x0) + (y - y0) * (y - y0);
+  };
+
+  while (r - l >= minimum) {
+    const x = (l + r) / 2;
+    const y = f(x);
+    if (d(x, y) >= R * R) {
+      r = x;
+    } else {
+      l = x;
+    }
+  }
+  return (r + l) / 2;
+};
+
+const available = (x0, x1, a, b, n, r) => {
+  let x = x0;
+  let i;
+  for (i = 0; i < n - 1; i++) {
+    x = nextX(x, a, b, r);
+    if (x > x1) return false;
+  }
+  return true;
+};
+
+const getPoints = (a, b, n) => {
+  let x0 = -Math.sqrt(b / a);
+  let x1 = -x0;
+  let l = 0,
+    r = Math.sqrt(b * b + 200 * 200),
+    R;
+  while (r - l >= minimum) {
+    R = (r + l) / 2;
+    console.log('LOGTRACE', available(x0, x1, a, b, n, R), R, x0, x1, r, l);
+    if (available(x0, x1, a, b, n, R)) {
+      l = R;
+    } else {
+      r = R;
+    }
+  }
+  R = r;
+
+  const f = (x) => a * x * x - b;
+  let i,
+    x = x0,
+    res = [];
+  for (i = 0; i < n; i++) {
+    res.push({ x, y: f(x) });
+    x = nextX(x, a, b, R);
+  }
+  return res;
+};
 
 export const useMainStore = defineStore({
   id: 'main',
@@ -367,17 +427,36 @@ export const useMainStore = defineStore({
           }
 
           // Our circle line segment starts with the first seat of the row
-          const firstx = r.seats[0].position.x;
-          const firsty = r.seats[0].position.y;
+          const x0 = r.seats[0].position.x;
+          const y0 = r.seats[0].position.y;
 
           // and ends with the last seat of the row (at least in the non-fixedCenter case)
-          const lastx = r.seats[r.seats.length - 1].position.x;
-          const lasty = r.seats[r.seats.length - 1].position.y;
+          const x1 = r.seats[r.seats.length - 1].position.x;
+          const y1 = r.seats[r.seats.length - 1].position.y;
 
           //
+          if (s === 0 || r.seats.length <= 2) return;
 
-          a = s / 10;
-          b = a;
+          const a = s / 150 / 100;
+          const b = 10000 * a;
+          const positions = getPoints(a, b, r.seats.length);
+          console.log('MYLOG', positions);
+          let i;
+          for (i = 0; i < r.seats.length; i++) {
+            let fromX = positions[i].x + 100;
+            let fromY = positions[i].y;
+
+            let a00 = (x1 - x0) / 200;
+            let a01 = (y1 - y0) / 200;
+            let a10 = (y0 - y1) / 200;
+            let a11 = (x1 - x0) / 200;
+
+            let toX = a00 * fromX + a10 * fromY;
+            let toY = a01 * fromX + a11 * fromY;
+
+            r.seats[i].position.x = toX;
+            r.seats[i].position.y = toY;
+          }
         }
       }
 
