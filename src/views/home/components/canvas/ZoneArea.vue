@@ -164,7 +164,7 @@
 <script>
 import { useMainStore } from "@/stores";
 import { usePlanStore } from "@/stores/plan";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 
 export default {
@@ -172,6 +172,9 @@ export default {
   props: {
     area: Object,
     zone: Object,
+    ox: Number,
+    oy: Number,
+    selectionBoundary: Object
   },
   setup() {
     const store = useMainStore();
@@ -179,7 +182,9 @@ export default {
     const cursor = computed(() => store.cursor);
     const selection = computed(() => store.selection);
     const getCategoryByName = computed(() => planStore.getCategoryByName);
-    return { cursor, selection, store, getCategoryByName };
+    const temp_ox = ref(0);
+    const temp_oy = ref(0);
+    return { cursor, selection, store, getCategoryByName, temp_ox, temp_oy };
   },
   computed: {
     isSelected() {
@@ -244,6 +249,19 @@ export default {
       }
     },
     mousedown(event) {
+      setTimeout(() => {
+        if (this.selectionBoundary) {
+
+          // const temp = this.selectionBoundary;
+          this.temp_ox = this.selectionBoundary.x + this.selectionBoundary.width / 2;
+          this.temp_oy = this.selectionBoundary.y + this.selectionBoundary.height / 2;
+          const store = useMainStore();
+          store.set_Ox(this.temp_ox);
+          store.set_Oy(this.temp_oy);
+          // console.log('Aha', temp)
+        }
+      }, 100);
+
       if (event.ctrlKey || event.metaKey) {
         return false;
       }

@@ -178,7 +178,7 @@ export default {
       return groupValue(this.areas, a => a.ellipse ? a.ellipse.radius.y : 0)
     },
     rotate_val() {
-      console.log(typeof (this.areas[0].rotation), this.areas[0].rotation)
+      // console.log(typeof (this.areas[0].rotation), this.areas[0].rotation)
       if (this.areas[0].rotation) return this.areas[0].rotation;
       return 0;
     }
