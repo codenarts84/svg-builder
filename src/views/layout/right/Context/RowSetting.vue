@@ -15,7 +15,8 @@
           <!-- <v-text-field class="custom-small-text-field" variant="outlined"
             type="number" density="compact"></v-text-field> -->
           <input class="custom-small-text-field v-custom-input" type="number"
-            name="row_spacing" @input="setCurve" min="-30" max="30" />
+            name="row_spacing" :value="curve" @input="setCurve" min="-30"
+            max="30" />
         </v-col>
         <v-col cols="12" sm="6"> Seats spacing </v-col>
         <v-col cols="12" sm="6">
@@ -147,6 +148,9 @@ export default defineComponent({
     }
   },
   computed: {
+    curve() {
+      return groupValue(this.rows, row => row.curve) || 0
+    },
     numberSeats() {
       return groupValue(this.rows, row => {
         return row.seats.length;
