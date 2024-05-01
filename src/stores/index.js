@@ -424,6 +424,7 @@ export const useMainStore = defineStore({
           if (!this.selection.includes(r.uuid) || r.seats.length < 2) {
             continue;
           }
+          r.curve = s / 10;
 
           // Our circle line segment starts with the first seat of the row
           const x0 = r.seats[0].position.x;
@@ -434,27 +435,35 @@ export const useMainStore = defineStore({
           const y1 = r.seats[r.seats.length - 1].position.y;
 
           //
-          if (s === 0 || r.seats.length <= 2) return;
+          if (r.seats.length <= 2) return;
+          if (s === 0) {
+            const dx = (x1 - x0) / (r.seats.length - 1);
+            const dy = (y1 - y0) / (r.seats.length - 1);
+            for (let i = 0; i < r.seats.length; i++) {
+              r.seats[i].position.x = x0 + dx * i;
+              r.seats[i].position.y = y0 + dy * i;
+            }
+          } else {
+            const a = s / 150 / 100;
+            const b = 10000 * a;
+            const positions = getPoints(a, b, r.seats.length);
+            console.log('MYLOG', positions);
+            let i;
+            for (i = 0; i < r.seats.length; i++) {
+              let fromX = positions[i].x + 100;
+              let fromY = positions[i].y;
 
-          const a = s / 150 / 100;
-          const b = 10000 * a;
-          const positions = getPoints(a, b, r.seats.length);
-          console.log('MYLOG', positions);
-          let i;
-          for (i = 0; i < r.seats.length; i++) {
-            let fromX = positions[i].x + 100;
-            let fromY = positions[i].y;
+              let a00 = (x1 - x0) / 200;
+              let a01 = (y1 - y0) / 200;
+              let a10 = (y0 - y1) / 200;
+              let a11 = (x1 - x0) / 200;
 
-            let a00 = (x1 - x0) / 200;
-            let a01 = (y1 - y0) / 200;
-            let a10 = (y0 - y1) / 200;
-            let a11 = (x1 - x0) / 200;
+              let toX = a00 * fromX + a10 * fromY;
+              let toY = a01 * fromX + a11 * fromY;
 
-            let toX = a00 * fromX + a10 * fromY;
-            let toY = a01 * fromX + a11 * fromY;
-
-            r.seats[i].position.x = toX;
-            r.seats[i].position.y = toY;
+              r.seats[i].position.x = toX;
+              r.seats[i].position.y = toY;
+            }
           }
         }
       }
