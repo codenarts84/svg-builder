@@ -1,8 +1,6 @@
 <template>
-  <v-list
-    style="position: fixed; top: 55px; left: 5px; z-index: 999"
-    id="hand-menu"
-  >
+  <v-list style="position: fixed; top: 55px; left: 5px; z-index: 999"
+    id="hand-menu">
     <v-list-item @click="onSeatToggle">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Seat</v-tooltip>
@@ -23,25 +21,17 @@
       </v-list-item-title>
     </v-list-item>
 
-    <v-list-item @click="() => {}">
+    <v-list-item @click="() => { }">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Alignment</v-tooltip>
-        <AddAlignTools
-          :textR="textR"
-          :textL="textL"
-          :textC="textC"
-          :onItemToggle="onAlignToggle"
-        />
+        <AddAlignTools :textR="textR" :textL="textL" :textC="textC"
+          :onItemToggle="onAlignToggle" />
       </v-list-item-title>
     </v-list-item>
   </v-list>
   <AddChairTools :opened="seatopened" />
-  <AddItemsTools
-    :addTextField="addTextField"
-    :addEllipse="addEllipse"
-    :addRectangle="addRectangle"
-    :opened="itemopened"
-  />
+  <AddItemsTools :addTextField="addTextField" :addEllipse="addEllipse"
+    :addRectangle="addRectangle" :opened="itemopened" />
 </template>
 
 <script setup>

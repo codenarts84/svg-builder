@@ -1044,7 +1044,6 @@ export default {
     },
     temp_Rotate(val) {
       const store = useMainStore();
-      console.log('tempRotate', store.temp_ox, store.temp_oy)
       store.moveRotating(
         store.temp_ox,
         store.temp_oy,

@@ -10,7 +10,6 @@ import {
 } from '../lib/geometry';
 import { v4 as uuid } from 'uuid';
 import { usePlanStore } from './plan';
-const mathjs = require('mathjs');
 
 const planStore = usePlanStore();
 const minimum = 0.0001;

@@ -31,33 +31,28 @@
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
-          <v-tooltip activator="parent" location="right"
-            >Flip Vertical</v-tooltip
-          >
+          <v-tooltip activator="parent" location="right">Flip Vertical</v-tooltip>
           <FlipVertIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
-          <v-tooltip activator="parent" location="right"
-            >Flip Horizental</v-tooltip
-          >
+          <v-tooltip activator="parent" location="right">Flip
+            Horizental</v-tooltip>
           <FlipHoriIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
-          <v-tooltip activator="parent" location="right"
-            >Distribute Horizental</v-tooltip
-          >
+          <v-tooltip activator="parent" location="right">Distribute
+            Horizental</v-tooltip>
           <DistHoriIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
       <v-list-item @click="onClick">
         <v-list-item-title>
-          <v-tooltip activator="parent" location="right"
-            >Distribute Vertical</v-tooltip
-          >
+          <v-tooltip activator="parent" location="right">Distribute
+            Vertical</v-tooltip>
           <DistVertIcon width="20px" height="20px" />
         </v-list-item-title>
       </v-list-item>
@@ -83,10 +78,23 @@ const props = defineProps({
   onItemToggle: Function,
 });
 
-const onAlignHorizonRight = () => props.textR();
-const onAlignHorizonLeft = () => props.textL();
-const onAlignHorizonCenter = () => props.textC();
+// const onAlignHorizonRight = () => props.textR();
+// const onAlignHorizonLeft = () => props.textL();
+// const onAlignHorizonCenter = () => props.textC();
 const onItemToggle = () => props.onItemToggle();
+
+
+const onAlignHorizonRight = () => {
+
+}
+
+const onAlignHorizonLeft = () => {
+
+}
+
+const onAlignHorizonCenter = () => {
+
+}
 
 const onClick = () => alert("Not set yet");
 </script>
