@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import mathjs from 'mathjs';
 // import Vuex from "vuex";
 
 import { defineStore } from 'pinia';
@@ -285,6 +286,24 @@ export const useMainStore = defineStore({
       }
     },
 
+    calculateQuadraticCoefficients(x0, y0, x1, y1, x2, y2) {
+      // Using Cramer's rule to solve the system of equations
+      let denominator = (x0 - x1) * (x0 - x2) * (x1 - x2);
+      let a = (y0 * (x1 - x2) + y1 * (x2 - x0) + y2 * (x0 - x1)) / denominator;
+      let b =
+        (y0 * (x1 * x1 - x2 * x2) +
+          y1 * (x2 * x2 - x0 * x0) +
+          y2 * (x0 * x0 - x1 * x1)) /
+        denominator;
+      let c =
+        (y0 * (x2 - x1) * x1 * x2 +
+          y1 * (x0 - x2) * x0 * x2 +
+          y2 * (x1 - x0) * x0 * x1) /
+        denominator;
+
+      return { a: a, b: b, c: c };
+    },
+
     calculateCircleCenter(x0, y0, x1, y1, x2, y2) {
       // Calculate midpoints of line segments
       const midPointX01 = (x0 + x1) / 2;
@@ -305,15 +324,10 @@ export const useMainStore = defineStore({
       const yIntercept12 = midPointY12 - perpendicularSlope12 * midPointX12;
 
       // Calculate center coordinates
-      const centerX = Math.max(
-        -2000,
+      const centerX =
         (yIntercept12 - yIntercept01) /
-          (perpendicularSlope01 - perpendicularSlope12)
-      );
-      const centerY = Math.max(
-        -2000,
-        perpendicularSlope01 * centerX + yIntercept01
-      );
+        (perpendicularSlope01 - perpendicularSlope12);
+      const centerY = perpendicularSlope01 * centerX + yIntercept01;
       // const centerX =
       //   (yIntercept12 - yIntercept01) /
       //   (perpendicularSlope01 - perpendicularSlope12);
@@ -360,42 +374,10 @@ export const useMainStore = defineStore({
           const lastx = r.seats[r.seats.length - 1].position.x;
           const lasty = r.seats[r.seats.length - 1].position.y;
 
-          if (s === 0) {
-            const len = r.seats.length;
-            const pos = [];
-            const dx = (lastx - firstx) / (len - 1);
-            const dy = (lasty - firsty) / (len - 1);
-            for (let i = 0; i < len; i++) {
-              r.seats[i].position.x = firstx + dx * i;
-              r.seats[i].position.y = firsty + dy * i;
-            }
-          } else {
-            const mid = this.findPointOnLine(
-              firstx,
-              firsty,
-              lastx,
-              lasty,
-              s * 10
-            );
-            const center = this.calculateCircleCenter(
-              firstx,
-              firsty,
-              lastx,
-              lasty,
-              mid.x,
-              mid.y
-            );
+          //
 
-            console.log('mid', mid);
-            console.log('center', center);
-
-            const store = useMainStore();
-            store.circleRows(
-              center.x,
-              center.y,
-              this.tool === 'rowCircleFixedCenter'
-            );
-          }
+          a = s / 10;
+          b = a;
         }
       }
 
