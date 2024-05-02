@@ -1127,7 +1127,7 @@ export default {
               event.shiftKey || this.bSnap2Grid,
               this.zoomTransform.k
             );
-            console.log('akfAjej', this.selectionBoundary)
+            // console.log('akfAjej', this.selectionBoundary)
             if (this.selectionBoundary) {
               useMainStore().set_Ox(this.selectionBoundary.x + this.selectionBoundary.width / 2);
               useMainStore().set_Oy(this.selectionBoundary.y + this.selectionBoundary.height / 2);

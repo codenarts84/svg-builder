@@ -21,17 +21,29 @@
       </v-list-item-title>
     </v-list-item>
 
-    <v-list-item @click="() => { }">
+    <v-list-item @click="onAlignToggle">
+      <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Alignment</v-tooltip>
+        <div class="arrow-menu">
+          <!-- <AddAlignTools width="20px" height="20px" /> -->
+          <ObjAlignCenterVertical width="20px" height="20px" />
+          <div>{{ ">" }}</div>
+        </div>
+      </v-list-item-title>
+    </v-list-item>
+
+
+    <!-- <v-list-item @click="() => { }">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Alignment</v-tooltip>
         <AddAlignTools :textR="textR" :textL="textL" :textC="textC"
           :onItemToggle="onAlignToggle" />
       </v-list-item-title>
-    </v-list-item>
+    </v-list-item> -->
   </v-list>
   <AddChairTools :opened="seatopened" />
-  <AddItemsTools :addTextField="addTextField" :addEllipse="addEllipse"
-    :addRectangle="addRectangle" :opened="itemopened" />
+  <AddItemsTools :opened="itemopened" />
+  <AddAlignTools :opened="alignopened" :selectionBoundary="selectionBoundary" />
 </template>
 
 <script setup>
@@ -41,23 +53,29 @@ import AddChairTools from "./tools/AddChairTools.vue";
 import AddItemsTools from "./tools/AddItemsTools.vue";
 import AddAlignTools from "./tools/AddAlignTools.vue";
 
+import ObjAlignCenterVertical from "@/assets/svgs/menuIcons/ObjAlignCenterVertical.vue";
 import SeatBuilderIcon from "@/assets/svgs/menuIcons/SeatBuilderIcon.vue";
 import DrawSquareIcon from "@/assets/svgs/menuIcons/DrawSquareIcon.vue";
 
 const seatopened = ref(false);
 const itemopened = ref(false);
+const alignopened = ref(false);
+
 
 const onSeatToggle = () => {
   seatopened.value = !seatopened.value;
   itemopened.value = false;
+  alignopened.value = false;
 };
 
 const onItemToggle = () => {
   itemopened.value = !itemopened.value;
   seatopened.value = false;
+  alignopened.value = false;
 };
 
 const onAlignToggle = () => {
+  alignopened.value = !alignopened.value;
   itemopened.value = false;
   seatopened.value = false;
 };
@@ -65,13 +83,8 @@ const onAlignToggle = () => {
 // import ImportIcon from "@/assets/svgs/menuIcons/ImportIcon.vue";
 
 const props = defineProps({
-  addRectangle: Function,
-  addEllipse: Function,
-  addTextField: Function,
   onImportClick: Function,
-  textR: Function,
-  textL: Function,
-  textC: Function,
+  selectionBoundary: Function
 });
 
 console.log(props);
