@@ -10,13 +10,11 @@
       <v-tooltip activator="parent" location="bottom">Direct Select</v-tooltip>
       <DirectSelectionArrowIcon width="20px" height="20px" />
     </v-btn>
-    <v-btn @click="changeTool('clip')"
-      :class="tool == 'clip' ? 'current-tool' : ''">
+    <v-btn @click="clip">
       <v-tooltip activator="parent" location="bottom">Clip</v-tooltip>
       <CloneIcon width="20px" height="20px" />
     </v-btn>
-    <v-btn @click="changeTool('redo')"
-      :class="tool == 'redo' ? 'current-tool' : ''">
+    <v-btn @click="undo" :disabled="hasUndo ? false : true">
       <v-tooltip activator="parent" location="bottom">Undo</v-tooltip>
       <UndoIcon width="20px" height="20px" />
     </v-btn>
@@ -49,10 +47,16 @@ const changeTool = (tool) => store.changeTool(tool);
 import { useBoardStore } from "@/stores/svgStore";
 import { usePlanStore } from "@/stores/plan";
 
+const plan = usePlanStore();
 const boardstore = useBoardStore();
 const hand_selected = ref(computed(() => boardstore.hand_selected));
 const select_selected = ref(computed(() => boardstore.select_selected));
 const dselect_selected = ref(computed(() => boardstore.dselect_selected));
+const hasUndo = ref(computed(() => plan.hasUndo))
+const undo = plan.undo;
+
+const clip = () => {
+}
 
 const props = defineProps({
   removeItem: Function,
