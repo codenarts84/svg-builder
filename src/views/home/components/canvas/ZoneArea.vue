@@ -29,8 +29,8 @@
 
     <g v-if="area.shape === 'gaCircle'">
       <ellipse :stroke="area.border_color || '#888888'" cx="0" cy="0"
-        :fill="area.color || '#888888'" :rx="area.ellipse.radius.x"
-        :ry="area.ellipse.radius.y" :stroke-width="area.border_width || '2px'"
+        :fill="gaColor" :rx="area.ellipse.radius.x" :ry="area.ellipse.radius.y"
+        :stroke-width="area.border_width || '2px'"
         :data-section="area.section || ''" :data-category="area.category || ''"
         :data-abv="area.abbreviation || ''">
       </ellipse>
@@ -56,8 +56,7 @@
     </g>
 
     <g v-if="area.shape === 'gaSquare'">
-      <rect :fill="area.color || '#888888'"
-        :stroke="area.border_color || '#888888'" x="0" y="0"
+      <rect :fill="gaColor" :stroke="area.border_color || '#888888'" x="0" y="0"
         :width="area.rectangle.width" :height="area.rectangle.height"
         :stroke-width="area.border_width || '2px'"
         :data-section="area.section || ''" :data-category="area.category || ''"
@@ -83,9 +82,8 @@
     </g>
 
     <g v-if="area.shape === 'gaPolygon'">
-      <polygon :fill="area.color || '#888888'"
-        :stroke="area.border_color || '#888888'" :points="polygonPoints"
-        :stroke-width="area.border_width || '2px'"
+      <polygon :fill="gaColor" :stroke="area.border_color || '#888888'"
+        :points="polygonPoints" :stroke-width="area.border_width || '2px'"
         :data-section="area.section || ''" :data-category="area.category || ''"
         :data-abv="area.abbreviation || ''"></polygon>
       <text v-if="area.text.text" :x="area.text.position.x"
@@ -187,6 +185,12 @@ export default {
     return { cursor, selection, store, getCategoryByName, temp_ox, temp_oy };
   },
   computed: {
+    gaColor() {
+      if (this.area.category) {
+        return this.getCategoryByName(this.area.category).color;
+      }
+      return this.area.color || '#888888'
+    },
     isSelected() {
       // console.log("Check here");
       // console.log(this.selection, this.area.uuid);
