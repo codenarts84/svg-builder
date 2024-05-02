@@ -50,9 +50,11 @@
             :value="rotation" @input="setRotation" />
         </v-col>
 
-        <v-col cols="12" sm="6"> Text </v-col>
-        <v-col cols="12" sm="6">
-          <input class="v-custom-input" name="text_value" :value="textValue"
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'gaCircle' && shape !== 'gaSquare'"> Text </v-col>
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'gaCircle' && shape !== 'gaSquare'">
+          <input class=" v-custom-input" name="text_value" :value="textValue"
             @input="setText" />
         </v-col>
 
@@ -133,7 +135,7 @@ export default {
   },
   computed: {
     rotation() {
-      return groupValue(this.areas, a => a.rotation)
+      return Math.round(groupValue(this.areas, a => a.rotation))
     },
     shape() {
       return groupValue(this.areas, a => a.shape)
@@ -145,7 +147,7 @@ export default {
       return groupValue(this.areas, a => a.border_color)
     },
     borderWidth() {
-      return groupValue(this.areas, a => a.border_width) || 2
+      return Math.round(groupValue(this.areas, a => a.border_width) || 2)
     },
     textColor() {
       return groupValue(this.areas, a => a.text ? a.text.color : undefined)
@@ -154,28 +156,28 @@ export default {
       return groupValue(this.areas, a => a.text ? a.text.text : undefined)
     },
     textSize() {
-      return groupValue(this.areas, a => (a.text && a.text.size) ? a.text.size : 16)
+      return Math.round(groupValue(this.areas, a => (a.text && a.text.size) ? a.text.size : 16))
     },
     textX() {
-      return groupValue(this.areas, a => a.text ? a.text.position.x : 0)
+      return Math.round(groupValue(this.areas, a => a.text ? a.text.position.x : 0))
     },
     textY() {
-      return groupValue(this.areas, a => a.text ? a.text.position.y : 0)
+      return Math.round(groupValue(this.areas, a => a.text ? a.text.position.y : 0))
     },
     width() {
-      return groupValue(this.areas, a => a.rectangle ? a.rectangle.width : 0)
+      return Math.round(groupValue(this.areas, a => a.rectangle ? a.rectangle.width : 0))
     },
     height() {
-      return groupValue(this.areas, a => a.rectangle ? a.rectangle.height : 0)
+      return Math.round(groupValue(this.areas, a => a.rectangle ? a.rectangle.height : 0))
     },
     radius() {
-      return groupValue(this.areas, a => a.circle ? a.circle.radius : 0)
+      return Math.round(groupValue(this.areas, a => a.circle ? a.circle.radius : 0))
     },
     radiusX() {
-      return groupValue(this.areas, a => a.ellipse ? a.ellipse.radius.x : 0)
+      return Math.round(groupValue(this.areas, a => a.ellipse ? a.ellipse.radius.x : 0))
     },
     radiusY() {
-      return groupValue(this.areas, a => a.ellipse ? a.ellipse.radius.y : 0)
+      return Math.round(groupValue(this.areas, a => a.ellipse ? a.ellipse.radius.y : 0))
     },
     rotate_val() {
       // console.log(typeof (this.areas[0].rotation), this.areas[0].rotation)

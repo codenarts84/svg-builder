@@ -1038,6 +1038,7 @@ export const usePlanStore = defineStore('plan', {
         }
       });
     },
+
     respaceSeats(rowIds, spacing) {
       spacing = Math.max(spacing, 1); // Ensure minimum spacing is at least 1
       this._plan.zones.forEach((z) => {
@@ -1095,6 +1096,7 @@ export const usePlanStore = defineStore('plan', {
       this._plan.name = name;
       this.persistPlan();
     },
+
     setPlanSize(width, height) {
       if (width) this._plan.size.width = width;
       if (height) this._plan.size.height = height;

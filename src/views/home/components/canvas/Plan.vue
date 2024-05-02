@@ -798,7 +798,7 @@ export default {
                 position: { x: 0, y: 0 },
                 color: "#333333",
                 text: "Text",
-                size: 16,
+                size: 32,
               },
             })
             .then(() => {
@@ -1597,7 +1597,7 @@ export default {
                 border_color: "#000000", // todo: use previously used color
                 rotation: 0,
                 uuid: newId,
-                capacity: 100,
+                capacity: 0,
                 position: {
                   x: round(
                     Math.min(pos.x, this.drawingStartX) - zone.position.x,
@@ -1717,7 +1717,7 @@ export default {
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
                 rotation: 0,
-                capacity: 100,
+                capacity: 0,
                 uuid: newId,
                 position: {
                   x: round(this.drawingStartX - zone.position.x, 4),

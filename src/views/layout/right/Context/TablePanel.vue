@@ -140,13 +140,13 @@ export default {
       return groupValue(this.areas, a => a.shape)
     },
     width() {
-      return groupValue(this.areas, a => a.rectangleTable ? a.rectangleTable.width : 0)
+      return Math.round(groupValue(this.areas, a => a.rectangleTable ? a.rectangleTable.width : 0))
     },
     height() {
-      return groupValue(this.areas, a => a.rectangleTable ? a.rectangleTable.height : 0)
+      return Math.round(groupValue(this.areas, a => a.rectangleTable ? a.rectangleTable.height : 0))
     },
     radius() {
-      return groupValue(this.areas, a => a.radius)
+      return Math.round(groupValue(this.areas, a => a.radius))
     },
     capacityT() {
       return groupValue(this.areas, a => a.seats.filter(i => i.special === 'top').length)
@@ -161,7 +161,7 @@ export default {
       return groupValue(this.areas, a => a.seats.filter(i => i.special === 'left').length)
     },
     rotation() {
-      return groupValue(this.areas, a => a.rotation)
+      return Math.round(groupValue(this.areas, a => a.rotation))
     },
     capacity() {
       return groupValue(this.areas, a => a.capacity)
