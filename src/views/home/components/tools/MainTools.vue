@@ -56,6 +56,8 @@ const hasUndo = ref(computed(() => plan.hasUndo))
 const undo = plan.undo;
 
 const clip = () => {
+  store.copy(store.selection);
+  store.paste();
 }
 
 const props = defineProps({
