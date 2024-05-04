@@ -313,7 +313,35 @@ export default {
       return false;
     },
 
-    seat_mouseup(event) { }
+    seat_mouseup(event, uuid) {
+      if (event.ctrlKey || event.metaKey) {
+        // this is a panning event
+        return false;
+      }
+      const interval = new Date().getTime() - this.lastMouseUp;
+      this.lastMouseUp = new Date().getTime();
+      if (useMainStore().tool === "seatselect") {
+        if (!useMainStore().dragged) {
+          useMainStore().toggleSelection(
+            [uuid],
+            event.shiftKey,
+            this.zone.uuid
+          );
+        }
+        if (useMainStore().dragging) {
+          useMainStore().stopDragging();
+        }
+        return true;
+      } else if (useMainStore().tool === "select" && interval < 500) {
+        // console.log(interval);
+        // doubleclick
+        useMainStore().changeTool("seatselect");
+        useMainStore().toggleSelection([uuid], false, this.zone.uuid);
+
+        return true;
+      }
+      return false;
+    }
   },
 };
 </script>

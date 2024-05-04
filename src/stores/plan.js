@@ -281,6 +281,11 @@ export const usePlanStore = defineStore('plan', {
         for (const r of z.rows) {
           r.seats = r.seats.filter((s) => !objects.includes(s.uuid));
         }
+        for (const a of z.areas) {
+          if (a.shape === 'roundTable' || a.shape === 'rectangleTable') {
+            a.seats = a.seats.filter((s) => !objects.includes(s.uuid));
+          }
+        }
       }
       // Assume there's an `unselect` action
       // this.unselect(objects);
