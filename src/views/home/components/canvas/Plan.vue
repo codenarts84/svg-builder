@@ -1207,7 +1207,6 @@ export default {
 
           break;
         case "seatselect":
-          // console.log('plan mousemove')
           if (store.dragging) {
             store.moveDragging(
               pos.x,
@@ -1255,6 +1254,37 @@ export default {
                     ymax
                   ) {
                     uuids.push(s.uuid);
+                  }
+                }
+              }
+
+              for (const a of z.areas) {
+                if (a.shape === 'roundTable' || a.shape === 'rectangleTable') {
+                  for (const s of a.seats) {
+                    if (
+                      z.position.x +
+                      a.position.x +
+                      s.position.x +
+                      (s.radius || 10) >=
+                      xmin &&
+                      z.position.x +
+                      a.position.x +
+                      s.position.x -
+                      (s.radius || 10) <=
+                      xmax &&
+                      z.position.y +
+                      a.position.y +
+                      s.position.y +
+                      (s.radius || 10) >=
+                      ymin &&
+                      z.position.y +
+                      a.position.y +
+                      s.position.y -
+                      (s.radius || 10) <=
+                      ymax
+                    ) {
+                      uuids.push(s.uuid);
+                    }
                   }
                 }
               }
@@ -1478,6 +1508,36 @@ export default {
                     ymax
                   ) {
                     uuids.push(s.uuid);
+                  }
+                }
+              }
+              for (const r of z.areas) {
+                if (r.shape === 'roundTable' || r.shape === 'rectangleTable') {
+                  for (const s of r.seats) {
+                    if (
+                      z.position.x +
+                      r.position.x +
+                      s.position.x +
+                      (s.radius || 10) >=
+                      xmin &&
+                      z.position.x +
+                      r.position.x +
+                      s.position.x -
+                      (s.radius || 10) <=
+                      xmax &&
+                      z.position.y +
+                      r.position.y +
+                      s.position.y +
+                      (s.radius || 10) >=
+                      ymin &&
+                      z.position.y +
+                      r.position.y +
+                      s.position.y -
+                      (s.radius || 10) <=
+                      ymax
+                    ) {
+                      uuids.push(s.uuid);
+                    }
                   }
                 }
               }
