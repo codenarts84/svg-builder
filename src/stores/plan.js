@@ -426,116 +426,430 @@ export const usePlanStore = defineStore('plan', {
     },
 
     modifyRectangleTableCapacityT(areas, val) {
-      areas.forEach((a) => {
-        const width = a.rectangleTable.width;
-        let top = a.seats.filter((item) => item.special === 'top');
-        const category = a.seats[a.seats.length - 1].category;
+      areas.forEach((r) => {
+        const width = r.rectangleTable.width;
+        let top = r.seats.filter((item) => item.special === 'top');
+        const category = r.seats[r.seats.length - 1].category;
         const dt = (width - 20) / (val - 1);
-        top = Array(val)
-          .fill(0)
-          .map((item, idx) => {
-            return {
-              position: {
-                x: idx * dt + 10,
-                y: -10,
-              },
-              radius: 10,
-              text: (idx + 4).toString(),
-              color: '#333333',
-              uuid: uuid(),
-              special: 'top',
-              category,
-            };
-          });
-        const ss = a.seats.filter((item) => item.special !== 'top');
-        a.seats = [...ss, ...top];
+        let numbers = [];
+        for (let numbering of SEAT_NUMBERINGS) {
+          try {
+            let guessedStartAt = numbering.findStartAt(r.seats[0].seat_number);
+
+            let guessedNumbers = numbering.compute(r.seats, guessedStartAt);
+            if (
+              r.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx])
+                .length === r.seats.length
+            ) {
+              const temp = [];
+              for (let i = 0; i < 500; i++) {
+                temp.push({});
+              }
+              numbers = numbering.compute(r.seats.concat(temp), guessedStartAt);
+
+              break;
+            }
+
+            let seatsReversed = [...r.seats].reverse();
+            let guessedStartAtRev = numbering.findStartAt(
+              seatsReversed[0].seat_number
+            );
+            let guessedNumbersRev = numbering.compute(
+              seatsReversed,
+              guessedStartAtRev
+            );
+            if (
+              seatsReversed.filter(
+                (s, idx) => s.seat_number === guessedNumbersRev[idx]
+              ).length === r.seats.length
+            ) {
+              numbers = numbering.compute(
+                seatsReversed.concat([{}]),
+                guessedStartAtRev
+              );
+              // for (const s of r.seats) {
+              //   s.seat_number = newNumbers.pop();
+              //   // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+              //   s.seat_guid = uuid();
+              // }
+              break;
+            }
+          } catch (e) {
+            console.warn(
+              'Crash while trying to test seat numbering schema',
+              numbering,
+              e
+            );
+          }
+        }
+
+        if (val > 1) {
+          top = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: idx * dt + 10,
+                  y: -10,
+                },
+                radius: 10,
+                seat_number: numbers[idx],
+                color: '#333333',
+                uuid: uuid(),
+                special: 'top',
+                category,
+              };
+            });
+        } else {
+          top = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: width / 2,
+                  y: -10,
+                },
+                radius: 10,
+                seat_number: numbers[idx],
+                color: '#333333',
+                uuid: uuid(),
+                special: 'top',
+                category,
+              };
+            });
+        }
+
+        const ss = r.seats.filter((item) => item.special !== 'top');
+        ss.forEach((item, idx) => (item.seat_number = numbers[idx + val]));
+        r.seats = [...top, ...ss];
       });
       this.persistPlan();
     },
 
     modifyRectangleTableCapacityB(areas, val) {
-      areas.forEach((a) => {
-        const width = a.rectangleTable.width;
-        const height = a.rectangleTable.height;
-        let bottom = a.seats.filter((item) => item.special === 'bottom');
-        const category = a.seats[a.seats.length - 1].category;
-        const db = (width - 20) / (val - 1);
-        bottom = Array(val)
-          .fill(0)
-          .map((item, idx) => {
-            return {
-              position: {
-                x: idx * db + 10,
-                y: height + 10,
-              },
-              radius: 10,
-              text: (idx + 4).toString(),
-              color: '#333333',
-              uuid: uuid(),
-              special: 'bottom',
-              category,
-            };
-          });
-        const ss = a.seats.filter((item) => item.special !== 'bottom');
-        a.seats = [...ss, ...bottom];
+      areas.forEach((r) => {
+        const width = r.rectangleTable.width;
+        const height = r.rectangleTable.height;
+        let bottom = r.seats.filter((item) => item.special === 'bottom');
+        const category = r.seats[r.seats.length - 1].category;
+        const dt = (width - 20) / (val - 1);
+        let numbers = [];
+        for (let numbering of SEAT_NUMBERINGS) {
+          try {
+            let guessedStartAt = numbering.findStartAt(r.seats[0].seat_number);
+
+            let guessedNumbers = numbering.compute(r.seats, guessedStartAt);
+            if (
+              r.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx])
+                .length === r.seats.length
+            ) {
+              const temp = [];
+              for (let i = 0; i < 500; i++) {
+                temp.push({});
+              }
+              numbers = numbering.compute(r.seats.concat(temp), guessedStartAt);
+
+              break;
+            }
+
+            let seatsReversed = [...r.seats].reverse();
+            let guessedStartAtRev = numbering.findStartAt(
+              seatsReversed[0].seat_number
+            );
+            let guessedNumbersRev = numbering.compute(
+              seatsReversed,
+              guessedStartAtRev
+            );
+            if (
+              seatsReversed.filter(
+                (s, idx) => s.seat_number === guessedNumbersRev[idx]
+              ).length === r.seats.length
+            ) {
+              numbers = numbering.compute(
+                seatsReversed.concat([{}]),
+                guessedStartAtRev
+              );
+              // for (const s of r.seats) {
+              //   s.seat_number = newNumbers.pop();
+              //   // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+              //   s.seat_guid = uuid();
+              // }
+              break;
+            }
+          } catch (e) {
+            console.warn(
+              'Crash while trying to test seat numbering schema',
+              numbering,
+              e
+            );
+          }
+        }
+
+        const top = r.seats.filter((item) => item.special === 'top');
+        const right = r.seats.filter((item) => item.special === 'right');
+        const left = r.seats.filter((item) => item.special === 'left');
+
+        let st = top.length + right.length;
+
+        if (val > 1) {
+          bottom = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: idx * dt + 10,
+                  y: height + 10,
+                },
+                radius: 10,
+                seat_number: numbers[st + idx],
+                color: '#333333',
+                uuid: uuid(),
+                special: 'bottom',
+                category,
+              };
+            });
+        } else {
+          bottom = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: width / 2,
+                  y: height + 10,
+                },
+                radius: 10,
+                seat_number: numbers[st + idx],
+                color: '#333333',
+                uuid: uuid(),
+                special: 'bottom',
+                category,
+              };
+            });
+        }
+
+        st += val;
+
+        left.forEach((i, idx) => {
+          i.seat_number = numbers[st + idx];
+        });
+        r.seats = [...top, ...right, ...bottom, ...left];
       });
       this.persistPlan();
     },
 
     modifyRectangleTableCapacityR(areas, val) {
-      areas.forEach((a) => {
-        const width = a.rectangleTable.width;
-        const height = a.rectangleTable.height;
-        let right = a.seats.filter((item) => item.special === 'right');
-        const category = a.seats[a.seats.length - 1].category;
-        const dr = (height - 20) / (val - 1);
-        right = Array(val)
-          .fill(0)
-          .map((item, idx) => {
-            return {
-              position: {
-                x: width + 10,
-                y: idx * dr + 10,
-              },
-              radius: 10,
-              text: (idx + 4).toString(),
-              color: '#333333',
-              uuid: uuid(),
-              special: 'right',
-              category,
-            };
-          });
-        const ss = a.seats.filter((item) => item.special !== 'right');
-        a.seats = [...ss, ...right];
+      areas.forEach((r) => {
+        const width = r.rectangleTable.width;
+        const height = r.rectangleTable.height;
+        let right = r.seats.filter((item) => item.special === 'right');
+        const category = r.seats[r.seats.length - 1].category;
+        const dt = (height - 20) / (val - 1);
+        let numbers = [];
+        for (let numbering of SEAT_NUMBERINGS) {
+          try {
+            let guessedStartAt = numbering.findStartAt(r.seats[0].seat_number);
+
+            let guessedNumbers = numbering.compute(r.seats, guessedStartAt);
+            if (
+              r.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx])
+                .length === r.seats.length
+            ) {
+              const temp = [];
+              for (let i = 0; i < 500; i++) {
+                temp.push({});
+              }
+              numbers = numbering.compute(r.seats.concat(temp), guessedStartAt);
+
+              break;
+            }
+
+            let seatsReversed = [...r.seats].reverse();
+            let guessedStartAtRev = numbering.findStartAt(
+              seatsReversed[0].seat_number
+            );
+            let guessedNumbersRev = numbering.compute(
+              seatsReversed,
+              guessedStartAtRev
+            );
+            if (
+              seatsReversed.filter(
+                (s, idx) => s.seat_number === guessedNumbersRev[idx]
+              ).length === r.seats.length
+            ) {
+              numbers = numbering.compute(
+                seatsReversed.concat([{}]),
+                guessedStartAtRev
+              );
+              // for (const s of r.seats) {
+              //   s.seat_number = newNumbers.pop();
+              //   // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+              //   s.seat_guid = uuid();
+              // }
+              break;
+            }
+          } catch (e) {
+            console.warn(
+              'Crash while trying to test seat numbering schema',
+              numbering,
+              e
+            );
+          }
+        }
+
+        const top = r.seats.filter((item) => item.special === 'top');
+        const bottom = r.seats.filter((item) => item.special === 'bottom');
+        const left = r.seats.filter((item) => item.special === 'left');
+
+        let st = top.length;
+        if (val > 1) {
+          right = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: width + 10,
+                  y: idx * dt + 10,
+                },
+                radius: 10,
+                seat_number: numbers[idx + st],
+                color: '#333333',
+                uuid: uuid(),
+                special: 'right',
+                category,
+              };
+            });
+        } else {
+          right = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: width + 10,
+                  y: height / 2,
+                },
+                radius: 10,
+                seat_number: numbers[idx + st],
+                color: '#333333',
+                uuid: uuid(),
+                special: 'right',
+                category,
+              };
+            });
+        }
+
+        st += val;
+        bottom.forEach((i, idx) => {
+          i.seat_number = numbers[st + idx];
+        });
+        st += bottom.length;
+        left.forEach((i, idx) => {
+          i.seat_number = numbers[st + idx];
+        });
+        r.seats = [...top, ...right, ...bottom, ...left];
       });
       this.persistPlan();
     },
 
     modifyRectangleTableCapacityL(areas, val) {
-      areas.forEach((a) => {
-        const width = a.rectangleTable.width;
-        const height = a.rectangleTable.height;
-        let left = a.seats.filter((item) => item.special === 'left');
-        const category = a.seats[a.seats.length - 1].category;
-        const dl = (height - 20) / (val - 1);
-        left = Array(val)
-          .fill(0)
-          .map((item, idx) => {
-            return {
-              position: {
-                x: -10,
-                y: idx * dl + 10,
-              },
-              radius: 10,
-              text: (idx + 4).toString(),
-              color: '#333333',
-              uuid: uuid(),
-              special: 'left',
-              category,
-            };
-          });
-        const ss = a.seats.filter((item) => item.special !== 'left');
-        a.seats = [...ss, ...left];
+      areas.forEach((r) => {
+        const width = r.rectangleTable.width;
+        const height = r.rectangleTable.height;
+        let left = r.seats.filter((item) => item.special === 'left');
+        const category = r.seats[r.seats.length - 1].category;
+        const dt = (height - 20) / (val - 1);
+        let numbers = [];
+        for (let numbering of SEAT_NUMBERINGS) {
+          try {
+            let guessedStartAt = numbering.findStartAt(r.seats[0].seat_number);
+
+            let guessedNumbers = numbering.compute(r.seats, guessedStartAt);
+            if (
+              r.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx])
+                .length === r.seats.length
+            ) {
+              const temp = [];
+              for (let i = 0; i < 500; i++) {
+                temp.push({});
+              }
+              numbers = numbering.compute(r.seats.concat(temp), guessedStartAt);
+
+              break;
+            }
+
+            let seatsReversed = [...r.seats].reverse();
+            let guessedStartAtRev = numbering.findStartAt(
+              seatsReversed[0].seat_number
+            );
+            let guessedNumbersRev = numbering.compute(
+              seatsReversed,
+              guessedStartAtRev
+            );
+            if (
+              seatsReversed.filter(
+                (s, idx) => s.seat_number === guessedNumbersRev[idx]
+              ).length === r.seats.length
+            ) {
+              numbers = numbering.compute(
+                seatsReversed.concat([{}]),
+                guessedStartAtRev
+              );
+              // for (const s of r.seats) {
+              //   s.seat_number = newNumbers.pop();
+              //   // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+              //   s.seat_guid = uuid();
+              // }
+              break;
+            }
+          } catch (e) {
+            console.warn(
+              'Crash while trying to test seat numbering schema',
+              numbering,
+              e
+            );
+          }
+        }
+
+        const top = r.seats.filter((item) => item.special === 'top');
+        const right = r.seats.filter((item) => item.special === 'right');
+        const bottom = r.seats.filter((item) => item.special === 'bottom');
+        const st = top.length + right.length + bottom.length;
+
+        if (val > 1) {
+          left = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: -10,
+                  y: idx * dt + 10,
+                },
+                radius: 10,
+                seat_number: numbers[st + idx],
+                color: '#333333',
+                uuid: uuid(),
+                special: 'left',
+                category,
+              };
+            });
+        } else {
+          left = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: -10,
+                  y: height / 2,
+                },
+                radius: 10,
+                seat_number: numbers[st + idx],
+                color: '#333333',
+                uuid: uuid(),
+                special: 'left',
+                category,
+              };
+            });
+        }
+        r.seats = [...top, ...right, ...bottom, ...left];
       });
       this.persistPlan();
     },
@@ -543,18 +857,24 @@ export const usePlanStore = defineStore('plan', {
     modifyRoundTableRadius(areas, r) {
       areas.forEach((a) => {
         a.radius = r;
-        a.seats = a.seats.map((item, idx, arr) => {
+        a.seats.forEach((s, idx, arr) => {
           const degree = ((2 * Math.PI) / arr.length) * idx;
-          const uid = uuid();
-          return {
-            text: (idx + 1).toString(),
-            position: {
-              x: (r + 10) * Math.cos(degree),
-              y: (r + 10) * Math.sin(degree),
-            },
-            r: 10,
-            uid,
-          };
+          s.position.x = (r + 10) * Math.cos(degree);
+          s.position.y = (r + 10) * Math.sin(degree);
+        });
+      });
+      this.persistPlan();
+    },
+
+    modifyRoundTableSpace(areas, value) {
+      areas.forEach((a) => {
+        a.space = value;
+        const total = value + a.capacity;
+        const r = a.radius;
+        a.seats.forEach((s, idx, arr) => {
+          const degree = ((2 * Math.PI) / total) * idx;
+          s.position.x = (r + 10) * Math.cos(degree);
+          s.position.y = (r + 10) * Math.sin(degree);
         });
       });
       this.persistPlan();
@@ -630,7 +950,6 @@ export const usePlanStore = defineStore('plan', {
                     guessedStartAt
                   );
                   newnumber = newNumbers[newNumbers.length - 1];
-                  console.log('newNumber', newNumbers);
                   break;
                 }
 
@@ -759,6 +1078,22 @@ export const usePlanStore = defineStore('plan', {
       this.persistPlan();
     },
 
+    renumberTableSeats(areaIds, numbering, startAt, reversed) {
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((r) => {
+          if (areaIds.includes(r.uuid) && r.seats.length) {
+            const numbers = numbering.compute(r.seats, startAt);
+            // console.log(r.seats, numbers);
+            r.seats.forEach((s) => {
+              s.seat_number = reversed ? numbers.pop() : numbers.shift();
+              s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+            });
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
     changeNumberSeats(rowIds, value) {
       value = Math.max(1, value);
       this._plan.zones.forEach((z) => {
@@ -822,7 +1157,6 @@ export const usePlanStore = defineStore('plan', {
                       r.seats.length,
                       r.seats.length + cnt + 1
                     );
-                    console.log('newNumber', newnumber);
                     break;
                   }
 
@@ -885,16 +1219,74 @@ export const usePlanStore = defineStore('plan', {
     },
 
     renumberCircleSeats(rowIds, count) {
+      count = Math.max(1, count);
       this._plan.zones.forEach((z) => {
         z.areas.forEach((r) => {
           if (rowIds.includes(r.uuid)) {
             const res = [];
             r.capacity = count;
-            // if (shape === 'roundTable') {
-            for (let si = 0; si < count; si++) {
-              const degree = ((2 * Math.PI) / count) * si;
+            let numbers = [];
+            for (let numbering of SEAT_NUMBERINGS) {
+              try {
+                let guessedStartAt = numbering.findStartAt(
+                  r.seats[0].seat_number
+                );
+
+                let guessedNumbers = numbering.compute(r.seats, guessedStartAt);
+                if (
+                  r.seats.filter(
+                    (s, idx) => s.seat_number === guessedNumbers[idx]
+                  ).length === r.seats.length
+                ) {
+                  const temp = [];
+                  for (let i = 0; i < 500; i++) {
+                    temp.push({});
+                  }
+                  numbers = numbering.compute(
+                    r.seats.concat(temp),
+                    guessedStartAt
+                  );
+
+                  break;
+                }
+
+                let seatsReversed = [...r.seats].reverse();
+                let guessedStartAtRev = numbering.findStartAt(
+                  seatsReversed[0].seat_number
+                );
+                let guessedNumbersRev = numbering.compute(
+                  seatsReversed,
+                  guessedStartAtRev
+                );
+                if (
+                  seatsReversed.filter(
+                    (s, idx) => s.seat_number === guessedNumbersRev[idx]
+                  ).length === r.seats.length
+                ) {
+                  numbers = numbering.compute(
+                    seatsReversed.concat([{}]),
+                    guessedStartAtRev
+                  );
+                  // for (const s of r.seats) {
+                  //   s.seat_number = newNumbers.pop();
+                  //   // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+                  //   s.seat_guid = uuid();
+                  // }
+                  break;
+                }
+              } catch (e) {
+                console.warn(
+                  'Crash while trying to test seat numbering schema',
+                  numbering,
+                  e
+                );
+              }
+            }
+
+            for (let i = 0; i < count; i++) {
+              const degree = ((2 * Math.PI) / count) * i;
               res.push({
-                text: (si + 1).toString(),
+                seat_number: numbers[i],
                 position: {
                   x: (r.radius + 10) * Math.cos(degree),
                   y: (r.radius + 10) * Math.sin(degree),
@@ -904,35 +1296,23 @@ export const usePlanStore = defineStore('plan', {
                 uuid: uuid(),
               });
             }
-            r.seats = res;
-            // }
-            // } else if (shape === 'rectangleTable') {
-            //   for (let idx = 0; idx < count; idx++) {
-            //     const len = count;
-            //     const mid = Math.ceil(len / 2);
-            //     const width = 120 - 10;
-            //     const height = 40;
-            //     console.log('sdh,', idx)
-            //     let x;
-            //     // if (len % 2 === 0) {
-            //     x = (width / (mid - 1)) * (idx % mid);
-            //     // }
-            //     // else {
-            //     //   x = (width / (mid - 1 - Math.floor(idx / mid))) * (idx % mid);
-            //     // }
-            //     const y = idx < mid ? -20 : 60;
-            //     console.log('width, height', x, y)
 
-            //     const uid = uuid();
-            //     return {
-            //       text: (idx + 1).toString(),
-            //       x: x + 5,
-            //       y,
-            //       r: 10,
-            //       uid
-            //     }
-            //   }
-            //   r.rectangleTable.seats = res;
+            r.seats = res;
+
+            // for (let si = 0; si < count; si++) {
+            //   const degree = ((2 * Math.PI) / count) * si;
+            //   res.push({
+            //     text: (si + 1).toString(),
+            //     position: {
+            //       x: (r.radius + 10) * Math.cos(degree),
+            //       y: (r.radius + 10) * Math.sin(degree),
+            //     },
+            //     category: r.seats[r.seats.length - 1].category,
+            //     r: 10,
+            //     uuid: uuid(),
+            //   });
+            // }
+            // r.seats = res;
           }
         });
       });

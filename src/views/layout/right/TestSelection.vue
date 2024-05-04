@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <DropDown :options="options" :selectedOption="selectedOption" />
-  </div>
+  <v-btn :active="false">button</v-btn>
 </template>
 
 <script setup>

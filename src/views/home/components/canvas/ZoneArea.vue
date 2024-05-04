@@ -2,9 +2,10 @@
   <g class="area" :transform="transform" @mousedown="mousedown" @mouseup="mouseup"
     :class="classes">
     <g v-if="area.shape === 'circle'">
-      <circle :fill="area.color || '#888888'"
-        :stroke="area.border_color || '#888888'" cx="0" cy="0"
-        :r="area.circle.radius" :stroke-width="area.border_width || '2px'">
+      <circle cx="0" cy="0" :r="area.circle.radius"
+        :fill="area.color || '#888888'"
+        :stroke="area.border_width >= 1 ? area.border_color || '#888888' : ''"
+        :stroke-width="area.border_width || '2px'">
       </circle>
       <text v-if="area.text.text" :x="area.text.position.x"
         :y="area.text.position.y" :font-size="area.text.size || 16"
@@ -14,8 +15,9 @@
       </text>
     </g>
     <g v-if="area.shape === 'ellipse'">
-      <ellipse :stroke="area.border_color || '#888888'" cx="0" cy="0"
-        :fill="area.color || '#888888'" :rx="area.ellipse.radius.x"
+      <ellipse
+        :stroke="area.border_width >= 1 ? area.border_color || '#888888' : ''"
+        cx="0" cy="0" :fill="area.color || '#888888'" :rx="area.ellipse.radius.x"
         :ry="area.ellipse.radius.y" :stroke-width="area.border_width || '2px'">
       </ellipse>
       <text v-if="area.text.text" :x="area.text.position.x"
@@ -28,9 +30,10 @@
 
 
     <g v-if="area.shape === 'gaCircle'">
-      <ellipse :stroke="area.border_color || '#888888'" cx="0" cy="0"
-        :fill="gaColor" :rx="area.ellipse.radius.x" :ry="area.ellipse.radius.y"
-        :stroke-width="area.border_width || '2px'"
+      <ellipse
+        :stroke="area.border_width >= 1 ? area.border_color || '#888888' : ''"
+        cx="0" cy="0" :fill="gaColor" :rx="area.ellipse.radius.x"
+        :ry="area.ellipse.radius.y" :stroke-width="area.border_width || '2px'"
         :data-section="area.section || ''" :data-category="area.category || ''"
         :data-abv="area.abbreviation || ''">
       </ellipse>
@@ -44,8 +47,8 @@
 
     <g v-if="area.shape === 'rectangle'">
       <rect :fill="area.color || '#888888'"
-        :stroke="area.border_color || '#888888'" x="0" y="0"
-        :width="area.rectangle.width" :height="area.rectangle.height"
+        :stroke="area.border_width >= 1 ? area.border_color || '#888888' : ''"
+        x="0" y="0" :width="area.rectangle.width" :height="area.rectangle.height"
         :stroke-width="area.border_width || '2px'"></rect>
       <text v-if="area.text.text" :x="area.text.position.x"
         :y="area.text.position.y" :font-size="area.text.size || 16"
@@ -56,8 +59,9 @@
     </g>
 
     <g v-if="area.shape === 'gaSquare'">
-      <rect :fill="gaColor" :stroke="area.border_color || '#888888'" x="0" y="0"
-        :width="area.rectangle.width" :height="area.rectangle.height"
+      <rect :fill="gaColor"
+        :stroke="area.border_width >= 1 ? area.border_color || '#888888' : ''"
+        x="0" y="0" :width="area.rectangle.width" :height="area.rectangle.height"
         :stroke-width="area.border_width || '2px'"
         :data-section="area.section || ''" :data-category="area.category || ''"
         :data-abv="area.abbreviation || ''"></rect>
@@ -71,8 +75,9 @@
 
     <g v-if="area.shape === 'polygon'">
       <polygon :fill="area.color || '#888888'"
-        :stroke="area.border_color || '#888888'" :points="polygonPoints"
-        :stroke-width="area.border_width || '2px'"></polygon>
+        :stroke="area.border_width >= 1 ? area.border_color || '#888888' : ''"
+        :points="polygonPoints" :stroke-width="area.border_width || '2px'">
+      </polygon>
       <text v-if="area.text.text" :x="area.text.position.x"
         :y="area.text.position.y" :font-size="area.text.size || 16"
         text-anchor="middle" font-family="sans-serif" dy=".3em"
@@ -82,7 +87,8 @@
     </g>
 
     <g v-if="area.shape === 'gaPolygon'">
-      <polygon :fill="gaColor" :stroke="area.border_color || '#888888'"
+      <polygon :fill="gaColor"
+        :stroke="area.border_width >= 1 ? area.border_color || '#888888' : ''"
         :points="polygonPoints" :stroke-width="area.border_width || '2px'"
         :data-section="area.section || ''" :data-category="area.category || ''"
         :data-abv="area.abbreviation || ''"></polygon>
@@ -94,32 +100,46 @@
       </text>
     </g>
 
-    <g v-if="area.shape === 'roundTable'" class="table-seat">
-      <circle :cx="0" :cy="0" :r="area.radius" fill="#ffffff" stroke="#000"
-        stroke-width="1">
+    <g v-if="area.shape === 'roundTable'" class="table">
+      <circle class="table_circle" :cx="0" :cy="0" :r="area.radius" fill="#ffffff"
+        stroke="#000" stroke-width="1">
       </circle>
-      <g v-for="item in area.seats" :key="item"
+      <text class="table_label" :x="area.label.position.x"
+        :y="area.label.position.y" :font-size="area.label.size || 16"
+        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        :fill="area.label.color || '#888888'">
+        {{ area.label.abv }}
+      </text>
+      <g class="table_seat" v-for="item in area.seats" :key="item"
         @mousedown="event => seat_mousedown(event, item.uuid)"
         @mouseup="event => seat_mouseup(event, item.uuid)">
-        <circle :cx="item.position.x" :cy="item.position.y" :r="item.r"
-          stroke="#000" style="stroke-width: 1px;"
-          :fill="seatColor(item.category)" stroke-width="1"
-          :id="`seat-round-${item.text}`" :data-section-label="item.section_label"
+        <circle class="table_seat_circle" :cx="item.position.x"
+          :cy="item.position.y" :r="item.r" stroke="#000"
+          style="stroke-width: 1px;" :fill="seatColor(item.category)"
+          stroke-width="1" :id="`seat-round-${item.text}`"
+          :data-section-label="item.section_label"
           :data-section-abv="item.section_abv" data-category-name=""
           data-category-abv="">
         </circle>
-        <text fill="black" :x="item.position.x" :y="item.position.y"
+        <text fill="table_seat_label" :x="item.position.x" :y="item.position.y"
           text-anchor="middle" font-size="10px" font-family="sans-serif"
           :key="item" dy=".3em">{{
-            item.text }}</text>
+            item.seat_number }}</text>
       </g>
     </g>
 
-    <g v-if="area.shape === 'rectangleTable'" class="table-seat"
+    <g v-if="area.shape === 'rectangleTable'" class="table"
       :transform="`translate(${-area.rectangleTable.width / 2}, ${-area.rectangleTable.height / 2})`">
-      <rect :x="0" :y="0" :width="area.rectangleTable.width"
+      <rect class="table_rect" :x="0" :y="0" :width="area.rectangleTable.width"
         :height="area.rectangleTable.height" fill="#ffffff" stroke="#000"
         stroke-width="1"></rect>
+      <text class="table_label"
+        :transform="`translate(${area.rectangleTable.width / 2}, ${area.rectangleTable.height / 2})`"
+        :x="area.label.position.x" :y="area.label.position.y"
+        :font-size="area.label.size || 16" text-anchor="middle"
+        font-family="sans-serif" dy=".3em" :fill="area.label.color || '#888888'">
+        {{ area.label.abv }}
+      </text>
       <g v-for="(item, idx) in area.seats" :key="item"
         @mousedown="event => seat_mousedown(event, item.uuid)"
         @mouseup="event => seat_mouseup(event, item.uuid)">
@@ -132,7 +152,7 @@
         </circle>
         <text fill="black" :x="item.position.x" :y="item.position.y"
           text-anchor="middle" font-size="10px" font-family="sans-serif"
-          dy=".3em">{{ (idx + 1).toString() }}</text>
+          dy=".3em">{{ item.seat_number }}</text>
       </g>
     </g>
 
@@ -162,6 +182,7 @@
 <script>
 import { useMainStore } from "@/stores";
 import { usePlanStore } from "@/stores/plan";
+import { area } from "d3";
 import { computed, ref } from "vue";
 
 
