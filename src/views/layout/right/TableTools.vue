@@ -2,8 +2,14 @@
   <div>
     <CategoryComponent :setCategory="setCategory"
       :selectedCategory="selectedCategory" />
-    <SectionLabel :setTag="setTag" />
+    <v-divider></v-divider>
+    <SectionLabel :setTag="setTag" :select="tag" />
+    <v-divider></v-divider>
     <TablePanel :areas="areas" />
+    <v-divider></v-divider>
+    <TableLabeling :areas="areas" />
+    <v-divider></v-divider>
+    <TableSeatLabeling :areas="areas" />
   </div>
 </template>
 
@@ -14,6 +20,8 @@ import TablePanel from './Context/TablePanel.vue';
 import CategoryComponent from '@/views/home/components/CategoryComponent.vue';
 import SectionLabel from './Context/SectionLabel.vue';
 import { useMainStore } from '@/stores';
+import TableLabeling from './Context/TableLabeling.vue';
+import TableSeatLabeling from './Context/TableSeatLabeling.vue';
 
 const planStore = usePlanStore();
 const mainStore = useMainStore();
@@ -58,12 +66,17 @@ const setCategory = (name) => {
 const tags = computed(() => mainStore.section_label);
 
 const setTag = (id) => {
-  console.log('setTag')
   const tag = tags.value.find(i => i.id === id);
   if (tag) {
     planStore.addTableSectionLabel(props.areas.map(i => i.uuid), tag.label, tag.abv);
   }
 }
+
+const tag = computed(() => {
+  const label = groupValue(props.areas, a => a.seats.map(s => s.section_label))[0];
+  const abv = groupValue(props.areas, a => a.seats.map(s => s.section_abv))[0];
+  return { label, abv };
+})
 
 const selectedCategory = computed(() => {
   return groupValue(props.areas, area => area.seats.map(s => s.category)[0]);

@@ -30,19 +30,10 @@
               category</button>
             <table>
               <tr v-for="(ca, idx) in categories" :key="ca">
-                <!-- <td class="left-container-td"></td> -->
                 <td class="color-container-td">
-                  <div class="colorcontainer">
-                    <!-- <DropDown :selection="selectedItem" :options="category_colors"
-                      :setCategory="setCategory" :direction="true" /> -->
-                    <input class="category-input" type="color" :value="ca.color"
-                      @input="(e) => handle_change_color(e, idx)" />
-                    <!-- <select>
-                    <option>red</option>
-                    <option>green</option>
-                    <option>blue</option>
-                  </select> -->
-                  </div>
+                  <ColorPicker :setColor="setColor" :selected="ca.color"
+                    :index="idx" :setToggle="setToggle" :clearToggle="clearToggle"
+                    :toggle="toggle[idx]" />
                 </td>
                 <td class="input-container-td"><input class="category-input"
                     type="text" name="inputForm" :value="ca.name"
@@ -69,12 +60,45 @@
 import { ref, defineProps, computed, defineComponent } from "vue";
 import { usePlanStore } from '@/stores/plan.js'
 import DropDown from '../../home/components/DropDown.vue';
+import ColorPicker from "./ColorPicker.vue";
 import { isoFormat } from "d3";
 const dialog = ref(false);
 
 const components = defineComponent({
   DropDown
 })
+
+const colors = [
+  '#2b68e8',
+  '#2144ac',
+  '#646bee',
+  '#21a6e6',
+  '#106a9f',
+  '#1992a1',
+  '#20b6d2',
+  '#25b8a6',
+  '#2fc463',
+  '#1d7f40',
+  '#86ca2e',
+  '#67a221',
+  '#f39d2a',
+  '#d77720',
+  '#f7732a',
+  '#bc173f',
+  '#df224c',
+]
+
+const toggle = ref(Array(colors.length).fill(false));
+
+const setToggle = (idx) => {
+  const value = toggle.value[idx];
+  clearToggle();
+  toggle.value[idx] = !value
+}
+
+const clearToggle = () => {
+  toggle.value = Array(colors.length).fill(false);
+}
 
 const props = defineProps({
 });
@@ -111,8 +135,9 @@ const handle_change_name = (e, idx) => {
   planStore.changeCategory(categories.value[idx].name, e.target.value, categories.value[idx].color);
 }
 
-const handle_change_color = (e, idx) => {
-  planStore.changeCategory(categories.value[idx].name, categories.value[idx].name, e.target.value);
+
+const setColor = (color, idx) => {
+  planStore.changeCategory(categories.value[idx].name, categories.value[idx].name, color);
 }
 
 const handle_delete = (idx) => {
@@ -120,9 +145,11 @@ const handle_delete = (idx) => {
 }
 
 const handle_create_category = () => {
-  let color = Math.floor(Math.random() * 16777215).toString(16);
+  const len = colors.length;
+  const rand = Math.floor(Math.random() * len);
+  const color = colors[rand]
   const newName = getUniqueCategoryName('New Category');
-  planStore.createCategory(newName, `#${color}`);
+  planStore.createCategory(newName, color);
 }
 
 const getUniqueCategoryName = name => {
@@ -201,6 +228,7 @@ table,
 th,
 td {
   border-bottom: 1px solid #ccc;
+  padding: 0 10px;
 }
 
 td {

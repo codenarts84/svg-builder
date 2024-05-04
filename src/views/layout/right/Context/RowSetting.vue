@@ -60,7 +60,6 @@ import { defineComponent, computed, ref } from 'vue';
 import { useSeatFormatStore } from '@/stores/seatFormat';
 import { usePlanStore } from '@/stores/plan';
 import { useMainStore } from '@/stores';
-import { flatGroup } from 'd3';
 // import NumberInput from '../../home/components/NumberInput.vue';
 const round = (fl, places) => Number(fl.toFixed(places ? places : 0))
 

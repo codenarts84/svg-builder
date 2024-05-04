@@ -1,11 +1,12 @@
 <template>
-  <g @mousedown="mousedown" @mouseup="mouseup" :class="classObject">
+  <g @mousedown="mousedown" @mouseup="mouseup" class="seat_group"
+    data-object-type="seat_group">
 
-    <circle :id="seatID" :fill="seatColor" :cx="seat.position.x"
-      :cy="seat.position.y" :r="radius" stroke="#000" style="stroke-width: 1px"
-      data-seat-label="" data-row-label=""
-      :data-section-label="seat.section_label"
-      :data-section-abv="seat.section_abv" data-category-name=""
+    <circle class="seat_circle" :id="seatID" :fill="seatColor"
+      :cx="seat.position.x" :cy="seat.position.y" :r="radius" stroke="#000"
+      style="stroke-width: 1px" :data-seat-label="seat.seat_number"
+      :data-row-label="row_number" :data-section-label="seat.section_label"
+      :data-section-abv="seat.section_abv" :data-category-name="seat.category"
       data-category-abv="">
     </circle>
 
@@ -172,7 +173,7 @@ export default {
 </script>
 <style>
 .movable .selected g.seat *,
-.movable g.seat.selected * {
+.movable .selected * {
   cursor: move;
 }
 </style>

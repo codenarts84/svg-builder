@@ -1,6 +1,6 @@
 <template>
   <div>
-    <AreaPanel :areas="areas" :temp_Rotate="temp_Rotate" />
+    <AreaPanel v-if="show()" :areas="areas" :temp_Rotate="temp_Rotate" />
   </div>
 </template>
 
@@ -12,5 +12,13 @@ const props = defineProps({
   areas: Array,
   temp_Rotate: Function
 })
+
+const show = () => {
+  if (props.areas) {
+    const shape = props.areas[0].shape;
+    const filtered = props.areas.filter(a => a.shape === shape);
+    return filtered.length === props.areas.length;
+  }
+}
 
 </script>

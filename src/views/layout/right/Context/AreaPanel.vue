@@ -84,7 +84,7 @@
 
         <v-col cols="12" sm="6" v-if="shape !== 'text'"> Stroke Width </v-col>
         <v-col cols="12" sm="6" v-if="shape !== 'text'">
-          <input type="number" min="1" class="v-custom-input" name="text_size"
+          <input type="number" min="0" class="v-custom-input" name="text_size"
             :value="borderWidth" @input="setBorderWidth" />
         </v-col>
 
@@ -147,7 +147,7 @@ export default {
       return groupValue(this.areas, a => a.border_color)
     },
     borderWidth() {
-      return Math.round(groupValue(this.areas, a => a.border_width) || 2)
+      return Math.round(groupValue(this.areas, a => a.border_width))
     },
     textColor() {
       return groupValue(this.areas, a => a.text ? a.text.color : undefined)

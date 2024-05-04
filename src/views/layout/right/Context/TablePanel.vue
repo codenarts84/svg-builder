@@ -37,6 +37,13 @@
             :value="capacity" @input="setCapacity" />
         </v-col>
 
+        <v-col cols="12" sm="6" v-if="shape === 'roundTable'"> Open spaces
+        </v-col>
+        <v-col cols="12" sm="6" v-if="shape === 'roundTable'">
+          <input type="number" min="0" class="v-custom-input" name="open_space"
+            :value="space" @input="setSpace" />
+        </v-col>
+
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'"> Top </v-col>
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'">
           <input type="number" min="0" class="v-custom-input" name="rotation"
@@ -60,48 +67,6 @@
           <input type="number" min="0" class="v-custom-input" name="rotation"
             :value="capacityR" @input="setCapacityR" />
         </v-col>
-
-        <!-- <v-col cols="12" sm="6"> Position X </v-col>
-        <v-col cols="12" sm="6">
-          <input type="number" class="v-custom-input" name="rotation"
-            :value="rotation" @input="setRotation" />
-        </v-col>
-
-        <v-col cols="12" sm="6"> Position Y </v-col>
-        <v-col cols="12" sm="6">
-          <input type="number" class="v-custom-input" name="rotation"
-            :value="rotation" @input="setRotation" />
-        </v-col>
-
-        <v-col cols="12" sm="6"> Text Size </v-col>
-        <v-col cols="12" sm="6">
-          <input type="number" class="v-custom-input" name="rotation"
-            :value="rotation" @input="setRotation" />
-        </v-col> -->
-
-        <!-- <v-col cols="12" sm="6"> Category </v-col>
-        <v-col cols="12" sm="6">
-          <input type="number" class="v-custom-input" name="rotation"
-            :value="rotation" @input="setRotation" />
-        </v-col>
-
-        <v-col cols="12" sm="6"> Section </v-col>
-        <v-col cols="12" sm="6">
-          <input type="number" class="v-custom-input" name="rotation"
-            :value="rotation" @input="setRotation" />
-        </v-col> -->
-
-        <!-- <v-col cols="12" sm="6"> Seat Label </v-col>
-        <v-col cols="12" sm="6">
-          <input type="number" class="v-custom-input" name="rotation"
-            :value="rotation" @input="setRotation" />
-        </v-col>
-
-        <v-col cols="12" sm="6"> Skip </v-col>
-        <v-col cols="12" sm="6">
-          <input type="number" class="v-custom-input" name="rotation"
-            :value="rotation" @input="setRotation" />
-        </v-col> -->
 
       </v-row>
     </v-container>
@@ -168,6 +133,9 @@ export default {
     },
     label() {
       return groupValue(this.areas, a => a.label)
+    },
+    space() {
+      return groupValue(this.areas, a => a.space)
     }
   },
   methods: {
@@ -184,7 +152,12 @@ export default {
       this.planStore.modifyRoundTableRadius(this.areas, parseInt(e.target.value))
     },
     setCapacity(e) {
-      this.planStore.renumberCircleSeats(this.areas.map(a => a.uuid), parseInt(e.target.value))
+      if (e.target.value > 0) {
+        this.planStore.renumberCircleSeats(this.areas.map(a => a.uuid), parseInt(e.target.value))
+      }
+    },
+    setSpace(e) {
+      this.planStore.modifyRoundTableSpace(this.areas, parseInt(e.target.value))
     },
     setCapacityT(e) {
       this.planStore.modifyRectangleTableCapacityT(this.areas, parseInt(e.target.value))

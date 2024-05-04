@@ -6,7 +6,7 @@
     <v-divider></v-divider>
     <RotatePanel :rows="rows" :temp_Rotate="temp_Rotate" />
     <v-divider></v-divider>
-    <SectionLabel :setTag="setTag" />
+    <SectionLabel :setTag="setTag" :select="tag()" />
     <v-divider></v-divider>
     <TagsPanel :rows="rows" :selectedTag="selectedTag()" />
     <v-divider></v-divider>
@@ -70,6 +70,11 @@ const shallowEqual = (object1, object2) => {
 
 const tags = computed(() => mainStore.section_label);
 
+const tag = () => {
+  const section = groupValue(props.seats, seat => seat.section_label)
+  const abv = groupValue(props.seats, seat => seat.section_abv)
+  return { label: section, abv }
+}
 
 const selectedCategory = computed(() => {
   return groupValue(props.seats, seat => seat.category);

@@ -2,11 +2,11 @@
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
 
-
     <RowTools v-if="selectedRows().length" :rows="selectedRows()"
       :seats="selectedSeats()" :temp_Rotate="temp_Rotate" />
 
-    <!-- <SeatTools v-if="selectedSeats().length" :seats="selectedSeats()" /> -->
+    <SeatTools v-if="selectedSeats().length && !selectedRows().length"
+      :seats="selectedSeats()" />
 
     <GATools v-if="selectedGA().length" :areas="selectedGA()"
       :temp_Rotate="temp_Rotate" />
@@ -30,6 +30,7 @@ import TestSelection from './TestSelection.vue';
 
 import { useMainStore } from '@/stores';
 import { usePlanStore } from '@/stores/plan';
+import ColorPicker from '@/views/home/components/ColorPicker.vue';
 const store = useMainStore();
 const planstore = usePlanStore();
 const selection = ref(computed(() => store.selection));

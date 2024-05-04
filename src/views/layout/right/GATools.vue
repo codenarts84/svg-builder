@@ -2,8 +2,11 @@
   <div>
     <CategoryComponent :setCategory="setCategory"
       :selectedCategory="selectedCategory()" />
-    <SectionLabel :setTag="setTag" />
+    <v-divider></v-divider>
+    <SectionLabel :setTag="setTag" :select="tag" />
+    <v-divider></v-divider>
     <GAPanel :areas="areas" />
+    <v-divider></v-divider>
     <AreaPanel :areas="areas" :temp_Rotate="temp_Rotate" />
   </div>
 </template>
@@ -73,4 +76,10 @@ const setTag = (id) => {
     planStore.addGASectionLabel(props.areas.map(i => i.uuid), tag.label, tag.abv);
   }
 }
+
+const tag = computed(() => {
+  const label = groupValue(props.areas, a => a.section);
+  const abv = groupValue(props.areas, a => a.abbreviation);
+  return { label, abv };
+})
 </script>

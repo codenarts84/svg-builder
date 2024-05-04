@@ -5,9 +5,11 @@
       <template v-for="tag in tags" :key="tag.id">
         <v-row>
           <v-col class="section-container" cols="12">
-            <v-btn class="section-btn" @click="() => handle_tag(tag.id)">{{
-              tag.label
-            }}({{ tag.abv }})</v-btn>
+            <v-btn class="section-btn"
+              :active="tag.label === select?.label && tag.abv === select?.abv"
+              @click="() => handle_tag(tag.id)">{{
+                tag.label
+              }}({{ tag.abv }})</v-btn>
             <v-btn @click="() => removeTag(tag.id)" density="comfortable"
               icon="$delete" variant="plain"></v-btn>
           </v-col>
@@ -41,7 +43,12 @@ export default {
   },
   props: {
     setTag: Function,
+    select: Object
   },
+  computed: {
+
+  },
+
   methods: {
     removeTag(id) {
       this.mainStore.removeSectionLabel(id);

@@ -829,23 +829,29 @@ export default {
           usePlanStore()
             .createArea(this.selectedZone, {
               shape: "roundTable",
+              space: 0,
               rotation: 0,
               uuid: newId,
+              label: {
+                position: {
+                  x: 0,
+                  y: 0,
+                },
+                name: "",
+                abv: "",
+                color: "#333333",
+                size: 16,
+              },
               position: {
                 x: targetPos.x,
                 y: targetPos.y,
               },
               radius: 25,
               capacity: 6,
-              text: {
-                position: { x: 0, y: 0 },
-                color: "#333333",
-                text: "",
-              },
               seats: arr.map((item, idx, arr) => {
                 const degree = 2 * Math.PI / arr.length * idx;
                 return {
-                  text: (idx + 1).toString(),
+                  seat_number: (idx + 1).toString(),
                   position: {
                     x: 35 * Math.cos(degree),
                     y: 35 * Math.sin(degree),
@@ -889,7 +895,7 @@ export default {
                 x: idx * dx + 10,
                 y: -10
               },
-              text: (idx + 1).toString(),
+              seat_number: (idx + 1).toString(),
               color: "#333333",
               uuid: uuid(),
               radius: 10,
@@ -905,7 +911,7 @@ export default {
                 y: 70
               },
               radius: 10,
-              text: (idx + 5).toString(),
+              seat_number: (idx + 5).toString(),
               color: "#333333",
               uuid: uuid(),
               special: 'bottom'
@@ -932,7 +938,9 @@ export default {
                 x: targetPos.x,
                 y: targetPos.y,
               },
-              text: {
+              label: {
+                name: "",
+                abv: "",
                 position: { x: 0, y: 0 },
                 color: "#333333",
                 text: "",
@@ -1270,6 +1278,14 @@ export default {
           this.drawingCurrentX = pos.x;
           this.drawingCurrentY = pos.y;
           break;
+        case "roundTable":
+        case "rectangleTable":
+          if (event.shiftKey || this.bSnap2Grid) {
+            pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
+          }
+          this.drawingCurrentX = pos.x;
+          this.drawingCurrentY = pos.y;
+          break;
         case "rowCircle":
         case "rowCircleFixedCenter":
           if (this.tool !== "rowCircle" && this.tool !== "rowCircleFixedCenter")
@@ -1554,6 +1570,7 @@ export default {
                 shape: "rectangle",
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
+                border_width: 2,
                 rotation: 0,
                 uuid: newId,
                 position: {
@@ -1595,6 +1612,7 @@ export default {
                 shape: "gaSquare",
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
+                border_width: 2,
                 rotation: 0,
                 uuid: newId,
                 capacity: 0,
@@ -1643,6 +1661,7 @@ export default {
                 shape: "circle",
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
+                border_width: 2,
                 rotation: 0,
                 uuid: newId,
                 position: {
@@ -1678,6 +1697,7 @@ export default {
                 shape: "ellipse",
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
+                border_width: 2,
                 rotation: 0,
                 uuid: newId,
                 position: {
@@ -1716,6 +1736,7 @@ export default {
                 shape: "gaCircle",
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
+                border_width: 2,
                 rotation: 0,
                 capacity: 0,
                 uuid: newId,
@@ -1975,6 +1996,7 @@ export default {
           shape: "polygon",
           color: "#cccccc", // todo: use previously used color
           border_color: "#000001", // todo: use previously used color
+          border_width: 2,
           rotation: 0,
           uuid: newId,
           position: {
@@ -2016,9 +2038,10 @@ export default {
           shape: "gaPolygon",
           color: "#cccccc", // todo: use previously used color
           border_color: "#000001", // todo: use previously used color
+          border_width: 2,
           rotation: 0,
           uuid: newId,
-          capacity: 100,
+          capacity: 0,
           position: {
             x: minx - zone.position.x,
             y: miny - zone.position.y,
@@ -2531,6 +2554,29 @@ export default {
           :cx="circ.cx" :cy="circ.cy" :key="circ"></circle>
         <circle class="preview-center" v-for="circ in rowCirclePreviews" :r="2"
           :cx="circ.cx" :cy="circ.cy" :key="circ"></circle>
+      </g>
+
+      <g class="preview" v-if="(tool === 'roundTable')">
+        <circle :cx="drawingCurrentX" :cy="drawingCurrentY" :r="25">
+        </circle>
+        <circle v-for="index in 6" :key="index"
+          :cx="drawingCurrentX + 35 * Math.cos(2 * Math.PI / 6 * index)"
+          :cy="drawingCurrentY + 35 * Math.sin(2 * Math.PI / 6 * index)" :r="10">
+        </circle>
+      </g>
+
+      <g class="preview" v-if="(tool === 'rectangleTable')"
+        :transform="`translate(-70, -30)`">
+        <rect :x="drawingCurrentX" :y="drawingCurrentY" :width="140" :height="60">
+        </rect>
+        <circle v-for="index in 4" :key="index"
+          :cx="drawingCurrentX + 40 * (index - 1) + 10" :cy="drawingCurrentY - 10"
+          :r="10">
+        </circle>
+        <circle v-for="index in 4" :key="index"
+          :cx="drawingCurrentX + 40 * (index - 1) + 10" :cy="drawingCurrentY + 70"
+          :r="10">
+        </circle>
       </g>
 
       <g class="row-preview" v-if="tool === 'row' && rowDrawing">

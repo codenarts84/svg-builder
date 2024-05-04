@@ -136,7 +136,7 @@ export default {
       return groupValue(this.areas, a => a.border_color)
     },
     borderWidth() {
-      return groupValue(this.areas, a => a.border_width) || 2
+      return groupValue(this.areas, a => a.border_width)
     },
     textColor() {
       return groupValue(this.areas, a => a.text ? a.text.color : undefined)

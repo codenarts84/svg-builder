@@ -1,7 +1,7 @@
 <template>
   <g :transform="transform" @mousedown="mousedown" @mouseup="mouseup"
     :class="classObject">
-    <g id="unique-id" class="row_group" data-row-label="">
+    <g id="unique-id" class="row_group" :data-row-label="row.row_number">
       <text class="row_lable" v-if="rowNumberStart" :x="rowNumberStart.x"
         :y="rowNumberStart.y" dy=".3em" :font-size="rowNumberStart.fontSize"
         :text-anchor="rowNumberStart.textAnchor"
@@ -13,8 +13,8 @@
         :text-anchor="rowNumberEnd.textAnchor"
         :transform="rotate ? rowNumberEnd.transform : ''" fill="#888">{{
           row.row_number }}</text>
-      <Seat class="seat_group" v-for="s in row.seats" :seat="s" :key="s.uuid"
-        :zone="zone" @startDragging="startDragging" :row_number="row.row_number">
+      <Seat v-for="s in row.seats" :seat="s" :key="s.uuid" :zone="zone"
+        @startDragging="startDragging" :row_number="row.row_number">
       </Seat>
       <path class="selection-line" v-if="selection.includes(row.uuid)"
         :d="selectionLinePath"></path>
