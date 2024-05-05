@@ -815,6 +815,8 @@ export const useMainStore = defineStore({
 
         for (const area of z.areas) {
           if (this.selection.includes(area.uuid)) {
+            if (area.shape === 'roundTable' || area.shape === 'rectangleTable')
+              return;
             area.position.x = lox + (area.position.x - lox) * factor;
             area.position.y = loy + (area.position.y - loy) * factor;
 

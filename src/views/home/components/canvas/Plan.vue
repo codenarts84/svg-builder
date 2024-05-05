@@ -160,6 +160,17 @@ export default {
     };
   },
   computed: {
+    noTableSelection() {
+      if (this.selection.length === 1) {
+        for (const z of this.plan.zones) {
+          for (const a of z.areas) {
+            if (this.selection.includes(a.uuid)) return false;
+          }
+        }
+      }
+      return true;
+    },
+
     mainclasses() {
       return {
         // move cursor
@@ -2618,21 +2629,21 @@ export default {
         :width="selectionBoundary.width + 3"
         :height="selectionBoundary.height + 3" fill="none"></rect>
       <rect class="selection-resize-handle-nw"
-        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
+        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats && noTableSelection"
         :x="selectionBoundary.x - 4.5" :y="selectionBoundary.y - 4.5" :width="6"
         :height="6" @mousedown="startResizing($event, 'nw')"></rect>
       <rect class="selection-resize-handle-ne"
-        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
+        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats && noTableSelection"
         :x="selectionBoundary.x + selectionBoundary.width - 1.5"
         :y="selectionBoundary.y - 4.5" :width="6" :height="6"
         @mousedown="startResizing($event, 'ne')"></rect>
       <rect class="selection-resize-handle-sw"
-        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
+        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats && noTableSelection"
         :x="selectionBoundary.x - 4.5"
         :y="selectionBoundary.y + selectionBoundary.height - 1.5" :width="6"
         :height="6" @mousedown="startResizing($event, 'sw')"></rect>
       <rect class="selection-resize-handle-se"
-        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
+        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats && noTableSelection"
         :x="selectionBoundary.x + selectionBoundary.width - 1.5"
         :y="selectionBoundary.y + selectionBoundary.height - 1.5" :width="6"
         :height="6" fill="none" @mousedown="startResizing($event, 'se')"></rect>
