@@ -1,18 +1,13 @@
 <template>
-  <v-btn :active="false">button</v-btn>
+  <v-btn @click="onClick">Generate</v-btn>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import DropDown from '@/views/home/components/DropDown.vue';
-const options = ref([{
-  name: 'categoryA', color: '#ff0000'
-}, {
-  name: 'categoryB', color: '#ffff00'
-}, {
-  name: 'categoryC', color: '#ff00ff'
-}])
+import { v4 as uuid } from 'uuid';
 
-const selectedOption = ref({ name: 'categoryV', color: '#ff0000' })
+const onClick = () => {
+  console.log(Date.now().toString(10))
+}
 
 </script>

@@ -113,11 +113,10 @@
       <g class="table_seat" v-for="item in area.seats" :key="item"
         @mousedown="event => seat_mousedown(event, item.uuid)"
         @mouseup="event => seat_mouseup(event, item.uuid)">
-        <circle class="table_seat_circle" :cx="item.position.x"
+        <circle class="table_seat_circle" :id="item.guid" :cx="item.position.x"
           :cy="item.position.y" :r="item.r" stroke="#000"
           style="stroke-width: 1px;" :fill="seatColor(item.category)"
-          stroke-width="1" :id="`seat-round-${item.text}`"
-          :data-section-label="item.section_label"
+          stroke-width="1" :data-section-label="item.section_label"
           :data-section-abv="item.section_abv" data-category-name=""
           data-category-abv="">
         </circle>
@@ -128,25 +127,24 @@
       </g>
     </g>
 
-    <g v-if="area.shape === 'rectangleTable'" class="table"
+    <g v-if="area.shape === 'rectangleTable'" class=" table"
       :transform="`translate(${-area.rectangleTable.width / 2}, ${-area.rectangleTable.height / 2})`">
       <rect class="table_rect" :x="0" :y="0" :width="area.rectangleTable.width"
         :height="area.rectangleTable.height" fill="#ffffff" stroke="#000"
         stroke-width="1"></rect>
-      <text class="table_label"
-        :transform="`translate(${area.rectangleTable.width / 2}, ${area.rectangleTable.height / 2})`"
-        :x="area.label.position.x" :y="area.label.position.y"
-        :font-size="area.label.size || 16" text-anchor="middle"
-        font-family="sans-serif" dy=".3em" :fill="area.label.color || '#888888'">
+      <text class="table_label" :x="area.label.position.x"
+        :y="area.label.position.y" :font-size="area.label.size || 16"
+        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        :fill="area.label.color || '#888888'">
         {{ area.label.abv }}
       </text>
-      <g v-for="(item, idx) in area.seats" :key="item"
+      <g class="table-seat" v-for="(item) in area.seats" :key="item"
         @mousedown="event => seat_mousedown(event, item.uuid)"
         @mouseup="event => seat_mouseup(event, item.uuid)">
-        <circle :id="`seat-rect-${idx}`" :cx="item.position.x"
-          :cy="item.position.y" :r="item.radius" stroke="#000"
-          style="stroke-width: 1px;" :fill="seatColor(item.category)"
-          stroke-width="1" :data-section-label="item.section_label"
+        <circle :id="item.guid" :cx="item.position.x" :cy="item.position.y"
+          :r="item.radius" stroke="#000" style="stroke-width: 1px;"
+          :fill="seatColor(item.category)" stroke-width="1"
+          :data-section-label="item.section_label"
           :data-section-abv="item.section_abv" data-category-name=""
           data-category-abv="">
         </circle>

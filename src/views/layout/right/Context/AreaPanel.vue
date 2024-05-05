@@ -55,7 +55,7 @@
         <v-col cols="12" sm="6"
           v-if="shape !== 'gaCircle' && shape !== 'gaSquare'">
           <input class=" v-custom-input" name="text_value" :value="textValue"
-            @input="setText" />
+            @input="setText" maxlength="15" />
         </v-col>
 
         <v-col cols="12" sm="6"> Text size </v-col>

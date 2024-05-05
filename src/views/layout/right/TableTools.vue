@@ -5,11 +5,11 @@
     <v-divider></v-divider>
     <SectionLabel :setTag="setTag" :select="tag" />
     <v-divider></v-divider>
-    <TablePanel :areas="areas" />
+    <TablePanel v-if="show" :areas="areas" />
     <v-divider></v-divider>
-    <TableLabeling :areas="areas" />
+    <TableLabeling v-if="show" :areas="areas" />
     <v-divider></v-divider>
-    <TableSeatLabeling :areas="areas" />
+    <TableSeatLabeling v-if="show" :areas="areas" />
   </div>
 </template>
 
@@ -59,6 +59,16 @@ const shallowEqual = (object1, object2) => {
   return true
 }
 
+const show = computed(() => {
+  if (props.areas) {
+    const shape = props.areas[0].shape;
+    const filtered = props.areas.filter(a => a.shape === shape);
+    return filtered.length === props.areas.length;
+  }
+
+  return false;
+})
+
 const setCategory = (name) => {
   planStore.setTableCategory(props.areas, name);
 }
@@ -73,8 +83,10 @@ const setTag = (id) => {
 }
 
 const tag = computed(() => {
-  const label = groupValue(props.areas, a => a.seats.map(s => s.section_label))[0];
-  const abv = groupValue(props.areas, a => a.seats.map(s => s.section_abv))[0];
+  const labels = groupValue(props.areas, a => a.seats.map(s => s.section_label));
+  const abvs = groupValue(props.areas, a => a.seats.map(s => s.section_abv));
+  const label = labels ? labels[0] : '';
+  const abv = abvs ? abvs[0] : '';
   return { label, abv };
 })
 

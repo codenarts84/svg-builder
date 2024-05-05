@@ -1,7 +1,7 @@
 <template>
   <g :transform="transform" @mousedown="mousedown" @mouseup="mouseup"
     :class="classObject">
-    <g id="unique-id" class="row_group" :data-row-label="row.row_number">
+    <g :id="row.guid" class="row_group" :data-row-label="row.row_number">
       <text class="row_lable" v-if="rowNumberStart" :x="rowNumberStart.x"
         :y="rowNumberStart.y" dy=".3em" :font-size="rowNumberStart.fontSize"
         :text-anchor="rowNumberStart.textAnchor"

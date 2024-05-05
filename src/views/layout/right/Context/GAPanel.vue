@@ -12,24 +12,17 @@
             :value="capacity" @input="setCapacity" />
         </v-col>
 
-        <!--
-        <v-col cols="12" sm="6"> Section </v-col>
+        <v-col cols="12" sm="6"> Label </v-col>
         <v-col cols="12" sm="6">
-          <input class="v-custom-input" name="section" :value="section"
-            @input="setSection" />
+          <input class="v-custom-input" name="label" :value="label"
+            @input="setLabel" />
         </v-col>
 
         <v-col cols="12" sm="6"> Abbreviation </v-col>
         <v-col cols="12" sm="6">
           <input class="v-custom-input" name="abbreviation" :value="abbreviation"
-            @input="setAbbreviation" />
+            @input="setAbbreviation" maxlength="8" />
         </v-col>
-
-        <v-col cols="12" sm="6"> Category </v-col>
-        <v-col cols="12" sm="6">
-          <input class="v-custom-input" name="category" :value="category"
-            @input="setCategory" />
-        </v-col> -->
 
       </v-row>
     </v-container>
@@ -65,11 +58,8 @@ export default {
     abbreviation() {
       return groupValue(this.areas, a => a.abbreviation)
     },
-    category() {
-      return groupValue(this.areas, a => a.category)
-    },
-    section() {
-      return groupValue(this.areas, a => a.section)
+    label() {
+      return groupValue(this.areas, a => a.label)
     },
     capacity() {
       return groupValue(this.areas, a => a.capacity)
@@ -78,21 +68,23 @@ export default {
 
   methods: {
     setAbbreviation(e) {
+      const input = e.target;
+      const value = input.value;
+      const validCharacters = /^[a-zA-Z0-9]*$/;
+
+      if (!validCharacters.test(e.target.value)) {
+        input.value = value.replace(/[^a-zA-Z0-9]/g, '');
+      }
+
       this.planStore.modifyAreas({
         areaIds: this.areas.map(a => a.uuid),
-        abbreviation: e.target.value
+        abbreviation: input.value
       })
     },
-    setCategory(e) {
+    setLabel(e) {
       this.planStore.modifyAreas({
         areaIds: this.areas.map(a => a.uuid),
-        category: e.target.value
-      })
-    },
-    setSection(e) {
-      this.planStore.modifyAreas({
-        areaIds: this.areas.map(a => a.uuid),
-        section: e.target.value
+        label: e.target.value
       })
     },
     setCapacity(e) {

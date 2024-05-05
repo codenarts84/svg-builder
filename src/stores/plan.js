@@ -5,6 +5,7 @@ import { v4 as uuid } from 'uuid';
 import Ajv from 'ajv';
 import schema from '../schema/seating-plan.schema.json';
 import { letterCounter, reverse, SEAT_NUMBERINGS } from '@/lib/numbering';
+import { generateID } from '@/lib/numbers';
 import { useMainStore } from '.';
 
 // This is certainly not a best practice, but we don't want these two reactive for performance reasons
@@ -137,6 +138,7 @@ export const usePlanStore = defineStore('plan', {
               row_number_position: 'both',
               seats: [],
               uuid: uuid(),
+              guid: generateID(),
               rotation: 0,
             };
             for (const six of [...Array(seats).keys()]) {
@@ -144,6 +146,7 @@ export const usePlanStore = defineStore('plan', {
                 seat_number: (six + 1).toString(),
                 seat_guid: uuid(),
                 uuid: uuid(),
+                guid: generateID(),
                 position: { x: six * seat_spacing, y: 0 },
                 category: '',
               });
@@ -175,6 +178,7 @@ export const usePlanStore = defineStore('plan', {
                 row_number: letterCounter(rix + 1, 'A'),
                 row_number_position: 'both',
                 seats: [],
+                guid: generateID(),
                 uuid: uuid(),
                 rotation: 0,
               };
@@ -185,6 +189,7 @@ export const usePlanStore = defineStore('plan', {
                   // row_number: letterCounter(rix + 1, 'A'),
                   seat_guid: uuid(),
                   uuid: uuid(),
+                  guid: generateID(),
                   position: { x: six * seat_spacing, y: 0 },
                   category: '',
                 });
@@ -200,6 +205,7 @@ export const usePlanStore = defineStore('plan', {
                 row_number_position: 'both',
                 seats: [],
                 uuid: uuid(),
+                guid: generateID(),
                 rotation: 0,
               };
               for (const six of [...Array(seats - 1).keys()]) {
@@ -207,6 +213,7 @@ export const usePlanStore = defineStore('plan', {
                   seat_number: (six + 1).toString(),
                   seat_guid: uuid(),
                   uuid: uuid(),
+                  guid: generateID(),
                   position: { x: six * seat_spacing, y: 0 },
                   category: '',
                 });
@@ -500,6 +507,7 @@ export const usePlanStore = defineStore('plan', {
                 radius: 10,
                 seat_number: numbers[idx],
                 color: '#333333',
+                guid: generateID(),
                 uuid: uuid(),
                 special: 'top',
                 category,
@@ -518,6 +526,7 @@ export const usePlanStore = defineStore('plan', {
                 seat_number: numbers[idx],
                 color: '#333333',
                 uuid: uuid(),
+                guid: generateID(),
                 special: 'top',
                 category,
               };
@@ -609,6 +618,7 @@ export const usePlanStore = defineStore('plan', {
                 seat_number: numbers[st + idx],
                 color: '#333333',
                 uuid: uuid(),
+                guid: generateID(),
                 special: 'bottom',
                 category,
               };
@@ -626,6 +636,7 @@ export const usePlanStore = defineStore('plan', {
                 seat_number: numbers[st + idx],
                 color: '#333333',
                 uuid: uuid(),
+                guid: generateID(),
                 special: 'bottom',
                 category,
               };
@@ -719,6 +730,7 @@ export const usePlanStore = defineStore('plan', {
                 seat_number: numbers[idx + st],
                 color: '#333333',
                 uuid: uuid(),
+                guid: generateID(),
                 special: 'right',
                 category,
               };
@@ -736,6 +748,7 @@ export const usePlanStore = defineStore('plan', {
                 seat_number: numbers[idx + st],
                 color: '#333333',
                 uuid: uuid(),
+                guid: generateID(),
                 special: 'right',
                 category,
               };
@@ -832,6 +845,7 @@ export const usePlanStore = defineStore('plan', {
                 seat_number: numbers[st + idx],
                 color: '#333333',
                 uuid: uuid(),
+                guid: generateID(),
                 special: 'left',
                 category,
               };
@@ -849,6 +863,7 @@ export const usePlanStore = defineStore('plan', {
                 seat_number: numbers[st + idx],
                 color: '#333333',
                 uuid: uuid(),
+                guid: generateID(),
                 special: 'left',
                 category,
               };
@@ -996,6 +1011,7 @@ export const usePlanStore = defineStore('plan', {
               // seat_guid: `${z.zone_id}-${r.row_number}-${newnumber}`,
               seat_guid: uuid(),
               uuid: uuid(),
+              guid: generateID(),
               position: newposition,
               category: r.seats[r.seats.length - 1].category,
             });
@@ -1203,8 +1219,8 @@ export const usePlanStore = defineStore('plan', {
                 r.seats.push({
                   seat_number: newnumber[i],
                   // seat_guid: `${z.zone_id}-${r.row_number}-${newnumber[i]}`,
-                  seat_guid: uuid(),
                   uuid: uuid(),
+                  guid: generateID(),
                   position: newPositions[i],
                   category: r.seats[r.seats.length - 1].category,
                 });
@@ -1298,6 +1314,7 @@ export const usePlanStore = defineStore('plan', {
                 },
                 category: r.seats[r.seats.length - 1].category,
                 r: 10,
+                guid: generateID(),
                 uuid: uuid(),
               });
             }
@@ -1360,22 +1377,20 @@ export const usePlanStore = defineStore('plan', {
     createRow(zone, position, seats) {
       return new Promise((res, rej) => {
         try {
-          const rowids = [];
-
           zone = this._plan.zones.find((z) => z.uuid === zone);
           const row = {
             position: { x: position.x, y: position.y },
             row_number: 'A',
             row_number_position: 'both',
             seats: [],
+            guid: generateID(),
             uuid: uuid(),
             rotation: 0,
           };
           for (const [six, spos] of seats.entries()) {
-            // console.log(six, spos);
             row.seats.push({
               seat_number: (six + 1).toString(),
-              seat_guid: uuid(),
+              guid: generateID(),
               uuid: uuid(),
               position: { x: spos.x, y: spos.y },
               category: '',
