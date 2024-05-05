@@ -35,7 +35,7 @@
         </v-col>
         <v-col cols="12" sm="6"> Rotate Label with Table </v-col>
         <v-col cols="12" sm="6">
-          <input class="v-custom-input" type="checkbox" />
+          <input type="checkbox" :checked="rotate" @change="setRotate" />
         </v-col>
       </v-row>
     </v-container>
@@ -108,6 +108,10 @@ const textColor = computed(() => {
   return groupValue(props.areas, a => a.label.color);
 })
 
+const rotate = computed(() => {
+  return groupValue(props.areas, a => a.rotate_label);
+})
+
 const setTableName = (e) => {
   plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), label__name: e.target.value })
 }
@@ -130,6 +134,10 @@ const setTextSize = (e) => {
 
 const setTextColor = (e) => {
   plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), label__color: e.target.value })
+}
+
+const setRotate = (e) => {
+  plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), rotate_label: e.target.checked })
 }
 
 </script>

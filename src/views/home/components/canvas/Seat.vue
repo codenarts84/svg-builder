@@ -2,7 +2,7 @@
   <g @mousedown="mousedown" @mouseup="mouseup" class="seat_group"
     data-object-type="seat_group">
 
-    <circle class="seat_circle" :id="seatID" :fill="seatColor"
+    <circle class="seat_circle" :id="seat.guid" :fill="seatColor"
       :cx="seat.position.x" :cy="seat.position.y" :r="radius" stroke="#000"
       style="stroke-width: 1px" :data-seat-label="seat.seat_number"
       :data-row-label="row_number" :data-section-label="seat.section_label"

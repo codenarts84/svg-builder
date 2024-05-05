@@ -55,7 +55,7 @@
         </v-col> -->
         <v-col cols="12" sm="6"> Rotate Label with Element </v-col>
         <v-col cols="12" sm="6">
-          <input type="checkbox" v-model="rotate" @change="handle_rotate" />
+          <input type="checkbox" :checked="rotate" @change="handle_rotate" />
         </v-col>
 
       </v-row>
@@ -137,19 +137,20 @@ export default ({
     }, {
       text: 'Both', value: 3, left: true, right: true,
     }];
-    const rotate = ref(false);
     return {
       // selectedItem: this.rowsLabel[0]
       rowNumberings: ROW_NUMBERINGS,
       labelDirection,
       labelDisplay,
-      rotate
     }
   },
   props: {
     rows: Array
   },
   computed: {
+    rotate() {
+      return groupValue(this.rows, row => row.rotate_label);
+    },
     labelLocation() {
       if (this.rowNumberPositionStart && this.rowNumberPositionEnd) return 3;
       else if (this.rowNumberPositionStart) return 1;
@@ -229,8 +230,8 @@ export default ({
     },
   },
   methods: {
-    handle_rotate() {
-      this.planstore.setRotateLabel(this.rows.map(i => i.uuid), this.rotate);
+    handle_rotate(e) {
+      this.planstore.setRotateLabel(this.rows.map(i => i.uuid), e.target.checked);
     },
     handleSkipLetter(e) {
       // this.rowNumberings = this.rowNumbering.filter(item => !e.target.value.split(',').includes(item))

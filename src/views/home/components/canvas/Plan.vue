@@ -13,7 +13,9 @@ import {
   textBBox,
   roundTableBBox,
   rectangleTableBBox,
+  rotateRectangluarBox,
 } from "@/lib/geometry";
+import { generateID } from "@/lib/numbers";
 import { v4 as uuid } from "uuid";
 import * as d3 from "d3";
 import ZoneComponent from "./ZoneComponent.vue";
@@ -465,43 +467,37 @@ export default {
             } else if (a.shape === 'roundTable') {
               for (const s of a.seats) {
                 if (this.selection.includes(s.uuid)) {
-                  res.push({
-                    visible: true,
-                    x:
-                      z.position.x +
-                      a.position.x +
-                      s.position.x -
-                      (s.radius || 10),
-                    y:
-                      z.position.y +
-                      a.position.y +
-                      s.position.y -
-                      (s.radius || 10),
+                  let abox = {
+                    x: a.position.x + s.position.x - (s.radius || 10),
+                    y: a.position.y + s.position.y - (s.radius || 10),
                     width: 2 * (s.radius || 10),
-                    height: 2 * (s.radius || 10),
-                  });
+                    height: 2 * (s.radius || 10)
+                  }
+                  if (a.rotation) {
+                    abox = rotateRectangluarBox(a, abox);
+                  }
+                  abox.x += z.position.x;
+                  abox.y += z.position.y;
+                  abox.visible = true;
+                  res.push(abox);
                 }
               }
             } else if (a.shape === 'rectangleTable') {
               for (const s of a.seats) {
                 if (this.selection.includes(s.uuid)) {
-                  res.push({
-                    visible: true,
-                    x:
-                      z.position.x +
-                      a.position.x +
-                      s.position.x -
-                      (s.radius || 10) -
-                      a.rectangleTable.width / 2,
-                    y:
-                      z.position.y +
-                      a.position.y +
-                      s.position.y -
-                      (s.radius || 10) -
-                      a.rectangleTable.height / 2,
+                  let abox = {
+                    x: a.position.x + s.position.x - (s.radius || 10) - a.rectangleTable.width / 2,
+                    y: a.position.y + s.position.y - (s.radius || 10) - a.rectangleTable.height / 2,
                     width: 2 * (s.radius || 10),
-                    height: 2 * (s.radius || 10),
-                  });
+                    height: 2 * (s.radius || 10)
+                  }
+                  if (a.rotation) {
+                    abox = rotateRectangluarBox(a, abox);
+                  }
+                  abox.x += z.position.x;
+                  abox.y += z.position.y;
+                  abox.visible = true;
+                  res.push(abox);
                 }
               }
             }
@@ -857,6 +853,7 @@ export default {
                     y: 35 * Math.sin(degree),
                   },
                   r: 10,
+                  guid: generateID(),
                   uuid: uuid()
                 }
               })
@@ -898,6 +895,7 @@ export default {
               seat_number: (idx + 1).toString(),
               color: "#333333",
               uuid: uuid(),
+              guid: generateID(),
               radius: 10,
               special: 'top'
             }
@@ -914,6 +912,7 @@ export default {
               seat_number: (idx + 5).toString(),
               color: "#333333",
               uuid: uuid(),
+              guid: generateID(),
               special: 'bottom'
             }
           })
@@ -1259,28 +1258,53 @@ export default {
               }
 
               for (const a of z.areas) {
-                if (a.shape === 'roundTable' || a.shape === 'rectangleTable') {
+                if (a.shape === 'roundTable') {
                   for (const s of a.seats) {
+                    let abox = {
+                      x: a.position.x + s.position.x - (s.radius || 10),
+                      y: a.position.y + s.position.y - (s.radius || 10),
+                      width: 2 * (s.radius || 10),
+                      height: 2 * (s.radius || 10)
+                    }
+                    if (a.rotation) {
+                      abox = rotateRectangluarBox(a, abox);
+                    }
+                    abox.x += z.position.x;
+                    abox.y += z.position.y;
                     if (
-                      z.position.x +
-                      a.position.x +
-                      s.position.x +
-                      (s.radius || 10) >=
+                      (abox.x + abox.width) >=
                       xmin &&
-                      z.position.x +
-                      a.position.x +
-                      s.position.x -
-                      (s.radius || 10) <=
+                      abox.x <=
                       xmax &&
-                      z.position.y +
-                      a.position.y +
-                      s.position.y +
-                      (s.radius || 10) >=
+                      (abox.y + abox.height) >=
                       ymin &&
-                      z.position.y +
-                      a.position.y +
-                      s.position.y -
-                      (s.radius || 10) <=
+                      abox.y <=
+                      ymax
+                    ) {
+                      uuids.push(s.uuid);
+                    }
+                  }
+                } else if (a.shape === 'rectangleTable') {
+                  for (const s of a.seats) {
+                    let abox = {
+                      x: a.position.x + s.position.x - (s.radius || 10) - a.rectangleTable.width / 2,
+                      y: a.position.y + s.position.y - (s.radius || 10) - a.rectangleTable.height / 2,
+                      width: 2 * (s.radius || 10),
+                      height: 2 * (s.radius || 10)
+                    }
+                    if (a.rotation) {
+                      abox = rotateRectangluarBox(a, abox);
+                    }
+                    abox.x += z.position.x;
+                    abox.y += z.position.y;
+                    if (
+                      (abox.x + abox.width) >=
+                      xmin &&
+                      abox.x <=
+                      xmax &&
+                      (abox.y + abox.height) >=
+                      ymin &&
+                      abox.y <=
                       ymax
                     ) {
                       uuids.push(s.uuid);
@@ -1511,29 +1535,54 @@ export default {
                   }
                 }
               }
-              for (const r of z.areas) {
-                if (r.shape === 'roundTable' || r.shape === 'rectangleTable') {
-                  for (const s of r.seats) {
+              for (const a of z.areas) {
+                if (a.shape === 'roundTable') {
+                  for (const s of a.seats) {
+                    let abox = {
+                      x: a.position.x + s.position.x - (s.radius || 10),
+                      y: a.position.y + s.position.y - (s.radius || 10),
+                      width: 2 * (s.radius || 10),
+                      height: 2 * (s.radius || 10)
+                    }
+                    if (a.rotation) {
+                      abox = rotateRectangluarBox(a, abox);
+                    }
+                    abox.x += z.position.x;
+                    abox.y += z.position.y;
                     if (
-                      z.position.x +
-                      r.position.x +
-                      s.position.x +
-                      (s.radius || 10) >=
+                      (abox.x + abox.width) >=
                       xmin &&
-                      z.position.x +
-                      r.position.x +
-                      s.position.x -
-                      (s.radius || 10) <=
+                      abox.x <=
                       xmax &&
-                      z.position.y +
-                      r.position.y +
-                      s.position.y +
-                      (s.radius || 10) >=
+                      (abox.y + abox.height) >=
                       ymin &&
-                      z.position.y +
-                      r.position.y +
-                      s.position.y -
-                      (s.radius || 10) <=
+                      abox.y <=
+                      ymax
+                    ) {
+                      uuids.push(s.uuid);
+                    }
+                  }
+                } else if (a.shape === 'rectangleTable') {
+                  for (const s of a.seats) {
+                    let abox = {
+                      x: a.position.x + s.position.x - (s.radius || 10) - a.rectangleTable.width / 2,
+                      y: a.position.y + s.position.y - (s.radius || 10) - a.rectangleTable.height / 2,
+                      width: 2 * (s.radius || 10),
+                      height: 2 * (s.radius || 10)
+                    }
+                    if (a.rotation) {
+                      abox = rotateRectangluarBox(a, abox);
+                    }
+                    abox.x += z.position.x;
+                    abox.y += z.position.y;
+                    if (
+                      (abox.x + abox.width) >=
+                      xmin &&
+                      abox.x <=
+                      xmax &&
+                      (abox.y + abox.height) >=
+                      ymin &&
+                      abox.y <=
                       ymax
                     ) {
                       uuids.push(s.uuid);
