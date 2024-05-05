@@ -164,7 +164,7 @@ export default {
       if (this.selection.length === 1) {
         for (const z of this.plan.zones) {
           for (const a of z.areas) {
-            if (this.selection.includes(a.uuid)) return false;
+            if ((a.shape === 'roundTable' || a.shape === 'rectangleTable') && this.selection.includes(a.uuid)) return false;
           }
         }
       }

@@ -15,10 +15,8 @@ import TagsPanel from './Context/TagsPanel.vue';
 
 const planStore = usePlanStore();
 const mainStore = useMainStore();
-const category = computed(() => planStore.categories);
 
 const props = defineProps({
-  rows: Array,
   seats: Array,
 })
 
@@ -65,7 +63,8 @@ const selectedTag = () => {
 }
 
 const setCategory = (name) => {
-  planStore.modifySeats({ seatIds: props.seats.map(s => s.uuid), category: name })
+  console.log(props.seats)
+  planStore.setTableSeatCategory(props.seats, name);
 }
 
 const setTag = (id) => {

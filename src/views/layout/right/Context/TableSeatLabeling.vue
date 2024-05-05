@@ -30,6 +30,11 @@
             </option>
           </select>
         </v-col>
+        <!-- <v-col cols="12" sm="6"> Skip Function </v-col>
+        <v-col cols="12" sm="6">
+          <input class="v-custom-input" name="skip" :value="skip"
+            @input="setSkip" />
+        </v-col> -->
       </v-row>
     </v-container>
   </div>
@@ -138,6 +143,9 @@ const setSeatNumberingReversed = e => {
   if (seatNumbering.value) {
     plan.renumberTableSeats(props.areas.map(r => r.uuid), seatNumbering.value.scheme, seatNumbering.value.startAt, value)
   }
+}
+
+const setSkip = e => {
 }
 
 </script>

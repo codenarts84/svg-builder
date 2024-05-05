@@ -51,7 +51,8 @@
         </v-col>
         <!-- <v-col cols="12" sm="6"> Skip Letters </v-col>
         <v-col cols="12" sm="6">
-          <input type="text" class="v-custom-input" @input="handleSkipLetter" />
+          <input type="text" class="v-custom-input" :value="skip"
+            @input="setSkip" />
         </v-col> -->
         <v-col cols="12" sm="6"> Rotate Label with Element </v-col>
         <v-col cols="12" sm="6">
@@ -213,7 +214,6 @@ export default ({
             if (row.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx]).length === row.seats.length) {
               return { scheme: numbering, reversed: false, startAt: guessedStartAt }
             }
-
             let seatsReversed = reverse(row.seats)
             let guessedStartAtRev = numbering.findStartAt(seatsReversed[0].seat_number)
             let guessedNumbersRev = numbering.compute(seatsReversed, guessedStartAtRev)
@@ -233,8 +233,8 @@ export default ({
     handle_rotate(e) {
       this.planstore.setRotateLabel(this.rows.map(i => i.uuid), e.target.checked);
     },
-    handleSkipLetter(e) {
-      // this.rowNumberings = this.rowNumbering.filter(item => !e.target.value.split(',').includes(item))
+    setSkip(e) {
+      // this.rowNumberings = this.rowNumberings.filter(item => !e.target.value.split(',').includes(item))
     },
     handleChange(newValue) {
       // console.log(newValue)

@@ -41,8 +41,9 @@
       </g>
     </g>
 
-    <circle v-else-if="seat.tag_name" :fill="seatColor" :cx="seat.position.x"
-      :cy="seat.position.y + 7" :r="3" :stroke="'#000'" style="stroke-width: 1px">
+    <circle v-else-if="seat.tag_name && seat.tag_name !== 'Standing Room Only'"
+      :fill="seatColor" :cx="seat.position.x" :cy="seat.position.y + 7" :r="3"
+      :stroke="'#000'" style="stroke-width: 1px">
     </circle>
 
 

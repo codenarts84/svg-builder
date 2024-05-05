@@ -43,11 +43,11 @@ const tags = ref([
   "Wheelchair Companion",
   "Partial View",
   "Folding Chair",
+  "Standing Room Only"
 ]);
 const selected = ref(props.selectedTag)
 
 const selected_change = () => {
-
   planstore.setTag(props.rows.map(i => i.uuid), selected.value);
 }
 // const setTagName = (e) => {
