@@ -327,6 +327,14 @@ export const usePlanStore = defineStore('plan', {
       this.persistPlan();
     },
 
+    setTableSeatCategory(seats, val) {
+      for (const s of seats) {
+        console.log(s);
+        s.category = val;
+      }
+      this.persistPlan();
+    },
+
     setGACategory(areas, val) {
       areas.forEach((a) => {
         a.category = val;
@@ -1511,6 +1519,28 @@ export const usePlanStore = defineStore('plan', {
             r.seats.forEach((s) => {
               s.tag_name = value;
             });
+          } else {
+            r.seats.forEach((s) => {
+              if (rowIds.includes(s.uuid)) {
+                s.tag_name = value;
+              }
+            });
+          }
+        });
+
+        z.areas.forEach((r) => {
+          if (r.shape === 'roundTable' || r.shape === 'rectangleTable') {
+            if (rowIds.includes(r.uuid) && r.seats.length > 0) {
+              r.seats.forEach((s) => {
+                s.tag_name = value;
+              });
+            } else {
+              r.seats.forEach((s) => {
+                if (rowIds.includes(s.uuid)) {
+                  s.tag_name = value;
+                }
+              });
+            }
           }
         });
       });

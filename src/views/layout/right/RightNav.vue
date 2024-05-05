@@ -11,7 +11,11 @@
     <GATools v-if="selectedGA().length" :areas="selectedGA()"
       :temp_Rotate="temp_Rotate" />
 
-    <TableTools v-if="selectedTable().length" :areas="selectedTable()" />
+    <TableTools v-if="selectedTable().length" :areas="selectedTable()"
+      :seats="selectedTableSeat()" />
+
+    <TableSeatTools v-if="selectedTableSeat().length && !selectedTable().length"
+      :seats="selectedTableSeat()" />
 
     <AreaTools v-if="selectedAreas().length" :areas="selectedAreas()"
       :temp_Rotate="temp_Rotate" />
@@ -26,6 +30,7 @@ import SeatTools from './SeatTools.vue';
 import GATools from "./GATools.vue";
 import TableTools from './TableTools';
 import AreaTools from './AreaTools';
+import TableSeatTools from './TableSeatTools.vue';
 import TestSelection from './TestSelection.vue';
 
 import { useMainStore } from '@/stores';
@@ -68,6 +73,23 @@ const selectedSeats = () => {
     }
   }
   return res
+}
+
+const selectedTableSeat = () => {
+  const r = [];
+  if (selection.value.length) {
+    for (const z of plan.value.zones) {
+      for (const a of z.areas) {
+        if (a.shape === 'roundTable' || a.shape === 'rectangleTable') {
+          for (const s of a.seats) {
+            if (selection.value.includes(a.uuid) || selection.value.includes(s.uuid))
+              r.push(s)
+          }
+        }
+      }
+    }
+  }
+  return r;
 }
 
 const selectedTable = () => {

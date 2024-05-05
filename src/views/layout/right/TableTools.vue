@@ -5,6 +5,8 @@
     <v-divider></v-divider>
     <SectionLabel :setTag="setTag" :select="tag" />
     <v-divider></v-divider>
+    <TagsPanel :rows="seats" :selectedTag="selectedTag()" />
+    <v-divider></v-divider>
     <TablePanel v-if="show" :areas="areas" />
     <v-divider></v-divider>
     <TableLabeling v-if="show" :areas="areas" />
@@ -22,11 +24,13 @@ import SectionLabel from './Context/SectionLabel.vue';
 import { useMainStore } from '@/stores';
 import TableLabeling from './Context/TableLabeling.vue';
 import TableSeatLabeling from './Context/TableSeatLabeling.vue';
+import TagsPanel from './Context/TagsPanel.vue';
 
 const planStore = usePlanStore();
 const mainStore = useMainStore();
 const props = defineProps({
-  areas: Array
+  areas: Array,
+  seats: Array
 })
 
 const groupValue = (rows, mapper) => {
@@ -93,5 +97,10 @@ const tag = computed(() => {
 const selectedCategory = computed(() => {
   return groupValue(props.areas, area => area.seats.map(s => s.category)[0]);
 })
+
+const selectedTag = () => {
+  const tg = groupValue(props.seats, s => s.tag_name);
+  return tg;
+}
 
 </script>
