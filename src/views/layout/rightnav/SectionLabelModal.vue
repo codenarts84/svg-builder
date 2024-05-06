@@ -1,10 +1,7 @@
 <template>
   <div style="display: flex; justify-content: space-between; align-items: center">
-    <h4>Section Labeling</h4>
-    <v-btn class="btn" @click="dialog = true" size="small" variant="standard"
-      style="padding: 0px"><v-icon color="black" icon="mdi-plus"
-        size="large"></v-icon>
-    </v-btn>
+    <button type="button" class="add-button" id="addRow" @click="dialog = true">+
+      Create new</button>
   </div>
 
   <div class="text-center">
@@ -51,3 +48,13 @@ const onAdd = () => {
   }
 };
 </script>
+
+<style>
+.add-button {
+  background-color: transparent;
+  color: #3d9ffb;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+}
+</style>

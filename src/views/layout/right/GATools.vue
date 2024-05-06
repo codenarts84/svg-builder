@@ -1,13 +1,13 @@
 <template>
   <div>
+    <GAPanel v-if="show()" :areas="areas" />
+    <v-divider></v-divider>
+    <AreaPanel v-if="show()" :areas="areas" :temp_Rotate="temp_Rotate" />
+    <v-divider></v-divider>
     <CategoryComponent :setCategory="setCategory"
       :selectedCategory="selectedCategory()" />
     <v-divider></v-divider>
-    <SectionLabel :setTag="setTag" :select="tag" />
-    <v-divider></v-divider>
-    <GAPanel :areas="areas" />
-    <v-divider></v-divider>
-    <AreaPanel :areas="areas" :temp_Rotate="temp_Rotate" />
+    <SectionLabel :section="section()" :setSection="setSection" />
   </div>
 </template>
 
@@ -59,6 +59,26 @@ const shallowEqual = (object1, object2) => {
   return true
 }
 
+const show = () => {
+  if (props.areas) {
+    const shape = props.areas[0].shape;
+    const filtered = props.areas.filter(a => a.shape === shape);
+    return filtered.length === props.areas.length;
+  }
+}
+
+const section = () => {
+  const label = groupValue(props.areas, area => area.section)
+  return label;
+  // const abv = groupValue(props.areas, area => area.abbreviation)
+}
+
+const setSection = (label) => {
+  const tag = tags.value.find(i => i.label === label);
+  if (tag) {
+    planStore.addGASectionLabel(props.areas.map(i => i.uuid), tag.label, tag.abv);
+  }
+}
 
 const setCategory = (name) => {
   planStore.setGACategory(props.areas, name);
@@ -73,6 +93,7 @@ const tags = computed(() => mainStore.section_label);
 const setTag = (id) => {
   const tag = tags.value.find(i => i.id === id);
   if (tag) {
+    console.log(tag)
     planStore.addGASectionLabel(props.areas.map(i => i.uuid), tag.label, tag.abv);
   }
 }

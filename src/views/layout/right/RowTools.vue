@@ -1,18 +1,19 @@
 <template>
   <div>
-    <CategoryComponent :setCategory="setCategory"
-      :selectedCategory="selectedCategory" />
     <RowSetting :rows="rows" />
     <v-divider></v-divider>
     <RotatePanel :rows="rows" :temp_Rotate="temp_Rotate" />
     <v-divider></v-divider>
-    <SectionLabel :setTag="setTag" :select="tag()" />
-    <v-divider></v-divider>
-    <TagsPanel :rows="rows" :selectedTag="selectedTag()" />
-    <v-divider></v-divider>
     <RowLabeling :rows="rows" />
     <v-divider></v-divider>
     <SeatLabeling :rows="rows" />
+    <v-divider></v-divider>
+    <CategoryComponent :setCategory="setCategory"
+      :selectedCategory="selectedCategory" />
+    <v-divider></v-divider>
+    <SectionLabel :section="section()" :setSection="setSection" />
+    <v-divider></v-divider>
+    <TagsPanel v-if="show" :rows="rows" :selectedTag="selectedTag" />
   </div>
 </template>
 
@@ -68,6 +69,11 @@ const shallowEqual = (object1, object2) => {
   return true
 }
 
+const show = computed(() => {
+  console.log(props.rows.length === 1)
+  return props.rows.length === 1;
+})
+
 const tags = computed(() => mainStore.section_label);
 
 const tag = () => {
@@ -76,14 +82,27 @@ const tag = () => {
   return { label: section, abv }
 }
 
+const section = () => {
+  const section = groupValue(props.seats, seat => seat.section_label)
+  const abv = groupValue(props.seats, seat => seat.section_abv)
+  return section
+}
+
+const setSection = (label) => {
+  const tag = tags.value.find(i => i.label === label);
+  if (tag)
+    planStore.addSectionLabel(props.rows.map(i => i.uuid), tag.label, tag.abv)
+}
+
 const selectedCategory = computed(() => {
   return groupValue(props.seats, seat => seat.category);
 })
 
-const selectedTag = () => {
+const selectedTag = computed(() => {
   const tg = groupValue(props.seats, seat => seat.tag_name);
+  console.log(tg)
   return tg;
-}
+})
 
 const setCategory = (name) => {
   planStore.modifySeats({ seatIds: props.seats.map(s => s.uuid), category: name })

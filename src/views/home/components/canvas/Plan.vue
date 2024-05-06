@@ -93,6 +93,8 @@ export default {
     const nseat = computed(() => seatStore.nseat);
 
     const bSnap2Grid = computed(() => store.snap);
+    const sections = computed(() => store.section_label)
+    const categories = computed(() => planstore.categories)
 
     onMounted(() => {
       console.log("SVG Element:", svg.value.getBoundingClientRect());
@@ -101,6 +103,8 @@ export default {
     const getSvgRect = () => svg.value.getBoundingClientRect();
 
     return {
+      sections,
+      categories,
       bSnap2Grid,
       plan,
       validationErrors,
@@ -160,6 +164,10 @@ export default {
     };
   },
   computed: {
+    metadata() {
+      const author = 'Lazar'
+      return `<author>${author}</author>`;
+    },
     noTableSelection() {
       if (this.selection.length === 1) {
         for (const z of this.plan.zones) {
@@ -2553,19 +2561,35 @@ export default {
 </script>
 <template>
   <svg :width="plan.size.width" :height="plan.size.height" v-if="plan.size"
-    ref="svg" @mousemove="mousemove" @mouseup="mouseup" @mousedown="mousedown"
-    style="
+    ref="svg" style="
       width: 100%;
       height: 100%;
       background-color: rgb(151, 162, 182);
       user-select: none;
     ">
-    <g :class="mainclasses" :transform="zoomTransform.toString()">
+    <g :class="mainclasses" :transform="zoomTransform.toString()"
+      @mousemove="mousemove" @mouseup="mouseup" @mousedown="mousedown">
       <rect :width="plan.size.width" :height="plan.size.height" fill="#fcfcfc"
         :cursor="cursor"></rect>
       <image v-if="background" :width="backgroundWidth" :height="backgroundHeight"
         :href="background" :opacity="backgroundOpacity / 100" :x="backgroundX"
         :y="backgroundY"></image>
+      <metadata>
+        <booktix-data>
+          <categories>
+            <category v-for="(category, idx) in categories" :key="idx">
+              <name>{{ category.name }}</name>
+              <color>{{ category.color }}</color>
+            </category>
+          </categories>
+          <sections>
+            <section v-for="(section, idx) in sections" :key="idx">
+              <name>{{ section.label }}</name>
+              <abv>{{ section.abv }}</abv>
+            </section>
+          </sections>
+        </booktix-data>
+      </metadata>
       <defs>
         <pattern id="smallGrid" width="20" height="20"
           patternUnits="userSpaceOnUse">
@@ -2584,7 +2608,8 @@ export default {
       <ZoneComponent v-for="z in plan.zones" :zone="z" :key="z.uuid"
         :startDragging="startDragging"
         :startDraggingPolygonPoint="startDraggingPolygonPoint" :ox="temp_ox"
-        :oy="temp_oy" :selectionBoundary="selectionBoundary"></ZoneComponent>
+        :oy="temp_oy" :selectionBoundary="selectionBoundary">
+      </ZoneComponent>
 
       <!-- <g v-for="b in selectionBoxesVisible" :key="b">
         <rect class="selection-box" v-if="b.bStatus" :x="b.x - 1.5" :y="b.y - 1.5"
