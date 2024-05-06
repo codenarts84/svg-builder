@@ -107,10 +107,11 @@
       <text class="table_label" :x="area.label.position.x"
         :y="area.label.position.y" :font-size="area.label.size || 16"
         text-anchor="middle" font-family="sans-serif" dy=".3em"
-        :fill="area.label.color || '#888888'">
+        :fill="area.label.color || '#888888'"
+        :transform="area.rotate_label ? `rotate(${-area.rotation})` : ''">
         {{ area.label.abv }}
       </text>
-      <g class="table_seat" v-for="item in area.seats" :key="item"
+      <g class="table_seat" v-for="(item, idx) in area.seats" :key="item"
         @mousedown="event => seat_mousedown(event, item.uuid)"
         @mouseup="event => seat_mouseup(event, item.uuid)">
         <circle class="table_seat_circle" :id="item.guid" :cx="item.position.x"
@@ -153,7 +154,8 @@
 
         <text fill="table_seat_label" :x="item.position.x" :y="item.position.y"
           text-anchor="middle" font-size="10px" font-family="sans-serif"
-          :key="item" dy=".3em">{{
+          :key="item" dy=".3em"
+          :transform="area.rotate_label ? roundTableTransform(area, item, idx) : ''">{{
             item.seat_number }}</text>
       </g>
     </g>
@@ -169,7 +171,7 @@
         :fill="area.label.color || '#888888'">
         {{ area.label.abv }}
       </text>
-      <g class="table-seat" v-for="(item) in area.seats" :key="item"
+      <g class="table-seat" v-for="(item, idx) in area.seats" :key="item"
         @mousedown="event => seat_mousedown(event, item.uuid)"
         @mouseup="event => seat_mouseup(event, item.uuid)">
         <circle :id="item.guid" :cx="item.position.x" :cy="item.position.y"
@@ -212,7 +214,9 @@
 
         <text fill="black" :x="item.position.x" :y="item.position.y"
           text-anchor="middle" font-size="10px" font-family="sans-serif"
-          dy=".3em">{{ item.seat_number }}</text>
+          dy=".3em">{{
+            item.seat_number
+          }}</text>
       </g>
     </g>
 
@@ -298,6 +302,24 @@ export default {
     },
   },
   methods: {
+    roundTableTransform(area, item, idx) {
+      const theta = area.rotation * Math.PI / 180;
+      const len = area.seats.length + area?.space;
+      const dx = (area.radius + (10 || item.radius)) * Math.cos(theta + 2 * Math.PI / len * idx) - item.position.x
+      const dy = (area.radius + (10 || item.radius)) * Math.sin(theta + 2 * Math.PI / len * idx) - item.position.y
+      return `rotate(${-area.rotation}) translate(${dx}, ${dy})`
+    },
+
+    rectTableTransform(area, item, idx) {
+      // return `rotate(${-area.rotation})`
+      const theta = area.rotation * Math.PI / 180;
+      const dx = (area.rectangleTable.width + item.position.x) * Math.cos(theta);
+      const dy = (area.rectangleTable.height + item.position.y) * Math.sin(theta);
+      // const dx = item.position.x * Math.cos(theta) + area.rectangleTable.width / 2;
+      // const dy = item.position.y * Math.sin(theta) + area.rectangleTable.height / 2;
+      return `rotate(${-area.rotation}) translate(${dx}, ${dy})`
+    },
+
     seatColor(category) {
       if (category) {
         return this.getCategoryByName(category).color
