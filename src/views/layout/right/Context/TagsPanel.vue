@@ -12,13 +12,15 @@
       </v-chip-group> -->
       <v-row>
         <v-col cols="12">
-          <select class="toolbox-input v-custom-input" v-model="selected"
+          <!-- <select class="toolbox-input v-custom-input" v-model="selected"
             @change="selected_change">
             <option v-for="tag in tags" :key="tag" option-label="label"
               name="tag_name" :value="tag">
               {{ tag }}
             </option>
-          </select>
+          </select> -->
+          <v-select v-model="tag" :items="tags" label="Tags" chips multiple>
+          </v-select>
         </v-col>
       </v-row>
     </v-container>
@@ -30,14 +32,15 @@
 </template>
 
 <script setup>
-import { ref, defineProps } from "vue";
+import { ref, defineProps, watch, computed } from "vue";
 import { usePlanStore } from '@/stores/plan';
 const planstore = usePlanStore();
 
 const props = defineProps({
   rows: Array,
-  selectedTag: String
+  selectedTag: Array
 })
+
 const tags = ref([
   "Wheelchair",
   "Wheelchair Companion",
@@ -45,11 +48,20 @@ const tags = ref([
   "Folding Chair",
   "Standing Room Only"
 ]);
-const selected = ref(props.selectedTag)
 
-const selected_change = () => {
-  planstore.setTag(props.rows.map(i => i.uuid), selected.value);
-}
+const tag = ref(props.selectedTag)
+
+watch(tag, () => {
+  planstore.setTag(props.rows.map(i => i.uuid), tag.value);
+})
+
+let isDeselecting = false; // Flag to prevent recursive updates
+
+// const selected = ref(props.selectedTag)
+
+// const selected_change = () => {
+//   planstore.setTag(props.rows.map(i => i.uuid), selected.value);
+// }
 // const setTagName = (e) => {
 //   console.log(selected.value)
 //   planstore.setTag(props.rows.map(i => i.uuid), e.target.value);

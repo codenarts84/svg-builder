@@ -28,8 +28,8 @@ import { computed, ref, defineProps } from 'vue'
 import RowTools from './RowTools.vue';
 import SeatTools from './SeatTools.vue';
 import GATools from "./GATools.vue";
-import TableTools from './TableTools';
-import AreaTools from './AreaTools';
+import TableTools from './TableTools.vue';
+import AreaTools from './AreaTools.vue';
 import TableSeatTools from './TableSeatTools.vue';
 import TestSelection from './TestSelection.vue';
 

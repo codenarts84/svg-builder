@@ -1,17 +1,17 @@
 <template>
   <div>
-    <CategoryComponent :setCategory="setCategory"
-      :selectedCategory="selectedCategory" />
-    <v-divider></v-divider>
-    <SectionLabel :setTag="setTag" :select="tag" />
-    <v-divider></v-divider>
-    <TagsPanel :rows="seats" :selectedTag="selectedTag()" />
-    <v-divider></v-divider>
     <TablePanel v-if="show" :areas="areas" />
     <v-divider></v-divider>
     <TableLabeling v-if="show" :areas="areas" />
     <v-divider></v-divider>
     <TableSeatLabeling v-if="show" :areas="areas" />
+    <v-divider></v-divider>
+    <CategoryComponent :setCategory="setCategory"
+      :selectedCategory="selectedCategory" />
+    <v-divider></v-divider>
+    <SectionLabel :section="section()" :setSection="setSection" />
+    <v-divider></v-divider>
+    <TagsPanel v-if="showTag" :rows="seats" :selectedTag="selectedTag" />
   </div>
 </template>
 
@@ -73,6 +73,13 @@ const show = computed(() => {
   return false;
 })
 
+const showTag = computed(() => {
+  if (props.areas) {
+    return props.areas.length === 1;
+  }
+  return false;
+})
+
 const setCategory = (name) => {
   planStore.setTableCategory(props.areas, name);
 }
@@ -94,13 +101,26 @@ const tag = computed(() => {
   return { label, abv };
 })
 
+const section = () => {
+  const labels = groupValue(props.areas, a => a.seats.map(s => s.section_label));
+  const label = labels ? labels[0] : '';
+  return label;
+}
+
+const setSection = (label) => {
+  const tag = tags.value.find(i => i.label === label);
+  if (tag) {
+    planStore.addTableSectionLabel(props.areas.map(i => i.uuid), tag.label, tag.abv);
+  }
+}
+
 const selectedCategory = computed(() => {
   return groupValue(props.areas, area => area.seats.map(s => s.category)[0]);
 })
 
-const selectedTag = () => {
+const selectedTag = computed(() => {
   const tg = groupValue(props.seats, s => s.tag_name);
   return tg;
-}
+})
 
 </script>

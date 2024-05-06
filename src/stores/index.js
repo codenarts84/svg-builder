@@ -166,7 +166,7 @@ export const useMainStore = defineStore({
     removeSectionLabel(id) {
       console.log(id, 'okay');
       this.section_label = this.section_label.filter((i) => i.id !== id);
-      window.localStorage.setItem('sectin_label', this.section_label);
+      window.localStorage.setItem('section_label', this.section_label);
     },
 
     disableGrid() {

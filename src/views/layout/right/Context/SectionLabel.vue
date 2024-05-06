@@ -1,87 +1,37 @@
 <template>
   <div style="padding: 15px 10px; text-align: left">
-    <SectionLabelModal :addTags="addTags" />
+    <SectionManage />
+    <!-- <SectionLabelModal :addTags="addTags" /> -->
     <v-container>
-      <template v-for="tag in tags" :key="tag.id">
-        <v-row>
-          <v-col class="section-container" cols="12">
-            <v-btn class="section-btn"
-              :active="tag.label === select?.label && tag.abv === select?.abv"
-              @click="() => handle_tag(tag.id)">{{
-                tag.label
-              }}({{ tag.abv }})</v-btn>
-            <v-btn @click="() => removeTag(tag.id)" density="comfortable"
-              icon="$delete" variant="plain"></v-btn>
-          </v-col>
-        </v-row>
-      </template>
+      <v-row>
+        <v-col cols="12">
+          <select class="v-custom-input" :value="section"
+            @change="selected_change">
+            <option v-for="tag in tags" :key="tag.id" option-label="label"
+              name="tag_name" :value="tag.label">
+              {{ tag.label }}({{ tag.abv }})
+            </option>
+          </select>
+        </v-col>
+      </v-row>
     </v-container>
   </div>
 </template>
 
-<script>
-import { ref, computed } from "vue";
-import { useMainStore } from "@/stores";
-import { usePlanStore } from "@/stores/plan";
-// import SectionLabelModal from "./SectionLabelModal.vue";
-import SectionLabelModal from './SectionLabelModel.vue'
-export default {
-  components: {
-    SectionLabelModal
-  },
-  setup() {
-    const mainStore = useMainStore();
-    const planStore = usePlanStore();
-    const tags = computed(() => mainStore.section_label);
-    // const setSectionLabel = computed(() => mainStore.setSectionLabel);
-    return {
-      mainStore,
-      planStore,
-      tags,
-      // setSectionLabel
-    }
-  },
-  props: {
-    setTag: Function,
-    select: Object
-  },
-  computed: {
+<script setup>
+import { defineProps, ref, computed } from "vue"
+import { useMainStore } from '@/stores';
+import SectionManage from "@/views/home/components/SectionManage.vue";
+const mainStore = useMainStore();
 
-  },
+const props = defineProps({
+  section: String,
+  setSection: Function
+})
 
-  methods: {
-    removeTag(id) {
-      this.mainStore.removeSectionLabel(id);
-    },
-    handle_tag(id) {
-      this.setTag(id);
-    },
-    addTags(v) {
-      this.tags.push(v);
-      this.mainStore.setSectionLabel(this.tags)
-    },
-  }
+const tags = computed(() => mainStore.section_label);
+const selected_change = (e) => {
+  console.log(e.target.value)
+  props.setSection(e.target.value);
 }
 </script>
-
-<style>
-.v-input__details {
-  display: none;
-}
-
-.btn-label {
-  width: 100%;
-}
-
-.v-col-sm-6 {
-  padding: 5px;
-}
-
-.section-container {
-  padding: 6px;
-}
-
-.section-btn {
-  width: 80%;
-}
-</style>

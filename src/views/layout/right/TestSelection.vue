@@ -1,13 +1,24 @@
 <template>
-  <v-btn @click="onClick">Generate</v-btn>
+  <v-select v-model="tag" :items="tags" label="Tags" chips multiple
+    @input="onChange">
+  </v-select>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { v4 as uuid } from 'uuid';
 
-const onClick = () => {
-  console.log(Date.now().toString(10))
-}
+const tags = ref([
+  "Wheelchair",
+  "Wheelchair Companion",
+  "Partial View",
+  "Folding Chair",
+  "Standing Room Only"
+]);
 
+const tag = ref([])
+
+watch(tag, async (newValue, oldValue) => {
+  console.log('I found it', newValue)
+})
 </script>
