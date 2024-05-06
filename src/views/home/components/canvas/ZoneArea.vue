@@ -171,7 +171,7 @@
         :fill="area.label.color || '#888888'">
         {{ area.label.abv }}
       </text>
-      <g class="table-seat" v-for="(item, idx) in area.seats" :key="item"
+      <g class="table-seat" v-for="item in area.seats" :key="item"
         @mousedown="event => seat_mousedown(event, item.uuid)"
         @mouseup="event => seat_mouseup(event, item.uuid)">
         <circle :id="item.guid" :cx="item.position.x" :cy="item.position.y"
@@ -310,15 +310,6 @@ export default {
       return `rotate(${-area.rotation}) translate(${dx}, ${dy})`
     },
 
-    rectTableTransform(area, item, idx) {
-      // return `rotate(${-area.rotation})`
-      const theta = area.rotation * Math.PI / 180;
-      const dx = (area.rectangleTable.width + item.position.x) * Math.cos(theta);
-      const dy = (area.rectangleTable.height + item.position.y) * Math.sin(theta);
-      // const dx = item.position.x * Math.cos(theta) + area.rectangleTable.width / 2;
-      // const dy = item.position.y * Math.sin(theta) + area.rectangleTable.height / 2;
-      return `rotate(${-area.rotation}) translate(${dx}, ${dy})`
-    },
 
     seatColor(category) {
       if (category) {
