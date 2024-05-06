@@ -830,6 +830,7 @@ export default {
             this.zoomTransform,
             zone
           );
+          // if (targetPos.x < 35 || targetPos.y < 35 || targetPos.x > this.plan.size.width - 35 || targetPos.y > this.plan.size.height - 35) return;
           if (event.shiftKey || this.bSnap2Grid) {
             targetPos = findClosestGridPoint({
               x: targetPos.x,
@@ -2561,14 +2562,19 @@ export default {
 </script>
 <template>
   <svg :width="plan.size.width" :height="plan.size.height" v-if="plan.size"
-    ref="svg" style="
+    @mousemove="mousemove" @mousedown="mousedown" @mouseup="mouseup" ref="svg"
+    style="
       width: 100%;
       height: 100%;
       background-color: rgb(151, 162, 182);
-      user-select: none;
-    ">
+      user-select: none;">
+    <defs>
+      <clipPath id="clip">
+        <rect :width="plan.size.width" :height="plan.size.height" />
+      </clipPath>
+    </defs>
     <g :class="mainclasses" :transform="zoomTransform.toString()"
-      @mousemove="mousemove" @mouseup="mouseup" @mousedown="mousedown">
+      clip-path="url(#clip)">
       <rect :width="plan.size.width" :height="plan.size.height" fill="#fcfcfc"
         :cursor="cursor"></rect>
       <image v-if="background" :width="backgroundWidth" :height="backgroundHeight"

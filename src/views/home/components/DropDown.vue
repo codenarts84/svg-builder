@@ -65,6 +65,7 @@ const handleItemClick = (option) => {
   justify-content: space-between;
   min-width: 200px;
   cursor: pointer;
+  user-select: none;
 }
 
 .dropdown-menu {
