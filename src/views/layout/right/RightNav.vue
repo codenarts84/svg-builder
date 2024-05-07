@@ -32,6 +32,7 @@ import TableTools from './TableTools.vue';
 import AreaTools from './AreaTools.vue';
 import TableSeatTools from './TableSeatTools.vue';
 import TestSelection from './TestSelection.vue';
+import InputColor from '@/views/home/components/InputColor.vue'
 
 import { useMainStore } from '@/stores';
 import { usePlanStore } from '@/stores/plan';

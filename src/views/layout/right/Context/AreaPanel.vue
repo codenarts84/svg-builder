@@ -65,11 +65,13 @@
         </v-col>
 
         <v-col cols="12" sm="6"> Text Color </v-col>
-        <v-col cols="12" sm="6"> </v-col>
-        <v-col cols="12" sm="12">
+        <v-col cols="12" sm="6">
+          <InputColor :color="textColor" :setColor="setTextColor" />
+        </v-col>
+        <!-- <v-col cols="12" sm="12" v-if="bTextColor">
           <v-color-picker class="v-color-picker" mode="hexa"
             v-model="text_color" />
-        </v-col>
+        </v-col> -->
 
         <v-col cols="12" sm="6"> label Text position (x) </v-col>
         <v-col cols="12" sm="6">
@@ -91,19 +93,17 @@
 
         <v-col cols="12" sm="6" v-if="shape !== 'text'"> Stroke Color </v-col>
         <v-col cols="12" sm="6" v-if="shape !== 'text'">
+          <InputColor :color="borderColor" :setColor="setBorderColor" />
         </v-col>
-        <v-col cols="12" sm="12" v-if="shape !== 'text'">
+        <!-- <v-col cols="12" sm="12" v-if="shape !== 'text'">
           <v-color-picker class="v-color-picker" mode="hexa"
             v-model="stroke_color" />
-        </v-col>
+        </v-col> -->
 
 
         <v-col cols="12" sm="6" v-if="shape !== 'text'"> Fill Color </v-col>
         <v-col cols="12" sm="6" v-if="shape !== 'text'">
-        </v-col>
-        <v-col cols="12" sm="12" v-if="shape !== 'text'">
-          <v-color-picker class="v-color-picker" mode="hexa"
-            v-model="fill_color" />
+          <InputColor :color="color" :setColor="setColor" />
         </v-col>
 
       </v-row>
@@ -115,6 +115,7 @@
 
 import { usePlanStore } from '@/stores/plan';
 import { ref } from 'vue'
+import InputColor from '@/views/home/components/InputColor.vue'
 
 const groupValue = (areas, mapper) => {
   const uniques = areas.map(mapper).filter((v, i, s) => s.indexOf(v) === i)
@@ -129,6 +130,9 @@ export default {
   props: {
     areas: Array,
     temp_Rotate: Function,
+  },
+  components: {
+    InputColor
   },
   data() {
     const text_color = ref(groupValue(this.areas, a => a.text ? a.text.color : undefined))
@@ -211,10 +215,10 @@ export default {
   },
   methods: {
     setColor(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), color: e.target.value })
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), color: e })
     },
     setBorderColor(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), border_color: e.target.value })
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), border_color: e })
     },
     setBorderWidth(e) {
       this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), border_width: parseInt(e.target.value) })
@@ -226,7 +230,7 @@ export default {
       this.temp_Rotate(temp);
     },
     setTextColor(e) {
-      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__color: e.target.value })
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__color: e })
     },
     setText(e) {
       this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__text: e.target.value })
@@ -259,9 +263,3 @@ export default {
 }
 
 </script>
-
-<style>
-.v-color-picker {
-  width: 100% !important;
-}
-</style>

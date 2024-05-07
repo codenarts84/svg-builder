@@ -154,7 +154,7 @@ const handle_create_category = () => {
   nextTick(() => {
     const allCategoryInput = document.querySelectorAll('.category-input')
     const cnt = allCategoryInput.length;
-    allCategoryInput[cnt - 1].focus()
+    allCategoryInput[cnt - 1].select();
   })
 }
 

@@ -14,6 +14,7 @@
     "d3": "^7.9.0",
     "file-saver": "^2.0.5",
     "intersects": "^2.7.2",
+    "nodemailer": "^6.3.1",
     "pinia": "^2.1.7",
     "sass": "^1.74.1",
     "sass-loader": "^14.1.1",
