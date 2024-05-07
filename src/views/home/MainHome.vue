@@ -30,7 +30,6 @@ import AppToolbar from "./components/AppToolbar.vue";
 import RightNav from "../layout/right/RightNav.vue";
 import HandMenu from "./components/HandMenu.vue";
 import MainZone from "./MainZone.vue";
-import TestComponent from "../layout/rightnav/TestComponent.vue";
 
 import { useMainStore } from "@/stores";
 import sampleplan from "@/sampleplan";

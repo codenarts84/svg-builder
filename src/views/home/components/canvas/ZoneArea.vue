@@ -112,7 +112,7 @@
         :y="area.label.position.y" :font-size="area.label.size || 16"
         text-anchor="middle" font-family="sans-serif" dy=".3em"
         :fill="area.label.color || '#888888'"
-        :transform="area.rotate_label ? `rotate(${-area.rotation})` : ''">
+        :transform="!area.rotate_label ? `rotate(${-area.rotation})` : ''">
         {{ area.label.abv }}
       </text>
       <g class="table_seat_group" v-for="(item, idx) in area.seats" :key="item"
@@ -157,8 +157,8 @@
         <text fill="table_seat_label" :x="item.position.x" :y="item.position.y"
           text-anchor="middle" font-size="10px" font-family="sans-serif"
           :key="item" dy=".3em"
-          :transform="area.rotate_label ? roundTableTransform(area, item, idx) : ''">{{
-            item.seat_number }}</text>
+          :transform="!area.rotate_label ? roundTableTransform(area, item, idx) : ''">{{
+            area.skip_letter ? item.skip_number : item.seat_number }}</text>
       </g>
     </g>
 
@@ -170,10 +170,12 @@
       <text class="table_label" :x="area.label.position.x"
         :y="area.label.position.y" :font-size="area.label.size || 16"
         text-anchor="middle" font-family="sans-serif" dy=".3em"
-        :fill="area.label.color || '#888888'">
+        :fill="area.label.color || '#888888'"
+        :transform="!area.rotate_label ? `translate(${area.rectangleTable.width / 2}, ${area.rectangleTable.height / 2}) rotate(${-area.rotation})`
+          : `translate(${area.rectangleTable.width / 2}, ${area.rectangleTable.height / 2})`">
         {{ area.label.abv }}
       </text>
-      <g class="table_seat_group" v-for="item in area.seats" :key="item"
+      <g class="table_seat_group" v-for="(item, index) in area.seats" :key="item"
         @mousedown="event => seat_mousedown(event, item.uuid)"
         @mouseup="event => seat_mouseup(event, item.uuid)">
         <circle :id="item.guid" :cx="item.position.x" :cy="item.position.y"
@@ -213,10 +215,9 @@
         </circle>
 
         <text fill="black" :x="item.position.x" :y="item.position.y"
-          text-anchor="middle" font-size="10px" font-family="sans-serif"
-          dy=".3em">{{
-            item.seat_number
-          }}</text>
+          text-anchor="middle" font-size="10px" font-family="sans-serif" dy=".3em"
+          :transform="!area.rotate_label ? rectangleTableTransform(area, item, index) : ''">{{
+            area.skip_letter ? item.skip_number : item.seat_number }}</text>
       </g>
     </g>
 
@@ -340,6 +341,16 @@ export default {
       return `rotate(${-area.rotation}) translate(${dx}, ${dy})`
     },
 
+    rectangleTableTransform(area, item, index) {
+      const theta = area.rotation * Math.PI / 180;
+      const centerX = area.position.x;
+      const centerY = area.position.y;
+      const newX = item.position.x * Math.cos(theta) - item.position.y * Math.sin(theta);
+      const newY = item.position.x * Math.sin(theta) + item.position.y * Math.cos(theta);
+      const dx = newX - item.position.x;
+      const dy = newY - item.position.y;
+      return `rotate(${-area.rotation}) translate(${dx}, ${dy})`
+    },
 
     seatColor(category) {
       if (category) {

@@ -85,7 +85,9 @@ const tag = () => {
 const section = () => {
   const section = groupValue(props.seats, seat => seat.section_label)
   const abv = groupValue(props.seats, seat => seat.section_abv)
-  return section
+  if (section && abv)
+    return `${section}(${abv})`
+  return '';
 }
 
 const setSection = (label) => {

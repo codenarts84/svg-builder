@@ -30,11 +30,11 @@
             </option>
           </select>
         </v-col>
-        <!-- <v-col cols="12" sm="6"> Skip Function </v-col>
+        <v-col cols="12" sm="6"> Skip Function </v-col>
         <v-col cols="12" sm="6">
           <input class="v-custom-input" name="skip" :value="skip"
             @input="setSkip" />
-        </v-col> -->
+        </v-col>
       </v-row>
     </v-container>
   </div>
@@ -84,9 +84,9 @@ const props = defineProps({
 })
 
 const labelDirection = [{
-  text: 'Ascending', value: false
+  text: 'Clockwise', value: false
 }, {
-  text: 'Descending', value: true
+  text: 'Counter Clockwise', value: true
 }]
 
 const seatNumberings = SEAT_NUMBERINGS;
@@ -130,22 +130,33 @@ const setSeatNumberingStartAt = (e) => {
   if (seatNumbering.value) {
     const le = seatNumbering.value.scheme.findStartAt(e.target.value)
     plan.renumberTableSeats(props.areas.map(a => a.uuid), seatNumbering.value.scheme, le, seatNumbering.value.reversed)
+    plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), skip_letter: '' });
   }
 }
 
 const setSeatNumbering = e => {
   let numbering = SEAT_NUMBERINGS.find(n => n.id === e.target.value)
   plan.renumberTableSeats(props.areas.map(a => a.uuid), numbering, 1, false)
+  plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), skip_letter: '' });
 }
 
 const setSeatNumberingReversed = e => {
   const value = e.target.value === 'true';
   if (seatNumbering.value) {
     plan.renumberTableSeats(props.areas.map(r => r.uuid), seatNumbering.value.scheme, seatNumbering.value.startAt, value)
+    plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), skip_letter: '' });
   }
 }
 
+const skip = computed(() => {
+  return groupValue(props.areas, area => area?.skip_letter)
+})
+
 const setSkip = e => {
+  plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), skip_letter: e.target.value });
+  if (seatNumbering.value) {
+    plan.skipLetterTableSeats(props.areas.map(a => a.uuid), seatNumbering.value.scheme, seatNumbering.value.startAt, seatNumbering.value.reversed, e.target.value)
+  }
 }
 
 </script>

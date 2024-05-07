@@ -44,6 +44,11 @@
             </option>
           </select>
         </v-col>
+
+        <v-col cols="12" sm="6"> Skip Function </v-col>
+        <v-col cols="12" sm="6">
+          <input class="v-custom-input" :value="skip" @input="setSkip" />
+        </v-col>
       </v-row>
     </v-container>
   </div>
@@ -134,6 +139,9 @@ export default ({
   },
 
   computed: {
+    skip() {
+      return groupValue(this.rows, row => row.skip_letter)
+    },
     seatNumbering() {
       return groupValue(this.rows, row => {
         for (let numbering of SEAT_NUMBERINGS) {
@@ -177,21 +185,29 @@ export default ({
       if (this.seatNumbering) {
         const le = this.seatNumbering.scheme.findStartAt(e.target.value)
         this.planStore.renumberSeats(this.rows.map(r => r.uuid), this.seatNumbering.scheme, le, this.seatNumbering.reversed)
+        this.planStore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip_letter: '' })
       }
     },
     setSeatNumberingReversed(val) {
       const value = val.target.value === 'true';
       if (this.seatNumbering) {
         this.planStore.renumberSeats(this.rows.map(r => r.uuid), this.seatNumbering.scheme, this.seatNumbering.startAt, value)
+        this.planStore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip_letter: '' })
       }
     },
     setSeatNumbering(val) {
       // let numbering = SEAT_NUMBERINGS.find(n => n.id === val.target.value);
       // this.planStore.modifyRows(this.rows.map(r => r.uuid), numbering, 1, false);
-
       let numbering = SEAT_NUMBERINGS.find(n => n.id === val.target.value)
       this.planStore.renumberSeats(this.rows.map(r => r.uuid), numbering, 1, false);
+      this.planStore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip_letter: '' })
     },
+    setSkip(val) {
+      if (this.seatNumbering) {
+        this.planStore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip_letter: val.target.value })
+        this.planStore.skipLetterSeats(this.rows.map(r => r.uuid), this.seatNumbering.scheme, this.seatNumbering.startAt, this.seatNumbering.reversed, val.target.value);
+      }
+    }
   }
 })
 </script>

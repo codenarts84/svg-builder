@@ -37,6 +37,7 @@
                 </td>
                 <td class="input-container-td"><input class="category-input"
                     type="text" name="inputForm" :value="ca.name"
+                    ref="categoryInput"
                     @input="(e) => handle_change_name(e, idx)">
                 </td>
                 <td class="delete-container-td">
@@ -57,7 +58,7 @@
 
 
 <script setup>
-import { ref, defineProps, computed, defineComponent } from "vue";
+import { ref, defineProps, computed, defineComponent, nextTick } from "vue";
 import { usePlanStore } from '@/stores/plan.js'
 import DropDown from '../../home/components/DropDown.vue';
 import ColorPicker from "./ColorPicker.vue";
@@ -150,6 +151,11 @@ const handle_create_category = () => {
   const color = colors[rand]
   const newName = getUniqueCategoryName('New Category');
   planStore.createCategory(newName, color);
+  nextTick(() => {
+    const allCategoryInput = document.querySelectorAll('.category-input')
+    const cnt = allCategoryInput.length;
+    allCategoryInput[cnt - 1].focus()
+  })
 }
 
 const getUniqueCategoryName = name => {

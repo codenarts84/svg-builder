@@ -13,7 +13,7 @@
         :text-anchor="rowNumberEnd.textAnchor"
         :transform="rotate ? rowNumberEnd.transform : ''" fill="#888">{{
           row.row_number }}</text>
-      <Seat v-for="s in row.seats" :seat="s" :key="s.uuid" :zone="zone"
+      <Seat v-for="s in row.seats" :row="row" :seat="s" :key="s.uuid" :zone="zone"
         @startDragging="startDragging" :row_number="row.row_number">
       </Seat>
       <path class="selection-line" v-if="selection.includes(row.uuid)"

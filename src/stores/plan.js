@@ -4,7 +4,12 @@ import Vue, { ref } from 'vue';
 import { v4 as uuid } from 'uuid';
 import Ajv from 'ajv';
 import schema from '../schema/seating-plan.schema.json';
-import { letterCounter, reverse, SEAT_NUMBERINGS } from '@/lib/numbering';
+import {
+  letterCounter,
+  skipLetterCounter,
+  reverse,
+  SEAT_NUMBERINGS,
+} from '@/lib/numbering';
 import { generateID } from '@/lib/numbers';
 import { useMainStore } from '.';
 
@@ -1107,6 +1112,21 @@ export const usePlanStore = defineStore('plan', {
       this.persistPlan();
     },
 
+    skipLetterSeats(rowIds, numbering, startAt, reversed, skip_letter) {
+      this._plan.zones.forEach((z) => {
+        z.rows.forEach((r) => {
+          if (rowIds.includes(r.uuid) && r.seats.length) {
+            const numbers = numbering.skip(r.seats, startAt, skip_letter);
+            // console.log(r.seats, numbers);
+            r.seats.forEach((s) => {
+              s.skip_number = reversed ? numbers.pop() : numbers.shift();
+            });
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
     renumberTableSeats(areaIds, numbering, startAt, reversed) {
       this._plan.zones.forEach((z) => {
         z.areas.forEach((r) => {
@@ -1116,6 +1136,21 @@ export const usePlanStore = defineStore('plan', {
             r.seats.forEach((s) => {
               s.seat_number = reversed ? numbers.pop() : numbers.shift();
               s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+            });
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+    skipLetterTableSeats(areaIds, numbering, startAt, reversed, skip_letter) {
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((r) => {
+          if (areaIds.includes(r.uuid) && r.seats.length) {
+            const numbers = numbering.skip(r.seats, startAt, skip_letter);
+            r.seats.forEach((s) => {
+              s.skip_number = reversed ? numbers.pop() : numbers.shift();
+              // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
             });
           }
         });
@@ -1312,8 +1347,9 @@ export const usePlanStore = defineStore('plan', {
               }
             }
 
+            const total = count + (r.space || 0);
             for (let i = 0; i < count; i++) {
-              const degree = ((2 * Math.PI) / count) * i;
+              const degree = ((2 * Math.PI) / total) * i;
               res.push({
                 seat_number: numbers[i],
                 position: {

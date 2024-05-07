@@ -64,6 +64,7 @@ export default {
   name: "SeatComp",
   props: {
     seat: Object,
+    row: Object,
     zone: Object,
     row_number: String,
   },
@@ -129,7 +130,7 @@ export default {
       //   content = this.seat.start_direction;
       // }
       // return content;
-      return this.seat.seat_number;
+      return this.row.skip_letter ? this.seat.skip_number : this.seat.seat_number;
       // return letterCounter(this.seat.seat_number, 'A');
     },
     category() {
