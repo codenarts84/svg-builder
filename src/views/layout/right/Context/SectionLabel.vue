@@ -5,13 +5,15 @@
     <v-container>
       <v-row>
         <v-col cols="12">
-          <select class="v-custom-input" :value="section"
+          <DropDownComponent :options="options" :setSection="setSection"
+            :section="section" />
+          <!-- <select class="v-custom-input" :value="section"
             @change="selected_change">
             <option v-for="tag in tags" :key="tag.id" option-label="label"
               name="tag_name" :value="tag.label">
               {{ tag.label }}({{ tag.abv }})
-            </option>
-          </select>
+            </option> -->
+          <!-- </select> -->
         </v-col>
       </v-row>
     </v-container>
@@ -22,6 +24,7 @@
 import { defineProps, ref, computed } from "vue"
 import { useMainStore } from '@/stores';
 import SectionManage from "@/views/home/components/SectionManage.vue";
+import DropDownComponent from "@/views/home/components/DropDownComponent";
 const mainStore = useMainStore();
 
 const props = defineProps({
@@ -29,6 +32,7 @@ const props = defineProps({
   setSection: Function
 })
 
+const options = computed(() => mainStore.section_label);
 const tags = computed(() => mainStore.section_label);
 const selected_change = (e) => {
   console.log(e.target.value)

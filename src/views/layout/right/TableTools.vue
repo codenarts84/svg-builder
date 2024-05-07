@@ -104,7 +104,11 @@ const tag = computed(() => {
 const section = () => {
   const labels = groupValue(props.areas, a => a.seats.map(s => s.section_label));
   const label = labels ? labels[0] : '';
-  return label;
+  const abvs = groupValue(props.areas, a => a.seats.map(s => s.section_abv));
+  const abv = abvs ? abvs[0] : '';
+  if (label && abv)
+    return `${label}(${abv})`;
+  return '';
 }
 
 const setSection = (label) => {

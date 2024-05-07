@@ -4,9 +4,19 @@ import { defineStore } from 'pinia';
 import { round } from '../lib/numbers';
 import * as d3 from 'd3';
 import {
-  degreeInCircle,
-  findCircleCenter,
   findClosestGridPoint,
+  findCircleCenter,
+  degreeInCircle,
+  positionInZone,
+  rectangleBBox,
+  polygonBBox,
+  textBBox,
+  ellipseBBox,
+  testOverlap,
+  roundTableBBox,
+  rectangleTableBBox,
+  estimateTextWidth,
+  rotateRectangluarBox,
 } from '../lib/geometry';
 import { v4 as uuid } from 'uuid';
 import { usePlanStore } from './plan';
@@ -612,6 +622,18 @@ export const useMainStore = defineStore({
           if (!this.draggingPolygonPoint) {
             for (const r of z.rows) {
               if (this.selection.includes(r.uuid)) {
+                // const minx = Math.min(...r.seats.map((s) => s.position.x));
+                // const maxx = Math.max(...r.seats.map((s) => s.position.x));
+                // const miny = Math.min(...r.seats.map((s) => s.position.y));
+                // const maxy = Math.max(...r.seats.map((s) => s.position.y));
+                // if (
+                //   r.position.x + minx + dx + 10 < 0 ||
+                //   r.position.y + miny + dy + 10 < 0 ||
+                //   r.position.x + maxx + dx + 10 > temp.plan.size.width ||
+                //   r.position.y + maxy + dy + 10 > temp.plan.size.height
+                // ) {
+                //   return;
+                // }
                 r.position.x += dx;
                 r.position.y += dy;
                 if (snap) {
@@ -691,6 +713,101 @@ export const useMainStore = defineStore({
                   snap = false;
                 }
               } else {
+                // let abox;
+                // if (
+                //   a.shape === 'circle' &&
+                //   (a.position.x + dx - a.circle.radius < 0 ||
+                //     a.position.y + dy - a.circle.radius < 0 ||
+                //     a.position.x + dx + a.circle.radius >
+                //       temp.plan.size.width ||
+                //     a.position.y + dy + a.circle.radius > temp.plan.size.height)
+                // )
+                //   return;
+                // if (a.shape === 'ellipse' || a.shape === 'gaCircle') {
+                //   abox = ellipseBBox(a);
+                //   if (
+                //     abox.x + dx < 0 ||
+                //     abox.x + dx + abox.width > temp.plan.size.width ||
+                //     abox.y + dy < 0 ||
+                //     abox.y + dy + abox.height > temp.plan.size.height
+                //   )
+                //     return;
+                // }
+                // if (
+                //   (a.shape === 'rectangle' || a.shape === 'gaSquare') &&
+                //   (a.position.x + dx < 0 ||
+                //     a.position.x + dx + a.rectangle.width >
+                //       temp.plan.size.width ||
+                //     a.position.y + dy < 0 ||
+                //     a.position.y + dy + a.rectangle.height >
+                //       temp.plan.size.height)
+                // )
+                //   return;
+                // if (a.shape === 'polygon' || a.shape === 'gaPolygon') {
+                //   const minx = Math.min(...a.polygon.points.map((p) => p.x));
+                //   const maxx = Math.max(...a.polygon.points.map((p) => p.x));
+                //   const miny = Math.max(...a.polygon.points.map((p) => p.y));
+                //   const maxy = Math.max(...a.polygon.points.map((p) => p.y));
+                //   if (
+                //     a.position.x + minx + dx < 0 ||
+                //     a.position.x + maxx + dx > temp.plan.size.width ||
+                //     a.position.y + miny + dy < 0 ||
+                //     a.position.y + maxy + dy > temp.plan.size.height
+                //   )
+                //     return;
+                // }
+                // if (a.shape === 'text') {
+                //   const width = estimateTextWidth(a.text.text, a.text.size);
+                //   const height = a.text.size;
+                //   if (
+                //     a.position.x + dx - width / 2 < 0 ||
+                //     a.position.x + dx + width / 2 > temp.plan.size.width ||
+                //     a.position.y + dy - height / 2 < 0 ||
+                //     a.position.y + dy + height / 2 > temp.plan.size.height
+                //   )
+                //     return;
+                // }
+                // if (a.shape === 'roundTable') {
+                //   if (
+                //     a.position.x + dx - a.radius - 20 < 0 ||
+                //     a.position.x + dx + a.radius + 20 > temp.plan.size.width ||
+                //     a.position.y + dy - a.radius - 20 < 0 ||
+                //     a.position.y + dy + a.radius + 20 > temp.plan.size.height
+                //   )
+                //     return;
+                // }
+                // if (a.shape === 'rectangleTable') {
+                //   const top =
+                //     a.seats.findIndex((s) => s.special === 'top') > -1 ? 1 : 0;
+                //   const bottom =
+                //     a.seats.findIndex((s) => s.special === 'bottom') > -1
+                //       ? 1
+                //       : 0;
+                //   const left =
+                //     a.seats.findIndex((s) => s.special === 'left') > -1 ? 1 : 0;
+                //   const right =
+                //     a.seats.findIndex((s) => s.special === 'right') > -1
+                //       ? 1
+                //       : 0;
+                //   const minx =
+                //     a.position.x + dx - a.rectangleTable.width / 2 - left * 20;
+                //   const maxx =
+                //     a.position.x + dx + a.rectangleTable.width / 2 + right * 20;
+                //   const miny =
+                //     a.position.y + dy - a.rectangleTable.height / 2 - top * 20;
+                //   const maxy =
+                //     a.position.y +
+                //     dy +
+                //     a.rectangleTable.height / 2 +
+                //     bottom * 20;
+                //   if (
+                //     minx < 0 ||
+                //     miny < 0 ||
+                //     maxx > temp.plan.size.width ||
+                //     maxy > temp.plan.size.height
+                //   )
+                //     return;
+                // }
                 a.position.x += dx;
                 a.position.y += dy;
                 if (snap) {

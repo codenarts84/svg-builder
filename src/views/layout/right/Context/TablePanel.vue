@@ -154,6 +154,7 @@ export default {
     setCapacity(e) {
       if (e.target.value > 0) {
         this.planStore.renumberCircleSeats(this.areas.map(a => a.uuid), parseInt(e.target.value))
+        this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), skip_letter: '' })
       }
     },
     setSpace(e) {
@@ -161,15 +162,19 @@ export default {
     },
     setCapacityT(e) {
       this.planStore.modifyRectangleTableCapacityT(this.areas, parseInt(e.target.value))
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), skip_letter: '' })
     },
     setCapacityB(e) {
       this.planStore.modifyRectangleTableCapacityB(this.areas, parseInt(e.target.value))
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), skip_letter: '' })
     },
     setCapacityR(e) {
       this.planStore.modifyRectangleTableCapacityR(this.areas, parseInt(e.target.value))
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), skip_letter: '' })
     },
     setCapacityL(e) {
       this.planStore.modifyRectangleTableCapacityL(this.areas, parseInt(e.target.value))
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), skip_letter: '' })
     },
   }
 }

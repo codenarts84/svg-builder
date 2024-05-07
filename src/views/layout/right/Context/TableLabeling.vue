@@ -11,7 +11,7 @@
         <v-col cols="12" sm="6"> Abbreviation </v-col>
         <v-col cols="12" sm="6">
           <input class="v-custom-input" name="table_abv" :value="tableAbv"
-            @input="setTableAbv" />
+            maxlength="8" @input="setTableAbv" />
         </v-col>
         <v-col cols="12" sm="6"> Position X </v-col>
         <v-col cols="12" sm="6">
@@ -30,8 +30,10 @@
         </v-col>
         <v-col cols="12" sm="6"> Text Color </v-col>
         <v-col cols="12" sm="6">
-          <input class="v-custom-input" type="color" :value="textColor"
-            @input="setTextColor" />
+        </v-col>
+        <v-col cols="12" sm="12">
+          <v-color-picker class="v-color-picker" mode="hexa"
+            v-model="text_color" />
         </v-col>
         <v-col cols="12" sm="6"> Rotate Label with Table </v-col>
         <v-col cols="12" sm="6">
@@ -43,7 +45,7 @@
 </template>
 
 <script setup>
-import { computed, ref, defineProps } from 'vue';
+import { computed, ref, defineProps, watch } from 'vue';
 import { usePlanStore } from '@/stores/plan';
 import { useMainStore } from '@/stores';
 
@@ -84,6 +86,12 @@ const props = defineProps({
   areas: Array
 })
 
+const text_color = ref(groupValue(props.areas, a => a.label.color))
+
+watch(text_color, (newValue, oldValue) => {
+  plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), label__color: newValue })
+})
+
 const tableName = computed(() => {
   return groupValue(props.areas, a => a.label ? a.label.name : undefined)
 })
@@ -117,7 +125,14 @@ const setTableName = (e) => {
 }
 
 const setTableAbv = (e) => {
-  plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), label__abv: e.target.value })
+  const input = e.target;
+  const value = input.value;
+  const validCharacters = /^[a-zA-Z0-9]*$/;
+
+  if (!validCharacters.test(e.target.value)) {
+    input.value = value.replace(/[^a-zA-Z0-9]/g, '');
+  }
+  plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), label__abv: input.value })
 }
 
 const setPositionX = (e) => {

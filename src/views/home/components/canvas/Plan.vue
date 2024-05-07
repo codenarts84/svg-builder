@@ -14,6 +14,7 @@ import {
   roundTableBBox,
   rectangleTableBBox,
   rotateRectangluarBox,
+  estimateTextWidth
 } from "@/lib/geometry";
 import { generateID } from "@/lib/numbers";
 import { v4 as uuid } from "uuid";
@@ -720,7 +721,6 @@ export default {
 
     mousedown(event) {
       if (!this.svg) return;
-
       const store = useMainStore();
 
       if (event.ctrlKey || event.metaKey) {
@@ -731,9 +731,18 @@ export default {
         return;
       }
       const svgbox = this.getSvgRect(); //this.getSvgRect();
+      const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
       // console.log(svgbox);
 
-      const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
+      let targetPos = positionInZone(
+        event.clientX - svgbox.x,
+        event.clientY - svgbox.y,
+        this.zoomTransform,
+        zone
+      );
+
+      if (targetPos.x < 0 || targetPos.y < 0 || targetPos.x > this.plan.size.width || targetPos.y > this.plan.size.height) return;
+
       switch (this.tool) {
         // case "hand":
         //   console.log("changed to handon");
@@ -793,12 +802,17 @@ export default {
             this.zoomTransform,
             zone
           );
+          const width = estimateTextWidth('Text', 32);
+          const height = 32;
           if (event.shiftKey || this.bSnap2Grid) {
             targetPos = findClosestGridPoint({
               x: targetPos.x,
               y: targetPos.y,
             });
           }
+
+          if (targetPos.x - width / 2 < 0 || targetPos.x + width / 2 > this.plan.size.width || targetPos.y - height / 2 < 0 || targetPos.y + height / 2 > this.plan.size.height)
+            return;
           const newId = uuid();
           usePlanStore()
             .createArea(this.selectedZone, {
@@ -837,6 +851,8 @@ export default {
               y: targetPos.y,
             });
           }
+          if (targetPos.x - 45 < 0 || targetPos.x + 45 > this.plan.size.width || targetPos.y - 42 < 0 || targetPos.y + 42 > this.plan.size.height)
+            return;
           const arr = []
           for (let i = 0; i < this.nseat; i++) {
             arr.push(i);
@@ -899,6 +915,8 @@ export default {
               y: targetPos.y,
             });
           }
+          if (targetPos.x - 70 < 0 || targetPos.x + 70 > this.plan.size.width || targetPos.y - 50 < 0 || targetPos.y + 50 > this.plan.size.width)
+            return;
           const arr = []
           for (let i = 0; i < this.nseat; i++) {
             arr.push(i);
@@ -963,6 +981,7 @@ export default {
                 position: { x: 0, y: 0 },
                 color: "#333333",
                 text: "",
+                size: 16
               },
               seats: [...top, ...bottom]
             })
@@ -1105,6 +1124,8 @@ export default {
       );
       const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
 
+      if (pos.x < 0 || pos.y < 0 || pos.x > this.plan.size.width || pos.y > this.plan.size.height) return;
+
       if (this.rotating && this.tool !== "seatselect") {
         let angle = -Math.atan(
           (this.rotatingOriginX - pos.x) / (this.rotatingOriginY - pos.y)
@@ -1148,6 +1169,8 @@ export default {
       switch (this.tool) {
         case "select":
           if (store.dragging) {
+            // if (this.selectionBoundary.x < 0 || this.selectionBoundary.y < 0 || this.selectionBoundary.x + this.selectionBoundary.width > (this.plan.size.width + 10) ||
+            //   this.selectionBoundary.y + this.selectionBoundary.height > this.plan.size.height) return;
             store.moveDragging(
               pos.x,
               pos.y,
@@ -2568,6 +2591,22 @@ export default {
       height: 100%;
       background-color: rgb(151, 162, 182);
       user-select: none;">
+    <metadata>
+      <booktix-data>
+        <categories>
+          <category v-for="(category, idx) in categories" :key="idx">
+            <name>{{ category.name }}</name>
+            <color>{{ category.color }}</color>
+          </category>
+        </categories>
+        <sections>
+          <section v-for="(section, idx) in sections" :key="idx">
+            <name>{{ section.label }}</name>
+            <abv>{{ section.abv }}</abv>
+          </section>
+        </sections>
+      </booktix-data>
+    </metadata>
     <defs>
       <clipPath id="clip">
         <rect :width="plan.size.width" :height="plan.size.height" />
@@ -2580,22 +2619,6 @@ export default {
       <image v-if="background" :width="backgroundWidth" :height="backgroundHeight"
         :href="background" :opacity="backgroundOpacity / 100" :x="backgroundX"
         :y="backgroundY"></image>
-      <metadata>
-        <booktix-data>
-          <categories>
-            <category v-for="(category, idx) in categories" :key="idx">
-              <name>{{ category.name }}</name>
-              <color>{{ category.color }}</color>
-            </category>
-          </categories>
-          <sections>
-            <section v-for="(section, idx) in sections" :key="idx">
-              <name>{{ section.label }}</name>
-              <abv>{{ section.abv }}</abv>
-            </section>
-          </sections>
-        </booktix-data>
-      </metadata>
       <defs>
         <pattern id="smallGrid" width="20" height="20"
           patternUnits="userSpaceOnUse">

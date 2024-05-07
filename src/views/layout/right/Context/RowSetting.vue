@@ -44,6 +44,7 @@
   border-radius: 5px;
   border: 1px solid light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
   border-radius: 5px;
+  user-select: none;
 }
 
 .v-custom-input:focus {
@@ -139,6 +140,7 @@ export default defineComponent({
     },
     setNumberSeats(e) {
       if (e.target.value > 0) {
+        this.planStore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip_letter: '' })
         this.planStore.changeNumberSeats(this.rows.map(r => r.uuid), e.target.value)
       }
     },

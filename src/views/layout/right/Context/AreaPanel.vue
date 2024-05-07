@@ -65,9 +65,10 @@
         </v-col>
 
         <v-col cols="12" sm="6"> Text Color </v-col>
-        <v-col cols="12" sm="6">
-          <input class="v-custom-input" type="color" name="text_color"
-            :value="textColor || '#ccc'" @input="setTextColor" />
+        <v-col cols="12" sm="6"> </v-col>
+        <v-col cols="12" sm="12">
+          <v-color-picker class="v-color-picker" mode="hexa"
+            v-model="text_color" />
         </v-col>
 
         <v-col cols="12" sm="6"> label Text position (x) </v-col>
@@ -90,14 +91,19 @@
 
         <v-col cols="12" sm="6" v-if="shape !== 'text'"> Stroke Color </v-col>
         <v-col cols="12" sm="6" v-if="shape !== 'text'">
-          <input class="v-custom-input" type="color" name="labelBorder"
-            :value="borderColor || '#ccc'" @input="setBorderColor" />
         </v-col>
+        <v-col cols="12" sm="12" v-if="shape !== 'text'">
+          <v-color-picker class="v-color-picker" mode="hexa"
+            v-model="stroke_color" />
+        </v-col>
+
 
         <v-col cols="12" sm="6" v-if="shape !== 'text'"> Fill Color </v-col>
         <v-col cols="12" sm="6" v-if="shape !== 'text'">
-          <input class="v-custom-input" type="color" name="labelColor"
-            :value="color || '#ccc'" @input="setColor" />
+        </v-col>
+        <v-col cols="12" sm="12" v-if="shape !== 'text'">
+          <v-color-picker class="v-color-picker" mode="hexa"
+            v-model="fill_color" />
         </v-col>
 
       </v-row>
@@ -108,6 +114,7 @@
 <script>
 
 import { usePlanStore } from '@/stores/plan';
+import { ref } from 'vue'
 
 const groupValue = (areas, mapper) => {
   const uniques = areas.map(mapper).filter((v, i, s) => s.indexOf(v) === i)
@@ -124,13 +131,30 @@ export default {
     temp_Rotate: Function,
   },
   data() {
+    const text_color = ref(groupValue(this.areas, a => a.text ? a.text.color : undefined))
+    const fill_color = ref(groupValue(this.areas, a => a.color))
+    const stroke_color = ref(groupValue(this.areas, a => a.border_color))
     return {
+      text_color,
+      fill_color,
+      stroke_color,
+    }
+  },
+  watch: {
+    text_color(newValue, oldValue) {
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__color: newValue })
+    },
+    fill_color(newValue, oldValue) {
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), color: newValue })
+    },
+    stroke_color(newValue, oldValue) {
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), border_color: newValue })
     }
   },
   setup() {
     const planStore = usePlanStore();
     return {
-      planStore
+      planStore,
     }
   },
   computed: {
@@ -235,3 +259,9 @@ export default {
 }
 
 </script>
+
+<style>
+.v-color-picker {
+  width: 100% !important;
+}
+</style>

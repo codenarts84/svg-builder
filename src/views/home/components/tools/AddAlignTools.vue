@@ -353,7 +353,8 @@ const onFlipVertical = () => {
           const maxx = Math.max(...r.seats.map(s => s.position.x)) + z.position.x + r.position.x
           const midx = (minx + maxx) / 2;
           // r.position.x += 2 * (midX - midx);
-          r.seats.forEach(s => s.position.x = midx * 2 - s.position.x)
+          r.position.x = 2 * midX - r.position.x;
+          r.seats.forEach(s => s.position.x = -s.position.x)
         }
       }
 
@@ -361,7 +362,7 @@ const onFlipVertical = () => {
       for (const a of z.areas) {
         if (selection.value.includes(a.uuid)) {
           if (a.shape === 'circle') {
-            a.position.x = midX;
+            a.position.x = midX * 2 - a.position.x;
           } else if (a.shape === 'rectangle' || a.shape === 'gaSquare') {
             if (a.rotation) {
               let abox = {
@@ -371,12 +372,20 @@ const onFlipVertical = () => {
                 height: a.rectangle.height
               }
               abox = rotateRectangluarBox(a, abox);
-              a.position.x = (midX * 2 - abox.x - abox.width);
+              const w = a.rectangle.width;
+              const h = a.rectangle.height;
+              const alpha = a.rotation * Math.PI / 180;
+              const x0 = a.position.x + w * Math.cos(alpha) + h * Math.sin(alpha)
+              const y0 = a.position.y + w * Math.sin(alpha) - h * Math.cos(alpha)
+              a.position.x = midX * 2 - x0;
+              a.position.y = y0;
+              a.rotation = -a.rotation;
             } else {
               a.position.x = midX * 2 - a.position.x - a.rectangle.width;
             }
           } else if (a.shape === 'ellipse' || a.shape === 'gaCircle') {
-            a.position.x = midX;
+            a.position.x = midX * 2 - a.position.x;
+            a.rotation = 180 - a.rotation;
           } else if (a.shape === 'polygon' || a.shape === 'gaPolygon') {
             if (a.rotation) {
               const abox = polygonBBox(a);
@@ -389,7 +398,7 @@ const onFlipVertical = () => {
               a.position.x += midX - (minx + maxx) / 2;
             }
           } else if (a.shape === 'text') {
-            a.position.x = midX;
+            a.position.x = midX * 2 - a.position.x;
           } else if (a.shape === 'roundTable') {
             //bug fix
             a.position.x = midX;

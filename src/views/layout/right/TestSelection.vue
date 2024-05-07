@@ -1,24 +1,15 @@
 <template>
-  <v-select v-model="tag" :items="tags" label="Tags" chips multiple
-    @input="onChange">
-  </v-select>
+  <div>
+    <v-btn @click="onClick">
+      Check
+    </v-btn>
+  </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { v4 as uuid } from 'uuid';
-
-const tags = ref([
-  "Wheelchair",
-  "Wheelchair Companion",
-  "Partial View",
-  "Folding Chair",
-  "Standing Room Only"
-]);
-
-const tag = ref([])
-
-watch(tag, async (newValue, oldValue) => {
-  console.log('I found it', newValue)
-})
+import { letterCounter, reverse, ROW_NUMBERINGS } from '@/lib/numbering';
+const onClick = () => {
+  const rows = Array(30).fill(0);
+  console.log(ROW_NUMBERINGS[2].skip(rows, 1, 'a,aa'));
+}
 </script>
