@@ -1,23 +1,23 @@
-import { defineStore } from 'pinia';
-import Vue, { ref } from 'vue';
+import { defineStore } from "pinia";
+import Vue, { ref } from "vue";
 
-import { v4 as uuid } from 'uuid';
-import Ajv from 'ajv';
-import schema from '../schema/seating-plan.schema.json';
+import { v4 as uuid } from "uuid";
+import Ajv from "ajv";
+import schema from "../schema/seating-plan.schema.json";
 import {
   letterCounter,
   skipLetterCounter,
   reverse,
   SEAT_NUMBERINGS,
-} from '@/lib/numbering';
-import { generateID } from '@/lib/numbers';
-import { useMainStore } from '.';
+} from "@/lib/numbering";
+import { generateID } from "@/lib/numbers";
+import { useMainStore } from ".";
 
 // This is certainly not a best practice, but we don't want these two reactive for performance reasons
 
-const zoneNameToID = (name) => name.replace(/[^0-9A-Za-z]/, '');
+const zoneNameToID = (name) => name.replace(/[^0-9A-Za-z]/, "");
 
-export const usePlanStore = defineStore('plan', {
+export const usePlanStore = defineStore("plan", {
   state: () => ({
     _plan: {
       zones: [],
@@ -26,7 +26,7 @@ export const usePlanStore = defineStore('plan', {
         width: 0,
         height: 0,
       },
-      name: 'My Charting Board',
+      name: "My Charting Board",
     },
     validationErrors: undefined,
     hasUndo: false,
@@ -46,7 +46,7 @@ export const usePlanStore = defineStore('plan', {
   actions: {
     persistPlan(skipHistory = false) {
       const s = JSON.stringify(this._plan);
-      localStorage.setItem('frontrow2.editor.plan', s);
+      localStorage.setItem("frontrow2.editor.plan", s);
 
       if (!skipHistory) {
         this.recordHistoryState(s);
@@ -87,7 +87,7 @@ export const usePlanStore = defineStore('plan', {
                   errors.push({
                     text: `Seat ${z.name} > ${r.row_number} > ${s.seat_number} has no seat ID.`,
                     uuid: s.uuid,
-                    tool: 'seatselect',
+                    tool: "seatselect",
                   });
                 } else if (
                   seatGuids.has(s.seat_guid) &&
@@ -96,14 +96,14 @@ export const usePlanStore = defineStore('plan', {
                   errors.push({
                     text: `Seat ID "${s.seat_guid}" is not unique! This will lead to errors when people try to book these seats. (Seen again in "${z.name}" > "${r.row_number}" > "${s.seat_number}")`,
                     uuid: s.uuid,
-                    tool: 'seatselect',
+                    tool: "seatselect",
                   });
                   errorIds.add(s.seat_guid);
                 } else if (seatNames.has(sname) && !errorIds.has(sname)) {
                   errors.push({
                     text: `You have multiple seats with zone "${z.name}", row "${r.row_number}", and seat "${s.seat_number}". This is going to be very confusing.`,
                     uuid: s.uuid,
-                    tool: 'seatselect',
+                    tool: "seatselect",
                   });
                   errorIds.add(sname);
                 }
@@ -118,7 +118,7 @@ export const usePlanStore = defineStore('plan', {
           this.setValidationErrors([
             {
               text:
-                'JSON schema validation error (contact support for help): ' +
+                "JSON schema validation error (contact support for help): " +
                 ajv.errorsText(ajv.errors),
             },
           ]);
@@ -139,8 +139,8 @@ export const usePlanStore = defineStore('plan', {
             const row = {
               position: { x: position.x, y: position.y + rix * row_spacing },
               // row_number: (rix + 1).toString(),
-              row_number: letterCounter(rix + 1, 'A'),
-              row_number_position: 'both',
+              row_number: letterCounter(rix + 1, "A"),
+              row_number_position: "both",
               seats: [],
               uuid: uuid(),
               guid: generateID(),
@@ -153,7 +153,7 @@ export const usePlanStore = defineStore('plan', {
                 uuid: uuid(),
                 guid: generateID(),
                 position: { x: six * seat_spacing, y: 0 },
-                category: '',
+                category: "",
               });
             }
             this.createRowAfter(zone.uuid, row, false);
@@ -180,8 +180,8 @@ export const usePlanStore = defineStore('plan', {
               row = {
                 position: { x: position.x, y: position.y + rix * row_spacing },
                 // row_number: (rix + 1).toString(),
-                row_number: letterCounter(rix + 1, 'A'),
-                row_number_position: 'both',
+                row_number: letterCounter(rix + 1, "A"),
+                row_number_position: "both",
                 seats: [],
                 guid: generateID(),
                 uuid: uuid(),
@@ -196,7 +196,7 @@ export const usePlanStore = defineStore('plan', {
                   uuid: uuid(),
                   guid: generateID(),
                   position: { x: six * seat_spacing, y: 0 },
-                  category: '',
+                  category: "",
                 });
               }
             } else {
@@ -206,8 +206,8 @@ export const usePlanStore = defineStore('plan', {
                   y: position.y + rix * row_spacing,
                 },
                 // row_number: (rix + 1).toString(),
-                row_number: letterCounter(rix + 1, 'A'),
-                row_number_position: 'both',
+                row_number: letterCounter(rix + 1, "A"),
+                row_number_position: "both",
                 seats: [],
                 uuid: uuid(),
                 guid: generateID(),
@@ -220,7 +220,7 @@ export const usePlanStore = defineStore('plan', {
                   uuid: uuid(),
                   guid: generateID(),
                   position: { x: six * seat_spacing, y: 0 },
-                  category: '',
+                  category: "",
                 });
               }
             }
@@ -294,7 +294,7 @@ export const usePlanStore = defineStore('plan', {
           r.seats = r.seats.filter((s) => !objects.includes(s.uuid));
         }
         for (const a of z.areas) {
-          if (a.shape === 'roundTable' || a.shape === 'rectangleTable') {
+          if (a.shape === "roundTable" || a.shape === "rectangleTable") {
             a.seats = a.seats.filter((s) => !objects.includes(s.uuid));
           }
         }
@@ -302,7 +302,7 @@ export const usePlanStore = defineStore('plan', {
       // Assume there's an `unselect` action
       // this.unselect(objects);
       useMainStore().unselect(objects);
-      console.log('delete Obejct', useMainStore().selection);
+      console.log("delete Obejct", useMainStore().selection);
       this.persistPlan();
     },
 
@@ -352,9 +352,9 @@ export const usePlanStore = defineStore('plan', {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid)) {
             for (const arg in args) {
-              if (arg.includes('__')) {
+              if (arg.includes("__")) {
                 let inner = r;
-                const argparts = arg.split('__');
+                const argparts = arg.split("__");
                 argparts.forEach((part, index) => {
                   if (index === argparts.length - 1) {
                     inner[part] = args[arg];
@@ -378,9 +378,9 @@ export const usePlanStore = defineStore('plan', {
           r.seats.forEach((s) => {
             if (seatIds.includes(s.uuid)) {
               for (const arg in args) {
-                if (arg.includes('__')) {
+                if (arg.includes("__")) {
                   let inner = s;
-                  const argparts = arg.split('__');
+                  const argparts = arg.split("__");
                   argparts.forEach((part, index) => {
                     if (index === argparts.length - 1) {
                       inner[part] = args[arg];
@@ -402,10 +402,10 @@ export const usePlanStore = defineStore('plan', {
     modifyRectangleTableWidth(areas, w) {
       areas.forEach((a) => {
         a.rectangleTable.width = w;
-        let top = a.seats.filter((item) => item.special === 'top');
-        let bottom = a.seats.filter((item) => item.special === 'bottom');
-        let left = a.seats.filter((item) => item.special === 'left');
-        let right = a.seats.filter((item) => item.special === 'right');
+        let top = a.seats.filter((item) => item.special === "top");
+        let bottom = a.seats.filter((item) => item.special === "bottom");
+        let left = a.seats.filter((item) => item.special === "left");
+        let right = a.seats.filter((item) => item.special === "right");
         const dt = (w - 20) / (top.length - 1);
         const db = (w - 20) / (bottom.length - 1);
         top = top.map((item, idx) => {
@@ -427,10 +427,10 @@ export const usePlanStore = defineStore('plan', {
     modifyRectangleTableHeight(areas, h) {
       areas.forEach((a) => {
         a.rectangleTable.height = h;
-        let top = a.seats.filter((item) => item.special === 'top');
-        let bottom = a.seats.filter((item) => item.special === 'bottom');
-        let left = a.seats.filter((item) => item.special === 'left');
-        let right = a.seats.filter((item) => item.special === 'right');
+        let top = a.seats.filter((item) => item.special === "top");
+        let bottom = a.seats.filter((item) => item.special === "bottom");
+        let left = a.seats.filter((item) => item.special === "left");
+        let right = a.seats.filter((item) => item.special === "right");
         const dl = (h - 20) / (left.length - 1);
         const dr = (h - 20) / (right.length - 1);
         bottom = bottom.map((item, idx) => {
@@ -453,7 +453,7 @@ export const usePlanStore = defineStore('plan', {
     modifyRectangleTableCapacityT(areas, val) {
       areas.forEach((r) => {
         const width = r.rectangleTable.width;
-        let top = r.seats.filter((item) => item.special === 'top');
+        let top = r.seats.filter((item) => item.special === "top");
         const category = r.seats[r.seats.length - 1].category;
         const dt = (width - 20) / (val - 1);
         let numbers = [];
@@ -501,7 +501,7 @@ export const usePlanStore = defineStore('plan', {
             }
           } catch (e) {
             console.warn(
-              'Crash while trying to test seat numbering schema',
+              "Crash while trying to test seat numbering schema",
               numbering,
               e
             );
@@ -519,10 +519,10 @@ export const usePlanStore = defineStore('plan', {
                 },
                 radius: 10,
                 seat_number: numbers[idx],
-                color: '#333333',
+                color: "#333333",
                 guid: generateID(),
                 uuid: uuid(),
-                special: 'top',
+                special: "top",
                 category,
               };
             });
@@ -537,16 +537,16 @@ export const usePlanStore = defineStore('plan', {
                 },
                 radius: 10,
                 seat_number: numbers[idx],
-                color: '#333333',
+                color: "#333333",
                 uuid: uuid(),
                 guid: generateID(),
-                special: 'top',
+                special: "top",
                 category,
               };
             });
         }
 
-        const ss = r.seats.filter((item) => item.special !== 'top');
+        const ss = r.seats.filter((item) => item.special !== "top");
         ss.forEach((item, idx) => (item.seat_number = numbers[idx + val]));
         r.seats = [...top, ...ss];
       });
@@ -557,7 +557,7 @@ export const usePlanStore = defineStore('plan', {
       areas.forEach((r) => {
         const width = r.rectangleTable.width;
         const height = r.rectangleTable.height;
-        let bottom = r.seats.filter((item) => item.special === 'bottom');
+        let bottom = r.seats.filter((item) => item.special === "bottom");
         const category = r.seats[r.seats.length - 1].category;
         const dt = (width - 20) / (val - 1);
         let numbers = [];
@@ -605,16 +605,16 @@ export const usePlanStore = defineStore('plan', {
             }
           } catch (e) {
             console.warn(
-              'Crash while trying to test seat numbering schema',
+              "Crash while trying to test seat numbering schema",
               numbering,
               e
             );
           }
         }
 
-        const top = r.seats.filter((item) => item.special === 'top');
-        const right = r.seats.filter((item) => item.special === 'right');
-        const left = r.seats.filter((item) => item.special === 'left');
+        const top = r.seats.filter((item) => item.special === "top");
+        const right = r.seats.filter((item) => item.special === "right");
+        const left = r.seats.filter((item) => item.special === "left");
 
         let st = top.length + right.length;
 
@@ -629,10 +629,10 @@ export const usePlanStore = defineStore('plan', {
                 },
                 radius: 10,
                 seat_number: numbers[st + idx],
-                color: '#333333',
+                color: "#333333",
                 uuid: uuid(),
                 guid: generateID(),
-                special: 'bottom',
+                special: "bottom",
                 category,
               };
             });
@@ -647,10 +647,10 @@ export const usePlanStore = defineStore('plan', {
                 },
                 radius: 10,
                 seat_number: numbers[st + idx],
-                color: '#333333',
+                color: "#333333",
                 uuid: uuid(),
                 guid: generateID(),
-                special: 'bottom',
+                special: "bottom",
                 category,
               };
             });
@@ -670,7 +670,7 @@ export const usePlanStore = defineStore('plan', {
       areas.forEach((r) => {
         const width = r.rectangleTable.width;
         const height = r.rectangleTable.height;
-        let right = r.seats.filter((item) => item.special === 'right');
+        let right = r.seats.filter((item) => item.special === "right");
         const category = r.seats[r.seats.length - 1].category;
         const dt = (height - 20) / (val - 1);
         let numbers = [];
@@ -718,16 +718,16 @@ export const usePlanStore = defineStore('plan', {
             }
           } catch (e) {
             console.warn(
-              'Crash while trying to test seat numbering schema',
+              "Crash while trying to test seat numbering schema",
               numbering,
               e
             );
           }
         }
 
-        const top = r.seats.filter((item) => item.special === 'top');
-        const bottom = r.seats.filter((item) => item.special === 'bottom');
-        const left = r.seats.filter((item) => item.special === 'left');
+        const top = r.seats.filter((item) => item.special === "top");
+        const bottom = r.seats.filter((item) => item.special === "bottom");
+        const left = r.seats.filter((item) => item.special === "left");
 
         let st = top.length;
         if (val > 1) {
@@ -741,10 +741,10 @@ export const usePlanStore = defineStore('plan', {
                 },
                 radius: 10,
                 seat_number: numbers[idx + st],
-                color: '#333333',
+                color: "#333333",
                 uuid: uuid(),
                 guid: generateID(),
-                special: 'right',
+                special: "right",
                 category,
               };
             });
@@ -759,10 +759,10 @@ export const usePlanStore = defineStore('plan', {
                 },
                 radius: 10,
                 seat_number: numbers[idx + st],
-                color: '#333333',
+                color: "#333333",
                 uuid: uuid(),
                 guid: generateID(),
-                special: 'right',
+                special: "right",
                 category,
               };
             });
@@ -785,7 +785,7 @@ export const usePlanStore = defineStore('plan', {
       areas.forEach((r) => {
         const width = r.rectangleTable.width;
         const height = r.rectangleTable.height;
-        let left = r.seats.filter((item) => item.special === 'left');
+        let left = r.seats.filter((item) => item.special === "left");
         const category = r.seats[r.seats.length - 1].category;
         const dt = (height - 20) / (val - 1);
         let numbers = [];
@@ -833,16 +833,16 @@ export const usePlanStore = defineStore('plan', {
             }
           } catch (e) {
             console.warn(
-              'Crash while trying to test seat numbering schema',
+              "Crash while trying to test seat numbering schema",
               numbering,
               e
             );
           }
         }
 
-        const top = r.seats.filter((item) => item.special === 'top');
-        const right = r.seats.filter((item) => item.special === 'right');
-        const bottom = r.seats.filter((item) => item.special === 'bottom');
+        const top = r.seats.filter((item) => item.special === "top");
+        const right = r.seats.filter((item) => item.special === "right");
+        const bottom = r.seats.filter((item) => item.special === "bottom");
         const st = top.length + right.length + bottom.length;
 
         if (val > 1) {
@@ -856,10 +856,10 @@ export const usePlanStore = defineStore('plan', {
                 },
                 radius: 10,
                 seat_number: numbers[st + idx],
-                color: '#333333',
+                color: "#333333",
                 uuid: uuid(),
                 guid: generateID(),
-                special: 'left',
+                special: "left",
                 category,
               };
             });
@@ -874,10 +874,10 @@ export const usePlanStore = defineStore('plan', {
                 },
                 radius: 10,
                 seat_number: numbers[st + idx],
-                color: '#333333',
+                color: "#333333",
                 uuid: uuid(),
                 guid: generateID(),
-                special: 'left',
+                special: "left",
                 category,
               };
             });
@@ -890,8 +890,9 @@ export const usePlanStore = defineStore('plan', {
     modifyRoundTableRadius(areas, r) {
       areas.forEach((a) => {
         a.radius = r;
+        const total = a.seats.length + a?.space;
         a.seats.forEach((s, idx, arr) => {
-          const degree = ((2 * Math.PI) / arr.length) * idx;
+          const degree = ((2 * Math.PI) / total) * idx;
           s.position.x = (r + 10) * Math.cos(degree);
           s.position.y = (r + 10) * Math.sin(degree);
         });
@@ -919,9 +920,9 @@ export const usePlanStore = defineStore('plan', {
         z.areas.forEach((a) => {
           if (areaIds.includes(a.uuid)) {
             for (const arg in args) {
-              if (arg.includes('__')) {
+              if (arg.includes("__")) {
                 let inner = a;
-                const argparts = arg.split('__');
+                const argparts = arg.split("__");
                 argparts.forEach((part, index) => {
                   if (index === argparts.length - 1) {
                     inner[part] = args[arg];
@@ -966,7 +967,7 @@ export const usePlanStore = defineStore('plan', {
 
             // Assuming SEAT_NUMBERINGS is available and imported
             //Changed here
-            let newnumber = '?';
+            let newnumber = "?";
             for (let numbering of SEAT_NUMBERINGS) {
               try {
                 let guessedStartAt = numbering.findStartAt(
@@ -1012,7 +1013,7 @@ export const usePlanStore = defineStore('plan', {
                 }
               } catch (e) {
                 console.warn(
-                  'Crash while trying to test seat numbering schema',
+                  "Crash while trying to test seat numbering schema",
                   numbering,
                   e
                 );
@@ -1251,7 +1252,7 @@ export const usePlanStore = defineStore('plan', {
                   }
                 } catch (e) {
                   console.warn(
-                    'Crash while trying to test seat numbering schema',
+                    "Crash while trying to test seat numbering schema",
                     numbering,
                     e
                   );
@@ -1340,7 +1341,7 @@ export const usePlanStore = defineStore('plan', {
                 }
               } catch (e) {
                 console.warn(
-                  'Crash while trying to test seat numbering schema',
+                  "Crash while trying to test seat numbering schema",
                   numbering,
                   e
                 );
@@ -1424,8 +1425,8 @@ export const usePlanStore = defineStore('plan', {
           zone = this._plan.zones.find((z) => z.uuid === zone);
           const row = {
             position: { x: position.x, y: position.y },
-            row_number: 'A',
-            row_number_position: 'both',
+            row_number: "A",
+            row_number_position: "both",
             seats: [],
             guid: generateID(),
             uuid: uuid(),
@@ -1437,7 +1438,7 @@ export const usePlanStore = defineStore('plan', {
               guid: generateID(),
               uuid: uuid(),
               position: { x: spos.x, y: spos.y },
-              category: '',
+              category: "",
             });
           }
 
@@ -1544,7 +1545,7 @@ export const usePlanStore = defineStore('plan', {
     setPlanSize(width, height) {
       if (width) this._plan.size.width = width;
       if (height) this._plan.size.height = height;
-      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event("resize"));
       this.persistPlan();
     },
 
@@ -1565,7 +1566,7 @@ export const usePlanStore = defineStore('plan', {
         });
 
         z.areas.forEach((r) => {
-          if (r.shape === 'roundTable' || r.shape === 'rectangleTable') {
+          if (r.shape === "roundTable" || r.shape === "rectangleTable") {
             if (rowIds.includes(r.uuid) && r.seats.length > 0) {
               r.seats.forEach((s) => {
                 s.tag_name = value;
@@ -1584,7 +1585,7 @@ export const usePlanStore = defineStore('plan', {
     },
 
     rowRotate(rowIds, angle) {
-      console.log('rotate+');
+      console.log("rotate+");
     },
 
     setRotateLabel(rowIds, value) {

@@ -67,6 +67,8 @@ export default {
     const drawingStartY = ref(0);
     const drawingCurrentX = ref(100);
     const drawingCurrentY = ref(100);
+    const rowCurrentX = ref(100);
+    const rowCurrentY = ref(100);
     const polygonDrawing = ref(false);
     const polygonPoints = ref([]);
     const rowBlockDrawing = ref(false);
@@ -160,6 +162,8 @@ export default {
       rowDrawing,
       rowSpacing,
       rowSeatSpacing,
+      rowCurrentX,
+      rowCurrentY,
       getSvgRect,
       nseat
     };
@@ -1044,6 +1048,8 @@ export default {
           this.drawingStartY = rowPos.y;
           this.drawingCurrentX = rowPos.x;
           this.drawingCurrentY = rowPos.y;
+          this.rowCurrentX = rowPos.x;
+          this.rowCurrentY = rowPos.y;
           break;
         }
         case "rows": {
@@ -1064,6 +1070,8 @@ export default {
           this.drawingStartY = pos.y;
           this.drawingCurrentX = pos.x;
           this.drawingCurrentY = pos.y;
+          this.rowCurrentX = pos.x;
+          this.rowCurrentY = pos.y;
           break;
         }
         case "stgrows": {
@@ -1084,6 +1092,8 @@ export default {
           this.drawingStartY = pos.y;
           this.drawingCurrentX = pos.x;
           this.drawingCurrentY = pos.y;
+          this.rowCurrentX = pos.x;
+          this.rowCurrentY = pos.y;
           break;
         }
       }
@@ -1394,6 +1404,8 @@ export default {
           this.drawingCurrentY = pos.y;
           break;
         case "row":
+          this.rowCurrentX = pos.x;
+          this.rowCurrentY = pos.y;
           if (!this.rowDrawing) return false;
           // rotate-setting
           // if (event.shiftKey || this.bSnap2Grid) {
@@ -1426,6 +1438,8 @@ export default {
           // }
           break;
         case "rows":
+          this.rowCurrentX = pos.x;
+          this.rowCurrentY = pos.y;
           if (!this.rowBlockDrawing) return false;
           if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
@@ -1434,7 +1448,8 @@ export default {
           this.drawingCurrentY = pos.y;
           break;
         case "stgrows":
-          console.log('stgrows')
+          this.rowCurrentX = pos.x;
+          this.rowCurrentY = pos.y;
           if (!this.stgrowBlockDrawing) return false;
           if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
@@ -2134,6 +2149,8 @@ export default {
           break;
       }
     },
+
+
     finishPolygon() {
       const newId = uuid();
       const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
@@ -2261,7 +2278,6 @@ export default {
     },
 
     createZoom() {
-      // console.log('createZoom')
       if (!this.svg) return;
 
       const viewportHeight = this.svg.clientHeight;
@@ -2314,13 +2330,23 @@ export default {
               this.tool == "handon")
           );
         })
-        .wheelDelta((event) => {
-          // In contrast to default implementation, do not use a factor 10 if ctrl is pressed
-          return (
-            -event.deltaY *
-            (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002)
-          );
-        })
+        // .wheelDelta((event) => {
+        //   // In contrast to default implementation, do not use a factor 10 if ctrl is pressed
+        //   console.log(event)
+        //   // const deltaX = event.deltaX;
+        //   // const deltaY = event.deltaY;
+        //   // // const scale = event.transform.k;
+        //   // const translation = event.transform;
+
+        //   // translation.x -= deltaX;
+        //   // translation.y -= deltaY;
+
+        //   // return -deltaY * (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002);
+        //   // return (
+        //   //   -event.deltaY *
+        //   //   (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002)
+        //   // );
+        // })
         .on("zoom", (event) => {
           const scale = event.transform.k;
           useMainStore().setZoomTransform(event.transform);
@@ -2353,6 +2379,7 @@ export default {
         .on("wheel", function (event) {
           // Prevent scrolling when the min/max of the zoom extent is reached
           event.preventDefault();
+
         });
 
       const svg = d3.select(this.svg).call(this.zoom);
@@ -2551,7 +2578,7 @@ export default {
     getTransform() {
       return this.zoomTransform.k;
     },
-    setTransfrom(v) {
+    setTransform(v) {
       this.zoomTransform.k = v;
     },
 
@@ -2586,7 +2613,7 @@ export default {
 <template>
   <svg :width="plan.size.width" :height="plan.size.height" v-if="plan.size"
     @mousemove="mousemove" @mousedown="mousedown" @mouseup="mouseup" ref="svg"
-    style="
+    @wheel="wheel" style="
       width: 100%;
       height: 100%;
       background-color: rgb(151, 162, 182);
@@ -2753,6 +2780,12 @@ export default {
         </circle>
       </g>
 
+      <circle class="preview" v-if="tool === 'row' && !rowDrawing"
+        :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
+      <circle class="preview" v-if="tool === 'rows' && !rowBlockDrawing"
+        :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
+      <circle class="preview" v-if="tool === 'stgrows' && !stgrowBlockDrawing"
+        :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
       <g class="row-preview" v-if="tool === 'row' && rowDrawing">
         <line class="preview" :x1="drawingStartX" :y1="drawingStartY"
           :x2="drawingCurrentX" :y2="drawingCurrentY"></line>

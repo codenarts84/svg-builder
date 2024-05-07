@@ -30,10 +30,7 @@
         </v-col>
         <v-col cols="12" sm="6"> Text Color </v-col>
         <v-col cols="12" sm="6">
-        </v-col>
-        <v-col cols="12" sm="12">
-          <v-color-picker class="v-color-picker" mode="hexa"
-            v-model="text_color" />
+          <InputColor :color="textColor" :setColor="setTextColor" />
         </v-col>
         <v-col cols="12" sm="6"> Rotate Label with Table </v-col>
         <v-col cols="12" sm="6">
@@ -48,6 +45,7 @@
 import { computed, ref, defineProps, watch } from 'vue';
 import { usePlanStore } from '@/stores/plan';
 import { useMainStore } from '@/stores';
+import InputColor from '@/views/home/components/InputColor.vue'
 
 const plan = usePlanStore();
 const round = (fl, places) => Number(fl.toFixed(places ? places : 0))
@@ -148,7 +146,7 @@ const setTextSize = (e) => {
 }
 
 const setTextColor = (e) => {
-  plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), label__color: e.target.value })
+  plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), label__color: e })
 }
 
 const setRotate = (e) => {

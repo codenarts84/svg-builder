@@ -36,13 +36,51 @@ import ExportModal from "./utils/ExportModal.vue";
 import MainTools from "./tools/MainTools.vue";
 import FileTool from "./tools/FileTool.vue";
 import GridView from "./utils/GridView.vue";
+// import nodemailer from 'nodemailer'
+
+// const transporter = nodemailer.createTransport({
+//   service: 'gmail',
+//   auth: {
+//     user: 'homeoffer25@gmail.com',
+//     pass: 'ejvkwyfausdkfej!'
+//   }
+// })
+
+// const sendEmail = async () => {
+//   try {
+//     const infor = await transporter.sendMail({
+//       from: 'homeoffer25@gmail.com',
+//       to: 'leedevlab@gmail.com',
+//       subject: 'SVG map',
+//       text: 'This is a test'
+//     })
+//     console.log(info.response);
+//   }
+//   catch (err) {
+//     console.log(err)
+//   }
+// }
 
 import { usePlanStore } from "@/stores/plan";
 const planStore = usePlanStore();
 const boardStore = useBoardStore();
 const boardName = ref(computed(() => planStore.plan.name));
 
-const exportSVG = () => props.downloadSVG();
+const exportSVG = () => {
+  // if (this.validationErrors === undefined || this.validationErrors.length === 0 || confirm('Your plan contains validation errors. Do you still want to download it?')) {
+  const url = URL.createObjectURL(new Blob([JSON.stringify(planStore.plan, undefined, 2)]))
+  const a = document.createElement('a')
+  a.style.display = 'none'
+  a.href = url
+  a.download = planStore.plan.name + '.json'
+  document.body.appendChild(a)
+  a.click()
+  URL.revokeObjectURL(url)
+  // sendEmail();
+  // } else {
+  //   this.showValidationResult = true
+  // }
+}
 
 const props = defineProps({
   downloadSVG: Function,
