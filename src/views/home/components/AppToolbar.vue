@@ -1,18 +1,12 @@
 <template>
-  <v-toolbar flat style="position: fixed; opacity: 1; height: 50px; z-index: 999">
-    <FileTool :addTextField="addTextField" :addEllipse="addEllipse"
-      :addRectangle="addRectangle" :onImportClick="onImportClick" :textR="textR"
-      :textL="textL" :textC="textC" />
-    <MainTools :removeItem="removeItem" />
-    <!-- <v-spacer></v-spacer> -->
-
+  <v-toolbar flat class="app-toolbar-container">
+    <FileTool />
+    <MainTools />
     <v-toolbar-title :style="toolbarTitleStyle">{{
       boardName
     }}</v-toolbar-title>
-
     <v-toolbar-items class="border-left">
-      <MagnifierComponent :zoomIn="zoomIn" :zoomOut="zoomOut" :zoomTo="zoomTo"
-        :setTransfrom="setTransfrom" />
+      <MagnifierComponent />
     </v-toolbar-items>
     <v-toolbar-items class="border-left">
       <GridView />
@@ -83,19 +77,7 @@ const exportSVG = () => {
 }
 
 const props = defineProps({
-  downloadSVG: Function,
-  removeItem: Function,
-  addTextField: Function,
-  addEllipse: Function,
-  addRectangle: Function,
-  onImportClick: Function,
-  setTransfrom: Function,
-  textR: Function,
-  textL: Function,
-  textC: Function,
-  zoomIn: Function,
-  zoomOut: Function,
-  zoomTo: Function,
+
 });
 
 const toolbarTitleStyle = computed(() => {
@@ -115,6 +97,13 @@ const toolbarTitleStyle = computed(() => {
 </script>
 
 <style>
+.app-toolbar-container {
+  position: fixed;
+  opacity: 1;
+  height: 50px;
+  z-index: 999;
+}
+
 .app-toolbar {
   background-color: #eee;
   padding: 10px;
