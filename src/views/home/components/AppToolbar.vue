@@ -74,6 +74,24 @@ const exportSVG = () => {
   // } else {
   //   this.showValidationResult = true
   // }
+
+  // const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">
+  //                     <rect width="100%" height="100%" fill="lightgray"/>
+  //                     <circle cx="200" cy="100" r="80" fill="orange"/>
+  //                     <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="24" fill="white">SVG Export Example</text>
+  //                   </svg>`;
+
+  // let svgContent = document.getElementById('svg').innerHTML
+  // const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+
+  // const url = URL.createObjectURL(blob);
+  // const a = document.createElement('a');
+  // a.style.display = 'none';
+  // a.href = url;
+  // a.download = 'exported_svg.svg';
+  // document.body.appendChild(a);
+  // a.click();
+  // URL.revokeObjectURL(url);
 }
 
 const props = defineProps({

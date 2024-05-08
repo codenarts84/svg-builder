@@ -67,8 +67,8 @@
         :data-section-label="area.section || ''"
         :data-category-name="area.category || ''"
         :data-section-abv="area.abbreviation || ''"></rect>
-      <text v-if="area.text.text" :x="area.text.position.x"
-        :y="area.text.position.y" :font-size="area.text.size || 16"
+      <text v-if="area.text.text" :x="area.rectangle.width / 2"
+        :y="area.rectangle.height / 2" :font-size="area.text.size || 16"
         text-anchor="middle" font-family="sans-serif" dy=".3em"
         :fill="area.text.color || '#888888'">
         {{ area.text.text }}

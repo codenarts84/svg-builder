@@ -21,7 +21,7 @@
         <v-col cols="12" sm="6"> Seats spacing </v-col>
         <v-col cols="12" sm="6">
           <input class="custom-small-text-field v-custom-input" type="number"
-            min="1" name="row_spacing" :value="seatSpacing"
+            min="20" name="row_spacing" :value="seatSpacing"
             @input="setSeatSpacing" />
         </v-col>
 

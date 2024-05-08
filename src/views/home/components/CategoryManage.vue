@@ -146,9 +146,18 @@ const handle_delete = (idx) => {
 }
 
 const handle_create_category = () => {
+  if (categories.value.length === 17) {
+    alert('Can not add category anymore')
+    return;
+  }
   const len = colors.length;
-  const rand = Math.floor(Math.random() * len);
-  const color = colors[rand]
+  let rand;
+  let color;
+  while (1) {
+    rand = Math.floor(Math.random() * len);
+    color = colors[rand]
+    if (categories.value.findIndex(i => i.color === color) === -1) break;
+  }
   const newName = getUniqueCategoryName('New Category');
   planStore.createCategory(newName, color);
   nextTick(() => {

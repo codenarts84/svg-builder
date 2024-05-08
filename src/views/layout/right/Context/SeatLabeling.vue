@@ -45,7 +45,7 @@
           </select>
         </v-col>
 
-        <v-col cols="12" sm="6"> Skip Function </v-col>
+        <v-col cols="12" sm="6"> Skip Labels </v-col>
         <v-col cols="12" sm="6">
           <input class="v-custom-input" :value="skip" @input="setSkip" />
         </v-col>
@@ -182,7 +182,17 @@ export default ({
 
   methods: {
     setSeatNumberingStartAt(e) {
-      if (this.seatNumbering) {
+      const id = this.seatNumbering.scheme.id;
+      const input = e.target;
+      const value = input.value;
+      const validLetters = /^[a-zA-Z]+$/;
+      const validNumbers = /^[0-9]+$/;
+
+      if ((id === 'alpha' || id === 'alphalower') && !validLetters.test(e.target.value)) {
+        input.value = value.replace(/[^a-zA-Z]/g, '');
+      } else if (id === 'natural' && !validNumbers.test(e.target.value)) {
+        input.value = value.replace(/[^0-9]/g, '');
+      } else {
         const le = this.seatNumbering.scheme.findStartAt(e.target.value)
         this.planStore.renumberSeats(this.rows.map(r => r.uuid), this.seatNumbering.scheme, le, this.seatNumbering.reversed)
         this.planStore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip_letter: '' })

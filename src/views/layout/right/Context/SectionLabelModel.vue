@@ -32,12 +32,14 @@
 <script setup>
 import { ref, defineProps } from "vue";
 import { v4 as uuid } from "uuid";
+import { watch } from "vue";
 const dialog = ref(false);
 const newLabel = ref("");
 const newAbr = ref("");
 const props = defineProps({
   addTags: Function,
 });
+
 
 const onAdd = () => {
   if (newLabel.value && newAbr.value) {

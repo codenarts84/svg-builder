@@ -51,9 +51,10 @@
         </v-col>
 
         <v-col cols="12" sm="6"
-          v-if="shape !== 'gaCircle' && shape !== 'gaSquare'"> Text </v-col>
+          v-if="shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
+          Text </v-col>
         <v-col cols="12" sm="6"
-          v-if="shape !== 'gaCircle' && shape !== 'gaSquare'">
+          v-if="shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
           <input class=" v-custom-input" name="text_value" :value="textValue"
             @input="setText" maxlength="15" />
         </v-col>
@@ -64,35 +65,63 @@
             :value="textSize" @input="setTextSize" />
         </v-col>
 
-        <v-col cols="12" sm="6"> Text Color </v-col>
-        <v-col cols="12" sm="6">
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
+          Text Color </v-col>
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
           <InputColor :color="textColor" :setColor="setTextColor" />
         </v-col>
         <!-- <v-col cols="12" sm="12" v-if="bTextColor">
           <v-color-picker class="v-color-picker" mode="hexa"
             v-model="text_color" />
         </v-col> -->
+        <v-col cols="12" sm="6"
+          v-if="shape === 'gaCircle' || shape === 'gaSquare' || shape === 'gaPolygon'">
+          Text Color </v-col>
+        <v-col cols="12" sm="6"
+          v-if="shape === 'gaCircle' || shape === 'gaSquare' || shape === 'gaPolygon'">
+          <select class="v-custom-input" :value="gaTextColor"
+            @input="setGATextColor">
+            <option v-for="(op, idx) in gaColorOptions" :key="idx"
+              :value="op.name">
+              {{ op.name }}
+            </option>
+          </select>
+        </v-col>
 
-        <v-col cols="12" sm="6"> label Text position (x) </v-col>
-        <v-col cols="12" sm="6">
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
+          label Text position (x) </v-col>
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
           <input type="number" class="v-custom-input" name="text_x" :value="textX"
             @input="setTextX" />
         </v-col>
 
-        <v-col cols="12" sm="6"> label Text position (y) </v-col>
-        <v-col cols="12" sm="6">
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
+          label Text position (y) </v-col>
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
           <input type="number" class="v-custom-input" name="text_y" :value="textY"
             @input="setTextY" />
         </v-col>
 
-        <v-col cols="12" sm="6" v-if="shape !== 'text'"> Stroke Width </v-col>
-        <v-col cols="12" sm="6" v-if="shape !== 'text'">
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'text' && shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
+          Stroke Width </v-col>
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'text' && shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
           <input type="number" min="0" class="v-custom-input" name="text_size"
             :value="borderWidth" @input="setBorderWidth" />
         </v-col>
 
-        <v-col cols="12" sm="6" v-if="shape !== 'text'"> Stroke Color </v-col>
-        <v-col cols="12" sm="6" v-if="shape !== 'text'">
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'text' && shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
+          Stroke Color </v-col>
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'text' && shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
           <InputColor :color="borderColor" :setColor="setBorderColor" />
         </v-col>
         <!-- <v-col cols="12" sm="12" v-if="shape !== 'text'">
@@ -101,8 +130,11 @@
         </v-col> -->
 
 
-        <v-col cols="12" sm="6" v-if="shape !== 'text'"> Fill Color </v-col>
-        <v-col cols="12" sm="6" v-if="shape !== 'text'">
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'text' && shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
+          Fill Color </v-col>
+        <v-col cols="12" sm="6"
+          v-if="shape !== 'text' && shape !== 'gaCircle' && shape !== 'gaSquare' && shape !== 'gaPolygon'">
           <InputColor :color="color" :setColor="setColor" />
         </v-col>
 
@@ -138,10 +170,17 @@ export default {
     const text_color = ref(groupValue(this.areas, a => a.text ? a.text.color : undefined))
     const fill_color = ref(groupValue(this.areas, a => a.color))
     const stroke_color = ref(groupValue(this.areas, a => a.border_color))
+    const gaColorOptions = ref([
+      { name: 'White', color: '#ffffff' },
+      { name: 'Gray', color: '#333333' },
+      { name: 'Black', color: '#000000' }
+    ]);
+
     return {
       text_color,
       fill_color,
       stroke_color,
+      gaColorOptions
     }
   },
   watch: {
@@ -162,6 +201,10 @@ export default {
     }
   },
   computed: {
+    gaTextColor() {
+      const value = this.gaColorOptions.find(item => item.color === groupValue(this.areas, a => a.text.color));
+      return value.name;
+    },
     rotation() {
       return Math.round(groupValue(this.areas, a => a.rotation))
     },
@@ -214,6 +257,11 @@ export default {
     }
   },
   methods: {
+    setGATextColor(e) {
+      const value = this.gaColorOptions.find(item => item.name === e.target.value);
+      console.log(value)
+      this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__color: value.color })
+    },
     setColor(e) {
       this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), color: e })
     },

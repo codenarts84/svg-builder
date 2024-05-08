@@ -22,6 +22,7 @@ import * as d3 from "d3";
 import ZoneComponent from "./ZoneComponent.vue";
 import { useToolbarStore } from '@/stores/toolbar';
 import { useSeatFormatStore } from "@/stores/seatFormat";
+import { useBoardStore } from "@/stores/svgStore";
 
 const round = (fl, places) => Number(fl.toFixed(places || 0));
 
@@ -76,6 +77,7 @@ export default {
     const rowDrawing = ref(false);
     const rowSpacing = ref(25);
     const rowSeatSpacing = ref(25);
+    const mouseStatus = ref(false);
 
     const store = useMainStore();
     const planstore = usePlanStore();
@@ -163,14 +165,11 @@ export default {
       rowSeatSpacing,
       rowCurrentX,
       rowCurrentY,
+      mouseStatus,
       getSvgRect,
     };
   },
   computed: {
-    metadata() {
-      const author = 'Lazar'
-      return `<author>${author}</author>`;
-    },
     noTableSelection() {
       if (this.selection.length === 1) {
         for (const z of this.plan.zones) {
@@ -1128,7 +1127,12 @@ export default {
       );
       const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
 
-      if (pos.x < 0 || pos.y < 0 || pos.x > this.plan.size.width || pos.y > this.plan.size.height) return;
+      if (pos.x < 0 || pos.y < 0 || pos.x > this.plan.size.width || pos.y > this.plan.size.height) {
+        this.mouseStatus = false;
+        return;
+      }
+
+      this.mouseStatus = true;
 
       if (this.rotating && this.tool !== "seatselect") {
         let angle = -Math.atan(
@@ -1771,6 +1775,7 @@ export default {
             usePlanStore()
               .createArea(this.selectedZone, {
                 shape: "gaSquare",
+                abbreviation: "GA",
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
                 border_width: 2,
@@ -1895,6 +1900,7 @@ export default {
             usePlanStore()
               .createArea(this.selectedZone, {
                 shape: "gaCircle",
+                abbreviation: "GA",
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
                 border_width: 2,
@@ -2617,28 +2623,31 @@ export default {
 };
 </script>
 <template>
-  <svg :width="plan.size.width" :height="plan.size.height" v-if="plan.size"
-    @mousemove="mousemove" @mousedown="mousedown" @mouseup="mouseup"
-    @wheel="wheel" ref="svg" style="
+  <svg id="svg" :width="plan.size.width" :height="plan.size.height"
+    v-if="plan.size" @mousemove="mousemove" @mousedown="mousedown"
+    @mouseup="mouseup" @wheel="wheel" ref="svg" style="
       width: 100%;
       height: 100%;
       background-color: rgb(151, 162, 182);
       user-select: none;">
     <metadata>
-      <!-- <booktix-data> -->
-      <categories>
-        <category v-for="(category, idx) in categories" :key="idx">
-          <name>{{ category.name }}</name>
-          <color>{{ category.color }}</color>
-        </category>
-      </categories>
-      <sections>
-        <section v-for="(section, idx) in sections" :key="idx">
-          <name>{{ section.label }}</name>
-          <abv>{{ section.abv }}</abv>
-        </section>
-      </sections>
-      <!-- </booktix-data> -->
+      <booktix-data>
+        <chartname>
+          {{ plan.name }}
+        </chartname>
+        <categories>
+          <category v-for="(category, idx) in categories" :key="idx">
+            <name>{{ category.name }}</name>
+            <color>{{ category.color }}</color>
+          </category>
+        </categories>
+        <sections>
+          <section v-for="(section, idx) in sections" :key="idx">
+            <name>{{ section.label }}</name>
+            <abv>{{ section.abv }}</abv>
+          </section>
+        </sections>
+      </booktix-data>
     </metadata>
     <defs>
       <clipPath id="clip">
@@ -2763,7 +2772,7 @@ export default {
           :cx="circ.cx" :cy="circ.cy" :key="circ"></circle>
       </g>
 
-      <g class="preview" v-if="(tool === 'roundTable')">
+      <g class="preview" v-if="(tool === 'roundTable') && mouseStatus">
         <circle :cx="drawingCurrentX" :cy="drawingCurrentY" :r="25">
         </circle>
         <circle v-for="index in 6" :key="index"
@@ -2772,7 +2781,7 @@ export default {
         </circle>
       </g>
 
-      <g class="preview" v-if="(tool === 'rectangleTable')"
+      <g class="preview" v-if="(tool === 'rectangleTable') && mouseStatus"
         :transform="`translate(-70, -30)`">
         <rect :x="drawingCurrentX" :y="drawingCurrentY" :width="140" :height="60">
         </rect>
@@ -2786,11 +2795,13 @@ export default {
         </circle>
       </g>
 
-      <circle class="preview" v-if="tool === 'row' && !rowDrawing"
+      <circle class="preview" v-if="tool === 'row' && !rowDrawing && mouseStatus"
         :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
-      <circle class="preview" v-if="tool === 'rows' && !rowBlockDrawing"
+      <circle class="preview"
+        v-if="tool === 'rows' && !rowBlockDrawing && mouseStatus"
         :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
-      <circle class="preview" v-if="tool === 'stgrows' && !stgrowBlockDrawing"
+      <circle class="preview"
+        v-if="tool === 'stgrows' && !stgrowBlockDrawing && mouseStatus"
         :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
       <g class="row-preview" v-if="tool === 'row' && rowDrawing">
         <line class="preview" :x1="drawingStartX" :y1="drawingStartY"
