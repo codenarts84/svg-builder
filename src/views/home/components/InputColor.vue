@@ -32,5 +32,6 @@ watch(color, (newValue, oldValue) => {
   right: 0;
   max-width: 250px !important;
   width: 250px !important;
+  z-index: 999;
 }
 </style>

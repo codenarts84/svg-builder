@@ -60,11 +60,6 @@ const clip = () => {
   store.paste();
 }
 
-const props = defineProps({
-  removeItem: Function,
-});
-
-const onDelete = () => props.removeItem();
 const selection = computed(() => store.selection());
 
 const deleteObjects = () => usePlanStore().deleteObjects(selection);
@@ -78,6 +73,7 @@ const onHand = () => {
   set_all_false();
   boardstore.set_hand();
 };
+
 const onSelect = () => {
   set_all_false();
   boardstore.select_toggle(true);

@@ -1,15 +1,6 @@
 <template>
-  <AppToolbar :importSVG="importSVG" :zoomIn="zoomIn" :setTransfrom="setTransfrom"
-    :zoomOut="zoomOut" :zoomTo="zoomTo" :textL="textL" :textR="textR"
-    :textC="textC" :addTextField="addTextField" :addRectangle="addRectangle"
-    :addEllipse="addEllipse" :removeItem="removeItem"
-    :downloadSVG="handleDownloadSVG" :onImportClick="onImportClick" />
-  <v-layout style="
-      height: calc(100vh - 50px);
-      /* top: 50px; */
-      /* position: absolute; */
-      width: calc(100% - 300px);
-    ">
+  <AppToolbar />
+  <v-layout class="main-container">
     <RightNav :temp_Rotate="temp_Rotate" />
     <div class="main-pan">
       <HandMenu :selectionBoundary="selectionBoundary" />
@@ -17,7 +8,6 @@
       <!-- <Toolbar></Toolbar> -->
       <Plan ref="planref"></Plan>
       <StatusBar></StatusBar>
-      <!-- <TestEditor ref="TestEdt" /> -->
     </div>
   </v-layout>
 </template>
@@ -42,30 +32,8 @@ store.loadPlan(
 );
 
 const planref = ref(null);
-const TestEdt = ref(null);
-
-// const zoomIn = () => {
-//   TestEdt.value.zoomIn();
-// };
-
-const removeItem = () => {
-  TestEdt.value.deleteItem();
-};
-
-const importSVG = () => TestEdt.value.importSVG();
-// const zoomOut = () => TestEdt.value.zoomOut();
-const onImportClick = () => TestEdt.value.onImportClick();
-const handleDownloadSVG = () => {
-  if (TestEdt.value) {
-    // console.log(TestEdt.value);
-    TestEdt.value.downloadSVG();
-  } else {
-    console.error("TestEdt component is not yet mounted or available.");
-  }
-};
 
 import { usePlanStore } from "@/stores/plan.js"; // Assuming you've set up a Pinia store in this location
-import Toolbar from "./components/Toolbar.vue";
 import Plan from "./components/canvas/Plan.vue";
 import StatusBar from "./components/StatusBar.vue";
 
@@ -84,20 +52,10 @@ const cmdOtherwiseCtrl = ref(
 );
 
 const plan = computed(() => planStore.plan);
-const setTransfrom = (v) => planref.value.setTransfrom(v);
 
-const zoomIn = () => {
-  planref.value.scaleBy(planref.value, 1.1);
-};
-const zoomOut = () => {
-  // planref.value.scaleTo(planref.value, 1);
-  planref.value.scaleBy(planref.value, 0.9);
-};
 const temp_Rotate = (v) => planref.value.temp_Rotate(v);
 
 const selectionBoundary = () => planref.value.selectionBoundary;
-
-const zoomTo = (v) => planref.value.scaleTo(planref.value, v);
 
 // Methods
 const hideWelcomePrompt = () => {
@@ -113,5 +71,10 @@ const hideWelcomePrompt = () => {
   /* display: flex; */
   /* align-items: center; */
   /* justify-content: center; */
+}
+
+.main-container {
+  height: calc(100vh - 50px);
+  width: calc(100% - 300px);
 }
 </style>

@@ -341,17 +341,6 @@ export default {
   top: -1px;
 }
 
-/* .c-status-bar div span.hint {
-  margin-right: 5px;
-}
-
-.c-status-bar span.selected-hint {
-  display: inline-block;
-  margin-right: 15px;
-  max-width: 200px;
-  width: 200px;
-} */
-
 .selected-hint {
   padding: 0 5px;
   max-width: 200px;

@@ -1,5 +1,5 @@
 <template>
-  <v-btn class="btn" @click="setTransfrom((zoomValue - 10) / 100)">
+  <v-btn class="btn" @click="setTransform((zoomValue - 10) / 100)">
     <v-icon color="black" icon="mdi-minus" size="large"></v-icon>
     <v-tooltip activator="parent" location="bottom">Zoom out</v-tooltip>
   </v-btn>
@@ -8,7 +8,7 @@
     class="custom-input-1" dense @change="onChange" type="number"
     variant="plane" />
 
-  <v-btn class="btn" @click="setTransfrom((zoomValue + 10) / 100)">
+  <v-btn class="btn" @click="setTransform((zoomValue + 10) / 100)">
     <v-icon color="black" icon="mdi-plus" size="large"></v-icon>
     <v-tooltip activator="parent" location="bottom">Zoom In</v-tooltip>
   </v-btn>
@@ -19,27 +19,18 @@ import { computed, defineProps, ref, watch } from "vue";
 import { useSvgStore } from "../../../../stores/svgStore";
 import { useMainStore } from "@/stores";
 const store = useMainStore();
+const zoomTransform = computed(() => store.zoomTransform);
 
 const zoomValue = ref(computed(() => Math.round(store.zoomTransform.k * 100)));
-watch(
-  [store.zoomTransform.k],
-  () => {
-    // console.log("Changed", store.zoomTransform.k);
-  },
-  { immediate: true }
-);
+
 const onChange = (e) => {
-  props.setTransfrom(e.target.value / 100);
+  zoomTransform.value.k = (e.target.value / 100);
 };
 
-const props = defineProps({
-  zoomIn: Function,
-  zoomOut: Function,
-  zoomTo: Function,
-  setTransfrom: Function,
-});
+const setTransform = val => {
+  zoomTransform.value.k = val;
+}
 
-// const zoomIn =
 </script>
 
 <style>

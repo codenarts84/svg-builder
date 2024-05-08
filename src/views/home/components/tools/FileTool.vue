@@ -11,22 +11,13 @@
   </v-toolbar-items>
 </template>
 <script setup>
-import { defineProps, ref, computed } from "vue";
 import { useMainStore } from "@/stores";
-import { usePlanStore } from "@/stores/plan";
 import sampleplan from "@/sampleplan";
 import Ajv from 'ajv'
 import schema from '@/schema/seating-plan.schema.json'
 // import ImportIcon from "@/assets/svgs/menuIcons/ImportIcon.vue";
 const store = useMainStore();
-const plan = usePlanStore();
-const props = defineProps({
-  onImportClick: Function,
-});
 
-const tool = ref(computed(() => store.tool));
-
-const changeTool = (tool) => store.changeTool(tool);
 const reset = () => {
   if (
     window.confirm(

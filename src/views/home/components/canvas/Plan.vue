@@ -93,7 +93,6 @@ export default {
     const toolbarStore = useToolbarStore();
 
     const seatStore = useSeatFormatStore();
-    const nseat = computed(() => seatStore.nseat);
 
     const bSnap2Grid = computed(() => store.snap);
     const sections = computed(() => store.section_label)
@@ -165,7 +164,6 @@ export default {
       rowCurrentX,
       rowCurrentY,
       getSvgRect,
-      nseat
     };
   },
   computed: {
@@ -2277,6 +2275,13 @@ export default {
       }
     },
 
+    wheel(event) {
+      if (this.tool === 'hand') {
+        this.zoomTransform.x += event.deltaX / 10;
+        this.zoomTransform.y -= event.deltaY / 10;
+      }
+    },
+
     createZoom() {
       if (!this.svg) return;
 
@@ -2289,7 +2294,6 @@ export default {
           (viewportHeight - 130) / this.plan.size.height
         )
         : 1;
-      // console.log("here`````````````````");
       this.zoom = d3
         .zoom()
         .scaleExtent([
@@ -2313,7 +2317,7 @@ export default {
           [viewportWidth, viewportHeight],
         ])
         .filter((event) => {
-          const wheeled = event.type === "wheel";
+          // const wheeled = event.type === "wheel";
           const mouseDrag =
             event.type === "mousedown" ||
             event.type === "mouseup" ||
@@ -2323,32 +2327,22 @@ export default {
             event.type === "touchmove" ||
             event.type === "touchstop";
           return (
-            (wheeled || mouseDrag || touch) &&
+            (mouseDrag || touch) &&
             (event.metaKey ||
               event.ctrlKey ||
               this.tool == "hand" ||
               this.tool == "handon")
           );
         })
-        // .wheelDelta((event) => {
-        //   // In contrast to default implementation, do not use a factor 10 if ctrl is pressed
-        //   console.log(event)
-        //   // const deltaX = event.deltaX;
-        //   // const deltaY = event.deltaY;
-        //   // // const scale = event.transform.k;
-        //   // const translation = event.transform;
-
-        //   // translation.x -= deltaX;
-        //   // translation.y -= deltaY;
-
-        //   // return -deltaY * (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002);
-        //   // return (
-        //   //   -event.deltaY *
-        //   //   (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002)
-        //   // );
-        // })
+        .wheelDelta((event) => {
+          return (
+            -event.deltaY *
+            (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002)
+          );
+        })
         .on("zoom", (event) => {
           const scale = event.transform.k;
+          console.log(event.transform)
           useMainStore().setZoomTransform(event.transform);
 
           this.zoom.translateExtent([
@@ -2612,27 +2606,27 @@ export default {
 </script>
 <template>
   <svg :width="plan.size.width" :height="plan.size.height" v-if="plan.size"
-    @mousemove="mousemove" @mousedown="mousedown" @mouseup="mouseup" ref="svg"
-    @wheel="wheel" style="
+    @mousemove="mousemove" @mousedown="mousedown" @mouseup="mouseup"
+    @wheel="wheel" ref="svg" style="
       width: 100%;
       height: 100%;
       background-color: rgb(151, 162, 182);
       user-select: none;">
     <metadata>
-      <booktix-data>
-        <categories>
-          <category v-for="(category, idx) in categories" :key="idx">
-            <name>{{ category.name }}</name>
-            <color>{{ category.color }}</color>
-          </category>
-        </categories>
-        <sections>
-          <section v-for="(section, idx) in sections" :key="idx">
-            <name>{{ section.label }}</name>
-            <abv>{{ section.abv }}</abv>
-          </section>
-        </sections>
-      </booktix-data>
+      <!-- <booktix-data> -->
+      <categories>
+        <category v-for="(category, idx) in categories" :key="idx">
+          <name>{{ category.name }}</name>
+          <color>{{ category.color }}</color>
+        </category>
+      </categories>
+      <sections>
+        <section v-for="(section, idx) in sections" :key="idx">
+          <name>{{ section.label }}</name>
+          <abv>{{ section.abv }}</abv>
+        </section>
+      </sections>
+      <!-- </booktix-data> -->
     </metadata>
     <defs>
       <clipPath id="clip">
