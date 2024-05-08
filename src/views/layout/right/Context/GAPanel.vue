@@ -21,7 +21,7 @@
         <v-col cols="12" sm="6"> Abbreviation </v-col>
         <v-col cols="12" sm="6">
           <input class="v-custom-input" name="abbreviation" :value="abbreviation"
-            @input="setAbbreviation" maxlength="8" />
+            @input="setAbbreviation" maxlength="6" />
         </v-col>
 
       </v-row>
@@ -78,7 +78,9 @@ export default {
 
       this.planStore.modifyAreas({
         areaIds: this.areas.map(a => a.uuid),
-        abbreviation: input.value
+        abbreviation: input.value,
+        text__text: input.value
+
       })
     },
     setLabel(e) {

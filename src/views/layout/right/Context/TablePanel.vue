@@ -31,12 +31,6 @@
             :value="rotation" @input="setRotation" />
         </v-col>
 
-        <v-col cols="12" sm="6" v-if="shape === 'roundTable'"> Capacity </v-col>
-        <v-col cols="12" sm="6" v-if="shape === 'roundTable'">
-          <input type="number" min="0" class="v-custom-input" name="rotation"
-            :value="capacity" @input="setCapacity" />
-        </v-col>
-
         <v-col cols="12" sm="6" v-if="shape === 'roundTable'"> Open spaces
         </v-col>
         <v-col cols="12" sm="6" v-if="shape === 'roundTable'">
@@ -44,30 +38,55 @@
             :value="space" @input="setSpace" />
         </v-col>
 
+      </v-row>
+
+    </v-container>
+  </div>
+
+  <v-divider></v-divider>
+
+  <div style="padding: 15px 10px; text-align: left">
+    <h4>
+      Capacity
+    </h4>
+    <v-container>
+      <v-row style="display: flex; justify-content: center; align-items: center">
+        <v-col cols="12" sm="6" v-if="shape === 'roundTable'"> Capacity </v-col>
+        <v-col cols="12" sm="6" v-if="shape === 'roundTable'">
+          <input type="number" min="0" class="v-custom-input" name="rotation"
+            :value="capacity" @input="setCapacity" />
+        </v-col>
+
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'"> Top </v-col>
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'">
-          <input type="number" min="0" class="v-custom-input" name="rotation"
+          <input type="number" min="0" class="v-custom-input" name="capacity_top"
             :value="capacityT" @input="setCapacityT" />
         </v-col>
 
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'"> Bottom </v-col>
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'">
-          <input type="number" min="0" class="v-custom-input" name="rotation"
-            :value="capacityB" @input="setCapacityB" />
+          <input type="number" min="0" class="v-custom-input"
+            name="capacity_bottom" :value="capacityB" @input="setCapacityB" />
         </v-col>
 
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'"> Left </v-col>
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'">
-          <input type="number" min="0" class="v-custom-input" name="rotation"
+          <input type="number" min="0" class="v-custom-input" name="capacity_left"
             :value="capacityL" @input="setCapacityL" />
         </v-col>
 
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'"> Right </v-col>
         <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'">
-          <input type="number" min="0" class="v-custom-input" name="rotation"
-            :value="capacityR" @input="setCapacityR" />
+          <input type="number" min="0" class="v-custom-input"
+            name="capacity_right" :value="capacityR" @input="setCapacityR" />
         </v-col>
 
+        <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'"> Total
+        </v-col>
+        <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'">
+          <input type="number" min="0" class="v-custom-input"
+            name="capacity_total" :value="capacityTotal" readonly disabled />
+        </v-col>
       </v-row>
     </v-container>
   </div>
@@ -136,6 +155,9 @@ export default {
     },
     space() {
       return groupValue(this.areas, a => a.space)
+    },
+    capacityTotal() {
+      return groupValue(this.areas, a => a.seats.length);
     }
   },
   methods: {

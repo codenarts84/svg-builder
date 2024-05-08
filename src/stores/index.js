@@ -1,8 +1,8 @@
-import Vue from 'vue';
+import Vue from "vue";
 
-import { defineStore } from 'pinia';
-import { round } from '../lib/numbers';
-import * as d3 from 'd3';
+import { defineStore } from "pinia";
+import { round } from "../lib/numbers";
+import * as d3 from "d3";
 import {
   findClosestGridPoint,
   findCircleCenter,
@@ -17,9 +17,9 @@ import {
   rectangleTableBBox,
   estimateTextWidth,
   rotateRectangluarBox,
-} from '../lib/geometry';
-import { v4 as uuid } from 'uuid';
-import { usePlanStore } from './plan';
+} from "../lib/geometry";
+import { v4 as uuid } from "uuid";
+import { usePlanStore } from "./plan";
 
 const planStore = usePlanStore();
 const minimum = 0.0001;
@@ -64,7 +64,7 @@ const getPoints = (a, b, n) => {
     R;
   while (r - l >= minimum) {
     R = (r + l) / 2;
-    console.log('LOGTRACE', available(x0, x1, a, b, n, R), R, x0, x1, r, l);
+    console.log("LOGTRACE", available(x0, x1, a, b, n, R), R, x0, x1, r, l);
     if (available(x0, x1, a, b, n, R)) {
       l = R;
     } else {
@@ -85,16 +85,16 @@ const getPoints = (a, b, n) => {
 };
 
 export const useMainStore = defineStore({
-  id: 'main',
+  id: "main",
   state: () => ({
     zoomTransform: d3.zoomTransform({ k: 1, x: 0, y: 0 }),
     // grid: (window.localStorage.getItem("grid_enabled") || "false") === "true",
     // snap: (window.localStorage.getItem("snap_enabled") || "false") === "true",
-    grid: true,
+    grid: false,
     snap: true,
     clipboardAreas: [],
     clipboardRows: [],
-    tool: 'select',
+    tool: "select",
     ignoreNextSelection: false,
     selectedZone: null,
     lockedZones: [],
@@ -106,8 +106,8 @@ export const useMainStore = defineStore({
     dragStartX: 0,
     dragStartY: 0,
     plan: planStore.plan,
-    section_label: window.localStorage.getItem('section_label')
-      ? JSON.parse(window.localStorage.getItem('section_label'))
+    section_label: window.localStorage.getItem("section_label")
+      ? JSON.parse(window.localStorage.getItem("section_label"))
       : [],
     temp_ox: 0,
     temp_oy: 0,
@@ -116,29 +116,29 @@ export const useMainStore = defineStore({
   getters: {
     cursor: (state) => {
       switch (state.tool) {
-        case 'select':
-        case 'seatselect':
-          return 'default';
-        case 'circle':
-        case 'rectangle':
-        case 'polygon':
-        case 'ellipse':
-        case 'text':
-        case 'roundTable':
-        case 'rectangleTable':
-        case 'gaSquare':
-        case 'gaCircle':
-        case 'gaPolygon':
-        case 'rows':
-        case 'row':
-        case 'stgrows':
-          return 'crosshair';
-        case 'hand':
-          return 'grab';
-        case 'handon':
-          return 'grabbing';
+        case "select":
+        case "seatselect":
+          return "default";
+        case "circle":
+        case "rectangle":
+        case "polygon":
+        case "ellipse":
+        case "text":
+        case "roundTable":
+        case "rectangleTable":
+        case "gaSquare":
+        case "gaCircle":
+        case "gaPolygon":
+        case "rows":
+        case "row":
+        case "stgrows":
+          return "crosshair";
+        case "hand":
+          return "grab";
+        case "handon":
+          return "grabbing";
         default:
-          return 'default';
+          return "default";
       }
     },
   },
@@ -161,27 +161,27 @@ export const useMainStore = defineStore({
 
     toggleGrid() {
       this.grid = !this.grid;
-      window.localStorage.setItem('grid_enabled', this.grid ? 'true' : 'false');
+      window.localStorage.setItem("grid_enabled", this.grid ? "true" : "false");
     },
     toggleSnap() {
       this.snap = !this.snap;
-      window.localStorage.setItem('snap_enabled', this.snap ? 'true' : 'false');
+      window.localStorage.setItem("snap_enabled", this.snap ? "true" : "false");
     },
 
     setSectionLabel(s) {
       this.section_label = s;
-      window.localStorage.setItem('section_label', JSON.stringify(s));
+      window.localStorage.setItem("section_label", JSON.stringify(s));
     },
 
     removeSectionLabel(id) {
-      console.log(id, 'okay');
+      console.log(id, "okay");
       this.section_label = this.section_label.filter((i) => i.id !== id);
-      window.localStorage.setItem('section_label', this.section_label);
+      window.localStorage.setItem("section_label", this.section_label);
     },
 
     disableGrid() {
       this.grid = false;
-      window.localStorage.setItem('grid_enabled', 'false');
+      window.localStorage.setItem("grid_enabled", "false");
     },
     toggleZoneLock(uuid) {
       if (!this.lockedZones.includes(uuid)) {
@@ -199,7 +199,7 @@ export const useMainStore = defineStore({
       this.selection = [];
       const temp = usePlanStore();
       const z = temp.plan.zones.find((z) => z.uuid === this.selectedZone);
-      if (this.tool === 'seatselect') {
+      if (this.tool === "seatselect") {
         for (const r of z.rows) {
           for (const s of r.seats) {
             this.selection.push(s.uuid);
@@ -269,19 +269,19 @@ export const useMainStore = defineStore({
     },
     changeTool(tool) {
       const rowTools = [
-        'rows',
-        'row',
-        'stgrows',
-        'select',
-        'rowCircle',
-        'rowCircleFixedCenter',
+        "rows",
+        "row",
+        "stgrows",
+        "select",
+        "rowCircle",
+        "rowCircleFixedCenter",
       ];
       const keepSelection =
         tool === this.tool ||
-        ((this.tool === 'rows' ||
-          this.tool === 'row' ||
-          this.tool === 'stgrows') &&
-          tool === 'select') ||
+        ((this.tool === "rows" ||
+          this.tool === "row" ||
+          this.tool === "stgrows") &&
+          tool === "select") ||
         (rowTools.includes(this.tool) && rowTools.includes(tool));
       if (!keepSelection) {
         this.selection = [];
@@ -330,7 +330,7 @@ export const useMainStore = defineStore({
     },
     selectAll() {
       this.selection = [];
-      if (this.tool === 'seatselect') {
+      if (this.tool === "seatselect") {
         const temp = usePlanStore();
         for (const z of temp.plan.zones) {
           if (this.lockedZones.includes(z.uuid)) continue;
@@ -457,7 +457,7 @@ export const useMainStore = defineStore({
             const a = s / 150 / 100;
             const b = 10000 * a;
             const positions = getPoints(a, b, r.seats.length);
-            console.log('MYLOG', positions);
+            console.log("MYLOG", positions);
             let i;
             for (i = 0; i < r.seats.length; i++) {
               let fromX = positions[i].x + 100;
@@ -611,9 +611,9 @@ export const useMainStore = defineStore({
       }
       if (Math.abs(dx) > 0 || Math.abs(dy) > 0) this.dragged = true;
       if (
-        this.tool === 'select' ||
-        this.tool === 'seatselect' ||
-        this.tool === 'polygon'
+        this.tool === "select" ||
+        this.tool === "seatselect" ||
+        this.tool === "polygon"
       ) {
         // TODO: delegate to plan module?
         const temp = usePlanStore();
@@ -683,9 +683,9 @@ export const useMainStore = defineStore({
           for (const a of z.areas) {
             if (this.selection.includes(a.uuid)) {
               if (this.draggingPolygonPoint) {
-                if (a.shape !== 'polygon') {
+                if (a.shape !== "polygon") {
                   console.warn(
-                    'trying to move polygon points, but shape is not a polygon'
+                    "trying to move polygon points, but shape is not a polygon"
                   );
                   continue;
                 }
@@ -932,42 +932,42 @@ export const useMainStore = defineStore({
 
         for (const area of z.areas) {
           if (this.selection.includes(area.uuid)) {
-            if (area.shape === 'roundTable' || area.shape === 'rectangleTable')
+            if (area.shape === "roundTable" || area.shape === "rectangleTable")
               return;
             area.position.x = lox + (area.position.x - lox) * factor;
             area.position.y = loy + (area.position.y - loy) * factor;
 
             switch (area.shape) {
-              case 'rectangle':
+              case "rectangle":
                 area.rectangle.width *= factor;
                 area.rectangle.height *= factor;
                 break;
-              case 'gaSquare':
+              case "gaSquare":
                 area.rectangle.width *= factor;
                 area.rectangle.height *= factor;
                 area.text.position.x = round(area.rectangle.width / 2, 4);
                 area.text.position.y = round(area.rectangle.height / 2, 4);
                 break;
-              case 'circle':
+              case "circle":
                 area.circle.radius *= factor;
                 break;
-              case 'ellipse':
-              case 'gaCircle':
+              case "ellipse":
+              case "gaCircle":
                 area.ellipse.radius.x *= factor;
                 area.ellipse.radius.y *= factor;
                 break;
-              case 'polygon':
+              case "polygon":
                 for (let p of area.polygon.points) {
                   p.x *= factor;
                   p.y *= factor;
                 }
                 break;
-              case 'text':
+              case "text":
                 area.text.size =
                   (area.text.size ? area.text.size : 16) * factor;
                 break;
               default:
-                console.warn('Unknown shape type', area.shape);
+                console.warn("Unknown shape type", area.shape);
             }
           }
         }
@@ -1024,9 +1024,9 @@ export const useMainStore = defineStore({
           s.uuid = uuid();
           s.seat_guid =
             z.zone_id +
-            '-' +
+            "-" +
             r.row_number.toString() +
-            '-' +
+            "-" +
             s.seat_number.toString();
         }
         select.push(r.uuid);

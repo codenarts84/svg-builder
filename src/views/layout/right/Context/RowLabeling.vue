@@ -49,16 +49,10 @@
             </option>
           </select>
         </v-col>
-        <!-- <v-col cols="12" sm="6"> Skip Letters </v-col>
-        <v-col cols="12" sm="6">
-          <input type="text" class="v-custom-input" :value="skip"
-            @input="setSkip" />
-        </v-col> -->
         <v-col cols="12" sm="6"> Rotate Label with Element </v-col>
         <v-col cols="12" sm="6">
           <input type="checkbox" :checked="rotate" @change="handle_rotate" />
         </v-col>
-
       </v-row>
     </v-container>
   </div>
@@ -254,11 +248,19 @@ export default ({
       this.planstore.renumberRows(this.rows.map(r => r.uuid), numbering, 1, false)
     },
     setRowNumberingStartAt(e) {
-      if (this.rowNumbering) {
-        const le = this.rowNumbering.scheme.findStartAt(e.target.value)
-        // console.log(e.target.value, this.rowNumbering.scheme)
+      const id = this.rowNumbering.scheme.id;
+      const input = e.target;
+      const value = input.value;
+      const validLetters = /^[a-zA-Z]+$/;
+      const validNumbers = /^[0-9]+$/;
+
+      if ((id === 'alpha' || id === 'alphalower') && !validLetters.test(e.target.value)) {
+        input.value = value.replace(/[^a-zA-Z]/g, '');
+      } else if (id === 'natural' && !validNumbers.test(e.target.value)) {
+        input.value = value.replace(/[^0-9]/g, '');
+      } else {
+        const le = this.rowNumbering.scheme.findStartAt(input.value)
         this.planstore.renumberRows(this.rows.map(r => r.uuid), this.rowNumbering.scheme, le, this.rowNumbering.reversed)
-        // this.planstore.renumberRows(this.rows.map(r => r.uuid), this.rowNumbering.scheme, val, this.rowNumbering.reversed)
       }
     },
     setRowNumberingReversed(val) {

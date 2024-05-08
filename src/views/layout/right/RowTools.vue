@@ -70,7 +70,7 @@ const shallowEqual = (object1, object2) => {
 }
 
 const show = computed(() => {
-  console.log(props.rows.length === 1)
+  return true;
   return props.rows.length === 1;
 })
 

@@ -11,7 +11,7 @@
         <v-col cols="12" sm="6"> Abbreviation </v-col>
         <v-col cols="12" sm="6">
           <input class="v-custom-input" name="table_abv" :value="tableAbv"
-            maxlength="8" @input="setTableAbv" />
+            maxlength="6" @input="setTableAbv" />
         </v-col>
         <v-col cols="12" sm="6"> Position X </v-col>
         <v-col cols="12" sm="6">
