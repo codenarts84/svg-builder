@@ -2276,10 +2276,8 @@ export default {
     },
 
     wheel(event) {
-      if (this.tool === 'hand') {
-        this.zoomTransform.x += event.deltaX / 10;
-        this.zoomTransform.y -= event.deltaY / 10;
-      }
+      this.zoomTransform.x += event.deltaX / 10;
+      this.zoomTransform.y -= event.deltaY / 10;
     },
 
     createZoom() {
@@ -2317,7 +2315,7 @@ export default {
           [viewportWidth, viewportHeight],
         ])
         .filter((event) => {
-          // const wheeled = event.type === "wheel";
+          const wheeled = event.type === "wheel";
           const mouseDrag =
             event.type === "mousedown" ||
             event.type === "mouseup" ||
@@ -2327,7 +2325,7 @@ export default {
             event.type === "touchmove" ||
             event.type === "touchstop";
           return (
-            (mouseDrag || touch) &&
+            (wheeled || mouseDrag || touch) &&
             (event.metaKey ||
               event.ctrlKey ||
               this.tool == "hand" ||
@@ -2335,10 +2333,12 @@ export default {
           );
         })
         .wheelDelta((event) => {
-          return (
-            -event.deltaY *
-            (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002)
-          );
+          if (event.ctrlKey) {
+            return (
+              -event.deltaY *
+              (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002)
+            );
+          } else return 0;
         })
         .on("zoom", (event) => {
           const scale = event.transform.k;
