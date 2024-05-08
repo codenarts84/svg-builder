@@ -2414,34 +2414,50 @@ export default {
           event.stopPropagation();
           return;
         case "ArrowUp":
-          useMainStore().moveSelected(
-            0,
-            -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-          );
+          if (this.selection.length) {
+            useMainStore().moveSelected(
+              0,
+              -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+            );
+          } else {
+            this.zoomTransform.y += 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10);
+          }
           event.preventDefault();
           event.stopPropagation();
           return;
         case "ArrowDown":
-          useMainStore().moveSelected(
-            0,
-            1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-          );
+          if (this.selection.length) {
+            useMainStore().moveSelected(
+              0,
+              1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+            );
+          } else {
+            this.zoomTransform.y -= 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10);
+          }
           event.preventDefault();
           event.stopPropagation();
           return;
         case "ArrowLeft":
-          useMainStore().moveSelected(
-            -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10),
-            0
-          );
+          if (this.selection.length) {
+            useMainStore().moveSelected(
+              -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10),
+              0
+            );
+          } else {
+            this.zoomTransform.x += 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+          }
           event.preventDefault();
           event.stopPropagation();
           return;
         case "ArrowRight":
-          useMainStore().moveSelected(
-            1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10),
-            0
-          );
+          if (this.selection.length) {
+            useMainStore().moveSelected(
+              1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10),
+              0
+            );
+          } else {
+            this.zoomTransform.x -= 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+          }
           event.preventDefault();
           event.stopPropagation();
           return;
