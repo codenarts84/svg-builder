@@ -856,7 +856,7 @@ export default {
           if (targetPos.x - 45 < 0 || targetPos.x + 45 > this.plan.size.width || targetPos.y - 42 < 0 || targetPos.y + 42 > this.plan.size.height)
             return;
           const arr = []
-          for (let i = 0; i < this.nseat; i++) {
+          for (let i = 0; i < 6; i++) {
             arr.push(i);
           }
           const newId = uuid();
