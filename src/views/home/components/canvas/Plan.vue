@@ -919,10 +919,6 @@ export default {
           }
           if (targetPos.x - 70 < 0 || targetPos.x + 70 > this.plan.size.width || targetPos.y - 50 < 0 || targetPos.y + 50 > this.plan.size.width)
             return;
-          const arr = []
-          for (let i = 0; i < this.nseat; i++) {
-            arr.push(i);
-          }
           const dx = 120 / 3;
           let top = []
           for (let i = 0; i < 4; i++) top.push(i)
@@ -2435,16 +2431,16 @@ export default {
           return;
         case "ArrowLeft":
           useMainStore().moveSelected(
-            0,
-            -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+            -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10),
+            0
           );
           event.preventDefault();
           event.stopPropagation();
           return;
         case "ArrowRight":
           useMainStore().moveSelected(
-            0,
-            1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+            1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10),
+            0
           );
           event.preventDefault();
           event.stopPropagation();
