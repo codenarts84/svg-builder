@@ -151,12 +151,11 @@ const handle_create_category = () => {
     return;
   }
   const len = colors.length;
-  let rand;
-  let color;
-  while (1) {
-    rand = Math.floor(Math.random() * len);
+  let color = null;
+  while (!color) {
+    const rand = Math.floor(Math.random() * len);
     color = colors[rand]
-    if (categories.value.findIndex(i => i.color === color) === -1) break;
+    if ((categories.value.findIndex(item => item.color === color)) === -1) break;
   }
   const newName = getUniqueCategoryName('New Category');
   planStore.createCategory(newName, color);

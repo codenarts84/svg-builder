@@ -71,7 +71,6 @@ const shallowEqual = (object1, object2) => {
 
 const show = computed(() => {
   return true;
-  return props.rows.length === 1;
 })
 
 const tags = computed(() => mainStore.section_label);
