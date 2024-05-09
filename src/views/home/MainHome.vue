@@ -33,7 +33,9 @@ store.loadPlan(
 
 const planref = ref(null);
 
+
 import { usePlanStore } from "@/stores/plan.js"; // Assuming you've set up a Pinia store in this location
+import Toolbar from "./components/Toolbar.vue";
 import Plan from "./components/canvas/Plan.vue";
 import StatusBar from "./components/StatusBar.vue";
 

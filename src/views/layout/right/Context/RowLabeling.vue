@@ -39,7 +39,6 @@
           </select>
         </v-col>
 
-
         <v-col cols="12" sm="6"> Row Label Location </v-col>
         <v-col cols="12" sm="6">
           <select class="toolbox-input v-custom-input"
@@ -49,6 +48,12 @@
             </option>
           </select>
         </v-col>
+
+        <v-col cols="12" sm="6"> Skip Rows </v-col>
+        <v-col cols="12" sm="6">
+          <input class="v-custom-input" :value="skip" @input="setSkip" />
+        </v-col>
+
         <v-col cols="12" sm="6"> Rotate Label with Element </v-col>
         <v-col cols="12" sm="6">
           <input type="checkbox" :checked="rotate" @change="handle_rotate" />
@@ -143,6 +148,9 @@ export default ({
     rows: Array
   },
   computed: {
+    skip() {
+      return groupValue(this.rows, row => row.skip)
+    },
     rotate() {
       return groupValue(this.rows, row => row.rotate_label);
     },
@@ -166,11 +174,13 @@ export default ({
         try {
           let guessedStartAt = numbering.findStartAt(this.rows[0].row_number)
           let guessedNumbers = numbering.compute(this.rows, guessedStartAt)
+          console.log(guessedNumbers)
           if (this.rows.filter((r, idx) => r.row_number === guessedNumbers[idx]).length === this.rows.length) {
             let start = ''
             if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
             else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
-            else if (numbering.id === 'odd') start = guessedStartAt * 2;
+            else if (numbering.id === 'odd') start = (guessedStartAt - 1) * 2;
+            else if (numbering.id === 'even') start = (guessedNumbers - 1) * 2;
             else start = guessedStartAt
             return { scheme: numbering, reversed: false, startAt: guessedStartAt, start }
           }
@@ -182,7 +192,8 @@ export default ({
             let start = ''
             if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
             else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
-            else if (numbering.id === 'odd') start = guessedStartAt * 2;
+            else if (numbering.id === 'odd') start = (guessedStartAt - 1) * 2;
+            else if (numbering.id === 'even') start = (guessedStartAt - 1) * 2;
             else start = guessedStartAt
             return { scheme: numbering, reversed: true, startAt: guessedStartAtRev, start }
           }
@@ -227,8 +238,11 @@ export default ({
     handle_rotate(e) {
       this.planstore.setRotateLabel(this.rows.map(i => i.uuid), e.target.checked);
     },
-    setSkip(e) {
-      // this.rowNumberings = this.rowNumberings.filter(item => !e.target.value.split(',').includes(item))
+    setSkip(val) {
+      if (this.rowNumbering) {
+        this.planstore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip: val.target.value })
+        this.planstore.skipLetterRows(this.rows.map(r => r.uuid), this.rowNumbering.scheme, this.rowNumbering.startAt, this.rowNumbering.reversed, val.target.value);
+      }
     },
     handleChange(newValue) {
       // console.log(newValue)
@@ -245,6 +259,7 @@ export default ({
     },
     setRowNumbering(val) {
       let numbering = ROW_NUMBERINGS.find(n => n.id === val.target.value);
+      this.planstore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip: '' })
       this.planstore.renumberRows(this.rows.map(r => r.uuid), numbering, 1, false)
     },
     setRowNumberingStartAt(e) {
@@ -256,16 +271,18 @@ export default ({
 
       if ((id === 'alpha' || id === 'alphalower') && !validLetters.test(e.target.value)) {
         input.value = value.replace(/[^a-zA-Z]/g, '');
-      } else if (id === 'natural' && !validNumbers.test(e.target.value)) {
+      } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(e.target.value)) {
         input.value = value.replace(/[^0-9]/g, '');
       } else {
         const le = this.rowNumbering.scheme.findStartAt(input.value)
+        this.planstore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip: '' })
         this.planstore.renumberRows(this.rows.map(r => r.uuid), this.rowNumbering.scheme, le, this.rowNumbering.reversed)
       }
     },
     setRowNumberingReversed(val) {
       const value = val.target.value === 'true';
       if (this.rowNumbering) {
+        this.planstore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip: '' })
         this.planstore.renumberRows(this.rows.map(r => r.uuid), this.rowNumbering.scheme, this.rowNumbering.startAt, value)
       }
     },
