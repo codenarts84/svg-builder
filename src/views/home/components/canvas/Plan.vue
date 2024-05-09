@@ -2773,9 +2773,10 @@ export default {
       </g>
 
       <g class="preview" v-if="(tool === 'roundTable') && mouseStatus">
-        <circle :cx="drawingCurrentX" :cy="drawingCurrentY" :r="25">
+        <circle class="seat-preview" :cx="drawingCurrentX" :cy="drawingCurrentY"
+          :r="25">
         </circle>
-        <circle v-for="index in 6" :key="index"
+        <circle class="seat-preview" v-for="index in 6" :key="index"
           :cx="drawingCurrentX + 35 * Math.cos(2 * Math.PI / 6 * index)"
           :cy="drawingCurrentY + 35 * Math.sin(2 * Math.PI / 6 * index)" :r="10">
         </circle>
@@ -2783,24 +2784,26 @@ export default {
 
       <g class="preview" v-if="(tool === 'rectangleTable') && mouseStatus"
         :transform="`translate(-70, -30)`">
-        <rect :x="drawingCurrentX" :y="drawingCurrentY" :width="140" :height="60">
+        <rect class="seat-preview" :x="drawingCurrentX" :y="drawingCurrentY"
+          :width="140" :height="60">
         </rect>
-        <circle v-for="index in 4" :key="index"
+        <circle class="seat-preview" v-for="index in 4" :key="index"
           :cx="drawingCurrentX + 40 * (index - 1) + 10" :cy="drawingCurrentY - 10"
           :r="10">
         </circle>
-        <circle v-for="index in 4" :key="index"
+        <circle class="seat-preview" v-for="index in 4" :key="index"
           :cx="drawingCurrentX + 40 * (index - 1) + 10" :cy="drawingCurrentY + 70"
           :r="10">
         </circle>
       </g>
 
-      <circle class="preview" v-if="tool === 'row' && !rowDrawing && mouseStatus"
-        :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
-      <circle class="preview"
+      <circle class="seat-preview"
+        v-if="tool === 'row' && !rowDrawing && mouseStatus" :cx="rowCurrentX"
+        :cy="rowCurrentY" :r="10"></circle>
+      <circle class="seat-preview"
         v-if="tool === 'rows' && !rowBlockDrawing && mouseStatus"
         :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
-      <circle class="preview"
+      <circle class="seat-preview"
         v-if="tool === 'stgrows' && !stgrowBlockDrawing && mouseStatus"
         :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
       <g class="row-preview" v-if="tool === 'row' && rowDrawing">
