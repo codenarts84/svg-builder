@@ -914,6 +914,20 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
+    modifyTableSeatLabel(seatId, seat_number) {
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((a) => {
+          if (a.shape === "roundTable" || a.shape === "rectangleTable") {
+            const seat = a.seats.find((s) => s.uuid === seatId);
+            if (seat) {
+              seat.seat_number = seat_number;
+            }
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
     modifyAreas({ areaIds, ...args }) {
       // console.log(areaIds, args)
       this._plan.zones.forEach((z) => {
@@ -937,6 +951,16 @@ export const usePlanStore = defineStore("plan", {
           }
         });
       });
+      this.persistPlan();
+    },
+
+    addPolygonPoint(area, pid, point) {
+      area.polygon.points.splice(pid, 0, point);
+      this.persistPlan();
+    },
+
+    removePolygonPoint(area, pid) {
+      area.polygon.points.splice(area, pid);
       this.persistPlan();
     },
 
@@ -1122,6 +1146,19 @@ export const usePlanStore = defineStore("plan", {
             r.seats.forEach((s) => {
               s.skip_number = reversed ? numbers.pop() : numbers.shift();
             });
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+    skipLetterRows(rowIds, numbering, startAt, reversed, skip_letter) {
+      const numbers = numbering.skip(rowIds, startAt, skip_letter);
+      console.log("numbers", numbers);
+      this._plan.zones.forEach((z) => {
+        z.rows.forEach((r) => {
+          if (rowIds.includes(r.uuid) && r.seats.length) {
+            r.skip_number = reversed ? numbers.pop() : numbers.shift();
           }
         });
       });
@@ -1485,7 +1522,7 @@ export const usePlanStore = defineStore("plan", {
     },
 
     respaceSeats(rowIds, spacing) {
-      spacing = Math.max(spacing, 1); // Ensure minimum spacing is at least 1
+      spacing = Math.max(spacing, 20); // Ensure minimum spacing is at least 1
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid) && r.seats.length > 1) {

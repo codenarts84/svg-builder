@@ -1,7 +1,7 @@
 function letterCounter(number, start) {
   // A, B, … Z, AA, AB, … ZZ, AAA …
   let baseChar = start.charCodeAt(0);
-  let letters = '';
+  let letters = "";
 
   do {
     number -= 1;
@@ -18,7 +18,7 @@ function skipLetterCounter(number, start, skip_letter, count) {
   const skips = skip_letter.split(/\s*,\s*/);
   while (res.length < count) {
     let baseChar = start.charCodeAt(0);
-    let letters = '';
+    let letters = "";
     do {
       number -= 1;
       letters = String.fromCharCode(baseChar + (number % 26)) + letters;
@@ -41,8 +41,8 @@ function reverseLetterCounter(letters) {
 
 const SEAT_NUMBERINGS = [
   {
-    id: 'natural',
-    label: '1, 2, 3, …',
+    id: "natural",
+    label: "1, 2, 3, …",
     compute: (seats, startAt) => {
       let counter = startAt;
       return seats.map((s) => (counter++).toString());
@@ -64,15 +64,11 @@ const SEAT_NUMBERINGS = [
     },
   },
   {
-    id: 'odd',
-    label: '1, 3, 5, … / 2, 4, 6, …',
+    id: "odd",
+    label: "1, 3, 5, …",
     compute: (seats, startAt) => {
-      let counter = startAt;
-      return seats.map((s) => {
-        const n = counter;
-        counter += 2;
-        return n.toString();
-      });
+      let counter = (startAt - 1) * 2 - 1;
+      return seats.map((s) => (counter += 2).toString());
     },
     skip: (seats, startAt, skip_letter) => {
       let counter = startAt;
@@ -81,7 +77,7 @@ const SEAT_NUMBERINGS = [
       const skips = skip_letter.split(/\s*,\s*/);
       while (res.length < len) {
         if (!skips.includes(counter.toString())) res.push(counter.toString());
-        counter += 2;
+        counter++;
       }
       return res;
     },
@@ -90,29 +86,82 @@ const SEAT_NUMBERINGS = [
     },
   },
   {
-    id: 'alpha',
-    label: 'A, B, C, …',
+    id: "even",
+    label: "2, 4, 6, …",
     compute: (seats, startAt) => {
-      let counter = startAt;
-      return seats.map((s) => letterCounter(counter++, 'A'));
+      let counter = (startAt - 1) * 2;
+      return seats.map((s) => {
+        const n = counter;
+        counter += 2;
+        return n.toString();
+      });
+      // return seats.map((s) => (counter += 2).toString());
     },
     skip: (seats, startAt, skip_letter) => {
       let counter = startAt;
-      return skipLetterCounter(counter, 'A', skip_letter, seats.length);
+      const res = [];
+      const len = seats.length;
+      const skips = skip_letter.split(/\s*,\s*/);
+      while (res.length < len) {
+        if (!skips.includes(counter.toString())) res.push(counter.toString());
+        counter++;
+      }
+      return res;
+    },
+    findStartAt: (firstValue) => {
+      return parseInt(firstValue);
+    },
+  },
+  // {
+  //   id: "odd",
+  //   label: "1, 3, 5, … / 2, 4, 6, …",
+  //   compute: (seats, startAt) => {
+  //     let counter = startAt;
+  //     return seats.map((s) => {
+  //       const n = counter;
+  //       counter += 2;
+  //       return n.toString();
+  //     });
+  //   },
+  //   skip: (seats, startAt, skip_letter) => {
+  //     let counter = startAt;
+  //     const res = [];
+  //     const len = seats.length;
+  //     const skips = skip_letter.split(/\s*,\s*/);
+  //     while (res.length < len) {
+  //       if (!skips.includes(counter.toString())) res.push(counter.toString());
+  //       counter += 2;
+  //     }
+  //     return res;
+  //   },
+  //   findStartAt: (firstValue) => {
+  //     return parseInt(firstValue);
+  //   },
+  // },
+  {
+    id: "alpha",
+    label: "A, B, C, …",
+    compute: (seats, startAt) => {
+      let counter = startAt;
+      return seats.map((s) => letterCounter(counter++, "A"));
+    },
+    skip: (seats, startAt, skip_letter) => {
+      let counter = startAt;
+      return skipLetterCounter(counter, "A", skip_letter, seats.length);
     },
     findStartAt: (firstValue) => {
       return reverseLetterCounter(firstValue.toUpperCase());
     },
   },
   {
-    id: 'alphalower',
-    label: 'a, b, c, …',
+    id: "alphalower",
+    label: "a, b, c, …",
     compute: (seats, startAt) => {
       let counter = startAt;
-      return seats.map((s) => letterCounter(counter++, 'a'));
+      return seats.map((s) => letterCounter(counter++, "a"));
     },
     skip: (seats, startAt, skip_letter) => {
-      return skipLetterCounter(startAt, 'a', skip_letter, seats.length);
+      return skipLetterCounter(startAt, "a", skip_letter, seats.length);
     },
     findStartAt: (firstValue) => {
       return reverseLetterCounter(firstValue.toUpperCase());
@@ -122,33 +171,100 @@ const SEAT_NUMBERINGS = [
 
 const ROW_NUMBERINGS = [
   {
-    id: 'natural',
-    label: '1, 2, 3, …',
+    id: "natural",
+    label: "1, 2, 3, …",
     compute: (rows, startAt) => {
       let counter = startAt;
       return rows.map((r) => (counter++).toString());
+    },
+    skip: (rows, startAt, skip_letter) => {
+      let counter = startAt;
+      const res = [];
+      const len = rows.length;
+      const skips = skip_letter.split(/\s*,\s*/);
+      while (res.length < len) {
+        if (!skips.includes(counter.toString())) res.push(counter.toString());
+        counter++;
+      }
+      return res;
     },
     findStartAt: (firstValue) => {
       return parseInt(firstValue);
     },
   },
   {
-    id: 'alpha',
-    label: 'A, B, C, …',
+    id: "odd",
+    label: "1, 3, 5, …",
+    compute: (rows, startAt) => {
+      let counter = (startAt - 1) * 2 - 1;
+      return rows.map((r) => (counter += 2).toString());
+    },
+    skip: (rows, startAt, skip_letter) => {
+      let counter = startAt;
+      const res = [];
+      const len = rows.length;
+      const skips = skip_letter.split(/\s*,\s*/);
+      while (res.length < len) {
+        if (!skips.includes(counter.toString())) res.push(counter.toString());
+        counter++;
+      }
+      return res;
+    },
+    findStartAt: (firstValue) => {
+      return parseInt(firstValue);
+    },
+  },
+  {
+    id: "even",
+    label: "2, 4, 6, …",
+    compute: (rows, startAt) => {
+      let counter = (startAt - 1) * 2;
+      // return rows.map((s) => {
+      //   const n = counter;
+      //   counter += 2;
+      //   return n.toString();
+      // });
+      return rows.map((r) => (counter += 2).toString());
+    },
+    skip: (rows, startAt, skip_letter) => {
+      let counter = startAt;
+      const res = [];
+      const len = rows.length;
+      const skips = skip_letter.split(/\s*,\s*/);
+      while (res.length < len) {
+        if (!skips.includes(counter.toString())) res.push(counter.toString());
+        counter++;
+      }
+      return res;
+    },
+    findStartAt: (firstValue) => {
+      return parseInt(firstValue);
+    },
+  },
+  {
+    id: "alpha",
+    label: "A, B, C, …",
     compute: (rows, startAt) => {
       let counter = startAt;
-      return rows.map((r) => letterCounter(counter++, 'A'));
+      return rows.map((r) => letterCounter(counter++, "A"));
+    },
+    skip: (rows, startAt, skip_letter) => {
+      let counter = startAt;
+      return skipLetterCounter(counter, "A", skip_letter, rows.length);
     },
     findStartAt: (firstValue) => {
       return reverseLetterCounter(firstValue.toUpperCase());
     },
   },
   {
-    id: 'alphalower',
-    label: 'a, b, c, …',
+    id: "alphalower",
+    label: "a, b, c, …",
     compute: (rows, startAt) => {
       let counter = startAt;
-      return rows.map((r) => letterCounter(counter++, 'a'));
+      return rows.map((r) => letterCounter(counter++, "a"));
+    },
+    skip: (rows, startAt, skip_letter) => {
+      return skipLetterCounter(startAt, "a", skip_letter, rows.length);
     },
     findStartAt: (firstValue) => {
       return reverseLetterCounter(firstValue.toUpperCase());

@@ -152,7 +152,8 @@ export default ({
               let start = ''
               if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
               else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
-              else if (numbering.id === 'odd') start = guessedStartAt * 2;
+              else if (numbering.id === 'odd') start = (guessedStartAt - 1) * 2;
+              else if (numbering.id === 'even') start = (guessedStartAt - 1) * 2;
               else start = guessedStartAt
 
               return { scheme: numbering, reversed: false, startAt: guessedStartAt, start }
@@ -165,7 +166,8 @@ export default ({
               let start = ''
               if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
               else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
-              else if (numbering.id === 'odd') start = guessedStartAt * 2;
+              else if (numbering.id === 'odd') start = (guessedStartAt - 1) * 2;
+              else if (numbering.id === 'even') start = (guessedStartAt - 1) * 2;
               else start = guessedStartAt
 
               return { scheme: numbering, reversed: true, startAt: guessedStartAtRev, start }
@@ -190,10 +192,10 @@ export default ({
 
       if ((id === 'alpha' || id === 'alphalower') && !validLetters.test(e.target.value)) {
         input.value = value.replace(/[^a-zA-Z]/g, '');
-      } else if (id === 'natural' && !validNumbers.test(e.target.value)) {
+      } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(e.target.value)) {
         input.value = value.replace(/[^0-9]/g, '');
       } else {
-        const le = this.seatNumbering.scheme.findStartAt(e.target.value)
+        const le = this.seatNumbering.scheme.findStartAt(input.value)
         this.planStore.renumberSeats(this.rows.map(r => r.uuid), this.seatNumbering.scheme, le, this.seatNumbering.reversed)
         this.planStore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip_letter: '' })
       }

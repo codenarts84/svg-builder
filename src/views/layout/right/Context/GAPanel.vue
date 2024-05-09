@@ -70,10 +70,10 @@ export default {
     setAbbreviation(e) {
       const input = e.target;
       const value = input.value;
-      const validCharacters = /^[a-zA-Z0-9]*$/;
+      const validCharacters = /^[a-zA-Z0-9-]*$/;
 
       if (!validCharacters.test(e.target.value)) {
-        input.value = value.replace(/[^a-zA-Z0-9]/g, '');
+        input.value = value.replace(/[^a-zA-Z0-9-]/g, '');
       }
 
       this.planStore.modifyAreas({

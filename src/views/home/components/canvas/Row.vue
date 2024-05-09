@@ -6,13 +6,13 @@
         :y="rowNumberStart.y" dy=".3em" :font-size="rowNumberStart.fontSize"
         :text-anchor="rowNumberStart.textAnchor"
         :transform="rotate ? rowNumberStart.transform : ''" fill="#888">{{
-          row.row_number
+          row.skip ? row.skip_number : row.row_number
         }}</text>
       <text class="row_lable" v-if="rowNumberEnd" :x="rowNumberEnd.x"
         :y="rowNumberEnd.y" dy=".3em" :font-size="rowNumberEnd.fontSize"
         :text-anchor="rowNumberEnd.textAnchor"
         :transform="rotate ? rowNumberEnd.transform : ''" fill="#888">{{
-          row.row_number }}</text>
+          row.skip ? row.skip_number : row.row_number }}</text>
       <Seat v-for="s in row.seats" :row="row" :seat="s" :key="s.uuid" :zone="zone"
         @startDragging="startDragging" :row_number="row.row_number">
       </Seat>

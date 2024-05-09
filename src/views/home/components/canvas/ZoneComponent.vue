@@ -7,7 +7,7 @@
     <ZoneArea v-for="a in zone.areas" :key="a.uuid" :area="a" :zone="zone"
       :selectionBoundary="selectionBoundary" :ox="ox" :oy="oy"
       @startDragging="startDragging"
-      @startDraggingPolygonPoint="startDraggingPolygonPoint"></ZoneArea>
+      :startDraggingPolygonPoint="startDraggingPolygonPoint"></ZoneArea>
     <Row v-for="r in zone.rows" :key="r.uuid" :row="r" :zone="zone" :ox="ox"
       :selectionBoundary="selectionBoundary" :oy="oy"
       @startDragging="startDragging"></Row>

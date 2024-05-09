@@ -701,6 +701,7 @@ export default {
     },
 
     startDraggingPolygonPoint(uuid, pid, zone, event) {
+      console.log('startDragging')
       if (!this.svg) return;
       const svgbox = this.getSvgRect();
       const pos = positionInZone(
@@ -716,7 +717,7 @@ export default {
         event.shiftKey,
         pos.x,
         pos.y,
-        zone.uuid
+        zone
       );
     },
 
@@ -1140,13 +1141,13 @@ export default {
         );
 
 
+        console.log(this.bSnap2Grid)
         // rotate-setting
-        // if (event.shiftKey || this.bSnap2Grid) {
-        // console.log('rotating')
-        // Snap to 5° intervals
-        if (angle < 0) angle += 2 * Math.PI;
-        angle -= angle % ((5 / 180) * Math.PI);
-        // }
+        if (event.shiftKey || this.bSnap2Grid) {
+          // Snap to 5° intervals
+          if (angle < 0) angle += 2 * Math.PI;
+          angle -= angle % ((5 / 180) * Math.PI);
+        }
         if (pos.y > this.rotatingOriginY) angle += Math.PI;
         const store = useMainStore();
         store.moveRotating(
@@ -1406,34 +1407,34 @@ export default {
           this.rowCurrentY = pos.y;
           if (!this.rowDrawing) return false;
           // rotate-setting
-          // if (event.shiftKey || this.bSnap2Grid) {
-          // Snap to 5° intervals
-          {
-            const dx = pos.x - this.drawingStartX;
-            const dy = pos.y - this.drawingStartY;
-            let angle = (-Math.atan(dx / dy) / Math.PI) * 180;
-            let distance = Math.sqrt(dx * dx + dy * dy);
-            if (angle < 0) angle += 360;
-            angle -= angle % 5;
-            if (
-              Math.round(Math.abs(angle)) === 90 ||
-              Math.round(Math.abs(angle)) === 0 ||
-              Math.round(Math.abs(angle)) === 180 ||
-              Math.round(Math.abs(angle)) === 270
-            ) {
-              distance = Math.round(distance / 10) * 10;
+          if (event.shiftKey || this.bSnap2Grid) {
+            // Snap to 5° intervals
+            {
+              const dx = pos.x - this.drawingStartX;
+              const dy = pos.y - this.drawingStartY;
+              let angle = (-Math.atan(dx / dy) / Math.PI) * 180;
+              let distance = Math.sqrt(dx * dx + dy * dy);
+              if (angle < 0) angle += 360;
+              angle -= angle % 5;
+              if (
+                Math.round(Math.abs(angle)) === 90 ||
+                Math.round(Math.abs(angle)) === 0 ||
+                Math.round(Math.abs(angle)) === 180 ||
+                Math.round(Math.abs(angle)) === 270
+              ) {
+                distance = Math.round(distance / 10) * 10;
+              }
+              this.drawingCurrentX =
+                this.drawingStartX -
+                Math.sign(dy) * distance * Math.sin((angle / 180) * Math.PI);
+              this.drawingCurrentY =
+                this.drawingStartY +
+                Math.sign(dy) * distance * Math.cos((angle / 180) * Math.PI);
             }
-            this.drawingCurrentX =
-              this.drawingStartX -
-              Math.sign(dy) * distance * Math.sin((angle / 180) * Math.PI);
-            this.drawingCurrentY =
-              this.drawingStartY +
-              Math.sign(dy) * distance * Math.cos((angle / 180) * Math.PI);
+          } else {
+            this.drawingCurrentX = pos.x;
+            this.drawingCurrentY = pos.y;
           }
-          // } else {
-          //   this.drawingCurrentX = pos.x;
-          //   this.drawingCurrentY = pos.y;
-          // }
           break;
         case "rows":
           this.rowCurrentX = pos.x;
@@ -2278,6 +2279,14 @@ export default {
     },
 
     wheel(event) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const svgbox = this.getSvgRect();
+      // console.log(this.zoomTransform.y)
+      if (event.deltaY > 0 && this.zoomTransform.y < -height / 2) return;
+      if (event.deltaY < 0 && this.zoomTransform.y > height / 3 * 2) return;
+      if (event.deltaX > 0 && this.zoomTransform.x < -width / 2) return;
+      if (event.deltaX < 0 && this.zoomTransform.x > width / 3 * 2) return;
       this.zoomTransform.x += event.deltaX / 10;
       this.zoomTransform.y -= event.deltaY / 10;
     },
@@ -2344,7 +2353,10 @@ export default {
         })
         .on("zoom", (event) => {
           const scale = event.transform.k;
-          console.log(event.transform)
+          const height = window.innerHeight;
+          const width = window.innerWidth;
+          // if (event.transform.x > -width / 2 || event.transform.x > width ||
+          //   event.transform.y < -height / 2 || event.transform.y > height) return;
           useMainStore().setZoomTransform(event.transform);
 
           this.zoom.translateExtent([

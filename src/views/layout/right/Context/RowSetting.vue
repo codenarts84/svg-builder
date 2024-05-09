@@ -136,7 +136,9 @@ export default defineComponent({
       this.planStore.respaceRows(this.rows.map(r => r.uuid), e.target.value)
     },
     setSeatSpacing(e) {
-      this.planStore.respaceSeats(this.rows.map(r => r.uuid), e.target.value)
+      if (e.target.value >= 20) {
+        this.planStore.respaceSeats(this.rows.map(r => r.uuid), e.target.value)
+      }
     },
     setNumberSeats(e) {
       if (e.target.value > 0) {

@@ -21,9 +21,12 @@
 <script setup>
 import { computed, defineProps, ref, watch } from "vue";
 import { useSvgStore } from "../../../../stores/svgStore";
-import * as d3 from "d3";
 import { useMainStore } from "@/stores";
+import { usePlanStore } from "@/stores/plan";
+import * as d3 from "d3";
 const store = useMainStore();
+const planStore = usePlanStore();
+const plan = computed(() => planStore.plan)
 const zoomTransform = computed(() => store.zoomTransform);
 
 const zoomValue = ref(computed(() => Math.round(store.zoomTransform.k * 100)));
@@ -39,7 +42,23 @@ const setTransform = val => {
 }
 
 const fitScreen = () => {
-  alert('not yet')
+  const svg = document.getElementById('svg');
+  const viewportHeight = svg.clientHeight;
+  const viewportWidth = svg.clientWidth;
+  const panPadding = viewportHeight * -10;
+  const defaultScale = plan.value.size.height
+    ? Math.min(
+      (viewportWidth - 130) / plan.value.size.width,
+      (viewportHeight - 130) / plan.value.size.height
+    ) : 1;
+  const initTransform = d3.zoomIdentity
+    .scale(defaultScale)
+    .translate(
+      (viewportWidth / defaultScale - plan.value.size.width) / 2,
+      (viewportHeight / defaultScale - plan.value.size.height) / 2
+    );
+  useMainStore().setZoomTransform(initTransform);
+
 }
 
 </script>
@@ -58,8 +77,8 @@ const fitScreen = () => {
 }
 
 .zoom-btn {
-  width: 50px;
-  min-width: 50px;
+  width: 30px;
+  min-width: 30px;
 }
 
 .v-text-field input[type="number"]::-webkit-inner-spin-button,

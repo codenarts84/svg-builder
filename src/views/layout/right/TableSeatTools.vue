@@ -1,5 +1,18 @@
 <template>
   <div>
+    <div style="padding: 15px 10px; text-align: left" v-if="seats.length === 1">
+      <h4>Seat Label</h4>
+      <v-container>
+        <v-row
+          style="display: flex; justify-content: center; align-items: center">
+          <v-col cols="12" sm="6"> Seat Label </v-col>
+          <v-col cols="12" sm="6">
+            <input class="v-custom-input" name="seat_label" :value="seat"
+              @input="setSeat" />
+          </v-col>
+        </v-row>
+      </v-container>
+    </div>
     <CategoryComponent :setCategory="setCategory"
       :selectedCategory="selectedCategory" />
     <TagsPanel :rows="seats" :selectedTag="selectedTag()" />
@@ -52,6 +65,16 @@ const shallowEqual = (object1, object2) => {
 
 const tags = computed(() => mainStore.section_label);
 
+const seat = computed(() => {
+  return groupValue(props.seats, seat => seat.seat_number);
+})
+
+const setSeat = (e) => {
+  if (e.target.value) {
+    console.log(e.target.value)
+    planStore.modifyTableSeatLabel(props.seats[0].uuid, e.target.value)
+  }
+}
 
 const selectedCategory = computed(() => {
   return groupValue(props.seats, seat => seat.category);

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <SeatLabel v-if="show" :seats="seats" />
     <CategoryComponent :setCategory="setCategory"
       :selectedCategory="selectedCategory" />
     <TagsPanel :rows="seats" :selectedTag="selectedTag()" />
@@ -12,6 +13,7 @@ import { usePlanStore } from '@/stores/plan';
 import { useMainStore } from "@/stores";
 import CategoryComponent from '@/views/home/components/CategoryComponent.vue';
 import TagsPanel from './Context/TagsPanel.vue';
+import SeatLabel from './Context/SeatLabel.vue';
 
 const planStore = usePlanStore();
 const mainStore = useMainStore();
@@ -51,6 +53,8 @@ const shallowEqual = (object1, object2) => {
   }
   return true
 }
+
+const show = computed(() => props.seats.length === 1)
 
 const tags = computed(() => mainStore.section_label);
 

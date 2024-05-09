@@ -634,6 +634,7 @@ export const useMainStore = defineStore({
                 // ) {
                 //   return;
                 // }
+
                 r.position.x += dx;
                 r.position.y += dy;
                 if (snap) {
@@ -683,7 +684,7 @@ export const useMainStore = defineStore({
           for (const a of z.areas) {
             if (this.selection.includes(a.uuid)) {
               if (this.draggingPolygonPoint) {
-                if (a.shape !== "polygon") {
+                if (a.shape !== "polygon" && a.shape !== "gaPolygon") {
                   console.warn(
                     "trying to move polygon points, but shape is not a polygon"
                   );
@@ -699,11 +700,11 @@ export const useMainStore = defineStore({
                     y: ppoint.y,
                     zone: z,
                   });
-                  Vue.set(
-                    a.polygon.points,
-                    this.draggingPolygonPointId,
-                    ppoint
-                  );
+                  // Vue.set(
+                  //   a.polygon.points,
+                  //   this.draggingPolygonPointId,
+                  //   ppoint
+                  // );
                   if (ppoint.x !== oldpos.x || ppoint.y !== oldpos.y) {
                     dx += ppoint.x - oldpos.x;
                     dy += ppoint.y - oldpos.y;
@@ -920,6 +921,18 @@ export const useMainStore = defineStore({
 
         for (const row of z.rows) {
           if (this.selection.includes(row.uuid)) {
+            // if (factor < 0) return;
+            // if (row.seats.length > 1) {
+            //   const x1 = row.seats[0].position.x * factor;
+            //   const y1 = row.seats[0].position.y * factor;
+            //   const x0 = row.seats[1].position.x * factor;
+            //   const y0 = row.seats[1].position.y * factor;
+            //   const space = Math.sqrt(
+            //     (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)
+            //   );
+            //   if (space < 19 || space > 300) return;
+            // }
+
             row.position.x = lox + (row.position.x - lox) * factor;
             row.position.y = loy + (row.position.y - loy) * factor;
 

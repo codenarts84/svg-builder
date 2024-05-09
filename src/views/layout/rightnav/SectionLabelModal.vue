@@ -27,8 +27,11 @@
   </div>
 </template>
 <script setup>
-import { ref, defineProps } from "vue";
+import { ref, defineProps, computed } from "vue";
 import { v4 as uuid } from "uuid";
+import { useMainStore } from "@/stores";
+const store = useMainStore();
+const sections = computed(() => store.section_label)
 const dialog = ref(false);
 const newLabel = ref("");
 const newAbr = ref("");
@@ -38,6 +41,18 @@ const props = defineProps({
 
 const onAdd = () => {
   if (newLabel.value && newAbr.value) {
+    const abvPattern = /^[a-zA-Z0-9-]+$/
+    if (newAbr.value.length > 6 || !abvPattern.test(newAbr.value)) {
+      alert('Abbreviation must be limit to 6 or letters, numbers and hyphen(-)')
+      return;
+    }
+
+    const findItem = sections.value.find(s => s.label === newLabel.value)
+    if (findItem && findItem.abv === newAbr.value) {
+      alert('Already exist')
+      return
+    }
+
     const id = uuid();
     props.addTags({ id, label: newLabel.value, abv: newAbr.value });
     dialog.value = false;
