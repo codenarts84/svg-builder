@@ -1,11 +1,10 @@
 <template>
   <div>
     <input type="color" class="v-custom-input v-custom-color-input"
-      @click="e => e.preventDefault()" @focus="show = true" @blur="show = false"
-      v-model="color" />
+      @click="onClick" @blur="show = false" v-model="color" />
     <div class="d-relative">
       <v-color-picker v-show="show" class="v-color-picker" mode="hexa"
-        v-model="color" />
+        :style="popupStyles" v-model="color" />
     </div>
   </div>
 </template>
@@ -16,8 +15,18 @@ const props = defineProps({
   setColor: Function,
   color: String
 })
+const popupStyles = ref({})
 const show = ref(false)
 const color = ref(props?.color)
+const onClick = (e) => {
+  e.preventDefault();
+  if (e.clientY + 350 > window.innerHeight) {
+    popupStyles.value = {
+      bottom: '38px'
+    }
+  }
+  show.value = true;
+}
 watch(color, (newValue, oldValue) => {
   props.setColor(newValue)
 })

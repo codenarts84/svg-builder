@@ -62,14 +62,18 @@ const boardName = ref(computed(() => planStore.plan.name));
 
 const exportSVG = () => {
   // if (this.validationErrors === undefined || this.validationErrors.length === 0 || confirm('Your plan contains validation errors. Do you still want to download it?')) {
-  const url = URL.createObjectURL(new Blob([JSON.stringify(planStore.plan, undefined, 2)]))
-  const a = document.createElement('a')
-  a.style.display = 'none'
-  a.href = url
-  a.download = planStore.plan.name + '.json'
-  document.body.appendChild(a)
-  a.click()
-  URL.revokeObjectURL(url)
+  // const url = URL.createObjectURL(new Blob([JSON.stringify(planStore.plan, undefined, 2)]))
+  // const a = document.createElement('a')
+  // a.style.display = 'none'
+  // a.href = url
+  // a.download = planStore.plan.name + '.json'
+  // document.body.appendChild(a)
+  // a.click()
+  // URL.revokeObjectURL(url)
+
+  const plan = planStore.plan;
+  console.log(typeof plan, plan)
+
   // sendEmail();
   // } else {
   //   this.showValidationResult = true

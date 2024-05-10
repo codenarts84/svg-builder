@@ -2236,6 +2236,7 @@ export default {
           rotation: 0,
           uuid: newId,
           capacity: 0,
+          abbreviation: "GA",
           position: {
             x: minx - zone.position.x,
             y: miny - zone.position.y,
@@ -2303,15 +2304,15 @@ export default {
     },
 
     wheel(event) {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const svgbox = this.getSvgRect();
-      const boxWidth = svgbox.width * this.zoomTransform.k;
-      const boxHeight = svgbox.height * this.zoomTransform.k;
-      if (event.deltaY > 0 && this.zoomTransform.y < 0) return;
-      if (event.deltaY < 0 && this.zoomTransform.y + boxHeight > height) return;
-      if (event.deltaX > 0 && this.zoomTransform.x < 0) return;
-      if (event.deltaX < 0 && this.zoomTransform.x + boxWidth > width) return;
+      if (event.ctrlKey) return;
+      const width = window.innerWidth - 300;
+      const height = window.innerHeight - 40;
+      const boxWidth = this.zoomTransform.k * this.plan.size.width;
+      const boxHeight = this.zoomTransform.k * this.plan.size.height;
+      if (event.deltaY > 0 && this.zoomTransform.y < -boxHeight + 100) return;
+      if (event.deltaY < 0 && (this.zoomTransform.y + boxHeight) > (height + boxHeight - 100)) return;
+      if (event.deltaX > 0 && this.zoomTransform.x < -boxWidth + 100) return;
+      if (event.deltaX < 0 && (this.zoomTransform.x + boxWidth) > (width + boxWidth - 100)) return;
       this.zoomTransform.x += event.deltaX / 10;
       this.zoomTransform.y -= event.deltaY / 10;
     },
@@ -2378,9 +2379,7 @@ export default {
         })
         .on("zoom", (event) => {
           const scale = event.transform.k;
-          const height = window.innerHeight;
-          const width = window.innerWidth;
-
+          console.log(event.transform.k)
           useMainStore().setZoomTransform(event.transform);
 
           this.zoom.translateExtent([
@@ -2421,11 +2420,10 @@ export default {
     },
 
     hotkey(event) {
-      const height = window.innerHeight;
-      const width = window.innerWidth;
-      const svgbox = this.getSvgRect();
-      const boxWidth = svgbox.width * this.zoomTransform.k;
-      const boxHeight = svgbox.height * this.zoomTransform.k;
+      const width = window.innerWidth - 300;
+      const height = window.innerHeight - 40;
+      const boxWidth = this.zoomTransform.k * this.plan.size.width;
+      const boxHeight = this.zoomTransform.k * this.plan.size.height;
       if (
         event.target !== document.body &&
         !event.target.matches(".c-toolbar *")
@@ -2468,7 +2466,7 @@ export default {
               -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
             );
           } else {
-            if (this.zoomTransform.y + boxHeight > height) return;
+            if ((this.zoomTransform.y + boxHeight) > (height + boxHeight - 100)) return;
             this.zoomTransform.y += 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10);
           }
           event.preventDefault();
@@ -2481,7 +2479,7 @@ export default {
               1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
             );
           } else {
-            if (this.zoomTransform.y < 0) return;
+            if (this.zoomTransform.y < -boxHeight + 100) return;
             this.zoomTransform.y -= 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10);
           }
           event.preventDefault();
@@ -2494,7 +2492,7 @@ export default {
               0
             );
           } else {
-            if (this.zoomTransform.x + boxWidth > width) return;
+            if ((this.zoomTransform.x + boxWidth) > (width + boxWidth - 100)) return;
             this.zoomTransform.x += 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
           }
           event.preventDefault();
@@ -2507,7 +2505,7 @@ export default {
               0
             );
           } else {
-            if (this.zoomTransform.x < 0) return;
+            if (this.zoomTransform.x < -boxWidth + 100) return;
             this.zoomTransform.x -= 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
           }
           event.preventDefault();

@@ -5,29 +5,13 @@
       <h4>Tags</h4>
     </div>
     <v-container>
-      <!-- <v-chip-group selected-class="text-primary" multiple column>
-        <v-chip v-for="tag in tags" :key="tag" style="width: 100%">
-          {{ tag }}
-        </v-chip>
-      </v-chip-group> -->
       <v-row>
         <v-col cols="12">
-          <!-- <select class="toolbox-input v-custom-input" v-model="selected"
-            @change="selected_change">
-            <option v-for="tag in tags" :key="tag" option-label="label"
-              name="tag_name" :value="tag">
-              {{ tag }}
-            </option>
-          </select> -->
           <v-select v-model="tag" :items="tags" label="Tags" chips multiple>
           </v-select>
         </v-col>
       </v-row>
     </v-container>
-    <!-- <p style="font-size: 13px; text-align: center">
-      Ctrl + Left click = pick multiple. To remove all tags click each selected
-      with Ctrl.
-    </p> -->
   </div>
 </template>
 

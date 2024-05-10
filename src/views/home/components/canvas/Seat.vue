@@ -18,7 +18,7 @@
     </text>
 
 
-    <g v-if="seat.tag_name && !seat.tag_name.includes('Standing Room Only') && seat.tag_name.includes('Wheelchair')"
+    <g v-if="seat.tag_name && seat.tag_name.includes('Wheelchair')"
       :transform="`matrix(1, 0, 0, 1, ${seat.position.x - 5}, ${seat.position.y - 6})`"
       data-object-type="seat-icon" x="-5" y="-6" data-seat-id="element-1-1"
       data-seat-icon="wheelchair" data-v-e185086c="">
@@ -96,9 +96,10 @@ export default {
       const tags = [
         "Wheelchair Companion",
         "Partial View",
-        "Folding Chair"
+        "Folding Chair",
+        "Standing Room Only"
       ]
-      if (this.seat.tag_name && !this.seat.tag_name.includes('Standing Room Only')) {
+      if (this.seat.tag_name) {
         let res = false;
         tags.forEach(tag => {
           if (this.seat.tag_name.includes(tag))
