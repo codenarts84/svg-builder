@@ -4,12 +4,12 @@
     <g :id="row.guid" class="row_group" :data-row-label="row.row_number"
       text-anchor="middle">
       <text class="row_lable" v-if="rowNumberStart" :x="rowNumberStart.x"
-        :y="rowNumberStart.y" dy=".3em" :font-size="rowNumberStart.fontSize"
+        :y="rowNumberStart.y" dy=".35em" :font-size="rowNumberStart.fontSize"
         :transform="rotate ? rowNumberStart.transform : ''" fill="#888">{{
           row.skip ? row.skip_number : row.row_number
         }}</text>
       <text class="row_lable" v-if="rowNumberEnd" :x="rowNumberEnd.x"
-        :y="rowNumberEnd.y" dy=".3em" :font-size="rowNumberEnd.fontSize"
+        :y="rowNumberEnd.y" dy=".35em" :font-size="rowNumberEnd.fontSize"
         :transform="rotate ? rowNumberEnd.transform : ''" fill="#888">{{
           row.skip ? row.skip_number : row.row_number }}</text>
       <Seat v-for="s in row.seats" :row="row" :seat="s" :key="s.uuid" :zone="zone"
