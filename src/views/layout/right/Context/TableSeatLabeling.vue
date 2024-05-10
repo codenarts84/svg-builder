@@ -98,12 +98,7 @@ const seatNumbering = computed(() => {
         let guessedStartAt = numbering.findStartAt(area.seats[0].seat_number)
         let guessedNumbers = numbering.compute(area.seats, guessedStartAt)
         if (area.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx]).length === area.seats.length) {
-          let start = ''
-          if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
-          else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
-          else if (numbering.id === 'odd') start = guessedStartAt * 2;
-          else start = guessedStartAt
-
+          const start = numbering.start(guessedStartAt)
           return { scheme: numbering, reversed: false, startAt: guessedStartAt, start }
         }
 
@@ -111,11 +106,7 @@ const seatNumbering = computed(() => {
         let guessedStartAtRev = numbering.findStartAt(seatsReversed[0].seat_number)
         let guessedNumbersRev = numbering.compute(seatsReversed, guessedStartAtRev)
         if (seatsReversed.filter((s, idx) => s.seat_number === guessedNumbersRev[idx]).length === area.seats.length) {
-          let start = ''
-          if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
-          else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
-          else if (numbering.id === 'odd') start = guessedStartAt * 2;
-          else start = guessedStartAt
+          const start = numbering.start(guessedStartAt)
           return { scheme: numbering, reversed: true, startAt: guessedStartAtRev, start }
         }
       } catch (e) {
@@ -127,7 +118,19 @@ const seatNumbering = computed(() => {
 })
 
 const setSeatNumberingStartAt = (e) => {
-  if (seatNumbering.value) {
+  const id = seatNumbering.value.scheme.id;
+  const input = e.target;
+  const value = input.value;
+  const validLetters = /^[a-zA-Z]+$/;
+  const validNumbers = /^[0-9]+$/;
+
+  if ((id === 'alpha' || id === 'alphalower') && !validLetters.test(e.target.value)) {
+    input.value = value.replace(/[^a-zA-Z]/g, '');
+  } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(e.target.value)) {
+    input.value = value.replace(/[^0-9]/g, '');
+  } else if (id === 'even' && (parseInt(input.value) % 2)) return;
+  else if (id === 'odd' && !(parseInt(input.value) % 2)) return;
+  else {
     const le = seatNumbering.value.scheme.findStartAt(e.target.value)
     plan.renumberTableSeats(props.areas.map(a => a.uuid), seatNumbering.value.scheme, le, seatNumbering.value.reversed)
     plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), skip_letter: '' });
@@ -136,7 +139,12 @@ const setSeatNumberingStartAt = (e) => {
 
 const setSeatNumbering = e => {
   let numbering = SEAT_NUMBERINGS.find(n => n.id === e.target.value)
-  plan.renumberTableSeats(props.areas.map(a => a.uuid), numbering, 1, false)
+  if (e.target.value === 'even') {
+    plan.renumberTableSeats(props.areas.map(a => a.uuid), numbering, 2, false)
+  }
+  else {
+    plan.renumberTableSeats(props.areas.map(a => a.uuid), numbering, 1, false)
+  }
   plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), skip_letter: '' });
 }
 

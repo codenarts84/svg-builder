@@ -44,7 +44,7 @@ const selected = ref(computed(() => props.section));
 const handleItemClick = (option) => {
   selected.value = `${option.label}(${option.abv})`;
   show.value = false;
-  props.setSection(option.label);
+  props.setSection(option.label, option.abv);
 }
 
 </script>

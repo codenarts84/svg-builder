@@ -32,7 +32,8 @@
                   {{ tag.abv }}
                 </td>
                 <td class="text-center">
-                  <v-btn density="comfortable" icon="$delete" variant="plain"
+                  <v-btn v-if="delete_btn(idx)" density="comfortable"
+                    icon="$delete" variant="plain"
                     @click="remoteTag(tag.id)"></v-btn>
                 </td>
               </tr>
@@ -50,11 +51,13 @@ import { ref, defineProps, computed, defineComponent } from "vue";
 import { usePlanStore } from '@/stores/plan.js'
 import { useMainStore } from "@/stores";
 import SectionLabelModal from "@/views/layout/rightnav/SectionLabelModal.vue";
+import { lab } from "d3";
 const dialog = ref(false);
 
 const props = defineProps({
 });
 
+const planStore = usePlanStore();
 const mainStore = useMainStore();
 
 const tags = computed(() => mainStore.section_label);
@@ -68,6 +71,28 @@ const addTags = v => {
   mainStore.setSectionLabel(tags.value);
 }
 
+const delete_btn = (idx) => {
+  return assigned_section(tags.value[idx].label, tags.value[idx].abv);
+}
+
+const assigned_section = (label, abv) => {
+  for (const z of planStore._plan.zones) {
+    for (const r of z.rows) {
+      for (const s of r.seats) {
+        if (s?.section_label === label && s?.section_abv === abv) return false;
+      }
+    }
+    for (const a of z.areas) {
+      if (a.seats) {
+        for (const s of a.seats)
+          if (s?.section_label === label && s?.section_abv === abv) return false;
+      } else {
+        if (a?.section === label && a?.abbreviation === abv) return false;
+      }
+    }
+  }
+  return true;
+}
 </script>
 
 

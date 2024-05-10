@@ -75,11 +75,11 @@ const section = () => {
   // const abv = groupValue(props.areas, area => area.abbreviation)
 }
 
-const setSection = (label) => {
-  const tag = tags.value.find(i => i.label === label);
-  if (tag) {
-    planStore.addGASectionLabel(props.areas.map(i => i.uuid), tag.label, tag.abv);
-  }
+const setSection = (label, abv) => {
+  // const tag = tags.value.find(i => i.label === label && i.abv === abv);
+  // if (tag) {
+  planStore.addGASectionLabel(props.areas.map(i => i.uuid), label, abv);
+  // }
 }
 
 const setCategory = (name) => {

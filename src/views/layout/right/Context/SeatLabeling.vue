@@ -149,13 +149,7 @@ export default ({
             let guessedStartAt = numbering.findStartAt(row.seats[0].seat_number)
             let guessedNumbers = numbering.compute(row.seats, guessedStartAt)
             if (row.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx]).length === row.seats.length) {
-              let start = ''
-              if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
-              else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
-              else if (numbering.id === 'odd') start = (guessedStartAt - 1) * 2;
-              else if (numbering.id === 'even') start = (guessedStartAt - 1) * 2;
-              else start = guessedStartAt
-
+              const start = numbering.start(guessedStartAt)
               return { scheme: numbering, reversed: false, startAt: guessedStartAt, start }
             }
 
@@ -163,13 +157,7 @@ export default ({
             let guessedStartAtRev = numbering.findStartAt(seatsReversed[0].seat_number)
             let guessedNumbersRev = numbering.compute(seatsReversed, guessedStartAtRev)
             if (seatsReversed.filter((s, idx) => s.seat_number === guessedNumbersRev[idx]).length === row.seats.length) {
-              let start = ''
-              if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
-              else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
-              else if (numbering.id === 'odd') start = (guessedStartAt - 1) * 2;
-              else if (numbering.id === 'even') start = (guessedStartAt - 1) * 2;
-              else start = guessedStartAt
-
+              const start = numbering.start(guessedStartAt)
               return { scheme: numbering, reversed: true, startAt: guessedStartAtRev, start }
             }
           } catch (e) {
@@ -194,7 +182,9 @@ export default ({
         input.value = value.replace(/[^a-zA-Z]/g, '');
       } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(e.target.value)) {
         input.value = value.replace(/[^0-9]/g, '');
-      } else {
+      } else if (id === 'even' && (parseInt(input.value) % 2)) return;
+      else if (id === 'odd' && !(parseInt(input.value) % 2)) return;
+      else {
         const le = this.seatNumbering.scheme.findStartAt(input.value)
         this.planStore.renumberSeats(this.rows.map(r => r.uuid), this.seatNumbering.scheme, le, this.seatNumbering.reversed)
         this.planStore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip_letter: '' })
@@ -211,8 +201,11 @@ export default ({
       // let numbering = SEAT_NUMBERINGS.find(n => n.id === val.target.value);
       // this.planStore.modifyRows(this.rows.map(r => r.uuid), numbering, 1, false);
       let numbering = SEAT_NUMBERINGS.find(n => n.id === val.target.value)
-      this.planStore.renumberSeats(this.rows.map(r => r.uuid), numbering, 1, false);
       this.planStore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip_letter: '' })
+      if (val.target.value === 'even') {
+        this.planStore.renumberSeats(this.rows.map(r => r.uuid), numbering, 2, false)
+      } else
+        this.planStore.renumberSeats(this.rows.map(r => r.uuid), numbering, 1, false)
     },
     setSkip(val) {
       if (this.seatNumbering) {

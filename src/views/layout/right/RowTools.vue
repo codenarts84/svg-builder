@@ -89,10 +89,10 @@ const section = () => {
   return '';
 }
 
-const setSection = (label) => {
-  const tag = tags.value.find(i => i.label === label);
-  if (tag)
-    planStore.addSectionLabel(props.rows.map(i => i.uuid), tag.label, tag.abv)
+const setSection = (label, abv) => {
+  // const tag = tags.value.find(i => i.label === label);
+  // if (tag)
+  planStore.addSectionLabel(props.rows.map(i => i.uuid), label, abv)
 }
 
 const selectedCategory = computed(() => {

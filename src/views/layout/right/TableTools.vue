@@ -11,7 +11,7 @@
     <v-divider></v-divider>
     <SectionLabel :section="section()" :setSection="setSection" />
     <v-divider></v-divider>
-    <TagsPanel v-if="showTag" :rows="seats" :selectedTag="selectedTag" />
+    <TagsPanel v-if="showTag" :rows="seats" :selectedTag="selectedTag()" />
   </div>
 </template>
 
@@ -111,20 +111,23 @@ const section = () => {
   return '';
 }
 
-const setSection = (label) => {
-  const tag = tags.value.find(i => i.label === label);
-  if (tag) {
-    planStore.addTableSectionLabel(props.areas.map(i => i.uuid), tag.label, tag.abv);
-  }
+const setSection = (label, abv) => {
+  // const tag = tags.value.find(i => i.label === label);
+  // if (tag) {
+  planStore.addTableSectionLabel(props.areas.map(i => i.uuid), label, abv);
+  // }
 }
 
 const selectedCategory = computed(() => {
   return groupValue(props.areas, area => area.seats.map(s => s.category)[0]);
 })
 
-const selectedTag = computed(() => {
-  const tg = groupValue(props.seats, s => s.tag_name);
-  return tg;
-})
+// const selectedTag = computed(() => {
+//   const tg = groupValue(props.seats, s => s.tag_name);
+//   return tg;
+// })
 
+const selectedTag = () => {
+  return groupValue(props.seats, s => s.tag_name)
+}
 </script>
