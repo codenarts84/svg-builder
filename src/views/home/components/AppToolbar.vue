@@ -60,21 +60,30 @@ const planStore = usePlanStore();
 const boardStore = useBoardStore();
 const boardName = ref(computed(() => planStore.plan.name));
 
-const objectToSVG = obj => {
-  let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600">`;
+// const objectToSVG = plan => {
+//   let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600">`;
 
-  jsonData.shapes.forEach(shape => {
-    if (shape.type === "circle") {
-      svgContent += `<circle cx="${shape.cx}" cy="${shape.cy}" r="${shape.r}" fill="${shape.color}" />`;
-    }
-    // Add more conditions for other shapes like rectangles, lines, etc.
-  });
+//   for (const z of plan.zones) {
+//     for (const r of z.rows) {
+//       svgContent += `<g class="row_group" data-row-label="${r.row_number}" text-anchor="middle">`;
+//       // svgContent += `<text class="row_label" x=${} y=${} dy=".35em" fill="#888">${}</text>`
+//       // svgContent += `<text class="row_label" x=${} y=${} dy=".35em" fill="#888">${}</text>`
+//       for (const s of r.seats) {
+//         svgContent += `<g class="seat_group">`
+//         svgContent += `<circle cx="${s.position.x}" cy="${s.position.y}" r="10"  />`
+//         svgContent += `<text x="${s.position.x}" y="${s.position.y}" text-anchor="middle" font-size="10px" font-family="sans-serif" dy=".35em">${s.seat_number}</text>`
+//         svgContent += `</g>`
+//       }
+//       svgContent += `</g>`
+//     }
+//   }
 
-  svgContent += `</svg>`;
-  return svgContent;
-}
+//   svgContent += `</svg>`;
+//   return svgContent;
+// }
 
 const exportSVG = () => {
+  alert('not yet')
   // if (this.validationErrors === undefined || this.validationErrors.length === 0 || confirm('Your plan contains validation errors. Do you still want to download it?')) {
   // const url = URL.createObjectURL(new Blob([JSON.stringify(planStore.plan, undefined, 2)]))
   // const a = document.createElement('a')
@@ -85,8 +94,20 @@ const exportSVG = () => {
   // a.click()
   // URL.revokeObjectURL(url)
 
-  const plan = planStore.plan;
-  console.log(plan)
+  // const plan = planStore.plan;
+  // const svgData = objectToSVG(plan);
+  // const fileName = 'New Map'
+
+  // const blob = new Blob([svgData], { type: 'image/svg+xml' });
+  // const url = URL.createObjectURL(blob);
+  // const a = document.createElement('a');
+  // a.style.display = 'none';
+  // a.href = url;
+  // a.download = fileName + '.svg';
+  // document.body.appendChild(a);
+  // a.click();
+  // document.body.removeChild(a);
+  // URL.revokeObjectURL(url);
 
   // sendEmail();
   // } else {
