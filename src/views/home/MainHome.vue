@@ -81,7 +81,7 @@ const hideWelcomePrompt = () => {
 }
 
 .main-container {
-  height: calc(100vh - 50px);
+  height: calc(100vh - 41px);
   width: calc(100% - 300px);
 }
 </style>
