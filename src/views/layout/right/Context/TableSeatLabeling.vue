@@ -118,6 +118,7 @@ const seatNumbering = computed(() => {
 })
 
 const setSeatNumberingStartAt = (e) => {
+  if (!seatNumbering.value) return;
   const id = seatNumbering.value.scheme.id;
   const input = e.target;
   const value = input.value;
@@ -125,9 +126,12 @@ const setSeatNumberingStartAt = (e) => {
   const validLower = /^[a-z]+$/;
   const validNumbers = /^[0-9]+$/;
 
-  if ((id === 'alpha') && !validUpper.test(e.target.value.toUpperCase())) {
+  if (id === 'alpha') input.value = value.toUpperCase();
+  if (id === 'alphalower') input.value = value.toLowerCase();
+
+  if ((id === 'alpha') && !validUpper.test(input.value)) {
     input.value = value.toUpperCase().replace(/[^A-Z]/g, '');
-  } else if (id === 'alphalower' && !validLower.test(e.target.value.toLowerCase())) {
+  } else if (id === 'alphalower' && !validLower.test(input.value)) {
     input.value = value.toLowerCase().replace(/[^a-z]/g, '');
   } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(e.target.value)) {
     input.value = value.replace(/[^0-9]/g, '');
@@ -164,6 +168,7 @@ const skip = computed(() => {
 })
 
 const setSkip = e => {
+  if (!seatNumbering.value) return;
   const id = seatNumbering.value.scheme.id;
   const input = e.target;
   const value = input.value;
@@ -171,16 +176,19 @@ const setSkip = e => {
   const validLower = /^[a-z,]+$/;
   const validNumbers = /^[0-9,]+$/;
 
-  if ((id === 'alpha') && !validUpper.test(e.target.value.toUpperCase())) {
+  if (id === 'alpha') input.value = value.toUpperCase();
+  if (id === 'alphalower') input.value = value.toLowerCase();
+
+  if ((id === 'alpha') && !validUpper.test(input.value)) {
     input.value = value.toUpperCase().replace(/[^A-Z,]/g, '');
-  } else if (id === 'alphalower' && !validLower.test(e.target.value.toLowerCase())) {
+  } else if (id === 'alphalower' && !validLower.test(input.value)) {
     input.value = value.toLowerCase().replace(/[^a-z,]/g, '');
   } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(e.target.value)) {
     input.value = value.replace(/[^0-9,]/g, '');
   } else if (id === 'even' && (parseInt(input.value) % 2)) return;
   else if (id === 'odd' && !(parseInt(input.value) % 2)) return;
-  plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), skip_letter: e.target.value });
-  if (seatNumbering.value) {
+  else {
+    plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), skip_letter: e.target.value });
     plan.skipLetterTableSeats(props.areas.map(a => a.uuid), seatNumbering.value.scheme, seatNumbering.value.startAt, seatNumbering.value.reversed, e.target.value)
   }
 }

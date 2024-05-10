@@ -228,6 +228,7 @@ export default ({
       this.planstore.setRotateLabel(this.rows.map(i => i.uuid), e.target.checked);
     },
     setSkip(val) {
+      if (!this.rowNumbering) return;
       const id = this.rowNumbering.scheme.id;
       const input = val.target;
       const value = input.value;
@@ -235,11 +236,14 @@ export default ({
       const validLower = /^[a-z,]+$/;
       const validNumbers = /^[0-9,]+$/;
 
-      if ((id === 'alpha') && !validUpper.test(val.target.value.toUpperCase())) {
+      if (id === 'alpha') input.value = value.toUpperCase();
+      if (id === 'alphalower') input.value = value.toLowerCase();
+
+      if ((id === 'alpha') && !validUpper.test(input.value)) {
         input.value = value.toUpperCase().replace(/[^A-Z,]/g, '');
-      } else if (id === 'alphalower' && !validLower.test(val.target.value.toLowerCase())) {
+      } else if (id === 'alphalower' && !validLower.test(input.value)) {
         input.value = value.toLowerCase().replace(/[^a-z,]/g, '');
-      } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(val.target.value)) {
+      } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(input.value)) {
         input.value = value.replace(/[^0-9,]/g, '');
       } else if (id === 'even' && (parseInt(input.value) % 2)) return;
       else if (id === 'odd' && !(parseInt(input.value) % 2)) return;
@@ -248,7 +252,7 @@ export default ({
       // const lowerValidation = /^[a-z]+$/;
       // const numberValidation = /^[0-9]+$/;
 
-      if (this.rowNumbering) {
+      else {
         this.planstore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip: val.target.value })
         this.planstore.skipLetterRows(this.rows.map(r => r.uuid), this.rowNumbering.scheme, this.rowNumbering.startAt, this.rowNumbering.reversed, val.target.value);
       }
@@ -275,6 +279,7 @@ export default ({
         this.planstore.renumberRows(this.rows.map(r => r.uuid), numbering, 1, false)
     },
     setRowNumberingStartAt(e) {
+      if (!this.rowNumbering) return;
       const id = this.rowNumbering.scheme.id;
       const input = e.target;
       const value = input.value;
@@ -282,10 +287,12 @@ export default ({
       const validLower = /^[a-z]+$/;
       const validNumbers = /^[0-9]+$/;
 
+      if (id === 'alpha') input.value = value.toUpperCase();
+      if (id === 'alphalower') input.value = value.toLowerCase();
 
-      if (id === 'alpha' && !validUpper.test(e.target.value.toUpperCase())) {
+      if (id === 'alpha' && !validUpper.test(input.value)) {
         input.value = value.toUpperCase().replace(/[^A-Z]/g, '');
-      } else if (id === 'alphalower' && !validLower.test(e.target.value)) {
+      } else if (id === 'alphalower' && !validLower.test(input.value)) {
         input.value = value.toLowerCase().replace(/[^a-z]/g, '');
       } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(e.target.value)) {
         input.value = value.replace(/[^0-9]/g, '');
