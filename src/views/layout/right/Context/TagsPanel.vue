@@ -34,6 +34,7 @@
 <script setup>
 import { ref, defineProps, watch, computed } from "vue";
 import { usePlanStore } from '@/stores/plan';
+import { onMounted } from "vue";
 const planstore = usePlanStore();
 
 const props = defineProps({
@@ -49,10 +50,18 @@ const tags = ref([
   "Standing Room Only"
 ]);
 
-const tag = ref(props.selectedTag)
+const tag = ref(null)
 
-watch(tag, () => {
-  planstore.setTag(props.rows.map(i => i.uuid), tag.value);
+onMounted(() => {
+  tag.value = props.selectedTag
+})
+
+watch(() => props.selectedTag, (newValue, oldValue) => {
+  tag.value = props.selectedTag;
+})
+
+watch(tag, (newValue, oldValue) => {
+  planstore.setTag(props.rows.map(i => i.uuid), newValue);
 })
 
 let isDeselecting = false; // Flag to prevent recursive updates

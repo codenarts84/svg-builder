@@ -35,9 +35,9 @@
                     :index="idx" :setToggle="setToggle" :clearToggle="clearToggle"
                     :toggle="toggle[idx]" />
                 </td>
-                <td class="input-container-td"><input class="category-input"
-                    type="text" name="inputForm" :value="ca.name"
-                    ref="categoryInput"
+                <td class="input-container-td">
+                  <input class="category-input" type="text" name="inputForm"
+                    :value="ca.name" ref="categoryInput"
                     @input="(e) => handle_change_name(e, idx)">
                 </td>
                 <td class="delete-container-td">
@@ -105,7 +105,10 @@ const props = defineProps({
 });
 
 const planStore = usePlanStore();
-const categories = computed(() => planStore.categories);
+const cates = computed(() => planStore.categories);
+
+const categories = ref(cates);
+
 
 const assigned_category = (categoryName) => {
   for (const z of planStore._plan.zones) {
@@ -133,9 +136,13 @@ const delete_btn = ((idx) => {
 
 
 const handle_change_name = (e, idx) => {
+  // if (categories.value.find(c => c.name === e.target.value)) {
+  //   alert('Already exist')
+  //   e.target.value = '';
+  //   return;
+  // }
   planStore.changeCategory(categories.value[idx].name, e.target.value, categories.value[idx].color);
 }
-
 
 const setColor = (color, idx) => {
   planStore.changeCategory(categories.value[idx].name, categories.value[idx].name, color);

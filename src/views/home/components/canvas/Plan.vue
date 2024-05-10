@@ -2355,8 +2355,7 @@ export default {
           const scale = event.transform.k;
           const height = window.innerHeight;
           const width = window.innerWidth;
-          // if (event.transform.x > -width / 2 || event.transform.x > width ||
-          //   event.transform.y < -height / 2 || event.transform.y > height) return;
+
           useMainStore().setZoomTransform(event.transform);
 
           this.zoom.translateExtent([
@@ -2397,6 +2396,8 @@ export default {
     },
 
     hotkey(event) {
+      const height = window.innerHeight;
+      const width = window.innerWidth;
       if (
         event.target !== document.body &&
         !event.target.matches(".c-toolbar *")
@@ -2438,6 +2439,7 @@ export default {
               -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
             );
           } else {
+            if (this.zoomTransform.y > height / 3 * 2) return;
             this.zoomTransform.y += 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10);
           }
           event.preventDefault();
@@ -2450,6 +2452,7 @@ export default {
               1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
             );
           } else {
+            if (this.zoomTransform.y < -height / 2) return;
             this.zoomTransform.y -= 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10);
           }
           event.preventDefault();
@@ -2462,6 +2465,8 @@ export default {
               0
             );
           } else {
+            console.log(this.zoomTransform.x)
+            if (this.zoomTransform.x > width / 3 * 2) return;
             this.zoomTransform.x += 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
           }
           event.preventDefault();
@@ -2474,6 +2479,7 @@ export default {
               0
             );
           } else {
+            if (this.zoomTransform.x < -width / 4) return;
             this.zoomTransform.x -= 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
           }
           event.preventDefault();

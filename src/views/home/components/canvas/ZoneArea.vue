@@ -149,9 +149,8 @@
           </g>
         </g>
 
-        <circle v-if="showTag(item)" :fill="seatColor(item.category)"
-          :cx="item.position.x" :cy="item.position.y + 7" :r="3" :stroke="'#000'"
-          style="stroke-width: 1px">
+        <circle v-if="showTag(item)" fill="#fff" :cx="item.position.x"
+          :cy="item.position.y + 7" :r="3">
         </circle>
 
         <text fill="table_seat_label" :x="item.position.x" :y="item.position.y"
@@ -209,9 +208,8 @@
           </g>
         </g>
 
-        <circle v-if="showTag(item)" :fill="seatColor(item.category)"
-          :cx="item.position.x" :cy="item.position.y + 7" :r="3" :stroke="'#000'"
-          style="stroke-width: 1px">
+        <circle v-if="showTag(item)" fill="#fff" :cx="item.position.x"
+          :cy="item.position.y + 7" :r="3">
         </circle>
 
         <text fill="black" :x="item.position.x" :y="item.position.y"

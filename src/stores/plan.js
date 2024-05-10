@@ -1154,7 +1154,6 @@ export const usePlanStore = defineStore("plan", {
 
     skipLetterRows(rowIds, numbering, startAt, reversed, skip_letter) {
       const numbers = numbering.skip(rowIds, startAt, skip_letter);
-      console.log("numbers", numbers);
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid) && r.seats.length) {

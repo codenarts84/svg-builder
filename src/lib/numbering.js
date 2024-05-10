@@ -62,13 +62,22 @@ const SEAT_NUMBERINGS = [
     findStartAt: (firstValue) => {
       return parseInt(firstValue);
     },
+    start: (val) => {
+      return val;
+    },
   },
   {
     id: "odd",
     label: "1, 3, 5, …",
     compute: (seats, startAt) => {
-      let counter = (startAt - 1) * 2 - 1;
-      return seats.map((s) => (counter += 2).toString());
+      let counter = startAt;
+      if (startAt % 2)
+        return seats.map((s) => {
+          const n = counter;
+          counter += 2;
+          return n.toString();
+        });
+      return null;
     },
     skip: (seats, startAt, skip_letter) => {
       let counter = startAt;
@@ -77,25 +86,28 @@ const SEAT_NUMBERINGS = [
       const skips = skip_letter.split(/\s*,\s*/);
       while (res.length < len) {
         if (!skips.includes(counter.toString())) res.push(counter.toString());
-        counter++;
+        counter += 2;
       }
       return res;
     },
     findStartAt: (firstValue) => {
       return parseInt(firstValue);
+    },
+    start: (value) => {
+      return value;
     },
   },
   {
     id: "even",
     label: "2, 4, 6, …",
     compute: (seats, startAt) => {
-      let counter = (startAt - 1) * 2;
+      let counter = startAt;
+      if (startAt % 2) return null;
       return seats.map((s) => {
         const n = counter;
         counter += 2;
         return n.toString();
       });
-      // return seats.map((s) => (counter += 2).toString());
     },
     skip: (seats, startAt, skip_letter) => {
       let counter = startAt;
@@ -104,12 +116,15 @@ const SEAT_NUMBERINGS = [
       const skips = skip_letter.split(/\s*,\s*/);
       while (res.length < len) {
         if (!skips.includes(counter.toString())) res.push(counter.toString());
-        counter++;
+        counter += 2;
       }
       return res;
     },
     findStartAt: (firstValue) => {
       return parseInt(firstValue);
+    },
+    start: (value) => {
+      return value;
     },
   },
   // {
@@ -152,6 +167,9 @@ const SEAT_NUMBERINGS = [
     findStartAt: (firstValue) => {
       return reverseLetterCounter(firstValue.toUpperCase());
     },
+    start: (value) => {
+      return letterCounter(value, "A");
+    },
   },
   {
     id: "alphalower",
@@ -165,6 +183,9 @@ const SEAT_NUMBERINGS = [
     },
     findStartAt: (firstValue) => {
       return reverseLetterCounter(firstValue.toUpperCase());
+    },
+    start: (value) => {
+      return letterCounter(value, "a");
     },
   },
 ];
@@ -188,6 +209,9 @@ const ROW_NUMBERINGS = [
       }
       return res;
     },
+    start: (val) => {
+      return val;
+    },
     findStartAt: (firstValue) => {
       return parseInt(firstValue);
     },
@@ -196,8 +220,14 @@ const ROW_NUMBERINGS = [
     id: "odd",
     label: "1, 3, 5, …",
     compute: (rows, startAt) => {
-      let counter = (startAt - 1) * 2 - 1;
-      return rows.map((r) => (counter += 2).toString());
+      let counter = startAt;
+      if (startAt % 2)
+        return rows.map((s) => {
+          const n = counter;
+          counter += 2;
+          return n.toString();
+        });
+      return null;
     },
     skip: (rows, startAt, skip_letter) => {
       let counter = startAt;
@@ -206,9 +236,12 @@ const ROW_NUMBERINGS = [
       const skips = skip_letter.split(/\s*,\s*/);
       while (res.length < len) {
         if (!skips.includes(counter.toString())) res.push(counter.toString());
-        counter++;
+        counter += 2;
       }
       return res;
+    },
+    start: (value) => {
+      return value;
     },
     findStartAt: (firstValue) => {
       return parseInt(firstValue);
@@ -218,13 +251,16 @@ const ROW_NUMBERINGS = [
     id: "even",
     label: "2, 4, 6, …",
     compute: (rows, startAt) => {
-      let counter = (startAt - 1) * 2;
-      // return rows.map((s) => {
-      //   const n = counter;
-      //   counter += 2;
-      //   return n.toString();
-      // });
-      return rows.map((r) => (counter += 2).toString());
+      let counter = startAt;
+      if (startAt % 2) return null;
+      return rows.map((s) => {
+        const n = counter;
+        counter += 2;
+        return n.toString();
+      });
+    },
+    start: (value) => {
+      return value;
     },
     skip: (rows, startAt, skip_letter) => {
       let counter = startAt;
@@ -233,7 +269,7 @@ const ROW_NUMBERINGS = [
       const skips = skip_letter.split(/\s*,\s*/);
       while (res.length < len) {
         if (!skips.includes(counter.toString())) res.push(counter.toString());
-        counter++;
+        counter += 2;
       }
       return res;
     },
@@ -255,6 +291,9 @@ const ROW_NUMBERINGS = [
     findStartAt: (firstValue) => {
       return reverseLetterCounter(firstValue.toUpperCase());
     },
+    start: (value) => {
+      return letterCounter(value, "A");
+    },
   },
   {
     id: "alphalower",
@@ -268,6 +307,9 @@ const ROW_NUMBERINGS = [
     },
     findStartAt: (firstValue) => {
       return reverseLetterCounter(firstValue.toUpperCase());
+    },
+    start: (value) => {
+      return letterCounter(value, "a");
     },
   },
   // roman numbers?

@@ -174,14 +174,8 @@ export default ({
         try {
           let guessedStartAt = numbering.findStartAt(this.rows[0].row_number)
           let guessedNumbers = numbering.compute(this.rows, guessedStartAt)
-          console.log(guessedNumbers)
           if (this.rows.filter((r, idx) => r.row_number === guessedNumbers[idx]).length === this.rows.length) {
-            let start = ''
-            if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
-            else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
-            else if (numbering.id === 'odd') start = (guessedStartAt - 1) * 2;
-            else if (numbering.id === 'even') start = (guessedNumbers - 1) * 2;
-            else start = guessedStartAt
+            const start = numbering.start(guessedStartAt)
             return { scheme: numbering, reversed: false, startAt: guessedStartAt, start }
           }
 
@@ -189,12 +183,7 @@ export default ({
           let guessedStartAtRev = numbering.findStartAt(rowsReversed[0].row_number)
           let guessedNumbersRev = numbering.compute(rowsReversed, guessedStartAtRev)
           if (rowsReversed.filter((r, idx) => r.row_number === guessedNumbersRev[idx]).length === this.rows.length) {
-            let start = ''
-            if (numbering.id === 'alpha') start = letterCounter(guessedStartAt, 'A')
-            else if (numbering.id === 'alphalower') start = letterCounter(guessedStartAt, 'a')
-            else if (numbering.id === 'odd') start = (guessedStartAt - 1) * 2;
-            else if (numbering.id === 'even') start = (guessedStartAt - 1) * 2;
-            else start = guessedStartAt
+            const start = numbering.start(guessedStartAt)
             return { scheme: numbering, reversed: true, startAt: guessedStartAtRev, start }
           }
         } catch (e) {
@@ -260,7 +249,10 @@ export default ({
     setRowNumbering(val) {
       let numbering = ROW_NUMBERINGS.find(n => n.id === val.target.value);
       this.planstore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip: '' })
-      this.planstore.renumberRows(this.rows.map(r => r.uuid), numbering, 1, false)
+      if (val.target.value === 'even') {
+        this.planstore.renumberRows(this.rows.map(r => r.uuid), numbering, 2, false)
+      } else
+        this.planstore.renumberRows(this.rows.map(r => r.uuid), numbering, 1, false)
     },
     setRowNumberingStartAt(e) {
       const id = this.rowNumbering.scheme.id;
@@ -273,7 +265,9 @@ export default ({
         input.value = value.replace(/[^a-zA-Z]/g, '');
       } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(e.target.value)) {
         input.value = value.replace(/[^0-9]/g, '');
-      } else {
+      } else if (id === 'even' && (parseInt(input.value) % 2)) return;
+      else if (id === 'odd' && !(parseInt(input.value) % 2)) return;
+      else {
         const le = this.rowNumbering.scheme.findStartAt(input.value)
         this.planstore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip: '' })
         this.planstore.renumberRows(this.rows.map(r => r.uuid), this.rowNumbering.scheme, le, this.rowNumbering.reversed)

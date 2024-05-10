@@ -59,6 +59,7 @@ const fitScreen = () => {
     );
   useMainStore().setZoomTransform(initTransform);
 
+
 }
 
 </script>
