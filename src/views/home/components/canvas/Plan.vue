@@ -2313,7 +2313,7 @@ export default {
       if (event.deltaY < 0 && (this.zoomTransform.y + boxHeight) > (height + boxHeight - 100)) return;
       if (event.deltaX > 0 && this.zoomTransform.x < -boxWidth + 100) return;
       if (event.deltaX < 0 && (this.zoomTransform.x + boxWidth) > (width + boxWidth - 100)) return;
-      this.zoomTransform.x += event.deltaX / 10;
+      this.zoomTransform.x -= event.deltaX / 10;
       this.zoomTransform.y -= event.deltaY / 10;
     },
 
