@@ -9,7 +9,7 @@
       </circle>
       <text v-if="area.text.text" :x="area.text.position.x"
         :y="area.text.position.y" :font-size="area.text.size || 16"
-        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        text-anchor="middle" font-family="sans-serif" dy=".35em"
         :fill="area.text.color || '#888888'">
         {{ area.text.text }}
       </text>
@@ -22,7 +22,7 @@
       </ellipse>
       <text v-if="area.text.text" :x="area.text.position.x"
         :y="area.text.position.y" :font-size="area.text.size || 16"
-        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        text-anchor="middle" font-family="sans-serif" dy=".35em"
         :fill="area.text.color || '#888888'">
         {{ area.text.text }}
       </text>
@@ -40,7 +40,7 @@
       </ellipse>
       <text v-if="area.text.text" :x="area.text.position.x"
         :y="area.text.position.y" :font-size="area.text.size || 16"
-        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        text-anchor="middle" font-family="sans-serif" dy=".35em"
         :fill="area.text.color || '#888888'">
         {{ area.text.text }}
       </text>
@@ -53,7 +53,7 @@
         :stroke-width="area.border_width || '2px'"></rect>
       <text v-if="area.text.text" :x="area.text.position.x"
         :y="area.text.position.y" :font-size="area.text.size || 16"
-        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        text-anchor="middle" font-family="sans-serif" dy=".35em"
         :fill="area.text.color || '#888888'">
         {{ area.text.text }}
       </text>
@@ -69,7 +69,7 @@
         :data-section-abv="area.abbreviation || ''"></rect>
       <text v-if="area.text.text" :x="area.rectangle.width / 2"
         :y="area.rectangle.height / 2" :font-size="area.text.size || 16"
-        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        text-anchor="middle" font-family="sans-serif" dy=".35em"
         :fill="area.text.color || '#888888'">
         {{ area.text.text }}
       </text>
@@ -82,7 +82,7 @@
       </polygon>
       <text v-if="area.text.text" :x="area.text.position.x"
         :y="area.text.position.y" :font-size="area.text.size || 16"
-        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        text-anchor="middle" font-family="sans-serif" dy=".35em"
         :fill="area.text.color || '#888888'">
         {{ area.text.text }}
       </text>
@@ -98,7 +98,7 @@
       </polygon>
       <text v-if="area.text.text" :x="area.text.position.x"
         :y="area.text.position.y" :font-size="area.text.size || 16"
-        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        text-anchor="middle" font-family="sans-serif" dy=".35em"
         :fill="area.text.color || '#888888'">
         {{ area.text.text }}
       </text>
@@ -110,7 +110,7 @@
       </circle>
       <text class="table_label" :x="area.label.position.x"
         :y="area.label.position.y" :font-size="area.label.size || 16"
-        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        text-anchor="middle" font-family="sans-serif" dy=".35em"
         :fill="area.label.color || '#888888'"
         :transform="!area.rotate_label ? `rotate(${-area.rotation})` : ''">
         {{ area.label.abv }}
@@ -155,7 +155,7 @@
 
         <text fill="table_seat_label" :x="item.position.x" :y="item.position.y"
           text-anchor="middle" font-size="10px" font-family="sans-serif"
-          :key="item" dy=".3em"
+          :key="item" dy=".35em"
           :transform="!area.rotate_label ? roundTableTransform(area, item, idx) : ''">{{
             area.skip_letter ? item.skip_number : item.seat_number }}</text>
       </g>
@@ -168,7 +168,7 @@
         stroke-width="1"></rect>
       <text class="table_label" :x="area.label.position.x"
         :y="area.label.position.y" :font-size="area.label.size || 16"
-        text-anchor="middle" font-family="sans-serif" dy=".3em"
+        text-anchor="middle" font-family="sans-serif" dy=".35em"
         :fill="area.label.color || '#888888'"
         :transform="!area.rotate_label ? `translate(${area.rectangleTable.width / 2}, ${area.rectangleTable.height / 2}) rotate(${-area.rotation})`
           : `translate(${area.rectangleTable.width / 2}, ${area.rectangleTable.height / 2})`">
@@ -213,7 +213,8 @@
         </circle>
 
         <text fill="black" :x="item.position.x" :y="item.position.y"
-          text-anchor="middle" font-size="10px" font-family="sans-serif" dy=".3em"
+          text-anchor="middle" font-size="10px" font-family="sans-serif"
+          dy=".35em"
           :transform="!area.rotate_label ? rectangleTableTransform(area, item, index) : ''">{{
             area.skip_letter ? item.skip_number : item.seat_number }}</text>
       </g>
@@ -222,7 +223,7 @@
     <text v-if="area.shape === 'text' && area.text && area.text.text"
       :x="area.text.position.x" :y="area.text.position.y"
       :font-size="area.text.size || 16" text-anchor="middle"
-      font-family="sans-serif" dy=".3em" :fill="area.text.color || '#888888'">{{
+      font-family="sans-serif" dy=".35em" :fill="area.text.color || '#888888'">{{
         area.text.text }}</text>
     <g v-if="isIndividuallySelected &&
       (area.shape === 'polygon' || area.shape === 'gaPolygon') &&
