@@ -2868,7 +2868,7 @@ export default {
     rowDrawingSeats.length +
     rowDrawPosition.y -
     30
-    " text-anchor="middle" fill="black" dy=".3em" style="z-index: 99">
+    " text-anchor="middle" fill="black" dy=".35em" style="z-index: 99">
           {{ rowDrawingSeats.length }} Seats
         </text>
         <circle class="seat-preview" v-for="(s, sid) in rowDrawingSeats"
@@ -2882,11 +2882,11 @@ export default {
           </circle>
         </g>
         <text v-if="rowBlockRows * rowBlockSeats > 0" :x="10" :y="-30"
-          fill="black" dy=".3em" style="z-index: 99">
+          fill="black" dy=".35em" style="z-index: 99">
           {{ rowBlockRows }} × {{ rowBlockSeats }} Seats
         </text>
         <!-- <text v-if="rowBlockRows * rowBlockSeats > 0" :x="10" :y="-30"
-          fill="black" dy=".3em" style="z-index: 99">
+          fill="black" dy=".35em" style="z-index: 99">
           {{ rowBlockRows * rowBlockSeats }} Seats
         </text> -->
         <!-- <rect v-if="rowBlockSeats + rowBlockRows >= 7"
@@ -2896,7 +2896,7 @@ export default {
         <text v-if="rowBlockSeats + rowBlockRows >= 7"
           :x="(rowSeatSpacing * rowBlockSeats) / 2 - 12.5"
           :y="(rowSpacing * rowBlockRows) / 2 - 12.5" text-anchor="middle"
-          fill="#fff" dy=".3em">
+          fill="#fff" dy=".35em">
           {{ rowBlockRows }} × {{ rowBlockSeats }}
         </text> -->
       </g>
@@ -2920,17 +2920,17 @@ export default {
           </g>
         </g>
         <!-- <text v-if="stgrowBlockRows * stgrowBlockSeats > 0" :x="10" :y="-30"
-          fill="black" dy=".3em" style="z-index: 99">
+          fill="black" dy=".35em" style="z-index: 99">
           {{ stgrowBlockRows * stgrowBlockSeats }} Seats
         </text> -->
         <!-- <rect v-if="stgrowBlockSeats + stgrowBlockRows > 0" :x="10" :y="-50"
           width="50" height="25" fill="#00c"></rect>
         <text v-if="stgrowBlockSeats + stgrowBlockRows > 0" :x="33"
-          :y="-50 + 12.5" text-anchor="middle" fill="#fff" dy=".3em">
+          :y="-50 + 12.5" text-anchor="middle" fill="#fff" dy=".35em">
           {{ stgrowBlockRows }} × {{ stgrowBlockSeats }}
         </text> -->
         <text v-if="stgrowBlockRows * stgrowBlockSeats > 0" :x="10" :y="-30"
-          fill="black" dy=".3em" style="z-index: 99">
+          fill="black" dy=".35em" style="z-index: 99">
           {{ stgrowBlockRows }} × {{ stgrowBlockSeats }} Seats
         </text>
       </g>

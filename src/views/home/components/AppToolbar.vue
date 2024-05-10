@@ -60,6 +60,20 @@ const planStore = usePlanStore();
 const boardStore = useBoardStore();
 const boardName = ref(computed(() => planStore.plan.name));
 
+const objectToSVG = obj => {
+  let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600">`;
+
+  jsonData.shapes.forEach(shape => {
+    if (shape.type === "circle") {
+      svgContent += `<circle cx="${shape.cx}" cy="${shape.cy}" r="${shape.r}" fill="${shape.color}" />`;
+    }
+    // Add more conditions for other shapes like rectangles, lines, etc.
+  });
+
+  svgContent += `</svg>`;
+  return svgContent;
+}
+
 const exportSVG = () => {
   // if (this.validationErrors === undefined || this.validationErrors.length === 0 || confirm('Your plan contains validation errors. Do you still want to download it?')) {
   // const url = URL.createObjectURL(new Blob([JSON.stringify(planStore.plan, undefined, 2)]))
@@ -72,7 +86,7 @@ const exportSVG = () => {
   // URL.revokeObjectURL(url)
 
   const plan = planStore.plan;
-  console.log(typeof plan, plan)
+  console.log(plan)
 
   // sendEmail();
   // } else {
