@@ -175,11 +175,14 @@ export default ({
       const id = this.seatNumbering.scheme.id;
       const input = e.target;
       const value = input.value;
-      const validLetters = /^[a-zA-Z]+$/;
+      const validUpper = /^[A-Z]+$/;
+      const validLower = /^[a-z]+$/;
       const validNumbers = /^[0-9]+$/;
 
-      if ((id === 'alpha' || id === 'alphalower') && !validLetters.test(e.target.value)) {
-        input.value = value.replace(/[^a-zA-Z]/g, '');
+      if ((id === 'alpha') && !validUpper.test(e.target.value.toUpperCase())) {
+        input.value = value.toUpperCase().replace(/[^A-Z]/g, '');
+      } else if (id === 'alphalower' && !validLower.test(e.target.value.toLowerCase())) {
+        input.value = value.toLowerCase().replace(/[^a-z]/g, '');
       } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(e.target.value)) {
         input.value = value.replace(/[^0-9]/g, '');
       } else if (id === 'even' && (parseInt(input.value) % 2)) return;
@@ -208,6 +211,22 @@ export default ({
         this.planStore.renumberSeats(this.rows.map(r => r.uuid), numbering, 1, false)
     },
     setSkip(val) {
+      const id = this.seatNumbering.scheme.id;
+      const input = val.target;
+      const value = input.value;
+      const validUpper = /^[A-Z,]+$/;
+      const validLower = /^[a-z]+$/;
+      const validNumbers = /^[0-9]+$/;
+
+      if ((id === 'alpha') && !validUpper.test(val.target.value.toUpperCase())) {
+        input.value = value.toUpperCase().replace(/[^A-Z,]/g, '');
+      } else if (id === 'alphalower' && !validLower.test(val.target.value.toLowerCase())) {
+        input.value = value.toLowerCase().replace(/[^a-z,]/g, '');
+      } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(val.target.value)) {
+        input.value = value.replace(/[^0-9,]/g, '');
+      } else if (id === 'even' && (parseInt(input.value) % 2)) return;
+      else if (id === 'odd' && !(parseInt(input.value) % 2)) return;
+
       if (this.seatNumbering) {
         this.planStore.modifyRows({ rowIds: this.rows.map(r => r.uuid), skip_letter: val.target.value })
         this.planStore.skipLetterSeats(this.rows.map(r => r.uuid), this.seatNumbering.scheme, this.seatNumbering.startAt, this.seatNumbering.reversed, val.target.value);

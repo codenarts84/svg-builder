@@ -121,11 +121,14 @@ const setSeatNumberingStartAt = (e) => {
   const id = seatNumbering.value.scheme.id;
   const input = e.target;
   const value = input.value;
-  const validLetters = /^[a-zA-Z]+$/;
+  const validUpper = /^[A-Z]+$/;
+  const validLower = /^[a-z]+$/;
   const validNumbers = /^[0-9]+$/;
 
-  if ((id === 'alpha' || id === 'alphalower') && !validLetters.test(e.target.value)) {
-    input.value = value.replace(/[^a-zA-Z]/g, '');
+  if ((id === 'alpha') && !validUpper.test(e.target.value.toUpperCase())) {
+    input.value = value.toUpperCase().replace(/[^A-Z]/g, '');
+  } else if (id === 'alphalower' && !validLower.test(e.target.value.toLowerCase())) {
+    input.value = value.toLowerCase().replace(/[^a-z]/g, '');
   } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(e.target.value)) {
     input.value = value.replace(/[^0-9]/g, '');
   } else if (id === 'even' && (parseInt(input.value) % 2)) return;
@@ -161,6 +164,21 @@ const skip = computed(() => {
 })
 
 const setSkip = e => {
+  const id = seatNumbering.value.scheme.id;
+  const input = e.target;
+  const value = input.value;
+  const validUpper = /^[A-Z,]+$/;
+  const validLower = /^[a-z,]+$/;
+  const validNumbers = /^[0-9,]+$/;
+
+  if ((id === 'alpha') && !validUpper.test(e.target.value.toUpperCase())) {
+    input.value = value.toUpperCase().replace(/[^A-Z,]/g, '');
+  } else if (id === 'alphalower' && !validLower.test(e.target.value.toLowerCase())) {
+    input.value = value.toLowerCase().replace(/[^a-z,]/g, '');
+  } else if ((id === 'natural' || id === 'even' || id === 'odd') && !validNumbers.test(e.target.value)) {
+    input.value = value.replace(/[^0-9,]/g, '');
+  } else if (id === 'even' && (parseInt(input.value) % 2)) return;
+  else if (id === 'odd' && !(parseInt(input.value) % 2)) return;
   plan.modifyAreas({ areaIds: props.areas.map(a => a.uuid), skip_letter: e.target.value });
   if (seatNumbering.value) {
     plan.skipLetterTableSeats(props.areas.map(a => a.uuid), seatNumbering.value.scheme, seatNumbering.value.startAt, seatNumbering.value.reversed, e.target.value)

@@ -126,7 +126,7 @@
           :data-tags="makeTag(item)">
         </circle>
 
-        <g v-if="item.tag_name && !item.tag_name.includes('Standing Room Only') && item.tag_name.includes('Wheelchair')"
+        <g v-if="item.tag_name && item.tag_name.includes('Wheelchair')"
           :transform="`matrix(1, 0, 0, 1, ${item.position.x - 5}, ${item.position.y - 6})`"
           data-object-type="seat-icon" x="-5" y="-6" data-seat-id="element-1-1"
           data-seat-icon="wheelchair" data-v-e185086c="">
@@ -185,7 +185,7 @@
           :data-tags="makeTag(item)">
         </circle>
 
-        <g v-if="item.tag_name && !item.tag_name.includes('Standing Room Only') && item.tag_name.includes('Wheelchair')"
+        <g v-if="item.tag_name && item.tag_name.includes('Wheelchair')"
           :transform="`matrix(1, 0, 0, 1, ${item.position.x - 5}, ${item.position.y - 6})`"
           data-object-type="seat-icon" x="-5" y="-6" data-seat-id="element-1-1"
           data-seat-icon="wheelchair" data-v-e185086c="">
@@ -320,9 +320,10 @@ export default {
       const tags = [
         "Wheelchair Companion",
         "Partial View",
-        "Folding Chair"
+        "Folding Chair",
+        "Standing Room Only"
       ]
-      if (item.tag_name && !item.tag_name.includes('Standing Room Only')) {
+      if (item.tag_name) {
         let res = false;
         tags.forEach(tag => {
           if (item.tag_name.includes(tag))

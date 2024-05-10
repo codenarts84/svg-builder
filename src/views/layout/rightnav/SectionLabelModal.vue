@@ -47,9 +47,10 @@ const onAdd = () => {
       return;
     }
 
-    const findItem = sections.value.find(s => s.label === newLabel.value)
-    if (findItem && findItem.abv === newAbr.value) {
-      alert('Already exist')
+    const findLabel = sections.value.find(s => s.label === newLabel.value)
+    const findAbv = sections.value.find(s => s.abv === newAbr.value)
+    if (findLabel || findAbv) {
+      alert('This label or abbreviation already exists. Please use a different one')
       return
     }
 
