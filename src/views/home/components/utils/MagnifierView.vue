@@ -37,7 +37,7 @@ const onChange = (e) => {
 };
 
 const setTransform = val => {
-  if (val < 0.05) return;
+  if (val < 0.05) val = 0.05;
   zoomTransform.value.k = val;
 }
 
