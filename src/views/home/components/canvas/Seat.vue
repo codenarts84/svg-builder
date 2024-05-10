@@ -13,7 +13,7 @@
 
     <text class="seat_label" :fill="textColor ? 'black' : 'black'"
       :x="seat.position.x" :y="seat.position.y" text-anchor="middle"
-      font-size="10px" font-family="sans-serif" dy=".3em">
+      font-size="10px" font-family="sans-serif" dy=".35em">
       {{ textContent }}
     </text>
 
