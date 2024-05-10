@@ -256,8 +256,8 @@ const onAlignHorizonLeft = () => {
 
 const onAlignHorizonRight = () => {
   const boundary = props.selectionBoundary();
+  if (!boundary) return;
   const startX = boundary.x;
-  console.log(boundary)
   const endX = boundary.x + boundary.width;
   if (selection.value.length) {
     for (const z of plan.zones) {
@@ -342,82 +342,94 @@ const onAlignHorizonRight = () => {
   planStore.persistPlan();
 }
 
-const onFlipVertical = () => {
-  alert('not yet');
-  // const boundary = props.selectionBoundary();
-  // const startX = boundary.x;
-  // const endX = startX + boundary.width;
-  // const midX = (startX + endX) / 2;
-  // if (selection.value.length) {
-  //   for (const z of plan.zones) {
-  //     // row
-  //     for (const r of z.rows) {
-  //       if (selection.value.includes(r.uuid)) {
-  //         const minx = Math.min(...r.seats.map(s => s.position.x)) + z.position.x + r.position.x
-  //         const maxx = Math.max(...r.seats.map(s => s.position.x)) + z.position.x + r.position.x
-  //         const midx = (minx + maxx) / 2;
-  //         // r.position.x += 2 * (midX - midx);
-  //         r.position.x = 2 * midX - r.position.x;
-  //         r.seats.forEach(s => s.position.x = -s.position.x)
-  //       }
-  //     }
-
-  //     // shape
-  //     for (const a of z.areas) {
-  //       if (selection.value.includes(a.uuid)) {
-  //         if (a.shape === 'circle') {
-  //           a.position.x = midX * 2 - a.position.x;
-  //         } else if (a.shape === 'rectangle' || a.shape === 'gaSquare') {
-  //           if (a.rotation) {
-  //             let abox = {
-  //               x: a.position.x,
-  //               y: a.position.y,
-  //               width: a.rectangle.width,
-  //               height: a.rectangle.height
-  //             }
-  //             abox = rotateRectangluarBox(a, abox);
-  //             const w = a.rectangle.width;
-  //             const h = a.rectangle.height;
-  //             const alpha = a.rotation * Math.PI / 180;
-  //             const x0 = a.position.x + w * Math.cos(alpha) + h * Math.sin(alpha)
-  //             const y0 = a.position.y + w * Math.sin(alpha) - h * Math.cos(alpha)
-  //             a.position.x = midX * 2 - x0;
-  //             a.position.y = y0;
-  //             a.rotation = -a.rotation;
-  //           } else {
-  //             a.position.x = midX * 2 - a.position.x - a.rectangle.width;
-  //           }
-  //         } else if (a.shape === 'ellipse' || a.shape === 'gaCircle') {
-  //           a.position.x = midX * 2 - a.position.x;
-  //           a.rotation = 180 - a.rotation;
-  //         } else if (a.shape === 'polygon' || a.shape === 'gaPolygon') {
-  //           if (a.rotation) {
-  //             const abox = polygonBBox(a);
-  //             const dx = midX - (abox.x + abox.width / 2);
-  //             a.position.x += dx;
-  //           } else {
-  //             const points = a.polygon.points;
-  //             const minx = Math.min(...points.map(s => s.x)) + a.position.x;
-  //             const maxx = Math.max(...points.map(s => s.x)) + a.position.x;
-  //             a.position.x += midX - (minx + maxx) / 2;
-  //           }
-  //         } else if (a.shape === 'text') {
-  //           a.position.x = midX * 2 - a.position.x;
-  //         } else if (a.shape === 'roundTable') {
-  //           //bug fix
-  //           a.position.x = midX;
-  //         } else if (a.shape === 'rectangleTable') {
-  //           //bug fix
-  //           a.position.x = midX;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   planStore.persistPlan();
-  // }
+const rotateArea = (area, deg, lox, loy) => {
+  const theta = (deg / 180) * Math.PI;
+  const oldx = area.position.x;
+  const oldy = area.position.y;
+  area.position.x =
+    Math.cos(theta) * (oldx - lox) -
+    Math.sin(theta) * (oldy - loy) +
+    lox;
+  area.position.y =
+    Math.sin(theta) * (oldx - lox) +
+    Math.cos(theta) * (oldy - loy) +
+    loy;
+  area.rotation = Math.round((area.rotation + deg) % 360, 2);
+  if (area.rotation < 0) area.rotation += 360;
+  return area;
 }
 
 const onFlipHorizental = () => {
+  const boundary = props.selectionBoundary();
+  const startX = boundary.x;
+  const endX = startX + boundary.width;
+  const midX = (startX + endX) / 2;
+  if (selection.value.length) {
+    for (const z of plan.zones) {
+      // row
+      for (const r of z.rows) {
+        if (selection.value.includes(r.uuid)) {
+          const minx = Math.min(...r.seats.map(s => s.position.x)) + z.position.x + r.position.x
+          const maxx = Math.max(...r.seats.map(s => s.position.x)) + z.position.x + r.position.x
+          const midx = (minx + maxx) / 2;
+          // r.position.x += 2 * (midX - midx);
+          r.position.x = 2 * midX - r.position.x;
+          r.seats.forEach(s => s.position.x = -s.position.x)
+        }
+      }
+
+      // shape
+      for (const a of z.areas) {
+        if (selection.value.includes(a.uuid)) {
+          if (a.shape === 'circle') {
+            a.position.x = midX * 2 - a.position.x;
+          } else if (a.shape === 'rectangle' || a.shape === 'gaSquare') {
+            let rBox = rectangleBBox(a);
+            let oX = rBox.x + rBox.width / 2;
+            let oY = rBox.y + rBox.height / 2;
+
+            const prevRot = a.rotation;
+            rotateArea(a, -prevRot, oX, oY);
+            a.position.x = midX * 2 - a.position.x - a.rectangle.width;
+
+            rBox = rectangleBBox(a);
+            oX = rBox.x + rBox.width / 2;
+            oY = rBox.y + rBox.height / 2;
+
+            rotateArea(a, -prevRot, oX, oY);
+          } else if (a.shape === 'ellipse' || a.shape === 'gaCircle') {
+            a.position.x = midX * 2 - a.position.x;
+            a.rotation = 180 - a.rotation;
+          } else if (a.shape === 'polygon' || a.shape === 'gaPolygon') {
+            let rBox = polygonBBox(a);
+            let oX = rBox.x + rBox.width / 2;
+            let oY = rBox.y + rBox.height / 2;
+
+            const prevRot = a.rotation;
+            rotateArea(a, -prevRot, oX, oY);
+            a.position.x = midX * 2 - a.position.x - rBox.width;
+
+            rBox = polygonBBox(a);
+            oX = rBox.x + rBox.width / 2;
+            oY = rBox.y + rBox.height / 2;
+
+            rotateArea(a, -prevRot, oX, oY);
+          } else if (a.shape === 'text') {
+            a.position.x = midX * 2 - a.position.x;
+          } else if (a.shape === 'roundTable') {
+            //bug fix
+            a.position.x = midX;
+          } else if (a.shape === 'rectangleTable') {
+            //bug fix
+            a.position.x = midX;
+          }
+        }
+      }
+    }
+    planStore.persistPlan();
+  }
+}
+const onFlipVertical = () => {
   alert('not yet')
 }
 

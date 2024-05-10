@@ -700,6 +700,7 @@ export const useMainStore = defineStore({
                     y: ppoint.y,
                     zone: z,
                   });
+                  a.polygon.points[this.draggingPolygonPointId] = ppoint;
                   // Vue.set(
                   //   a.polygon.points,
                   //   this.draggingPolygonPointId,

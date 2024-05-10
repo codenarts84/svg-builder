@@ -12,7 +12,7 @@
   </v-layout>
 </template>
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import AppToolbar from "./components/AppToolbar.vue";
 import RightNav from "../layout/right/RightNav.vue";
 import HandMenu from "./components/HandMenu.vue";
@@ -22,7 +22,6 @@ import sampleplan from "@/sampleplan";
 
 import { useMainStore } from "@/stores";
 import { usePlanStore } from "@/stores/plan.js"; // Assuming you've set up a Pinia store in this location
-import { onMounted } from "vue";
 import { NULL } from "sass";
 
 const store = useMainStore();
@@ -32,11 +31,7 @@ store.loadPlan(
     : sampleplan.sampleplan
 );
 
-
 const WELCOME_VERSION = "1";
-
-// Using Pinia store
-const planStore = usePlanStore();
 
 // Data properties as refs
 const showCreateZonePrompt = ref(false);
@@ -47,6 +42,7 @@ const cmdOtherwiseCtrl = ref(
   window.navigator.platform.toLowerCase().startsWith("mac") ? "CMD" : "CTRL"
 );
 
+const planStore = usePlanStore();
 const plan = computed(() => planStore.plan);
 
 // const planref = ref(null)
@@ -57,9 +53,14 @@ const plan = computed(() => planStore.plan);
 //     temp_Rotate.value = planref.value.temp_Rotate;
 //   }
 // })
-const planref = ref(null)
-const temp_Rotate = (v) => planref.value.temp_Rotate(v);
-const selectionBoundary = () => planref.value.selectionBoundary;
+// const planref = ref(null)
+// const temp_Rotate = (v) => planref.value.temp_Rotate(v);
+// const selectionBoundary = () => planref.value.selectionBoundary;
+const planref = ref(null);
+// Dynamically assign functions if ref is available
+const temp_Rotate = (v) => planref.value ? planref.value.temp_Rotate(v) : undefined;
+const selectionBoundary = () => planref.value ? planref.value.selectionBoundary : undefined;
+
 
 // const selectionBoundary = () => planref.value ? planref.value.selectionBoundary : null;
 

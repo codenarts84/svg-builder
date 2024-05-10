@@ -41,7 +41,7 @@
       :class="tool == 'gaPolygon' ? 'current-tool' : ''">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">GA Polygon</v-tooltip>
-        <v-icon color="black" icon="mdi-shape-polygon-plus" size="large"></v-icon>
+        <GaPolyIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
     <v-list-item @click="changeTool('roundTable')"
@@ -71,6 +71,7 @@ import GaSquareIcon from "@/assets/svgs/menuIcons/GaSquareIcon.vue";
 import TableRoundIcon from "@/assets/svgs/menuIcons/TableRoundIcon.vue";
 import TableRectIcon from "@/assets/svgs/menuIcons/TableRectIcon.vue";
 import GaCircleIcon from "@/assets/svgs/menuIcons/GaCircleIcon.vue";
+import GaPolyIcon from "@/assets/svgs/menuIcons/GaPolyIcon.vue";
 
 import { useMainStore } from "@/stores";
 const store = useMainStore();
