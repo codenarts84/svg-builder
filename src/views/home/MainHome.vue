@@ -12,17 +12,18 @@
   </v-layout>
 </template>
 <script setup>
-import * as d3 from "d3";
 import { ref, computed } from "vue";
 import AppToolbar from "./components/AppToolbar.vue";
-// import TestEditor from "./components/TestEditor.vue";
-// import RightNav from "../layout/rightnav/RightNav.vue";
 import RightNav from "../layout/right/RightNav.vue";
 import HandMenu from "./components/HandMenu.vue";
-import MainZone from "./MainZone.vue";
+import Plan from "./components/canvas/Plan.vue";
+import StatusBar from "./components/StatusBar.vue";
+import sampleplan from "@/sampleplan";
 
 import { useMainStore } from "@/stores";
-import sampleplan from "@/sampleplan";
+import { usePlanStore } from "@/stores/plan.js"; // Assuming you've set up a Pinia store in this location
+import { onMounted } from "vue";
+import { NULL } from "sass";
 
 const store = useMainStore();
 store.loadPlan(
@@ -31,13 +32,6 @@ store.loadPlan(
     : sampleplan.sampleplan
 );
 
-const planref = ref(null);
-
-
-import { usePlanStore } from "@/stores/plan.js"; // Assuming you've set up a Pinia store in this location
-import Toolbar from "./components/Toolbar.vue";
-import Plan from "./components/canvas/Plan.vue";
-import StatusBar from "./components/StatusBar.vue";
 
 const WELCOME_VERSION = "1";
 
@@ -55,9 +49,19 @@ const cmdOtherwiseCtrl = ref(
 
 const plan = computed(() => planStore.plan);
 
-const temp_Rotate = (v) => planref.value.temp_Rotate(v);
+// const planref = ref(null)
+// const temp_Rotate = ref(null)
 
+// onMounted(() => {
+//   if (planref.value && planref.value.temp_Rotate) {
+//     temp_Rotate.value = planref.value.temp_Rotate;
+//   }
+// })
+const planref = ref(null)
+const temp_Rotate = (v) => planref.value.temp_Rotate(v);
 const selectionBoundary = () => planref.value.selectionBoundary;
+
+// const selectionBoundary = () => planref.value ? planref.value.selectionBoundary : null;
 
 // Methods
 const hideWelcomePrompt = () => {

@@ -23,6 +23,7 @@ import ZoneComponent from "./ZoneComponent.vue";
 import { useToolbarStore } from '@/stores/toolbar';
 import { useSeatFormatStore } from "@/stores/seatFormat";
 import { useBoardStore } from "@/stores/svgStore";
+import { pointBox } from "intersects";
 
 const round = (fl, places) => Number(fl.toFixed(places || 0));
 
@@ -49,6 +50,7 @@ export default {
     const rotating = ref(false);
     const rotatingOriginX = ref(0);
     const rotatingOriginY = ref(0);
+    const moveDirection = ref(-1);
     const temp_ox = ref(0);
     const temp_oy = ref(0);
     const rotatingHandleX = ref(0);
@@ -99,6 +101,7 @@ export default {
     const bSnap2Grid = computed(() => store.snap);
     const sections = computed(() => store.section_label)
     const categories = computed(() => planstore.categories)
+
 
     onMounted(() => {
       console.log("SVG Element:", svg.value.getBoundingClientRect());
@@ -650,22 +653,26 @@ export default {
       );
       switch (node) {
         case "nw":
+          this.moveDirection = 1;
           this.resizingOriginX =
             this.selectionBoundary.x + this.selectionBoundary.width;
           this.resizingOriginY =
             this.selectionBoundary.y + this.selectionBoundary.height;
           break;
         case "ne":
+          this.moveDirection = 2;
           this.resizingOriginX = this.selectionBoundary.x;
           this.resizingOriginY =
             this.selectionBoundary.y + this.selectionBoundary.height;
           break;
         case "sw":
+          this.moveDirection = 4;
           this.resizingOriginX =
             this.selectionBoundary.x + this.selectionBoundary.width;
           this.resizingOriginY = this.selectionBoundary.y;
           break;
         case "se":
+          this.moveDirection = 3;
           this.resizingOriginX = this.selectionBoundary.x;
           this.resizingOriginY = this.selectionBoundary.y;
           break;
@@ -1167,10 +1174,27 @@ export default {
           (pos.x - this.resizingOriginX) * (pos.x - this.resizingOriginX) +
           (pos.y - this.resizingOriginY) * (pos.y - this.resizingOriginY)
         );
+        for (const z of this.plan.zones) {
+          for (const row of z.rows) {
+            if (this.selection.includes(row.uuid)) {
+              if (row.seats.length < 2) return;
+              const x0 = row.seats[0].position.x;
+              const y0 = row.seats[0].position.y;
+              const x1 = row.seats[1].position.x;
+              const y1 = row.seats[1].position.y;
+              if (
+                Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1)) *
+                (distance / this.resizingStartDistance) <
+                20
+              )
+                return;
+            }
+          }
+        }
         store.moveResizing(
           this.resizingOriginX,
           this.resizingOriginY,
-          distance / this.resizingStartDistance
+          distance / this.resizingStartDistance,
         );
         this.resizingStartDistance = distance;
       }
@@ -2282,11 +2306,12 @@ export default {
       const width = window.innerWidth;
       const height = window.innerHeight;
       const svgbox = this.getSvgRect();
-      // console.log(this.zoomTransform.y)
-      if (event.deltaY > 0 && this.zoomTransform.y < -height / 2) return;
-      if (event.deltaY < 0 && this.zoomTransform.y > height / 3 * 2) return;
-      if (event.deltaX > 0 && this.zoomTransform.x < -width / 2) return;
-      if (event.deltaX < 0 && this.zoomTransform.x > width / 3 * 2) return;
+      const boxWidth = svgbox.width * this.zoomTransform.k;
+      const boxHeight = svgbox.height * this.zoomTransform.k;
+      if (event.deltaY > 0 && this.zoomTransform.y < 0) return;
+      if (event.deltaY < 0 && this.zoomTransform.y + boxHeight > height) return;
+      if (event.deltaX > 0 && this.zoomTransform.x < 0) return;
+      if (event.deltaX < 0 && this.zoomTransform.x + boxWidth > width) return;
       this.zoomTransform.x += event.deltaX / 10;
       this.zoomTransform.y -= event.deltaY / 10;
     },
@@ -2398,6 +2423,9 @@ export default {
     hotkey(event) {
       const height = window.innerHeight;
       const width = window.innerWidth;
+      const svgbox = this.getSvgRect();
+      const boxWidth = svgbox.width * this.zoomTransform.k;
+      const boxHeight = svgbox.height * this.zoomTransform.k;
       if (
         event.target !== document.body &&
         !event.target.matches(".c-toolbar *")
@@ -2432,6 +2460,7 @@ export default {
           event.preventDefault();
           event.stopPropagation();
           return;
+
         case "ArrowUp":
           if (this.selection.length) {
             useMainStore().moveSelected(
@@ -2439,7 +2468,7 @@ export default {
               -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
             );
           } else {
-            if (this.zoomTransform.y > height / 3 * 2) return;
+            if (this.zoomTransform.y + boxHeight > height) return;
             this.zoomTransform.y += 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10);
           }
           event.preventDefault();
@@ -2452,7 +2481,7 @@ export default {
               1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
             );
           } else {
-            if (this.zoomTransform.y < -height / 2) return;
+            if (this.zoomTransform.y < 0) return;
             this.zoomTransform.y -= 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10);
           }
           event.preventDefault();
@@ -2465,8 +2494,7 @@ export default {
               0
             );
           } else {
-            console.log(this.zoomTransform.x)
-            if (this.zoomTransform.x > width / 3 * 2) return;
+            if (this.zoomTransform.x + boxWidth > width) return;
             this.zoomTransform.x += 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
           }
           event.preventDefault();
@@ -2479,7 +2507,7 @@ export default {
               0
             );
           } else {
-            if (this.zoomTransform.x < -width / 4) return;
+            if (this.zoomTransform.x < 0) return;
             this.zoomTransform.x -= 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
           }
           event.preventDefault();

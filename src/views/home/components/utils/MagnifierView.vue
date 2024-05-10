@@ -57,9 +57,9 @@ const fitScreen = () => {
       (viewportWidth / defaultScale - plan.value.size.width) / 2,
       (viewportHeight / defaultScale - plan.value.size.height) / 2
     );
-  useMainStore().setZoomTransform(initTransform);
-
-
+  zoomTransform.value.x = initTransform.x;
+  zoomTransform.value.y = initTransform.y;
+  zoomTransform.value.k = initTransform.k;
 }
 
 </script>

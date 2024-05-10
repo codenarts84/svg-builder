@@ -6,7 +6,7 @@
     </v-btn>
   </div>
   <div class="text-center">
-    <v-dialog v-model="dialog" width="600">
+    <v-dialog v-model="dialog" width="600" persistent>
       <v-card class="v-card-container">
         <div class="close-btn">
           <v-btn density="comfortable" icon="$close" variant="plain"
@@ -26,19 +26,20 @@
         <div class="widget-container">
           <div class="widget-body">
             <button type="button" class="add-button" id="addRow"
-              @click="handle_create_category">+ Create new
+              @click="onCreate">+ Create new
               category</button>
             <table>
-              <tr v-for="(ca, idx) in categories" :key="ca">
+              <tr v-for="(ca, idx) in categories" :key="idx">
                 <td class="color-container-td">
                   <ColorPicker :setColor="setColor" :selected="ca.color"
                     :index="idx" :setToggle="setToggle" :clearToggle="clearToggle"
                     :toggle="toggle[idx]" />
                 </td>
                 <td class="input-container-td">
-                  <input class="category-input" type="text" name="inputForm"
-                    :value="ca.name" ref="categoryInput"
-                    @input="(e) => handle_change_name(e, idx)">
+                  <input class="category-input" :class="{ 'invalid': valid }"
+                    type=" text" name="inputForm" :defaultValue="ca.name"
+                    ref="categoryInput" @input="(e) => onChange(e, idx)"
+                    @blur="(e) => onBlur(e, idx)" />
                 </td>
                 <td class="delete-container-td">
                   <div class="delete-container-div">
@@ -62,8 +63,8 @@ import { ref, defineProps, computed, defineComponent, nextTick } from "vue";
 import { usePlanStore } from '@/stores/plan.js'
 import DropDown from '../../home/components/DropDown.vue';
 import ColorPicker from "./ColorPicker.vue";
-import { isoFormat } from "d3";
 const dialog = ref(false);
+const valid = ref(false)
 
 const components = defineComponent({
   DropDown
@@ -110,38 +111,32 @@ const cates = computed(() => planStore.categories);
 const categories = ref(cates);
 
 
-const assigned_category = (categoryName) => {
-  for (const z of planStore._plan.zones) {
-    for (const r of z.rows) {
-      for (const s of r.seats) {
-        if (s?.category === categoryName) return false;
-      }
-    }
-    for (const a of z.areas) {
-      if (a.seats) {
-        for (const s of a.seats)
-          if (s?.category === categoryName) return false;
-      } else {
-        if (a.category === categoryName) return false;
-      }
-    }
-  }
-  return true;
-}
-
 const delete_btn = ((idx) => {
   const bStatus = assigned_category(categories.value[idx].name);
   return bStatus;
 })
 
+// const handle_change_name = (e, idx) => {
+//   const val = e.target.value
+//   valid.value = categories.value.find(c => c.name === e.)
+//   if (categories.value.find(ca => ca.name === val)) {
+//     valid.value = false;
+//   } else {
+//     valid.value = true;
+//   }
+// }
 
-const handle_change_name = (e, idx) => {
-  // if (categories.value.find(c => c.name === e.target.value)) {
-  //   alert('Already exist')
-  //   e.target.value = '';
-  //   return;
-  // }
-  planStore.changeCategory(categories.value[idx].name, e.target.value, categories.value[idx].color);
+const onBlur = (e, idx) => {
+  if (!valid.value && e.target.value) {
+    planStore.changeCategory(categories.value[idx].name, e.target.value, categories.value[idx].color);
+  } else {
+    const allCategoryInput = document.querySelectorAll('.category-input')
+    allCategoryInput[idx].select();
+  }
+}
+
+const onChange = (e, idx) => {
+  valid.value = categories.value.findIndex(i => i.name === e.target.value) !== -1;
 }
 
 const setColor = (color, idx) => {
@@ -152,7 +147,17 @@ const handle_delete = (idx) => {
   planStore.deleteCategory(categories.value[idx].name);
 }
 
-const handle_create_category = () => {
+const getUniqueCategoryName = name => {
+  let newName = name;
+  let counter = 1;
+  while (categories.value.some(category => category.name === newName)) {
+    newName = `${name} ${counter}`;
+    counter++;
+  }
+  return newName;
+}
+
+const onCreate = () => {
   if (categories.value.length === 17) {
     alert('Can not add category anymore')
     return;
@@ -173,14 +178,23 @@ const handle_create_category = () => {
   })
 }
 
-const getUniqueCategoryName = name => {
-  let newName = name;
-  let counter = 1;
-  while (categories.value.some(category => category.name === newName)) {
-    newName = `${name} ${counter}`;
-    counter++;
+const assigned_category = (categoryName) => {
+  for (const z of planStore._plan.zones) {
+    for (const r of z.rows) {
+      for (const s of r.seats) {
+        if (s?.category === categoryName) return false;
+      }
+    }
+    for (const a of z.areas) {
+      if (a.seats) {
+        for (const s of a.seats)
+          if (s?.category === categoryName) return false;
+      } else {
+        if (a.category === categoryName) return false;
+      }
+    }
   }
-  return newName;
+  return true;
 }
 </script>
 
@@ -236,8 +250,20 @@ const getUniqueCategoryName = name => {
   border-radius: 5px;
 }
 
+.error {
+  border: 1px solid red;
+}
+
+.error-msg {
+  color: red;
+}
+
 .category-input:focus {
   outline: 3px solid #bae0ff;
+}
+
+.category-input.invalid:focus {
+  outline: 3px solid red;
 }
 
 table {

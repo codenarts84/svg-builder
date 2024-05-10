@@ -1647,14 +1647,6 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
-    createCategory(name, color) {
-      this._plan.categories.push({
-        name: name,
-        color: color,
-      });
-      this.persistPlan();
-    },
-
     moveZoneInOrder(uuid, delta) {
       const zone = this._plan.zones.find((z) => z.uuid === uuid);
       const currentIdx = this._plan.zones.findIndex((z) => z.uuid === uuid);
@@ -1671,6 +1663,14 @@ export const usePlanStore = defineStore("plan", {
       const zone = this._plan.zones.find((z) => z.uuid === uuid);
       zone.name = name;
       zone.zone_id = zone_id;
+      this.persistPlan();
+    },
+
+    createCategory(name, color) {
+      this._plan.categories.push({
+        name: name,
+        color: color,
+      });
       this.persistPlan();
     },
 

@@ -91,6 +91,9 @@ const props = defineProps({
 
 const onAlignHorizonCenter = () => {
   const boundary = props.selectionBoundary();
+  if (!boundary) {
+    return;
+  }
   const startX = boundary.x;
   const endX = startX + boundary.width;
   const midX = (startX + endX) / 2;

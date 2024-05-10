@@ -921,17 +921,17 @@ export const useMainStore = defineStore({
 
         for (const row of z.rows) {
           if (this.selection.includes(row.uuid)) {
-            // if (factor < 0) return;
-            // if (row.seats.length > 1) {
-            //   const x1 = row.seats[0].position.x * factor;
-            //   const y1 = row.seats[0].position.y * factor;
-            //   const x0 = row.seats[1].position.x * factor;
-            //   const y0 = row.seats[1].position.y * factor;
-            //   const space = Math.sqrt(
-            //     (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)
-            //   );
-            //   if (space < 19 || space > 300) return;
-            // }
+            // if (row.seats.length < 2) return;
+            // const x0 = row.seats[0].position.x;
+            // const y0 = row.seats[0].position.y;
+            // const x1 = row.seats[1].position.x;
+            // const y1 = row.seats[1].position.y;
+            // if (
+            //   Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1)) *
+            //     factor <
+            //   20
+            // )
+            //   return;
 
             row.position.x = lox + (row.position.x - lox) * factor;
             row.position.y = loy + (row.position.y - loy) * factor;
