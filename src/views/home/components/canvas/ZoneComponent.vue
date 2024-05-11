@@ -1,9 +1,6 @@
 <template>
   <g class="zone" :transform="transform" :opacity="opacity" :pointer-events="lockedZones.includes(zone.uuid) ? 'none' : 'visiblePainted'
     ">
-    <!-- <text x="500" y="500">
-      {{ store.selectedZone }}
-    </text> -->
     <ZoneArea v-for="a in zone.areas" :key="a.uuid" :area="a" :zone="zone"
       :selectionBoundary="selectionBoundary" :ox="ox" :oy="oy"
       @startDragging="startDragging"

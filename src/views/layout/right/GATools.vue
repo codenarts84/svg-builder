@@ -68,8 +68,8 @@ const show = () => {
 }
 
 const section = () => {
-  const label = groupValue(props.areas, area => area.section)
-  const abv = groupValue(props.areas, area => area.abbreviation)
+  const label = groupValue(props.areas, area => area.section_label)
+  const abv = groupValue(props.areas, area => area.section_abv)
   if (label && abv) return `${label}(${abv})`;
   return '';
   // const abv = groupValue(props.areas, area => area.abbreviation)

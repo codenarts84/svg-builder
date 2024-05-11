@@ -4,19 +4,24 @@
         color="black" icon="mdi-file" size="large"></v-icon>
       <v-tooltip activator="parent" location="bottom">New</v-tooltip>
     </v-btn>
-    <v-btn class="btn" @click="onImport">
+    <v-btn class="btn" @click="importSVG">
       <v-icon color="black" icon="mdi-folder" size="large"></v-icon>
       <v-tooltip activator="parent" location="bottom">Import</v-tooltip>
     </v-btn>
   </v-toolbar-items>
 </template>
 <script setup>
+import { defineProps } from "vue";
 import { useMainStore } from "@/stores";
 import sampleplan from "@/sampleplan";
 import Ajv from 'ajv'
 import schema from '@/schema/seating-plan.schema.json'
 // import ImportIcon from "@/assets/svgs/menuIcons/ImportIcon.vue";
 const store = useMainStore();
+
+const props = defineProps({
+  importSVG: Function,
+})
 
 const reset = () => {
   if (
