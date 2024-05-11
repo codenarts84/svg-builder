@@ -1077,8 +1077,8 @@ export const usePlanStore = defineStore("plan", {
       this._plan.zones.forEach((z) => {
         z.areas.forEach((r) => {
           if (areaIds.includes(r.uuid)) {
-            r.section = label;
-            r.abbreviation = abv;
+            r.section_label = label;
+            r.section_abv = abv;
           }
         });
       });

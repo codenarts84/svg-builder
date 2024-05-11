@@ -1800,12 +1800,16 @@ export default {
             usePlanStore()
               .createArea(this.selectedZone, {
                 shape: "gaSquare",
+                label: "",
                 abbreviation: "GA",
+                section_label: "",
+                section_abv: "",
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
                 border_width: 2,
                 rotation: 0,
                 uuid: newId,
+                guid: generateID(),
                 capacity: 0,
                 position: {
                   x: round(
@@ -1925,13 +1929,17 @@ export default {
             usePlanStore()
               .createArea(this.selectedZone, {
                 shape: "gaCircle",
+                label: "",
                 abbreviation: "GA",
+                section_label: "",
+                section_abv: "",
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
                 border_width: 2,
                 rotation: 0,
                 capacity: 0,
                 uuid: newId,
+                guid: generateID(),
                 position: {
                   x: round(this.drawingStartX - zone.position.x, 4),
                   y: round(this.drawingStartY - zone.position.y, 4),
@@ -2235,8 +2243,12 @@ export default {
           border_width: 2,
           rotation: 0,
           uuid: newId,
+          guid: generateID(),
           capacity: 0,
+          label: "",
           abbreviation: "GA",
+          section_label: "",
+          section_abv: "",
           position: {
             x: minx - zone.position.x,
             y: miny - zone.position.y,
@@ -2726,21 +2738,9 @@ export default {
         :oy="temp_oy" :selectionBoundary="selectionBoundary">
       </ZoneComponent>
 
-      <!-- <g v-for="b in selectionBoxesVisible" :key="b">
-        <rect class="selection-box" v-if="b.bStatus" :x="b.x - 1.5" :y="b.y - 1.5"
-          :width="b.width + 3" :height="b.height + 3" :key="b" fill="none"></rect>
-
-        <circle class="selection-box" :key="b" v-if="!b.bStatus" :cx="b.x + 10"
-          :cy="b.y + 10" fill="none" r="10">
-        </circle>
-      </g> -->
       <rect class="selection-box" v-for="b in selectionBoxesVisible"
         :x="b.x - 1.5" :y="b.y - 1.5" :width="b.width + 3" :height="b.height + 3"
         :key="b" fill="none"></rect>
-
-      <!-- <circle class="selection-box" v-for="b in selectionBoxesVisible" :key="b"
-        :cx="b.x + 10" :cy="b.y + 10" fill="none" r="10">
-      </circle> -->
 
       <line class="selection-rotate-handle-connector"
         v-if="selection.length && selectionBoundary && currentToolStatus"
@@ -2793,30 +2793,33 @@ export default {
         :y="Math.min(drawingStartY, drawingCurrentY)"
         :width="Math.abs(drawingStartX - drawingCurrentX)"
         :height="Math.abs(drawingStartY - drawingCurrentY)"></rect>
-      <circle class="preview" v-if="tool == 'circle' && drawing"
+      <circle class="preview" v-else-if="tool == 'circle' && drawing"
         :cx="drawingStartX" :cy="drawingStartY" :r="Math.sqrt(
           Math.pow(drawingStartX - drawingCurrentX, 2) +
           Math.pow(drawingStartY - drawingCurrentY, 2)
         )
           "></circle>
       <ellipse class="preview"
-        v-if="(tool == 'ellipse' || tool == 'gaCircle') && drawing"
+        v-else-if="(tool == 'ellipse' || tool == 'gaCircle') && drawing"
         :cx="drawingStartX" :cy="drawingStartY"
         :rx="Math.abs(drawingStartX - drawingCurrentX)"
         :ry="Math.abs(drawingStartY - drawingCurrentY)"></ellipse>
-      <polygon class="preview" v-if="tool === 'polygon' && polygonDrawing" x="0"
-        y="0" :points="polygonPreviewPoints"></polygon>
-      <polygon class="preview" v-if="tool === 'gaPolygon' && polygonDrawing" x="0"
-        y="0" :points="polygonPreviewPoints"></polygon>
+
+      <polygon class="preview" v-else-if="tool === 'polygon' && polygonDrawing"
+        x="0" y="0" :points="polygonPreviewPoints"></polygon>
+
+      <polygon class="preview" v-else-if="tool === 'gaPolygon' && polygonDrawing"
+        x="0" y="0" :points="polygonPreviewPoints"></polygon>
+
       <g class="row-circle-preview"
-        v-if="tool === 'rowCircle' || tool === 'rowCircleFixedCenter'">
+        v-else-if="tool === 'rowCircle' || tool === 'rowCircleFixedCenter'">
         <circle class="preview" v-for="circ in rowCirclePreviews" :r="circ.radius"
           :cx="circ.cx" :cy="circ.cy" :key="circ"></circle>
         <circle class="preview-center" v-for="circ in rowCirclePreviews" :r="2"
           :cx="circ.cx" :cy="circ.cy" :key="circ"></circle>
       </g>
 
-      <g class="preview" v-if="(tool === 'roundTable') && mouseStatus">
+      <g class="preview" v-else-if="(tool === 'roundTable') && mouseStatus">
         <circle class="seat-preview" :cx="drawingCurrentX" :cy="drawingCurrentY"
           :r="25">
         </circle>
@@ -2826,7 +2829,7 @@ export default {
         </circle>
       </g>
 
-      <g class="preview" v-if="(tool === 'rectangleTable') && mouseStatus"
+      <g class="preview" v-else-if="(tool === 'rectangleTable') && mouseStatus"
         :transform="`translate(-70, -30)`">
         <rect class="seat-preview" :x="drawingCurrentX" :y="drawingCurrentY"
           :width="140" :height="60">
@@ -2842,15 +2845,15 @@ export default {
       </g>
 
       <circle class="seat-preview"
-        v-if="tool === 'row' && !rowDrawing && mouseStatus" :cx="rowCurrentX"
+        v-else-if="tool === 'row' && !rowDrawing && mouseStatus" :cx="rowCurrentX"
         :cy="rowCurrentY" :r="10"></circle>
       <circle class="seat-preview"
-        v-if="tool === 'rows' && !rowBlockDrawing && mouseStatus"
+        v-else-if="tool === 'rows' && !rowBlockDrawing && mouseStatus"
         :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
       <circle class="seat-preview"
-        v-if="tool === 'stgrows' && !stgrowBlockDrawing && mouseStatus"
+        v-else-if="tool === 'stgrows' && !stgrowBlockDrawing && mouseStatus"
         :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
-      <g class="row-preview" v-if="tool === 'row' && rowDrawing">
+      <g class="row-preview" v-else-if="tool === 'row' && rowDrawing">
         <line class="preview" :x1="drawingStartX" :y1="drawingStartY"
           :x2="drawingCurrentX" :y2="drawingCurrentY"></line>
         <line class="auxline"
@@ -2874,7 +2877,7 @@ export default {
         <circle class="seat-preview" v-for="(s, sid) in rowDrawingSeats"
           :key="sid" :cx="s.x" :cy="s.y" r="10"></circle>
       </g>
-      <g class="rows-preview" v-if="tool === 'rows' && rowBlockDrawing"
+      <g class="rows-preview" v-else-if="tool === 'rows' && rowBlockDrawing"
         :transform="rowBlockTransform">
         <g v-for="rid in rowBlockRows" :key="rid">
           <circle class="seat-preview" v-for="sid in rowBlockSeats" :key="sid"
@@ -2885,22 +2888,9 @@ export default {
           fill="black" dy=".35em" style="z-index: 99">
           {{ rowBlockRows }} × {{ rowBlockSeats }} Seats
         </text>
-        <!-- <text v-if="rowBlockRows * rowBlockSeats > 0" :x="10" :y="-30"
-          fill="black" dy=".35em" style="z-index: 99">
-          {{ rowBlockRows * rowBlockSeats }} Seats
-        </text> -->
-        <!-- <rect v-if="rowBlockSeats + rowBlockRows >= 7"
-          :x="(rowSeatSpacing * rowBlockSeats) / 2 - 25 - 12.5"
-          :y="(rowSpacing * rowBlockRows) / 2 - 25" width="50" height="25"
-          fill="#00c"></rect>
-        <text v-if="rowBlockSeats + rowBlockRows >= 7"
-          :x="(rowSeatSpacing * rowBlockSeats) / 2 - 12.5"
-          :y="(rowSpacing * rowBlockRows) / 2 - 12.5" text-anchor="middle"
-          fill="#fff" dy=".35em">
-          {{ rowBlockRows }} × {{ rowBlockSeats }}
-        </text> -->
+
       </g>
-      <g class="rows-preview" v-if="tool === 'stgrows' && stgrowBlockDrawing"
+      <g class="rows-preview" v-else-if="tool === 'stgrows' && stgrowBlockDrawing"
         :transform="rowBlockTransform">
         <!-- //change here -->
         <g v-for="rid in stgrowBlockRows" :key="rid">
@@ -2919,16 +2909,7 @@ export default {
             </circle>
           </g>
         </g>
-        <!-- <text v-if="stgrowBlockRows * stgrowBlockSeats > 0" :x="10" :y="-30"
-          fill="black" dy=".35em" style="z-index: 99">
-          {{ stgrowBlockRows * stgrowBlockSeats }} Seats
-        </text> -->
-        <!-- <rect v-if="stgrowBlockSeats + stgrowBlockRows > 0" :x="10" :y="-50"
-          width="50" height="25" fill="#00c"></rect>
-        <text v-if="stgrowBlockSeats + stgrowBlockRows > 0" :x="33"
-          :y="-50 + 12.5" text-anchor="middle" fill="#fff" dy=".35em">
-          {{ stgrowBlockRows }} × {{ stgrowBlockSeats }}
-        </text> -->
+
         <text v-if="stgrowBlockRows * stgrowBlockSeats > 0" :x="10" :y="-30"
           fill="black" dy=".35em" style="z-index: 99">
           {{ stgrowBlockRows }} × {{ stgrowBlockSeats }} Seats
@@ -2936,7 +2917,7 @@ export default {
       </g>
 
       <rect class="selection-area"
-        v-if="(tool == 'select' || tool == 'seatselect') && selecting"
+        v-else-if="(tool == 'select' || tool == 'seatselect') && selecting"
         :x="Math.min(selectingStartX, selectingCurrentX)"
         :y="Math.min(selectingStartY, selectingCurrentY)"
         :width="Math.abs(selectingStartX - selectingCurrentX)"
@@ -3028,7 +3009,7 @@ svg .selection-boundary {
 svg .preview {
   stroke: #0064d0;
   stroke-width: 2px;
-  fill: rgba(0, 0, 204, 0.3);
+  fill: #8fc8f3;
 }
 
 svg .auxline {
