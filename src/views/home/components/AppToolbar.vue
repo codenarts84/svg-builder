@@ -1,6 +1,6 @@
 <template>
   <v-toolbar flat class="app-toolbar-container">
-    <FileTool :importSVG="importSVG" />
+    <FileTool :importSVG="exportFunc" />
     <MainTools />
     <v-toolbar-title :style="toolbarTitleStyle">{{
       boardName
@@ -139,31 +139,26 @@ const extractCircle = svgDoc => {
     const textColor = textElement ? textElement.getAttribute('fill') : "#333333";
     const fontSize = textElement ? parseInt(textElement.getAttribute('font-size'), 10) : 16;
 
-    // Construct the data object for each circle
     const data = {
-      areas: [{
+      areas: {
         shape: "circle",
         color: fillColor,
         border_color: strokeColor,
         border_width: strokeWidth,
-        rotation: 0,  // No rotation in the provided example
+        rotation: 0,
         position: {
           x: parseFloat(translateMatch[1]),
           y: parseFloat(translateMatch[2])
         },
         radius: radius,
         text: {
-          position: { x: 0, y: 0 }, // Center of the circle
+          position: { x: 0, y: 0 },
           color: textColor,
           text: textContent,
           size: fontSize
-        }
-      }],
-      name: "Ground floor", // Static data; update as needed
-      position: { x: 0, y: 0 }, // Static data; update if dynamic
-      rows: [], // Assuming no data; update as needed
-      uuid: uuid(), // Should be dynamically generated if it changes
-      zone_id: "Groundfloor" // Static data; update as needed
+        },
+        uuid: uuid(),
+      },
     };
 
     circleData.push(data);
@@ -179,6 +174,7 @@ const extractEllipse = svgDoc => {
   ellipses.forEach(area => {
     const transformData = parseTransform(area.getAttribute('transform'));
     const ellipse = area.querySelector('ellipse');
+    const textElement = area.querySelector('text');
 
     data.push({
       border_color: ellipse.getAttribute('stroke'),
@@ -197,55 +193,62 @@ const extractEllipse = svgDoc => {
       rotation: transformData.rotation,
       shape: "ellipse",
       text: {
-        position: { x: 0, y: 0 }, // Default values since text is not specified
-        color: "#A72929", // Assuming default since text is not specified
-        text: ""
+        position: { x: 0, y: 0 },
+        color: textElement ? textElement.getAttribute('fill') : "#333333",
+        text: textElement ? textElement.textContent : "",
+        size: textElement ? parseInt(textElement.getAttribute('font-size'), 10) : 16
       },
-      uuid: uuid()// Assuming static UUID, adjust as needed
+      uuid: uuid()
     });
   });
 
   return data;
 }
 
-const extractGARect = (svgDoc) => {
-  const areas = svgDoc.querySelectorAll('g.area-gaSquare');
-  let data = [];
-
-  areas.forEach(area => {
-    const transformData = parseTransform(area.getAttribute('transform'));
-    const rect = area.querySelector('rect');
-    const textElement = area.querySelector('text');
-
-    data.push({
-      abbreviation: "GA", // Assuming static abbreviation, adjust as needed
+const extractGARect = svgDoc => {
+  const rectElements = svgDoc.querySelectorAll('g.area-gaSquare');
+  const gaRects = [];
+  rectElements.forEach(gElement => {
+    const rect = gElement.querySelector('rect');
+    const text = gElement.querySelector('text');
+    const transform = gElement.getAttribute('transform');
+    const translateMatch = transform.match(/translate\(([\d.]+),\s*([\d.]+)\)/);
+    const rotateMatch = transform.match(/rotate\((\d+)/);
+    console.log(rect.getAttribute('width'))
+    gaRects.push({
+      section_abv: rect.getAttribute('data-section-abv') || "",
+      section_label: rect.getAttribute('data-section-label') || "",
+      label: rect.getAttribute('data-label') || "",
+      abbreviation: rect.getAttribute('data-abv') || "",
       border_color: rect.getAttribute('stroke'),
       border_width: parseInt(rect.getAttribute('stroke-width'), 10),
-      capacity: 0, // Assuming static capacity, adjust as needed
+      capacity: parseInt(rect.getAttribute('data-capacity'), 10),
       color: rect.getAttribute('fill'),
+      guid: rect.getAttribute('id'),
       position: {
-        x: transformData.e,
-        y: transformData.f
+        x: parseFloat(translateMatch[1]),
+        y: parseFloat(translateMatch[2])
       },
       rectangle: {
-        width: parseFloat(rect.getAttribute('width')),
-        height: parseFloat(rect.getAttribute('height'))
+        width: parseFloat(rect.getAttribute('width'), 10),
+        height: parseFloat(rect.getAttribute('height'), 10)
       },
-      rotation: transformData.rotation,
-      shape: "gaSquare", // Assuming static shape type, adjust as needed
+      rotation: rotateMatch ? parseInt(rotateMatch[1], 10) : 0,
+      category: rect.getAttribute('data-category-name') || "",
+      shape: "gaSquare",
       text: {
         position: {
-          x: parseFloat(textElement.getAttribute('x')),
-          y: parseFloat(textElement.getAttribute('y'))
+          x: text ? parseInt(text.getAttribute('x'), 10) : 0,
+          y: text ? parseInt(text.getAttribute('y'), 10) : 0,
         },
-        color: textElement.getAttribute('fill'),
-        text: textElement.textContent.trim()
+        color: text ? text.getAttribute('fill') : '#333333',
+        text: text ? text.textContent : "",
+        size: text ? text.getAttribute('font-size') : 16,
       },
-      uuid: uuid() // Static UUID, adjust as needed
-    });
-  });
-
-  return data;
+      uuid: uuid()
+    })
+  })
+  return gaRects;
 }
 
 const extractGACircle = (svgDoc) => {
@@ -255,14 +258,19 @@ const extractGACircle = (svgDoc) => {
   areas.forEach(area => {
     const transformData = parseTransform(area.getAttribute('transform'));
     const ellipse = area.querySelector('ellipse');
-    const textElement = area.querySelector('text');
-
+    const text = area.querySelector('text');
+    console.log(ellipse.getAttribute('fill'))
     data.push({
-      abbreviation: "GA", // Typically derived from data-section-abv or similar attribute
+      label: ellipse.getAttribute('data-label') || "",
+      abbreviation: ellipse.getAttribute('data-abv') || "",
+      section_label: ellipse.getAttribute('data-section-label') || "",
+      section_abv: ellipse.getAttribute('data-section-abv') || "",
+      capacity: parseInt(ellipse.getAttribute('data-capacity'), 10),
+      category: ellipse.getAttribute('data-category-name') || "",
       border_color: ellipse.getAttribute('stroke'),
       border_width: parseInt(ellipse.getAttribute('stroke-width'), 10),
-      capacity: 0, // If dynamically set, you need another method to determine this
       color: ellipse.getAttribute('fill'),
+      guid: ellipse.getAttribute('id'),
       ellipse: {
         radius: {
           x: parseFloat(ellipse.getAttribute('rx')),
@@ -277,13 +285,14 @@ const extractGACircle = (svgDoc) => {
       shape: "gaCircle", // This is static; adjust if your SVG has different shapes
       text: {
         position: {
-          x: parseFloat(textElement.getAttribute('x')),
-          y: parseFloat(textElement.getAttribute('y'))
+          x: text ? parseInt(text.getAttribute('x'), 10) : 0,
+          y: text ? parseInt(text.getAttribute('y'), 10) : 0,
         },
-        color: textElement.getAttribute('fill'),
-        text: textElement.textContent.trim()
+        color: text ? text.getAttribute('fill') : '#333333',
+        text: text ? text.textContent : "",
+        size: text ? text.getAttribute('font-size') : 16,
       },
-      uuid: uuid() // Assuming UUID is static; adjust as needed
+      uuid: uuid()
     });
   });
 
@@ -291,7 +300,7 @@ const extractGACircle = (svgDoc) => {
 }
 
 const extractPolygon = svgDoc => {
-  const polygons = svgDoc.querySelectorAll('g.area-polygon');
+  const polygons = svgDoc.querySelectorAll('g.area-gaPolygon');
   let data = [];
 
   polygons.forEach(area => {
@@ -512,6 +521,33 @@ const extractRectangleTable = svgDoc => {
   return data;
 }
 
+const extractCategories = (dom) => {
+  const categories = dom.querySelectorAll('category');
+  const categoryData = [];
+  categories.forEach(category => {
+    const name = category.querySelector('name').textContent;
+    const color = category.querySelector('color').textContent;
+    categoryData.push({ name, color });
+  });
+  return categoryData;
+}
+
+const extractSections = (dom) => {
+  const sections = dom.querySelectorAll('section');
+  const res = []
+  sections.forEach(section => {
+    const name = section.querySelector('name').textContent;
+    const abv = section.querySelector('abv').textContent;
+    res.push({ name, abv })
+  })
+  return res;
+}
+
+const extractChartName = dom => {
+  const chartname = dom.querySelector('chartname');
+  return chartname.textContent;
+}
+
 const importSVG = () => {
   const input = document.createElement('input')
   input.type = 'file'
@@ -523,8 +559,11 @@ const importSVG = () => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(e.target.result, "image/svg+xml");
       const zoneGroup = doc.querySelector('g.zone');
+      const metadata = doc.querySelector('metadata')
       if (zoneGroup) {
-        const mySvg = document.getElementById('svg');
+        const categories = extractCategories(metadata);
+        const sections = extractSections(metadata);
+        const chartname = extractChartName(metadata);
         const texts = extractTexts(doc)
         const rects = extractRectangle(doc)
         const circles = extractCircle(doc)
@@ -542,6 +581,8 @@ const importSVG = () => {
           uuid: uuid(),
           zone_id: "G"
         }
+        plan.value.categories = categories;
+        plan.value.name = chartname;
         plan.value.zones[0].areas = zone.areas;
       } else {
         alert("No seats found in the SVG.");
@@ -550,6 +591,36 @@ const importSVG = () => {
     reader.readAsText(file);
   }
   input.click()
+}
+
+const removeComments = rootElement => {
+  const walker = document.createTreeWalker(
+    rootElement,
+    NodeFilter.SHOW_COMMENT,
+    {
+      acceptNode: function (node) {
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    },
+    false
+  );
+
+  const comments = [];
+  let currentNode = walker.nextNode();
+  while (currentNode) {
+    comments.push(currentNode);
+    currentNode = walker.nextNode();
+  }
+
+  // Remove all collected comment nodes
+  comments.forEach(comment => {
+    comment.parentNode.removeChild(comment);
+  });
+  return rootElement;
+}
+
+const exportFunc = () => {
+  alert('not yet')
 }
 
 const exportSVG = () => {
@@ -565,6 +636,7 @@ const exportSVG = () => {
     newSvg.appendChild(metadata[i].cloneNode(true));
   }
   newSvg.appendChild(svgElement.cloneNode(true));
+  newSvg = removeComments(newSvg)
   const filename = 'SVG Map'
   var serializer = new XMLSerializer();
   var svgString = serializer.serializeToString(newSvg);

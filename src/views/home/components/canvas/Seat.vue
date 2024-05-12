@@ -10,7 +10,6 @@
       :data-tags="makeTag">
     </circle>
 
-
     <text class="seat_label" :fill="textColor ? 'black' : 'black'"
       :x="seat.position.x" :y="seat.position.y" text-anchor="middle"
       font-size="10px" font-family="sans-serif" dy=".35em">
@@ -41,15 +40,9 @@
       </g>
     </g>
 
-    <circle v-if="showTag" fill="#fff" :cx="seat.position.x"
+    <circle v-else-if="showTag" fill="#fff" :cx="seat.position.x"
       :cy="seat.position.y + 7" :r="3">
     </circle>
-
-    <!-- <circle v-else-if="seat.tag_name && seat.tag_name !== 'Standing Room Only'"
-      :fill="seatColor" :cx="seat.position.x" :cy="seat.position.y + 7" :r="3"
-      :stroke="'#000'" style="stroke-width: 1px">
-    </circle> -->
-
 
   </g>
 </template>
