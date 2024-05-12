@@ -341,8 +341,12 @@ export const usePlanStore = defineStore("plan", {
     },
 
     setGACategory(areas, val) {
-      areas.forEach((a) => {
-        a.category = val;
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((a) => {
+          if (areas.includes(a.uuid)) {
+            a.category = val;
+          }
+        });
       });
       this.persistPlan();
     },
@@ -1614,6 +1618,14 @@ export const usePlanStore = defineStore("plan", {
                 }
               });
             }
+          } else if (
+            r.shape === "gaCircle" ||
+            r.shape === "gaSquare" ||
+            r.shape === "gaPolygon"
+          ) {
+            if (rowIds.includes(r.uuid)) {
+              r.tag_name = value;
+            }
           }
         });
       });
@@ -1690,10 +1702,28 @@ export const usePlanStore = defineStore("plan", {
                 }
               }
             }
+            for (const a of z.areas) {
+              if (
+                a.shape === "gaCircle" ||
+                a.shape === "gaSquare" ||
+                a.shape === "gaPolygon"
+              )
+                if (a.category === oldname) {
+                  a.category = newname;
+                }
+              if (a.shape === "roundTable" || a.shape === "rectanlgeTable") {
+                for (const s of a.seats) {
+                  if (s.category === oldname) {
+                    s.category = newname;
+                  }
+                }
+              }
+            }
           }
         }
+      } else {
+        cat.color = color;
       }
-      cat.color = color;
       this.persistPlan();
     },
   },
