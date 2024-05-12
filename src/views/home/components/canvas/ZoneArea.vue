@@ -39,7 +39,7 @@
         :ry="area.ellipse.radius.y" :stroke-width="area.border_width || '2px'"
         :data-section-label="area.section_label || ''"
         :data-category-name="area.category || ''"
-        :data-section-abv="area.section_abv || ''">
+        :data-section-abv="area.section_abv || ''" :data-tags="makeTag(area)">
       </ellipse>
       <text v-if="area.text.text" :x="area.text.position.x"
         :y="area.text.position.y" :font-size="area.text.size || 16"
@@ -71,7 +71,8 @@
         :stroke-width="area.border_width || '2px'"
         :data-section-label="area.section_label || ''"
         :data-category-name="area.category || ''"
-        :data-section-abv="area.section_abv || ''"></rect>
+        :data-section-abv="area.section_abv || ''" :data-tags="makeTag(area)">
+      </rect>
       <text v-if="area.text.text" :x="area.rectangle.width / 2"
         :y="area.rectangle.height / 2" :font-size="area.text.size || 16"
         text-anchor="middle" font-family="sans-serif" dy=".35em"
@@ -118,7 +119,7 @@
         :points="polygonPoints" :stroke-width="area.border_width || '2px'"
         :data-section-label="area.section_label || ''"
         :data-category-name="area.category || ''"
-        :data-section-abv="area.section_abv || ''">
+        :data-section-abv="area.section_abv || ''" :data-tags="makeTag(area)">
       </polygon>
       <text v-if="area.text.text" :x="area.text.position.x"
         :y="area.text.position.y" :font-size="area.text.size || 16"
@@ -162,7 +163,8 @@
           style="stroke-width: 1px;" :fill="seatColor(item.category)"
           stroke-width="1" :data-section-label="item.section_label"
           :data-section-abv="item.section_abv" :data-category-name="item.category"
-          :data-tags="makeTag(item)">
+          :data-tags="makeTag(item)" :data-seat-label="item.seat_number"
+          :data-table-label="area.label.name" :data-table-abv="area.label.abv">
         </circle>
 
         <g v-if="item.tag_name && item.tag_name.includes('Wheelchair')"
@@ -222,7 +224,8 @@
           style="stroke-width: 1px;" :fill="seatColor(item.category)"
           stroke-width="1" :data-section-label="item.section_label"
           :data-section-abv="item.section_abv" :data-category-name="item.category"
-          :data-tags="makeTag(item)">
+          :data-tags="makeTag(item)" :data-seat-label="item.seat_number"
+          :data-table-label="area.label.name" :data-table-abv="area.label.abv">
         </circle>
 
         <g v-if="item.tag_name && item.tag_name.includes('Wheelchair')"
@@ -301,11 +304,15 @@ export default {
     return { cursor, selection, store, getCategoryByName, temp_ox, temp_oy, tool, planStore };
   },
   computed: {
+    category() {
+      return this.getCategoryByName(this.area.category);
+    },
     gaColor() {
-      if (this.area.category) {
-        return this.getCategoryByName(this.area.category).color;
+      console.log(this.area.category)
+      if (this.category) {
+        return this.category.color;
       }
-      return this.area.color || '#888888'
+      return '#cccccc'
     },
     isSelected() {
       // console.log("Check here");
@@ -336,8 +343,11 @@ export default {
     makeTag(item) {
       const res = []
       if (item.tag_name) {
+        if (item.tag_name.includes('Wheelchair')) res.push('W')
+        if (item.tag_name.includes('Wheelchair Companion')) res.push('C')
         if (item.tag_name.includes('Partial View')) res.push('P')
         if (item.tag_name.includes('Folding Chair')) res.push('F')
+        if (item.tag_name.includes('Standing Room Only')) res.push('S')
         return res.join(',')
       }
       return '';
@@ -385,9 +395,10 @@ export default {
 
     seatColor(category) {
       if (category) {
-        return this.getCategoryByName(category).color
+        return this.getCategoryByName(category)?.color
+      } else {
+        return '#fff';
       }
-      return '#fff';
     },
     startDragging(uuid, zone, event) {
       this.$emit("startDragging", uuid, zone, event);

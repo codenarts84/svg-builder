@@ -8,6 +8,8 @@
       :selectedCategory="selectedCategory()" />
     <v-divider></v-divider>
     <SectionLabel :section="section()" :setSection="setSection" />
+    <v-divider></v-divider>
+    <TagsPanel :rows="areas" :selectedTag="selectedTag()" />
   </div>
 </template>
 
@@ -19,6 +21,7 @@ import GAPanel from './Context/GAPanel.vue';
 import AreaPanel from './Context/AreaPanel.vue';
 import SectionLabel from './Context/SectionLabel.vue';
 import CategoryComponent from '@/views/home/components/CategoryComponent.vue';
+import TagsPanel from "./Context/TagsPanel.vue";
 
 const planStore = usePlanStore();
 const mainStore = useMainStore();
@@ -28,6 +31,10 @@ const props = defineProps({
   areas: Array,
   temp_Rotate: Function,
 })
+
+const selectedTag = () => {
+  return groupValue(props.areas, a => a.tag_name)
+}
 
 const groupValue = (rows, mapper) => {
   let lastFound = undefined
@@ -83,7 +90,8 @@ const setSection = (label, abv) => {
 }
 
 const setCategory = (name) => {
-  planStore.setGACategory(props.areas, name);
+  planStore.modifyAreas({ areaIds: props.areas.map(a => a.uuid), category: name })
+  // planStore.setGACategory(props.areas.map(i => i.uuid), name);
 }
 
 const selectedCategory = () => {

@@ -79,8 +79,11 @@ export default {
     makeTag() {
       const res = []
       if (this.seat.tag_name) {
+        if (this.seat.tag_name.includes('Wheelchair')) res.push('W')
+        if (this.seat.tag_name.includes('Wheelchair Companion')) res.push('C')
         if (this.seat.tag_name.includes('Partial View')) res.push('P')
         if (this.seat.tag_name.includes('Folding Chair')) res.push('F')
+        if (this.seat.tag_name.includes('Standing Room Only')) res.push('S')
         return res.join(',')
       }
       return '';

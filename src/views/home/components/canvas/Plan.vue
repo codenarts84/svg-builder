@@ -601,6 +601,64 @@ export default {
   },
 
   methods: {
+    getUniqueTableName() {
+      const tableNames = []
+      const tableAbvs = []
+      for (const z of this.plan.zones) {
+        for (const area of z.areas) {
+          if (area.shape === 'roundTable' || area.shape === 'rectangleTable') {
+            if (area.label && area.label.name)
+              tableNames.push(area.label.name)
+            if (area.label && area.label.abv)
+              tableAbvs.push(area.label.abv)
+          }
+        }
+      }
+      let nName = 1;
+      let nAbv = 1;
+      let labelName = 'Table 1';
+      let abvName = 'T1'
+      while (tableNames.some(name => name === labelName)) {
+        nName++;
+        labelName = `Table ${nName}`;
+      }
+
+      while (tableAbvs.some(name => name === abvName)) {
+        nAbv++;
+        abvName = `T${nAbv}`
+      }
+      return { labelName, abvName }
+    },
+
+    getUniqueGAName() {
+      const gaLabels = []
+      const gaAbvs = []
+      for (const z of this.plan.zones) {
+        for (const area of z.areas) {
+          if (area.shape === 'gaCircle' || area.shape === 'gaSquare' || area.shape === 'gaPolygon') {
+            if (area.label)
+              gaLabels.push(area.label)
+            if (area.abbreviation)
+              gaAbvs.push(area.abbreviation)
+          }
+        }
+      }
+      let nName = 1;
+      let nAbv = 1;
+      let gaLabel = 'General Admission 1';
+      let gaAbv = 'GA1'
+      while (gaLabels.some(name => name === gaLabel)) {
+        nName++;
+        gaLabel = `General Admission ${nName}`;
+      }
+
+      while (gaAbvs.some(name => name === gaAbv)) {
+        nAbv++;
+        gaAbv = `GA${nAbv}`
+      }
+      return { gaLabel, gaAbv }
+    },
+
     setZoomTransform(t) {
       const store = useMainStore();
       store.setZoomTransform(t);
@@ -866,6 +924,8 @@ export default {
           for (let i = 0; i < 6; i++) {
             arr.push(i);
           }
+
+          const { labelName, abvName } = this.getUniqueTableName();
           const newId = uuid();
           usePlanStore()
             .createArea(this.selectedZone, {
@@ -878,8 +938,8 @@ export default {
                   x: 0,
                   y: 0,
                 },
-                name: "",
-                abv: "",
+                name: labelName,
+                abv: abvName,
                 color: "#333333",
                 size: 16,
               },
@@ -959,8 +1019,8 @@ export default {
               special: 'bottom'
             }
           })
+          const { labelName, abvName } = this.getUniqueTableName();
           const newId = uuid();
-
           usePlanStore()
             .createArea(this.selectedZone, {
               shape: "rectangleTable",
@@ -981,8 +1041,8 @@ export default {
                 y: targetPos.y,
               },
               label: {
-                name: "",
-                abv: "",
+                name: labelName,
+                abv: abvName,
                 position: { x: 0, y: 0 },
                 color: "#333333",
                 text: "",
@@ -1797,11 +1857,12 @@ export default {
               this.drawing = false;
               return; // probably a misclick
             }
+            const { gaLabel, gaAbv } = this.getUniqueGAName();
             usePlanStore()
               .createArea(this.selectedZone, {
                 shape: "gaSquare",
-                label: "",
-                abbreviation: "GA",
+                label: gaLabel,
+                abbreviation: gaAbv,
                 section_label: "",
                 section_abv: "",
                 color: "#cccccc", // todo: use previously used color
@@ -1824,7 +1885,7 @@ export default {
                 text: {
                   position: { x: round(w / 2, 4), y: round(h / 2, 4) },
                   color: "#333333",
-                  text: "GA",
+                  text: gaAbv,
                 },
                 rectangle: {
                   width: round(w, 4),
@@ -1926,11 +1987,12 @@ export default {
               this.drawing = false;
               return; // probably a misclick
             }
+            const { gaLabel, gaAbv } = this.getUniqueGAName();
             usePlanStore()
               .createArea(this.selectedZone, {
                 shape: "gaCircle",
-                label: "",
-                abbreviation: "GA",
+                label: gaLabel,
+                abbreviation: gaAbv,
                 section_label: "",
                 section_abv: "",
                 color: "#cccccc", // todo: use previously used color
@@ -1947,7 +2009,7 @@ export default {
                 text: {
                   position: { x: 0, y: 0 },
                   color: "#333333",
-                  text: "GA",
+                  text: gaAbv,
                 },
                 ellipse: {
                   radius: {
@@ -2235,6 +2297,7 @@ export default {
       const miny = Math.min(...this.polygonPoints.map((p) => p.y));
       const maxx = Math.max(...this.polygonPoints.map((p) => p.x));
       const maxy = Math.max(...this.polygonPoints.map((p) => p.y));
+      const { gaLabel, gaAbv } = this.getUniqueGAName();
       usePlanStore()
         .createArea(this.selectedZone, {
           shape: "gaPolygon",
@@ -2245,8 +2308,8 @@ export default {
           uuid: newId,
           guid: generateID(),
           capacity: 0,
-          label: "",
-          abbreviation: "GA",
+          label: gaLabel,
+          abbreviation: gaAbv,
           section_label: "",
           section_abv: "",
           position: {
@@ -2256,7 +2319,7 @@ export default {
           text: {
             position: { x: (maxx - minx) / 2, y: (maxy - miny) / 2 },
             color: "#333333",
-            text: "GA",
+            text: gaAbv,
           },
           polygon: {
             points: this.polygonPoints.map((p) => ({
