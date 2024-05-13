@@ -174,7 +174,6 @@ export const useMainStore = defineStore({
     },
 
     removeSectionLabel(id) {
-      console.log(id, "okay");
       this.section_label = this.section_label.filter((i) => i.id !== id);
       window.localStorage.setItem("section_label", this.section_label);
     },
@@ -457,7 +456,6 @@ export const useMainStore = defineStore({
             const a = s / 150 / 100;
             const b = 10000 * a;
             const positions = getPoints(a, b, r.seats.length);
-            console.log("MYLOG", positions);
             let i;
             for (i = 0; i < r.seats.length; i++) {
               let fromX = positions[i].x + 100;

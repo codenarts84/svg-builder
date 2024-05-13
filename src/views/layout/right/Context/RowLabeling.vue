@@ -187,7 +187,7 @@ export default ({
             return { scheme: numbering, reversed: true, startAt: guessedStartAtRev, start }
           }
         } catch (e) {
-          console.warn('Crash while trying to test row numbering schema', numbering, e)
+          // console.warn('Crash while trying to test row numbering schema', numbering, e)
         }
       }
       return undefined

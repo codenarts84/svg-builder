@@ -10,6 +10,5 @@
 import { letterCounter, reverse, ROW_NUMBERINGS } from '@/lib/numbering';
 const onClick = () => {
   const rows = Array(30).fill(0);
-  console.log(ROW_NUMBERINGS[2].skip(rows, 1, 'a,aa'));
 }
 </script>

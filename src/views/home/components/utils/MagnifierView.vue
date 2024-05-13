@@ -5,7 +5,7 @@
   </v-btn>
 
   <v-text-field append-inner-icon="mdi-percent-outline" v-model="zoomValue"
-    class="custom-input-1" @change="onChange" type="number" variant="plane" />
+    class="custom-input-1" @change="onChange" type="number" solo-inverted flat />
 
   <v-btn class="zoom-btn" @click="setTransform((zoomValue + 10) / 100)">
     <v-icon color="black" icon="mdi-plus" size="large"></v-icon>

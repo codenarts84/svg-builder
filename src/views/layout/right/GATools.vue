@@ -103,7 +103,6 @@ const tags = computed(() => mainStore.section_label);
 const setTag = (id) => {
   const tag = tags.value.find(i => i.id === id);
   if (tag) {
-    console.log(tag)
     planStore.addGASectionLabel(props.areas.map(i => i.uuid), tag.label, tag.abv);
   }
 }

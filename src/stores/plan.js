@@ -302,7 +302,6 @@ export const usePlanStore = defineStore("plan", {
       // Assume there's an `unselect` action
       // this.unselect(objects);
       useMainStore().unselect(objects);
-      console.log("delete Obejct", useMainStore().selection);
       this.persistPlan();
     },
 
@@ -334,7 +333,6 @@ export const usePlanStore = defineStore("plan", {
 
     setTableSeatCategory(seats, val) {
       for (const s of seats) {
-        console.log(s);
         s.category = val;
       }
       this.persistPlan();
@@ -1630,10 +1628,6 @@ export const usePlanStore = defineStore("plan", {
         });
       });
       this.persistPlan();
-    },
-
-    rowRotate(rowIds, angle) {
-      console.log("rotate+");
     },
 
     setRotateLabel(rowIds, value) {
