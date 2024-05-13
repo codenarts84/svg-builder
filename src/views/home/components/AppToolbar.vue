@@ -39,6 +39,7 @@ const planStore = usePlanStore();
 const boardStore = useBoardStore();
 const boardName = ref(computed(() => planStore.plan.name));
 const plan = ref(computed(() => planStore.plan))
+const store = useMainStore();
 
 const getTags = (tags) => {
   if (!tags) return [];
@@ -440,10 +441,14 @@ const extractRoundTable = (svgDoc) => {
     const label = table.querySelector('.table_label');
     const seats = table.querySelectorAll('.table_seat_group');
     let seatData = [];
+    let table_label = "";
+    let table_abv = "";
 
     seats.forEach(seat => {
       const seatLabel = seat.querySelector('text');
       const seatCircle = seat.querySelector('circle');
+      table_label = seat.getAttribute("data-table-label") || "";
+      table_abv = seat.getAttribute("data-table-abv") || "";
       seatData.push({
         seat_number: seatLabel ? seatLabel.textContent : "",
         position: {
@@ -464,8 +469,8 @@ const extractRoundTable = (svgDoc) => {
           x: parseFloat(label.getAttribute('x')),
           y: parseFloat(label.getAttribute('y'))
         },
-        name: "",
-        abv: "",
+        name: table_label,
+        abv: table_abv,
         color: label.getAttribute('fill'),
         size: parseFloat(label.getAttribute('font-size'))
       },
@@ -477,7 +482,7 @@ const extractRoundTable = (svgDoc) => {
       rotation: parseFloat(area.getAttribute('transform').match(/rotate\(([\d.+-]+)\)/) ? area.getAttribute('transform').match(/rotate\(([\d.+-]+)\)/)[1] : 0),
       seats: seatData,
       shape: "roundTable",
-      space: 0,
+      space: circle.getAttribute('data-space') || 0,
       uuid: uuid()
     });
   });
@@ -566,7 +571,9 @@ const extractRows = svgDoc => {
         },
         guid: circle.getAttribute('id'),
         uuid: uuid(),
-        tag_name: getTags(circle.getAttribute('data-tags') || "")
+        tag_name: getTags(circle.getAttribute('data-tags') || ""),
+        section_label: circle.getAttribute('data-section-label') || "",
+        section_abv: circle.getAttribute('data-section-abv') || ""
       })
     })
     rowsData.push({
@@ -602,7 +609,7 @@ const extractSections = (dom) => {
   sections.forEach(section => {
     const name = section.querySelector('name').textContent;
     const abv = section.querySelector('abv').textContent;
-    res.push({ name, abv })
+    res.push({ label: name, abv })
   })
   return res;
 }
@@ -622,38 +629,10 @@ const importSVG = () => {
     reader.onload = function (e) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(e.target.result, "image/svg+xml");
-      const zoneGroup = doc.querySelector('g.zone');
-      const metadata = doc.querySelector('metadata')
-      if (zoneGroup) {
-        const categories = extractCategories(metadata);
-        const sections = extractSections(metadata);
-        const chartname = extractChartName(metadata);
-        const texts = extractTexts(doc)
-        const rects = extractRectangle(doc)
-        const circles = extractCircle(doc)
-        const polygons = extractPolygon(doc)
-        const ellipses = extractEllipse(doc)
-        const gaCircle = extractGACircle(doc)
-        const gaSquare = extractGARect(doc)
-        const gaPolygon = extractGAPolygon(doc)
-        const rectangleTable = extractRectangleTable(doc)
-        const roundTable = extractRoundTable(doc)
-        const rows = extractRows(doc);
-        const zone = {
-          areas: [...texts, ...rects, ...circles, ...polygons, ...ellipses, ...gaCircle, ...gaSquare, ...gaPolygon, ...roundTable, ...rectangleTable],
-          name: "Zone",
-          position: { x: 0, y: 0 },
-          uuid: uuid(),
-          zone_id: "G"
-        }
-        plan.value.categories = categories;
-        plan.value.name = chartname;
-        plan.value.zones[0].areas = zone.areas;
-        plan.value.zones[0].rows = rows;
-        planStore.persistPlan();
-      } else {
-        alert("No seats found in the SVG.");
-      }
+      const planData = doc.querySelector('svg').getAttribute('data-json');
+      console.log(JSON.parse(planData))
+      store.loadPlan(JSON.parse(planData))
+      planStore.persistPlan();
     };
     reader.readAsText(file);
   }
@@ -699,6 +678,7 @@ const exportSVG = () => {
   newSvg.setAttribute("version", "1.1");
   newSvg.setAttribute("width", "900");  // Set as per your requirement
   newSvg.setAttribute("height", "900"); // Set as per your requirement
+  newSvg.setAttribute("data-json", JSON.stringify(plan.value));
   for (let i = 0; i < metadata.length; i++) {
     newSvg.appendChild(metadata[i].cloneNode(true));
   }
