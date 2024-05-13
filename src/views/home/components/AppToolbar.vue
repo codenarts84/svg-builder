@@ -40,6 +40,21 @@ const boardStore = useBoardStore();
 const boardName = ref(computed(() => planStore.plan.name));
 const plan = ref(computed(() => planStore.plan))
 
+const getTags = (tags) => {
+  if (!tags) return [];
+  const descriptionMap = {
+    W: 'Wheelchair',
+    C: 'Wheelchair Companion',
+    P: 'Partial View',
+    F: 'Folding Chair',
+    S: 'Standing Room Only'
+  };
+
+  const codes = tags.split(',');
+  const descriptions = codes.map(code => descriptionMap[code.trim()]);
+  return descriptions;
+}
+
 const extractTexts = (svgDoc) => {
   const gElements = svgDoc.querySelectorAll('g.area-text');
   const texts = []
@@ -267,6 +282,7 @@ const extractGARect = svgDoc => {
       capacity: parseInt(rect.getAttribute('data-capacity'), 10),
       color: rect.getAttribute('fill'),
       guid: rect.getAttribute('id'),
+      tag_name: getTags(rect.getAttribute('data-tags') || ''),
       position: {
         x: parseFloat(translateMatch[1]),
         y: parseFloat(translateMatch[2])
@@ -301,6 +317,8 @@ const extractGACircle = (svgDoc) => {
     const transformData = parseTransform(area.getAttribute('transform'));
     const ellipse = area.querySelector('ellipse');
     const text = area.querySelector('text');
+    const tags = ellipse.getAttribute('data-tags') || "";
+
     data.push({
       label: ellipse.getAttribute('data-label') || "",
       abbreviation: ellipse.getAttribute('data-abv') || "",
@@ -318,6 +336,7 @@ const extractGACircle = (svgDoc) => {
           y: parseFloat(ellipse.getAttribute('ry'))
         }
       },
+      tag_name: getTags(ellipse.getAttribute('data-tags') || ''),
       position: {
         x: transformData.e,
         y: transformData.f
@@ -385,6 +404,7 @@ const extractGAPolygon = svgDoc => {
         x: transformData.e,
         y: transformData.f
       },
+      tag_name: getTags(polygon.getAttribute('data-tags') || ''),
       rotation: transformData.rotation,
       shape: "gaPolygon",
       text: textData,
@@ -432,7 +452,8 @@ const extractRoundTable = (svgDoc) => {
         },
         r: parseFloat(seatCircle.getAttribute('r')),
         guid: seatCircle.id,
-        uuid: uuid()
+        uuid: uuid(),
+        tag_name: getTags(seatCircle.getAttribute("data-tags") || "")
       });
     });
 
@@ -486,7 +507,8 @@ const extractRectangleTable = svgDoc => {
         seat_number: seatText ? seatText.textContent : "",
         radius: parseFloat(seatCircle.getAttribute('r')),
         color: seatText.getAttribute('fill'),
-        guid: seatCircle.id
+        guid: seatCircle.id,
+        tag_name: getTags(seatCircle.getAttribute('data-tags') || "")
       });
     });
 
@@ -544,6 +566,7 @@ const extractRows = svgDoc => {
         },
         guid: circle.getAttribute('id'),
         uuid: uuid(),
+        tag_name: getTags(circle.getAttribute('data-tags') || "")
       })
     })
     rowsData.push({
