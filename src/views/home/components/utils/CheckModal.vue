@@ -1,8 +1,8 @@
 <template>
-  <v-btn class="btn" @click="dialog = true"><v-icon v-if="status == true"
-      color="green" icon="mdi-check-circle" size="large"></v-icon>
-    <v-icon v-if="status == false" color="red" icon="mdi-close-circle"
+  <v-btn class="btn" @click="dialog = true">
+    <v-icon v-if="!isValid" color="green" icon="mdi-check-circle"
       size="large"></v-icon>
+    <v-icon v-else color="red" icon="mdi-close-circle" size="large"></v-icon>
     <v-tooltip activator="parent" location="bottom">Validation</v-tooltip>
   </v-btn>
   <div class="text-center">
@@ -60,7 +60,7 @@
           </v-chip>
           <v-chip v-else class="ma-2" color="green" closable label>
             <v-icon icon="mdi-check" start></v-icon>
-            {{ 'All sections contain capacity' }}
+            {{ 'All GA sections has capacity' }}
           </v-chip>
 
           <v-chip v-if="validateSectionLabel" class="ma-2" color="red" label>
@@ -159,6 +159,10 @@ const validateSeatLabel = computed(() => {
 
 const validateRowLabel = computed(() => {
   return validationErrors.value.rowLabel;
+})
+
+const isValid = computed(() => {
+  return validationErrors.value.isValid;
 })
 
 const dialog = ref(false);

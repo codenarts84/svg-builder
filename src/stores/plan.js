@@ -133,6 +133,19 @@ export const usePlanStore = defineStore("plan", {
 
       const temp = [...new Set(seatIds)];
       const nSeat = seatIds.length - temp.length;
+      const isValid =
+        nCapacity ||
+        nSection ||
+        nSeat ||
+        nTableLabel ||
+        nTableAbv ||
+        nCapacity ||
+        nSectionLabel ||
+        nSectionAbv ||
+        nSeatLabel ||
+        nRowLabel;
+
+      console.log(isValid);
 
       return {
         category: nCategory,
@@ -145,6 +158,7 @@ export const usePlanStore = defineStore("plan", {
         sectionAbv: nSectionAbv,
         seatLabel: nSeatLabel,
         rowLabel: nRowLabel,
+        isValid,
       };
 
       // return {
