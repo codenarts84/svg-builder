@@ -428,11 +428,80 @@ const onFlipHorizental = () => {
     planStore.persistPlan();
   }
 }
+
 const onFlipVertical = () => {
-  alert('not yet')
+  const boundary = props.selectionBoundary();
+  const startY = boundary.y;
+  const endY = startY + boundary.height;
+  const midY = (startY + endY) / 2;
+  if (selection.value.length) {
+    for (const z of plan.zones) {
+      // row
+      for (const r of z.rows) {
+        if (selection.value.includes(r.uuid)) {
+          const miny = Math.min(...r.seats.map(s => s.position.y)) + z.position.y + r.position.y
+          const maxy = Math.max(...r.seats.map(s => s.position.y)) + z.position.y + r.position.y
+          const midy = (miny + maxy) / 2;
+          // r.position.x += 2 * (midX - midx);
+          r.position.y = 2 * midY - r.position.y;
+          r.seats.forEach(s => s.position.y = -s.position.y)
+        }
+      }
+
+      // shape
+      for (const a of z.areas) {
+        if (selection.value.includes(a.uuid)) {
+          if (a.shape === 'circle') {
+            a.position.y = midY * 2 - a.position.y;
+          } else if (a.shape === 'rectangle' || a.shape === 'gaSquare') {
+            let rBox = rectangleBBox(a);
+            let oX = rBox.x + rBox.width / 2;
+            let oY = rBox.y + rBox.height / 2;
+
+            const prevRot = a.rotation;
+            rotateArea(a, -prevRot, oX, oY);
+            a.position.y = midY * 2 - a.position.y - a.rectangle.height;
+
+            rBox = rectangleBBox(a);
+            oX = rBox.x + rBox.width / 2;
+            oY = rBox.y + rBox.height / 2;
+
+            rotateArea(a, -prevRot, oX, oY);
+          } else if (a.shape === 'ellipse' || a.shape === 'gaCircle') {
+            a.position.y = midY * 2 - a.position.y;
+            a.rotation = 180 - a.rotation;
+          } else if (a.shape === 'polygon' || a.shape === 'gaPolygon') {
+            let rBox = polygonBBox(a);
+            let oX = rBox.x + rBox.width / 2;
+            let oY = rBox.y + rBox.height / 2;
+
+            const prevRot = a.rotation;
+            rotateArea(a, -prevRot, oX, oY);
+            a.position.y = midY * 2 - a.position.y - rBox.height;
+
+            rBox = polygonBBox(a);
+            oX = rBox.x + rBox.width / 2;
+            oY = rBox.y + rBox.height / 2;
+
+            rotateArea(a, -prevRot, oX, oY);
+          } else if (a.shape === 'text') {
+            a.position.y = midY * 2 - a.position.y;
+          } else if (a.shape === 'roundTable') {
+            //bug fix
+            a.position.y = midY;
+          } else if (a.shape === 'rectangleTable') {
+            //bug fix
+            a.position.y = midY;
+          }
+        }
+      }
+    }
+    planStore.persistPlan();
+  }
 }
 
-const onDistributeHorizental = () => { }
+const onDistributeHorizental = () => {
+}
 
 const onDistributeVertical = () => { }
 
