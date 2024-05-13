@@ -64,6 +64,99 @@ export const usePlanStore = defineStore("plan", {
       }, 500);
     },
 
+    validationPlan() {
+      let nCategory = 0;
+      let nSection = 0;
+      const seatIds = [];
+      let nLabel = 0;
+      let nTableLabel = 0;
+      let nTableAbv = 0;
+      let nCapacity = 0;
+      let nSectionLabel = 0;
+      let nSectionAbv = 0;
+      let nSeatLabel = 0;
+      let nRowLabel = 0;
+
+      for (const z of this.plan.zones) {
+        for (const r of z.rows) {
+          for (const s of r.seats) {
+            if (!s.category) {
+              nCategory++;
+            }
+            if (!s.section_label) {
+              nSection++;
+            }
+            if (!s.seat_number) nSeatLabel++;
+            seatIds.push(s.guid);
+          }
+          if (!r.row_number) nRowLabel++;
+        }
+        for (const a of z.areas) {
+          if (
+            a.shape === "gaCircle" ||
+            a.shape === "gaSquare" ||
+            a.shape === "gaPolygon"
+          ) {
+            if (!a.category) {
+              nCategory++;
+            }
+            if (!a.section_label) {
+              nSection++;
+            }
+            if (a.capacity <= 0) {
+              nCapacity++;
+            }
+            if (!a.label) {
+              nSectionLabel++;
+            }
+            if (!a.abbreviation) {
+              nSectionAbv++;
+            }
+            if (!a.label) seatIds.push(a.guid);
+          }
+          if (a.shape === "roundTable" || a.shape === "rectangleTable") {
+            for (const s of a.seats) {
+              if (!s.category) {
+                nCategory++;
+              }
+              if (!s.section_label) {
+                nSection++;
+              }
+              if (!s.seat_number) nSeatLabel++;
+              seatIds.push(s.guid);
+            }
+            if (!a.label.name) nTableLabel += a.seats.length;
+            if (!a.label.abv) nTableAbv += a.seats.length;
+          }
+        }
+      }
+
+      const temp = [...new Set(seatIds)];
+      const nSeat = seatIds.length - temp.length;
+
+      return {
+        category: nCategory,
+        section: nSection,
+        seatId: nSeat,
+        tableLabel: nTableLabel,
+        tableAbv: nTableAbv,
+        capacity: nCapacity,
+        sectionLabel: nSectionLabel,
+        sectionAbv: nSectionAbv,
+        seatLabel: nSeatLabel,
+        rowLabel: nRowLabel,
+      };
+
+      // return {
+      //   category: nCategory
+      //     ? `${nCategory} element(s) without category.`
+      //     : "All elements contain category.",
+      //   section: nSection
+      //     ? `${nSection} element(s) without section.`
+      //     : "All elements contain section.",
+      // };
+    },
+
     validatePlan() {
       const ajv = new Ajv({ allErrors: true, verbose: true });
       const plan = this._plan;
