@@ -555,7 +555,8 @@ const extractRows = svgDoc => {
       seats: seatData,
       rotation: transform.rotation,
       row_number: row_label.textContent,
-      row_number_position: "both"
+      row_number_position: "both",
+      uuid: uuid(),
     })
   })
   return rowsData;

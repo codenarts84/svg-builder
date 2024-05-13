@@ -501,6 +501,16 @@ const onFlipVertical = () => {
 }
 
 const onDistributeHorizental = () => {
+  alert('not yet')
+  // const boundary = props.selectionBoundary();
+  // if (!boundary) return;
+  // const startX = boundary.x;
+  // const endX = boundary.x + boundary.width;
+  // if(selection.value.length) {
+  //   for(selection.value.length) {
+
+  //   }
+  // }
 }
 
 const onDistributeVertical = () => { }
