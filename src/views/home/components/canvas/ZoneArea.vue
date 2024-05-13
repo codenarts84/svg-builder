@@ -155,7 +155,7 @@
 
     <g v-else-if="area.shape === 'roundTable'" class="table">
       <circle class="table_circle" :cx="0" :cy="0" :r="area.radius" fill="#ffffff"
-        stroke="#000" stroke-width="1">
+        stroke="#000" stroke-width="1" :data-space="area.space">
       </circle>
       <text class="table_label" :x="area.label.position.x"
         :y="area.label.position.y" :font-size="area.label.size || 16"
