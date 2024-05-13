@@ -259,7 +259,6 @@ export default {
   methods: {
     setGATextColor(e) {
       const value = this.gaColorOptions.find(item => item.name === e.target.value);
-      console.log(value)
       this.planStore.modifyAreas({ areaIds: this.areas.map(a => a.uuid), text__color: value.color })
     },
     setColor(e) {

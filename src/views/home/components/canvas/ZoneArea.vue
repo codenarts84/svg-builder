@@ -47,6 +47,9 @@
         :fill="area.text.color || '#888888'">
         {{ area.text.text }}
       </text>
+      <circle v-if="showTag(area)" fill="#fff" :cx="0"
+        :cy="area.ellipse.radius.y - 7" :r="7">
+      </circle>
     </template>
 
     <template v-else-if="area.shape === 'rectangle'">
@@ -79,6 +82,9 @@
         :fill="area.text.color || '#888888'">
         {{ area.text.text }}
       </text>
+      <circle v-if="showTag(area)" fill="#fff" :cx="area.rectangle.width / 2"
+        :cy="area.rectangle.height - 7" :r="7">
+      </circle>
     </template>
 
     <template v-else-if="area.shape === 'polygon'">
@@ -127,6 +133,9 @@
         :fill="area.text.color || '#888888'">
         {{ area.text.text }}
       </text>
+      <circle v-if="showTag(area)" fill="#fff" :cx="polygonTagX" :cy="polygonTagY"
+        :r="7">
+      </circle>
       <g v-if="isIndividuallySelected &&
         area.polygon &&
         area.polygon.points
@@ -308,7 +317,6 @@ export default {
       return this.getCategoryByName(this.area.category);
     },
     gaColor() {
-      console.log(this.area.category)
       if (this.category) {
         return this.category.color;
       }
@@ -338,6 +346,26 @@ export default {
         ? this.area.polygon.points.map((p) => `${p.x},${p.y}`).join(" ")
         : "";
     },
+    polygonTagX() {
+      const points = this.area.polygon.points;
+      let minX = points[0].x;
+      let maxX = points[0].x;
+      points.forEach(p => {
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+      })
+      return (minX + maxX) / 2;
+    },
+    polygonTagY() {
+      const points = this.area.polygon.points;
+      let minY = points[0].y;
+      let maxY = points[0].y;
+      points.forEach(p => {
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y
+      })
+      return (minY + maxY) / 2 + 20;
+    }
   },
   methods: {
     makeTag(item) {

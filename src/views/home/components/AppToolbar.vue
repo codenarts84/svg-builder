@@ -48,7 +48,6 @@ const extractTexts = (svgDoc) => {
     const translateMatch = transform.match(/translate\((\d+),\s*(\d+)\)/);
     const rotateMatch = transform.match(/rotate\((\d+)/);
     const textElement = gElement.querySelector('text');
-    const textContent = textElement.textContent;
     const fontSize = textElement.getAttribute('font-size');
     const fillColor = textElement.getAttribute('fill');
     const data = {
@@ -58,7 +57,7 @@ const extractTexts = (svgDoc) => {
       text: {
         position: { x: 0, y: 0 }, // Assuming position is always (0,0) as in the example
         color: fillColor,
-        text: textContent,
+        text: textElement.textContent,
         size: parseInt(fontSize, 10)
       },
       uuid: uuid() // This needs to be dynamically generated if it changes
@@ -249,7 +248,6 @@ const extractPolygon = svgDoc => {
   return data;
 }
 
-
 const extractGARect = svgDoc => {
   const rectElements = svgDoc.querySelectorAll('g.area-gaSquare');
   const gaRects = [];
@@ -342,7 +340,6 @@ const extractGACircle = (svgDoc) => {
   return data;
 }
 
-
 const extractGAPolygon = svgDoc => {
   const polygons = svgDoc.querySelectorAll('g.area-gaPolygon');
   let data = [];
@@ -398,7 +395,6 @@ const extractGAPolygon = svgDoc => {
   return data;
 }
 
-
 const parseTransform = (transformString) => {
   const result = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0, rotation: 0 }; // Include rotation in the matrix components
   if (!transformString) return result;
@@ -413,7 +409,6 @@ const parseTransform = (transformString) => {
   }
   return result;
 }
-
 
 const extractRoundTable = (svgDoc) => {
   const tables = svgDoc.querySelectorAll('g.area-roundTable');
@@ -528,6 +523,44 @@ const extractRectangleTable = svgDoc => {
   return data;
 }
 
+const extractRows = svgDoc => {
+  const rowElements = svgDoc.querySelectorAll('g.row');
+  let rowsData = [];
+  rowElements.forEach(row => {
+    const transform = parseTransform(row.getAttribute('transform'));
+    const rows = row.querySelector('g.row_group');
+    const row_label = rows.querySelector('text');
+    const seats = rows.querySelectorAll('g.seat_group');
+    const seatData = []
+    seats.forEach(seat => {
+      const circle = seat.querySelector('circle');
+      const text = seat.querySelector('text');
+      seatData.push({
+        seat_number: text.textContent,
+        category: circle.getAttribute('data-category-name') || "",
+        position: {
+          x: parseFloat(circle.getAttribute('cx')),
+          y: parseFloat(circle.getAttribute('cy'))
+        },
+        guid: circle.getAttribute('id'),
+        uuid: uuid(),
+      })
+    })
+    rowsData.push({
+      guid: rows.getAttribute('id'),
+      position: {
+        x: transform.e,
+        y: transform.f,
+      },
+      seats: seatData,
+      rotation: transform.rotation,
+      row_number: row_label.textContent,
+      row_number_position: "both"
+    })
+  })
+  return rowsData;
+}
+
 const extractCategories = (dom) => {
   const categories = dom.querySelectorAll('category');
   const categoryData = [];
@@ -581,6 +614,7 @@ const importSVG = () => {
         const gaPolygon = extractGAPolygon(doc)
         const rectangleTable = extractRectangleTable(doc)
         const roundTable = extractRoundTable(doc)
+        const rows = extractRows(doc);
         const zone = {
           areas: [...texts, ...rects, ...circles, ...polygons, ...ellipses, ...gaCircle, ...gaSquare, ...gaPolygon, ...roundTable, ...rectangleTable],
           name: "Zone",
@@ -591,6 +625,7 @@ const importSVG = () => {
         plan.value.categories = categories;
         plan.value.name = chartname;
         plan.value.zones[0].areas = zone.areas;
+        plan.value.zones[0].rows = rows;
         planStore.persistPlan();
       } else {
         alert("No seats found in the SVG.");

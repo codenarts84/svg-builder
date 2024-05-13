@@ -33,7 +33,7 @@ const defaultBg = JSON.parse(
 );
 
 export default {
-  name: "ZoneComp",
+  name: "PlanComponent",
   components: { ZoneComponent },
   setup() {
     const svg = ref(null);
@@ -92,20 +92,10 @@ export default {
     const selectedZone = computed(() => store.selectedZone);
     const lockedZones = computed(() => store.lockedZones);
     const grid = computed(() => store.grid);
-    const planSize = computed(() => planstore.planSize);
-
-    const toolbarStore = useToolbarStore();
-
-    const seatStore = useSeatFormatStore();
 
     const bSnap2Grid = computed(() => store.snap);
     const sections = computed(() => store.section_label)
     const categories = computed(() => planstore.categories)
-
-
-    onMounted(() => {
-      console.log("SVG Element:", svg.value.getBoundingClientRect());
-    });
 
     const getSvgRect = () => svg.value.getBoundingClientRect();
 
@@ -173,6 +163,20 @@ export default {
     };
   },
   computed: {
+    metadata() {
+      const categoriesXML = this.categories.map(cat =>
+        `<category><name>${cat.name}</name><color>${cat.color}</color></category>`
+      ).join("");
+      const sectionsXML = this.sections.map(sec =>
+        `<section><name>${sec.label}</name><abv>${sec.abv}</abv></section>`
+      ).join("");
+      return `<booktix-data>
+                <chartname>${this.plan.name}</chartname>
+                <categories>${categoriesXML}</categories>
+                <sections>${sectionsXML}</sections>
+              </booktix-data>`;
+    },
+
     noTableSelection() {
       if (this.selection.length === 1) {
         for (const z of this.plan.zones) {
@@ -208,12 +212,14 @@ export default {
       }
       return true;
     },
+
     polygonPreviewPoints() {
       return this.polygonPoints
         .concat([{ x: this.drawingCurrentX, y: this.drawingCurrentY }])
         .map((point) => `${point.x},${point.y}`)
         .join(" ");
     },
+
     rowBlockPosition() {
       const x =
         this.drawingCurrentX > this.drawingStartX
@@ -565,39 +571,39 @@ export default {
     // window.addEventListener("keydown", this.hotkey);
     window.localStorage.setItem('snap_enabled', true);
     window.localStorage.setItem('grid_enabled', true);
-    this.unwatch = watch(this.planSize, (newValue, oldValue) => {
-      if (
-        !oldValue ||
-        newValue.width !== oldValue.width ||
-        newValue.height !== oldValue.height
-      ) {
-        nextTick(() => {
-          this.createStage();
-          this.createZoom(); // Make sure this.createZoom() is compatible with the composition API
-        });
-      }
-    });
-    this.unwatchTool = watch(
-      () => this.tool,
-      (newValue, oldValue) => {
-        if (!oldValue || newValue !== oldValue) {
-          // console.log("This is the tool", this.tool, oldValue, newValue);
-          this.drawing = false;
-          this.selecting = false;
-          this.rowBlockDrawing = false;
-          this.polygonDrawing = false;
-          this.polygonPoints = [];
-        }
-      }
-    );
+    // this.unwatch = watch(this.planSize, (newValue, oldValue) => {
+    //   if (
+    //     !oldValue ||
+    //     newValue.width !== oldValue.width ||
+    //     newValue.height !== oldValue.height
+    //   ) {
+    //     nextTick(() => {
+    //       this.createStage();
+    //       this.createZoom(); // Make sure this.createZoom() is compatible with the composition API
+    //     });
+    //   }
+    // });
+    // this.unwatchTool = watch(
+    //   () => this.tool,
+    //   (newValue, oldValue) => {
+    //     if (!oldValue || newValue !== oldValue) {
+    //       // console.log("This is the tool", this.tool, oldValue, newValue);
+    //       this.drawing = false;
+    //       this.selecting = false;
+    //       this.rowBlockDrawing = false;
+    //       this.polygonDrawing = false;
+    //       this.polygonPoints = [];
+    //     }
+    //   }
+    // );
   },
 
   unmounted() {
     // window.removeEventListener("resize", this.createZoom);
     window.removeEventListener("keydown", this.hotkey);
     // console.log("unMounted");
-    this.unwatch();
-    this.unwatchTool();
+    // this.unwatch();
+    // this.unwatchTool();
   },
 
   methods: {
@@ -2454,7 +2460,6 @@ export default {
         })
         .on("zoom", (event) => {
           const scale = event.transform.k;
-          console.log(event.transform.k)
           useMainStore().setZoomTransform(event.transform);
 
           this.zoom.translateExtent([
@@ -2749,25 +2754,7 @@ export default {
       height: 100%;
       background-color: rgb(151, 162, 182);
       user-select: none;">
-    <metadata>
-      <booktix-data>
-        <chartname>
-          {{ plan.name }}
-        </chartname>
-        <categories>
-          <category v-for="(category, idx) in categories" :key="idx">
-            <name>{{ category.name }}</name>
-            <color>{{ category.color }}</color>
-          </category>
-        </categories>
-        <sections>
-          <section v-for="(section, idx) in sections" :key="idx">
-            <name>{{ section.label }}</name>
-            <abv>{{ section.abv }}</abv>
-          </section>
-        </sections>
-      </booktix-data>
-    </metadata>
+    <metadata v-html="metadata"></metadata>
     <defs>
       <clipPath id="clip">
         <rect :width="plan.size.width" :height="plan.size.height" />

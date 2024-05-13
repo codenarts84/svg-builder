@@ -35,7 +35,6 @@ const props = defineProps({
 const options = computed(() => mainStore.section_label);
 const tags = computed(() => mainStore.section_label);
 const selected_change = (e) => {
-  console.log(e.target.value)
   props.setSection(e.target.value);
 }
 </script>

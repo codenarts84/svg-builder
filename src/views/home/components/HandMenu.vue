@@ -87,7 +87,6 @@ const props = defineProps({
   selectionBoundary: Function
 });
 
-console.log(props);
 </script>
 
 <style>

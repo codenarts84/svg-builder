@@ -71,7 +71,6 @@ const seat = computed(() => {
 
 const setSeat = (e) => {
   if (e.target.value) {
-    console.log(e.target.value)
     planStore.modifyTableSeatLabel(props.seats[0].uuid, e.target.value)
   }
 }
@@ -86,7 +85,6 @@ const selectedTag = () => {
 }
 
 const setCategory = (name) => {
-  console.log(props.seats)
   planStore.setTableSeatCategory(props.seats, name);
 }
 

@@ -101,7 +101,6 @@ const selectedCategory = computed(() => {
 
 const selectedTag = computed(() => {
   const tg = groupValue(props.seats, seat => seat.tag_name);
-  console.log(tg)
   return tg;
 })
 

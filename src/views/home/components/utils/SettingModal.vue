@@ -59,7 +59,6 @@ const onSave = () => {
     return;
   }
   planstore.setPlanSize(boardWidth, boardHeight);
-  console.log(boardName.value)
   planstore.setPlanName(boardName.value);
   dialog.value = false;
 };

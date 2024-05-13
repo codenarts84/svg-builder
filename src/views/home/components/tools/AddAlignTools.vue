@@ -267,7 +267,6 @@ const onAlignHorizonRight = () => {
           const maxx = Math.max(...r.seats.map(s => s.position.x))
           if (endX > r.position.x + maxx + 10) {
             r.position.x += (endX - r.position.x - maxx - 10);
-            console.log(r.position.x)
           }
         }
       }
