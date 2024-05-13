@@ -1,6 +1,6 @@
 <template>
-  <v-btn class="btn" @click="dialog = true"><v-icon color="black"
-      icon="mdi-download" size="large"></v-icon>Export
+  <v-btn class="btn" @click="onClick"><v-icon color="black" icon="mdi-download"
+      size="large"></v-icon>Export
   </v-btn>
   <div class="text-center">
     <v-dialog v-model="dialog" width="400">
@@ -27,13 +27,17 @@
   </div>
 </template>
 <script setup>
-import { ref, defineProps } from "vue";
+import { ref, defineProps, computed } from "vue";
+import { usePlanStore } from "@/stores/plan"
+import { useToast } from "vue-toastification";
 // import { useBoardStore } from "../../../../stores/svgStore";
 
 // const boardStore = useBoardStore();
 const dialog = ref(false);
+const plan = usePlanStore();
 const emailAddress = ref("hereis.topdev@gmail.com");
 const onChangeEmail = (v) => (emailAddress.value = v.target.value);
+const isValid = computed(() => plan.validationPlan().isValid);
 const props = defineProps({
   export: Function,
 });
@@ -41,4 +45,16 @@ const onSave = () => {
   props.export();
   dialog.value = false;
 };
+
+const toast = useToast();
+
+const onClick = () => {
+  if (!isValid.value) {
+    dialog.value = true
+  } else {
+    toast.error("Validation Error!", {
+      timeout: 1000
+    });
+  }
+}
 </script>

@@ -13,7 +13,7 @@
     <v-divider></v-divider>
     <SectionLabel :section="section()" :setSection="setSection" />
     <v-divider></v-divider>
-    <TagsPanel v-if="show" :rows="rows" :selectedTag="selectedTag" />
+    <TagsPanel :rows="rows" :selectedTag="selectedTag" />
   </div>
 </template>
 

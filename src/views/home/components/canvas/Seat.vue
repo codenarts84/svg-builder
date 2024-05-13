@@ -40,7 +40,7 @@
       </g>
     </g>
 
-    <circle v-else-if="showTag" fill="#fff" :cx="seat.position.x"
+    <circle v-if="showTag" fill="#fff" :cx="seat.position.x"
       :cy="seat.position.y + 7" :r="3">
     </circle>
 

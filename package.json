@@ -22,6 +22,7 @@
     "vue-color": "^2.8.1",
     "vue-router": "^4.3.0",
     "vue-svg-loader": "^0.16.0",
+    "vue-toastification": "^2.0.0-rc.5",
     "vuetify": "^3.5.14"
   },
   "devDependencies": {
