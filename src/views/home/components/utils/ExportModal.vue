@@ -13,7 +13,7 @@
             v-model="emailAddress" @change="onChangeEmail"
             style="margin-top: 30px"></v-text-field>
 
-          <v-text-field label="Service ID" required clearable v-model="serviceID"
+          <!-- <v-text-field label="Service ID" required clearable v-model="serviceID"
             style="margin-top: 30px" placeholder="service_jv2oiml"></v-text-field>
 
           <v-text-field label="Template ID" required clearable
@@ -22,7 +22,7 @@
 
           <v-text-field label="Public Key" required clearable v-model="key"
             style="margin-top: 30px"
-            placeholder="yAHgq8gPUad2EXNq2"></v-text-field>
+            placeholder="yAHgq8gPUad2EXNq2"></v-text-field> -->
         </v-card-text>
 
         <v-divider></v-divider>
@@ -56,7 +56,8 @@ const props = defineProps({
   export: Function,
 });
 const onSave = () => {
-  props.export(serviceID.value, templateID.value, key.value, emailAddress.value);
+  props.export(emailAddress.value);
+  // props.export(emailAddress.value, serviceID.value, templateID.value, key.value);
   dialog.value = false;
 };
 
