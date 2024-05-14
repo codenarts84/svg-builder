@@ -43,7 +43,8 @@
   </v-list>
   <AddChairTools :opened="seatopened" />
   <AddItemsTools :opened="itemopened" />
-  <AddAlignTools :opened="alignopened" :selectionBoundary="selectionBoundary" />
+  <AddAlignTools :opened="alignopened" :selectionBoundary="selectionBoundary"
+    :selectionBoxes="selectionBoxes" />
 </template>
 
 <script setup>
@@ -84,7 +85,8 @@ const onAlignToggle = () => {
 
 const props = defineProps({
   onImportClick: Function,
-  selectionBoundary: Function
+  selectionBoundary: Function,
+  selectionBoxes: Function
 });
 
 </script>

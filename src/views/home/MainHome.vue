@@ -3,7 +3,8 @@
   <v-layout class="main-container">
     <RightNav :temp_Rotate="temp_Rotate" />
     <div class="main-pan">
-      <HandMenu :selectionBoundary="selectionBoundary" />
+      <HandMenu :selectionBoundary="selectionBoundary"
+        :selectionBoxes="selectionBoxes" />
       <!-- <MainZone style="padding: 100px"></MainZone> -->
       <!-- <Toolbar></Toolbar> -->
       <Plan ref="planref"></Plan>
@@ -60,7 +61,7 @@ const planref = ref(null);
 // Dynamically assign functions if ref is available
 const temp_Rotate = (v) => planref.value ? planref.value.temp_Rotate(v) : undefined;
 const selectionBoundary = () => planref.value ? planref.value.selectionBoundary : undefined;
-
+const selectionBoxes = () => planref.value ? planref.value.selectionBoxes : undefined;
 
 // const selectionBoundary = () => planref.value ? planref.value.selectionBoundary : null;
 

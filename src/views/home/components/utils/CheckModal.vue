@@ -1,7 +1,7 @@
 <template>
   <v-btn class="btn" @click="dialog = true">
-    <v-icon v-if="!isValid" color="green" icon="mdi-check-circle"
-      size="large"></v-icon>
+    <v-icon v-if="!isValid && !validateSeatSection" color="green"
+      icon="mdi-check-circle" size="large"></v-icon>
     <v-icon v-else color="red" icon="mdi-close-circle" size="large"></v-icon>
     <v-tooltip activator="parent" location="bottom">Validation</v-tooltip>
   </v-btn>
@@ -99,7 +99,18 @@
             {{ 'All rows contain label' }}
           </v-chip>
 
+          <v-chip v-if="validateSeatSection" class="ma-2" color="red" label>
+            <v-icon icon="mdi-close" start></v-icon>
+            {{ `${validateSeatSection} seat(s) duplicate section` }}
+          </v-chip>
+          <v-chip v-else class="ma-2" color="green" closable label>
+            <v-icon icon="mdi-check" start></v-icon>
+            {{ 'No seats duplicate section' }}
+          </v-chip>
+
+
         </v-card-text>
+
 
         <v-divider></v-divider>
 
@@ -115,11 +126,14 @@
 <script setup>
 import { ref, computed } from "vue";
 import { usePlanStore } from "@/stores/plan";
+import { useMainStore } from "@/stores";
 // import { useBoardStore } from "../../../../stores/svgStore";
 
 // const boardStore = useBoardStore();
-const plan = usePlanStore();
-const validationErrors = computed(() => plan.validationPlan());
+const planstore = usePlanStore();
+const validationErrors = computed(() => planstore.validationPlan());
+const plan = computed(() => planstore.plan)
+const section_label = computed(() => useMainStore().section_label)
 
 const validateCategory = computed(() => {
   return validationErrors.value.category;
@@ -164,6 +178,25 @@ const validateRowLabel = computed(() => {
 const isValid = computed(() => {
   return validationErrors.value.isValid;
 })
+
+const validateSeatSection = computed(() => {
+  let nSection = 0;
+  section_label.value.forEach(section => {
+    for (const z of plan.value.zones) {
+      const temp = []
+      for (const r of z.rows) {
+        for (const s of r.seats) {
+          if (s.section_label === section.label)
+            temp.push(`${r.row_number}${s.seat_number}`)
+        }
+      }
+      const tt = [...new Set(temp)];
+      nSection += (temp.length - tt.length);
+    }
+  })
+  return nSection;
+})
+
 
 const dialog = ref(false);
 const status = ref(false);
