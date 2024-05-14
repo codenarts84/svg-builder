@@ -81,6 +81,10 @@ export default {
     const rowSeatSpacing = ref(25);
     const mouseStatus = ref(false);
 
+    const focusPointX = ref(300)
+    const focusPointY = ref(300)
+    const focusDragging = ref(false)
+
     const store = useMainStore();
     const planstore = usePlanStore();
     const plan = computed(() => planstore.plan);
@@ -160,6 +164,9 @@ export default {
       rowCurrentY,
       mouseStatus,
       getSvgRect,
+      focusPointX,
+      focusPointY,
+      focusDragging,
     };
   },
   computed: {
@@ -1163,6 +1170,9 @@ export default {
           this.rowCurrentY = pos.y;
           break;
         }
+        case "focusPoint":
+          this.focusDragging = true;
+          break;
       }
     },
     temp_Rotate(val) {
@@ -1590,6 +1600,12 @@ export default {
           //   this.drawingCurrentX = pos.x;
           //   this.drawingCurrentY = pos.y;
           // }
+          break;
+        case "focusPoint":
+          if (this.focusDragging) {
+            this.focusPointX = pos.x;
+            this.focusPointY = pos.y;
+          }
           break;
       }
     },
@@ -2247,6 +2263,9 @@ export default {
               });
             this.rowDrawing = false;
           }
+          break;
+        case "focusPoint":
+          this.focusDragging = false;
           break;
       }
     },
@@ -2964,6 +2983,23 @@ export default {
           fill="black" dy=".35em" style="z-index: 99">
           {{ stgrowBlockRows }} × {{ stgrowBlockSeats }} Seats
         </text>
+      </g>
+
+      <g v-else-if="tool === 'focusPoint'">
+        <circle :cx="focusPointX" :cy="focusPointY" :r="18" fill="none"
+          stroke="#000" stroke-width="8px" :mousedown="mousedown"
+          :mousemove="mousemove" :mouseup="mousedown" cursor="move">
+        </circle>
+        <circle :cx="focusPointX" :cy="focusPointY" :r="30" fill="none"
+          stroke="#000" stroke-width="5px" :mousedown="mousedown"
+          :mousemove="mousemove" :mouseup="mousedown" cursor="move">
+        </circle>
+        <circle :cx="focusPointX" :cy="focusPointY" :r="100" fill="none"
+          stroke="#cccccc" stroke-width="2px"></circle>
+        <circle :cx="focusPointX" :cy="focusPointY" :r="180" fill="none"
+          stroke="#cccccc" stroke-width="2px"></circle>
+        <circle :cx="focusPointX" :cy="focusPointY" :r="260" fill="none"
+          stroke="#cccccc" stroke-width="2px"></circle>
       </g>
 
       <rect class="selection-area"

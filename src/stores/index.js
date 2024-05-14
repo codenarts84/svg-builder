@@ -92,6 +92,7 @@ export const useMainStore = defineStore({
     // snap: (window.localStorage.getItem("snap_enabled") || "false") === "true",
     grid: false,
     snap: true,
+    bfocus: false,
     clipboardAreas: [],
     clipboardRows: [],
     tool: "select",
@@ -286,6 +287,10 @@ export const useMainStore = defineStore({
         this.selection = [];
       }
       this.tool = tool;
+      this.bfocus = false;
+      if (tool === "focusPoint") {
+        this.bfocus = true;
+      }
       // console.log('changed tool', tool)
     },
     clearSelection() {
