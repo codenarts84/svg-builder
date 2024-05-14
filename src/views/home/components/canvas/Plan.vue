@@ -2801,6 +2801,25 @@ export default {
       <rect v-if="grid" :width="plan.size.width" :height="plan.size.height"
         fill="url(#grid)" :cursor="cursor">
       </rect>
+
+      <g v-if="tool === 'focusPoint'" class="booktik-focus-point"
+        id="booktik-focus-point">
+        <circle :cx="focusPointX" :cy="focusPointY" :r="18" fill="none"
+          stroke="#000" stroke-width="8px" :mousedown="mousedown"
+          :mousemove="mousemove" :mouseup="mousedown" cursor="move">
+        </circle>
+        <circle :cx="focusPointX" :cy="focusPointY" :r="30" fill="none"
+          stroke="#000" stroke-width="5px" :mousedown="mousedown"
+          :mousemove="mousemove" :mouseup="mousedown" cursor="move">
+        </circle>
+        <circle :cx="focusPointX" :cy="focusPointY" :r="100" fill="none"
+          stroke="#cccccc" stroke-width="2px"></circle>
+        <circle :cx="focusPointX" :cy="focusPointY" :r="180" fill="none"
+          stroke="#cccccc" stroke-width="2px"></circle>
+        <circle :cx="focusPointX" :cy="focusPointY" :r="260" fill="none"
+          stroke="#cccccc" stroke-width="2px"></circle>
+      </g>
+
       <ZoneComponent v-for="z in plan.zones" :zone="z" :key="z.uuid"
         :startDragging="startDragging"
         :startDraggingPolygonPoint="startDraggingPolygonPoint" :ox="temp_ox"
@@ -2983,23 +3002,6 @@ export default {
           fill="black" dy=".35em" style="z-index: 99">
           {{ stgrowBlockRows }} × {{ stgrowBlockSeats }} Seats
         </text>
-      </g>
-
-      <g v-else-if="tool === 'focusPoint'">
-        <circle :cx="focusPointX" :cy="focusPointY" :r="18" fill="none"
-          stroke="#000" stroke-width="8px" :mousedown="mousedown"
-          :mousemove="mousemove" :mouseup="mousedown" cursor="move">
-        </circle>
-        <circle :cx="focusPointX" :cy="focusPointY" :r="30" fill="none"
-          stroke="#000" stroke-width="5px" :mousedown="mousedown"
-          :mousemove="mousemove" :mouseup="mousedown" cursor="move">
-        </circle>
-        <circle :cx="focusPointX" :cy="focusPointY" :r="100" fill="none"
-          stroke="#cccccc" stroke-width="2px"></circle>
-        <circle :cx="focusPointX" :cy="focusPointY" :r="180" fill="none"
-          stroke="#cccccc" stroke-width="2px"></circle>
-        <circle :cx="focusPointX" :cy="focusPointY" :r="260" fill="none"
-          stroke="#cccccc" stroke-width="2px"></circle>
       </g>
 
       <rect class="selection-area"
