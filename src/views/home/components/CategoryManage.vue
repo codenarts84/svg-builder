@@ -116,16 +116,6 @@ const delete_btn = ((idx) => {
   return bStatus;
 })
 
-// const handle_change_name = (e, idx) => {
-//   const val = e.target.value
-//   valid.value = categories.value.find(c => c.name === e.)
-//   if (categories.value.find(ca => ca.name === val)) {
-//     valid.value = false;
-//   } else {
-//     valid.value = true;
-//   }
-// }
-
 const onBlur = (e, idx) => {
   if (!valid.value && e.target.value) {
     planStore.changeCategory(categories.value[idx].name, e.target.value, categories.value[idx].color);

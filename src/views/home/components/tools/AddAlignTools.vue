@@ -244,9 +244,11 @@ const onAlignHorizonLeft = () => {
               abox = rotateRectangluarBox(a, abox);
               a.position.x = boundary.x + (a.position.x - abox.x) + a.rectangleTable.width / 2;
             } else {
-              a.position.x = boundary.x + a.rectangleTable.width / 2;
+              if (a.seats.filter(s => s.special === 'left').length)
+                a.position.x = boundary.x + a.rectangleTable.width / 2 + 20;
+              else
+                a.position.x = boundary.x + a.rectangleTable.width / 2;
             }
-            // a.position.x = boundary.x + a.rectangleTable.width / 2;
           }
         }
       }
@@ -334,7 +336,21 @@ const onAlignHorizonRight = () => {
           } else if (a.shape === 'roundTable') {
             a.position.x = endX - a.radius - 20;
           } else if (a.shape === 'rectangleTable') {
-            a.position.x = endX - a.rectangleTable.width / 2;
+            if (a.rotation) {
+              let abox = {
+                x: a.position.x,
+                y: a.position.y,
+                width: a.rectangleTable.width,
+                height: a.rectangleTable.height
+              }
+              abox = rotateRectangluarBox(a, abox);
+              a.position.x = endX - abox.width + (a.position.x - abox.x);
+            } else {
+              if (a.seats.filter(s => s.special === 'right').length)
+                a.position.x = endX - a.rectangleTable.width / 2 - 20;
+              else
+                a.position.x = endX - a.rectangleTable.width / 2;
+            }
           }
         }
       }
@@ -419,10 +435,11 @@ const onFlipHorizental = () => {
             a.position.x = midX * 2 - a.position.x;
           } else if (a.shape === 'roundTable') {
             //bug fix
-            a.position.x = midX;
+            a.position.x = midX * 2 - a.position.x;
           } else if (a.shape === 'rectangleTable') {
             //bug fix
-            a.position.x = midX;
+            a.position.x = midX * 2 - a.position.x;
+            a.rotation = -a.rotation;
           }
         }
       }
@@ -490,10 +507,11 @@ const onFlipVertical = () => {
             a.position.y = midY * 2 - a.position.y;
           } else if (a.shape === 'roundTable') {
             //bug fix
-            a.position.y = midY;
+            a.position.y = midY * 2 - a.position.y;
           } else if (a.shape === 'rectangleTable') {
             //bug fix
-            a.position.y = midY;
+            a.position.y = midY * 2 - a.position.y;
+            a.rotation = -a.rotation;
           }
         }
       }
@@ -564,7 +582,7 @@ const onDistributeHorizental = () => {
           } else if (a.shape === 'rectangleTable') {
             abox = rectangleTableBBox(a);
             const or = centerX.findIndex(i => Math.abs(abox.x + abox.width / 2 - i) < delta)
-            a.position.x = minX + or * d - abox.width / 2;
+            a.position.x = minX + or * d;
           }
         }
       }
@@ -629,7 +647,7 @@ const onDistributeVertical = () => {
           } else if (a.shape === 'rectangleTable') {
             abox = rectangleTableBBox(a);
             const or = centerY.findIndex(i => Math.abs(abox.y + abox.height / 2 - i) < delta)
-            a.position.y = minY + or * d - abox.height / 2;
+            a.position.y = minY + or * d;
           }
         }
       }
