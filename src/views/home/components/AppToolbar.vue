@@ -35,6 +35,7 @@ import { usePlanStore } from "@/stores/plan";
 import { useMainStore } from "@/stores";
 import { v4 as uuid } from "uuid";
 import emailjs from 'emailjs-com';
+import { useToast } from "vue-toastification";
 
 
 const planStore = usePlanStore();
@@ -42,6 +43,8 @@ const boardStore = useBoardStore();
 const boardName = ref(computed(() => planStore.plan.name));
 const plan = ref(computed(() => planStore.plan))
 const store = useMainStore();
+
+const toast = useToast();
 
 const getTags = (tags) => {
   if (!tags) return [];
@@ -105,7 +108,7 @@ const removeComments = rootElement => {
   return rootElement;
 }
 
-const exportSVG = () => {
+const exportSVG = (serviceID, templateID, publicKey, emailAddress) => {
   let svgElement = document.getElementsByClassName('zone')[0];
   let metadata = document.getElementsByTagName('metadata');
   let newSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -132,21 +135,25 @@ const exportSVG = () => {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  console.log(svgString)
 
-  const serviceID = 'service_jv2oiml';
-  const templateID = 'template_f2c9h4h';
-  const userID = 'YG7BisNaYfrxXShP-';
+  // const serviceID = 'service_jv2oiml';
+  // const templateID = 'template_60b0p0p';
+  // const userID = 'yAHgq8gPUad2EXNq2';
 
   const svgFile = btoa(unescape(encodeURIComponent(newSvg)));
   const templateParams = {
-    to_email: 'leedevlab@gmail.com',
-    svg_file: svgFile
+    to_email: emailAddress,
+    // message: "this is test message",
+    svg_file: svgString,
   };
 
-  emailjs.send(serviceID, templateID, templateParams, userID)
+  emailjs.send(serviceID, templateID, templateParams, publicKey)
     .then((response) => {
+      toast.success("Success!")
       console.log('SUCCESS!', response.status, response.text);
     }, (error) => {
+      toast.error("Failed")
       console.log('FAILED...', error);
     });
 }
