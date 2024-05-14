@@ -134,7 +134,7 @@ export const usePlanStore = defineStore("plan", {
       const temp = [...new Set(seatIds)];
       const nSeat = seatIds.length - temp.length;
       const isValid =
-        nCapacity ||
+        nCategory ||
         nSection ||
         nSeat ||
         nTableLabel ||

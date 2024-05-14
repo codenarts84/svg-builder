@@ -12,6 +12,17 @@
           <v-text-field label="Email Address" required clearable
             v-model="emailAddress" @change="onChangeEmail"
             style="margin-top: 30px"></v-text-field>
+
+          <v-text-field label="Service ID" required clearable v-model="serviceID"
+            style="margin-top: 30px" placeholder="service_jv2oiml"></v-text-field>
+
+          <v-text-field label="Template ID" required clearable
+            v-model="templateID" style="margin-top: 30px"
+            placeholder="template_60b0p0p"></v-text-field>
+
+          <v-text-field label="Public Key" required clearable v-model="key"
+            style="margin-top: 30px"
+            placeholder="yAHgq8gPUad2EXNq2"></v-text-field>
         </v-card-text>
 
         <v-divider></v-divider>
@@ -36,13 +47,16 @@ import { useToast } from "vue-toastification";
 const dialog = ref(false);
 const plan = usePlanStore();
 const emailAddress = ref("hereis.topdev@gmail.com");
+const key = ref("");
+const templateID = ref("");
+const serviceID = ref("");
 const onChangeEmail = (v) => (emailAddress.value = v.target.value);
 const isValid = computed(() => plan.validationPlan().isValid);
 const props = defineProps({
   export: Function,
 });
 const onSave = () => {
-  props.export();
+  props.export(serviceID.value, templateID.value, key.value, emailAddress.value);
   dialog.value = false;
 };
 
