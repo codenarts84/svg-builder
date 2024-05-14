@@ -230,7 +230,8 @@ const onAlignHorizonLeft = () => {
             }
           } else if (a.shape === 'roundTable') {
             //bug fix
-            a.position.x = boundary.x + a.radius;
+
+            a.position.x = boundary.x + a.radius + 20;
           } else if (a.shape === 'rectangleTable') {
             //bug fix
             if (a.rotation) {
@@ -331,7 +332,7 @@ const onAlignHorizonRight = () => {
               a.position.x = endX - width / 2;
             }
           } else if (a.shape === 'roundTable') {
-            a.position.x = endX - a.radius;
+            a.position.x = endX - a.radius - 20;
           } else if (a.shape === 'rectangleTable') {
             a.position.x = endX - a.rectangleTable.width / 2;
           }

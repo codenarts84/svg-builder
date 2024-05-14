@@ -108,7 +108,7 @@ const removeComments = rootElement => {
   return rootElement;
 }
 
-const exportSVG = (serviceID, templateID, publicKey, emailAddress) => {
+const exportSVG = (emailAddress) => {
   let svgElement = document.getElementsByClassName('zone')[0];
   let metadata = document.getElementsByTagName('metadata');
   let newSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -137,9 +137,9 @@ const exportSVG = (serviceID, templateID, publicKey, emailAddress) => {
   URL.revokeObjectURL(url);
   console.log(svgString)
 
-  // const serviceID = 'service_jv2oiml';
-  // const templateID = 'template_60b0p0p';
-  // const userID = 'yAHgq8gPUad2EXNq2';
+  const serviceID = 'service_jv2oiml';
+  const templateID = 'template_60b0p0p';
+  const publicKey = 'yAHgq8gPUad2EXNq2';
 
   const svgFile = btoa(unescape(encodeURIComponent(newSvg)));
   const templateParams = {
