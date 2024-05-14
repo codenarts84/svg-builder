@@ -145,8 +145,6 @@ export const usePlanStore = defineStore("plan", {
         nSeatLabel ||
         nRowLabel;
 
-      console.log(isValid);
-
       return {
         category: nCategory,
         section: nSection,
