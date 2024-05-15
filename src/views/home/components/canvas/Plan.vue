@@ -81,8 +81,6 @@ export default {
     const rowSeatSpacing = ref(25);
     const mouseStatus = ref(false);
 
-    const focusPointX = ref(300)
-    const focusPointY = ref(300)
     const focusDragging = ref(false)
 
     const store = useMainStore();
@@ -101,12 +99,16 @@ export default {
     const sections = computed(() => store.section_label)
     const categories = computed(() => planstore.categories)
 
+    const focusPointX = computed(() => plan.value.point.x);
+    const focusPointY = computed(() => plan.value.point.y);
+
     const getSvgRect = () => svg.value.getBoundingClientRect();
 
     return {
       sections,
       categories,
       bSnap2Grid,
+      planstore,
       plan,
       validationErrors,
       selection,
@@ -1603,8 +1605,9 @@ export default {
           break;
         case "focusPoint":
           if (this.focusDragging) {
-            this.focusPointX = pos.x;
-            this.focusPointY = pos.y;
+            this.planstore.setFocusPoint(pos.x, pos.y)
+            // this.focusPointX = pos.x;
+            // this.focusPointY = pos.y;
           }
           break;
       }
@@ -2802,7 +2805,7 @@ export default {
         fill="url(#grid)" :cursor="cursor">
       </rect>
 
-      <g v-if="tool === 'focusPoint'" class="booktik-focus-point"
+      <g v-show="tool === 'focusPoint'" class="booktik-focus-point"
         id="booktik-focus-point">
         <circle :cx="focusPointX" :cy="focusPointY" :r="18" fill="none"
           stroke="#000" stroke-width="8px" :mousedown="mousedown"

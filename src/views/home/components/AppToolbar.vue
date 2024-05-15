@@ -1,7 +1,7 @@
 <template>
   <v-toolbar flat class="app-toolbar-container">
     <FileTool :importSVG="importSVG" />
-    <MainTools />
+    <MainTools :selectionBoundary="selectionBoundary" />
     <v-toolbar-title :style="toolbarTitleStyle">{{
       boardName
     }}</v-toolbar-title>
@@ -43,6 +43,10 @@ const boardStore = useBoardStore();
 const boardName = ref(computed(() => planStore.plan.name));
 const plan = ref(computed(() => planStore.plan))
 const store = useMainStore();
+
+const props = defineProps({
+  selectionBoundary: Function
+})
 
 const toast = useToast();
 
@@ -123,14 +127,14 @@ const exportSVG = (emailAddress) => {
   }
   newSvg.appendChild(svgElement.cloneNode(true));
   newSvg = removeComments(newSvg)
-  const filename = 'SVG Map'
+  const filename = `booktix_name_of_chart_${Date.now()}.svg`
   var serializer = new XMLSerializer();
   var svgString = serializer.serializeToString(newSvg);
   var blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = filename || 'download.svg';
+  a.download = filename || 'booktix_name_of_chart_.svg';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -148,14 +152,14 @@ const exportSVG = (emailAddress) => {
     svg_file: svgString,
   };
 
-  emailjs.send(serviceID, templateID, templateParams, publicKey)
-    .then((response) => {
-      toast.success("Success!")
-      console.log('SUCCESS!', response.status, response.text);
-    }, (error) => {
-      toast.error("Failed")
-      console.log('FAILED...', error);
-    });
+  // emailjs.send(serviceID, templateID, templateParams, publicKey)
+  //   .then((response) => {
+  //     toast.success("Success!")
+  //     console.log('SUCCESS!', response.status, response.text);
+  //   }, (error) => {
+  //     toast.error("Failed")
+  //     console.log('FAILED...', error);
+  //   });
 }
 
 const toolbarTitleStyle = computed(() => {

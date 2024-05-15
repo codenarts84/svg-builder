@@ -55,8 +55,12 @@ const dselect_selected = ref(computed(() => boardstore.dselect_selected));
 const hasUndo = ref(computed(() => plan.hasUndo))
 const undo = plan.undo;
 
+const props = defineProps({
+  selectionBoundary: Function
+})
+
 const clip = () => {
-  store.copy(store.selection);
+  store.copy(store.selection, props.selectionBoundary().height + 20);
   store.paste();
 }
 
