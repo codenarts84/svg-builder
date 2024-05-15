@@ -242,11 +242,11 @@ export const useMainStore = defineStore({
       }
     },
     toggleSelection(uuids, addition, zone) {
-      // if (this.ignoreNextSelection) {
-      //   // Work around that the end of a "drag" also might be a "click"
-      //   this.ignoreNextSelection = false;
-      //   return;
-      // }
+      if (this.ignoreNextSelection) {
+        // Work around that the end of a "drag" also might be a "click"
+        this.ignoreNextSelection = false;
+        return;
+      }
       if (addition && this.selection.length > 0) {
         for (const uuid of uuids) {
           if (this.selection.includes(uuid)) {
@@ -1070,6 +1070,7 @@ export const useMainStore = defineStore({
         z.areas.push(a);
         select.push(uid);
       }
+      this.ignoreNextSelection = false;
       this.toggleSelection(select, false, z.uuid);
       planStore.persistPlan();
     },
