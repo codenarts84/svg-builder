@@ -1,7 +1,7 @@
 import Vue from "vue";
 
 import { defineStore } from "pinia";
-import { round } from "../lib/numbers";
+import { generateID, round } from "../lib/numbers";
 import * as d3 from "d3";
 import {
   findClosestGridPoint,
@@ -242,11 +242,11 @@ export const useMainStore = defineStore({
       }
     },
     toggleSelection(uuids, addition, zone) {
-      if (this.ignoreNextSelection) {
-        // Work around that the end of a "drag" also might be a "click"
-        this.ignoreNextSelection = false;
-        return;
-      }
+      // if (this.ignoreNextSelection) {
+      //   // Work around that the end of a "drag" also might be a "click"
+      //   this.ignoreNextSelection = false;
+      //   return;
+      // }
       if (addition && this.selection.length > 0) {
         for (const uuid of uuids) {
           if (this.selection.includes(uuid)) {
@@ -996,7 +996,7 @@ export const useMainStore = defineStore({
     },
 
     copy(objects, offset) {
-      offset = offset === undefined ? 10 : offset;
+      offset = offset === undefined ? 100 : offset;
       this.clipboardAreas = [];
       this.clipboardRows = [];
       const clone = (o) => JSON.parse(JSON.stringify(o));
@@ -1008,7 +1008,7 @@ export const useMainStore = defineStore({
           .filter((r) => objects.includes(r.uuid))
           .map(clone);
         for (const r of rowsToClip) {
-          r.position.x += z.position.x + offset;
+          r.position.x += z.position.x;
           r.position.y += z.position.y + offset;
         }
         this.clipboardRows.push(...rowsToClip);
@@ -1017,7 +1017,7 @@ export const useMainStore = defineStore({
           .filter((a) => objects.includes(a.uuid))
           .map(clone);
         for (const a of areasToClip) {
-          a.position.x += z.position.x + offset;
+          a.position.x += z.position.x;
           a.position.y += z.position.y + offset;
         }
         this.clipboardAreas.push(...areasToClip);
@@ -1033,12 +1033,15 @@ export const useMainStore = defineStore({
     paste() {
       const temp = usePlanStore();
       const z = temp.plan.zones.find((z) => z.uuid === this.selectedZone);
+      let uid;
       const select = [];
       for (let r of this.clipboardRows) {
         r = JSON.parse(JSON.stringify(r));
-        r.uuid = uuid();
+        uid = uuid();
+        r.uuid = uid;
         for (const s of r.seats) {
           s.uuid = uuid();
+          s.guid = generateID();
           s.seat_guid =
             z.zone_id +
             "-" +
@@ -1053,11 +1056,19 @@ export const useMainStore = defineStore({
       }
       for (let a of this.clipboardAreas) {
         a = JSON.parse(JSON.stringify(a));
-        a.uuid = uuid();
+        uid = uuid();
+        a.uuid = uid;
+        a.guid = generateID();
         a.position.x -= z.position.x;
         a.position.y -= z.position.y;
+        if (a.shape === "roundTable" || a.shape === "rectangleTable") {
+          for (const s of a.seats) {
+            s.uuid = uuid();
+            s.guid = generateID();
+          }
+        }
         z.areas.push(a);
-        select.push(a.uuid);
+        select.push(uid);
       }
       this.toggleSelection(select, false, z.uuid);
       planStore.persistPlan();

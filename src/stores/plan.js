@@ -26,6 +26,10 @@ export const usePlanStore = defineStore("plan", {
         width: 0,
         height: 0,
       },
+      point: {
+        x: 0,
+        y: 0,
+      },
       name: "My Charting Board",
     },
     validationErrors: undefined,
@@ -80,13 +84,20 @@ export const usePlanStore = defineStore("plan", {
       for (const z of this.plan.zones) {
         for (const r of z.rows) {
           for (const s of r.seats) {
-            if (!s.category) {
-              nCategory++;
+            if (!s.category || !s.section_label || !s.seat_number) {
+              s.valid = false;
+              if (!s.category) {
+                nCategory++;
+              }
+              if (!s.section_label) {
+                nSection++;
+              }
+              if (!s.seat_number) {
+                nSeatLabel++;
+              }
+            } else {
+              s.valid = true;
             }
-            if (!s.section_label) {
-              nSection++;
-            }
-            if (!s.seat_number) nSeatLabel++;
             seatIds.push(s.guid);
           }
           if (!r.row_number) nRowLabel++;
@@ -97,36 +108,58 @@ export const usePlanStore = defineStore("plan", {
             a.shape === "gaSquare" ||
             a.shape === "gaPolygon"
           ) {
-            if (!a.category) {
-              nCategory++;
-            }
-            if (!a.section_label) {
-              nSection++;
-            }
-            if (a.capacity <= 0) {
-              nCapacity++;
-            }
-            if (!a.label) {
-              nSectionLabel++;
-            }
-            if (!a.abbreviation) {
-              nSectionAbv++;
-            }
-            if (!a.label) seatIds.push(a.guid);
+            if (
+              !a.category ||
+              !a.section_label ||
+              a.capacity < 1 ||
+              !a.label ||
+              !a.abbreviation
+            ) {
+              a.valid = false;
+              if (!a.category) {
+                nCategory++;
+              }
+              if (!a.section_label) {
+                nSection++;
+              }
+              if (a.capacity <= 0) {
+                nCapacity++;
+              }
+              if (!a.label) {
+                nSectionLabel++;
+              }
+              if (!a.abbreviation) {
+                nSectionAbv++;
+              }
+            } else a.valid = true;
+            seatIds.push(a.guid);
           }
           if (a.shape === "roundTable" || a.shape === "rectangleTable") {
             for (const s of a.seats) {
-              if (!s.category) {
-                nCategory++;
-              }
-              if (!s.section_label) {
-                nSection++;
-              }
-              if (!s.seat_number) nSeatLabel++;
+              if (
+                !s.category ||
+                !s.section_label ||
+                !s.seat_number ||
+                !a.label.name ||
+                !a.label.abv
+              ) {
+                s.valid = false;
+                if (!s.category) {
+                  nCategory++;
+                }
+                if (!s.section_label) {
+                  nSection++;
+                }
+                if (!s.seat_number) nSeatLabel++;
+              } else s.valid = true;
               seatIds.push(s.guid);
             }
-            if (!a.label.name) nTableLabel += a.seats.length;
-            if (!a.label.abv) nTableAbv += a.seats.length;
+            if (!a.label.name) {
+              nTableLabel += a.seats.length;
+            }
+            if (!a.label.abv) {
+              nTableAbv += a.seats.length;
+            }
           }
         }
       }
@@ -167,6 +200,35 @@ export const usePlanStore = defineStore("plan", {
       //     ? `${nSection} element(s) without section.`
       //     : "All elements contain section.",
       // };
+    },
+
+    validatePosition() {
+      let res = 0;
+      let nSeat = 0;
+
+      for (const z of this.plan.zones) {
+        for (const r of z.rows) {
+          nSeat += r.seats.length;
+          for (let i = 0; i < r.seats.length; i++) {
+            const s = r.seats[i];
+            const x = r.position.x + s.position.x;
+            const y = r.position.y + s.position.y;
+
+            for (let j = i + 1; j < r.seats.length; j++) {
+              const ss = r.seats[j];
+              const xx = r.position.x + ss.position.x;
+              const yy = r.position.y + ss.position.y;
+
+              if (Math.sqrt((x - xx) * (x - xx) + (y - yy) * (y - yy)) < 5) {
+                console.log(x, y, xx, yy);
+                res++;
+              }
+            }
+          }
+        }
+      }
+
+      return res;
     },
 
     validatePlan() {
@@ -342,12 +404,12 @@ export const usePlanStore = defineStore("plan", {
     },
 
     undo() {
-      if (this.undoStack.length >= 2) {
+      if (this.undoStack.length > 2) {
         const plan = this.undoStack.pop();
         this.redoStack.push(plan);
         this._plan = JSON.parse(this.undoStack[this.undoStack.length - 1]);
         this.hasRedo = true;
-        this.hasUndo = this.undoStack.length >= 2;
+        this.hasUndo = this.undoStack.length > 2;
         this.persistPlan({ skipHistory: true });
       }
     },
@@ -1689,6 +1751,12 @@ export const usePlanStore = defineStore("plan", {
       if (width) this._plan.size.width = width;
       if (height) this._plan.size.height = height;
       window.dispatchEvent(new Event("resize"));
+      this.persistPlan();
+    },
+
+    setFocusPoint(x, y) {
+      this._plan.point.x = x;
+      this._plan.point.y = y;
       this.persistPlan();
     },
 

@@ -38,5 +38,9 @@ export default {
       width: 900,
       height: 900,
     },
+    point: {
+      x: 0,
+      y: 0,
+    },
   },
 };

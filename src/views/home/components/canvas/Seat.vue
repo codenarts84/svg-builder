@@ -141,11 +141,14 @@ export default {
       }
     },
     seatColor() {
-      if (this.category) {
-        return this.category.color;
-      } else {
-        return "#fff";
+      if (this.seat.valid) {
+        if (this.category) {
+          return this.category.color;
+        } else {
+          return "#fff";
+        }
       }
+      return "#ffcf37";
     },
     textColor() {
       if (this.category) {

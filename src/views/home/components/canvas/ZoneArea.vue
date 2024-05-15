@@ -169,8 +169,8 @@
         @mouseup="event => seat_mouseup(event, item.uuid)">
         <circle class="tableCrSt" :id="item.guid" :cx="item.position.x"
           :cy="item.position.y" :r="item.r" stroke="#000"
-          style="stroke-width: 1px;" :fill="seatColor(item.category)"
-          stroke-width="1" :data-section-label="item.section_label"
+          style="stroke-width: 1px;" :fill="seatColor(item)" stroke-width="1"
+          :data-section-label="item.section_label"
           :data-section-abv="item.section_abv" :data-category-name="item.category"
           :data-tags="makeTag(item)" :data-seat-label="item.seat_number"
           :data-table-label="area.label.name" :data-table-abv="area.label.abv">
@@ -230,8 +230,8 @@
         @mouseup="event => seat_mouseup(event, item.uuid)">
         <circle class="tableSqSt" :id="item.guid" :cx="item.position.x"
           :cy="item.position.y" :r="item.radius" stroke="#000"
-          style="stroke-width: 1px;" :fill="seatColor(item.category)"
-          stroke-width="1" :data-section-label="item.section_label"
+          style="stroke-width: 1px;" :fill="seatColor(item)" stroke-width="1"
+          :data-section-label="item.section_label"
           :data-section-abv="item.section_abv" :data-category-name="item.category"
           :data-tags="makeTag(item)" :data-seat-label="item.seat_number"
           :data-table-label="area.label.name" :data-table-abv="area.label.abv">
@@ -317,10 +317,13 @@ export default {
       return this.getCategoryByName(this.area.category);
     },
     gaColor() {
-      if (this.category) {
-        return this.category.color;
+      if (this.area.valid) {
+        if (this.category) {
+          return this.category.color;
+        }
+        return '#cccccc'
       }
-      return '#cccccc'
+      return "#ffcf37";
     },
     isSelected() {
       // console.log("Check here");
@@ -421,12 +424,15 @@ export default {
       return `rotate(${-area.rotation}) translate(${dx}, ${dy})`
     },
 
-    seatColor(category) {
-      if (category) {
-        return this.getCategoryByName(category)?.color
-      } else {
-        return '#fff';
+    seatColor(item) {
+      if (item.valid) {
+        if (item.category) {
+          return this.getCategoryByName(item.category)?.color
+        } else {
+          return '#fff';
+        }
       }
+      return '#ffcf37';
     },
     startDragging(uuid, zone, event) {
       this.$emit("startDragging", uuid, zone, event);

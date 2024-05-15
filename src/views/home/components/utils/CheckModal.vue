@@ -9,7 +9,16 @@
     <v-dialog v-model="dialog" width="500">
       <v-card title="Chart Validation">
         <v-card-text>
-          <v-chip v-if="validateCategory" class="ma-2" color="red" label>
+          <v-chip v-if="validatePosition" class="ma-2" color="red" closable label>
+            <v-icon icon="mdi-close" start></v-icon>
+            {{ `${validatePosition} seat(s) is on top of another seat.` }}
+          </v-chip>
+          <v-chip v-else class="ma-2" color="green" closable label>
+            <v-icon icon="mdi-check" start></v-icon>
+            {{ 'No seat is on top of another seat' }}
+          </v-chip>
+
+          <v-chip v-if="validateCategory" class="ma-2" color="red" closable label>
             <v-icon icon="mdi-close" start></v-icon>
             {{ `${validateCategory} element(s) without category.` }}
           </v-chip>
@@ -18,7 +27,7 @@
             {{ 'All elements contain category.' }}
           </v-chip>
 
-          <v-chip v-if="validateSection" class="ma-2" color="red" label>
+          <v-chip v-if="validateSection" class="ma-2" color="red" closable label>
             <v-icon icon="mdi-close" start></v-icon>
             {{ `${validateSection} element(s) without section.` }}
           </v-chip>
@@ -27,7 +36,7 @@
             {{ 'All elements contain section.' }}
           </v-chip>
 
-          <v-chip v-if="validateSeatId" class="ma-2" color="red" label>
+          <v-chip v-if="validateSeatId" class="ma-2" color="red" closable label>
             <v-icon icon="mdi-close" start></v-icon>
             {{ `${validateSeatId} duplicate element(s)` }}
           </v-chip>
@@ -36,7 +45,8 @@
             {{ 'No duplicate elements' }}
           </v-chip>
 
-          <v-chip v-if="validateTableLabel" class="ma-2" color="red" label>
+          <v-chip v-if="validateTableLabel" class="ma-2" color="red" closable
+            label>
             <v-icon icon="mdi-close" start></v-icon>
             {{ `${validateTableLabel} table seat(s) without table label` }}
           </v-chip>
@@ -45,7 +55,7 @@
             {{ 'All table seats contain table label' }}
           </v-chip>
 
-          <v-chip v-if="validateTableAbv" class="ma-2" color="red" label>
+          <v-chip v-if="validateTableAbv" class="ma-2" color="red" closable label>
             <v-icon icon="mdi-close" start></v-icon>
             {{ `${validateTableAbv} table seat(s) without table abbreviation` }}
           </v-chip>
@@ -54,34 +64,37 @@
             {{ 'All table seats contain table abbreviation' }}
           </v-chip>
 
-          <v-chip v-if="validateCapacity" class="ma-2" color="red" label>
+          <v-chip v-if="validateCapacity" class="ma-2" color="red" closable label>
             <v-icon icon="mdi-close" start></v-icon>
-            {{ `${validateCapacity} sections without capacity` }}
+            {{ `${validateCapacity} GA sections without capacity` }}
           </v-chip>
           <v-chip v-else class="ma-2" color="green" closable label>
             <v-icon icon="mdi-check" start></v-icon>
             {{ 'All GA sections has capacity' }}
           </v-chip>
 
-          <v-chip v-if="validateSectionLabel" class="ma-2" color="red" label>
+          <v-chip v-if="validateSectionLabel" class="ma-2" color="red" closable
+            label>
             <v-icon icon="mdi-close" start></v-icon>
-            {{ `${validateSectionLabel} section(s) without label` }}
+            {{ `${validateSectionLabel} GA section(s) without label` }}
           </v-chip>
           <v-chip v-else class="ma-2" color="green" closable label>
             <v-icon icon="mdi-check" start></v-icon>
-            {{ 'All sections contain label' }}
+            {{ 'All GA sections contain label' }}
           </v-chip>
 
-          <v-chip v-if="validateSectionAbv" class="ma-2" color="red" label>
+          <v-chip v-if="validateSectionAbv" class="ma-2" color="red" closable
+            label>
             <v-icon icon="mdi-close" start></v-icon>
-            {{ `${validateSectionAbv} section(s) without abbreviation` }}
+            {{ `${validateSectionAbv} GA section(s) without abbreviation` }}
           </v-chip>
           <v-chip v-else class="ma-2" color="green" closable label>
             <v-icon icon="mdi-check" start></v-icon>
-            {{ 'All sections contain abbreviation' }}
+            {{ 'All GA sections contain abbreviation' }}
           </v-chip>
 
-          <v-chip v-if="validateSeatLabel" class="ma-2" color="red" label>
+          <v-chip v-if="validateSeatLabel" class="ma-2" color="red" closable
+            label>
             <v-icon icon="mdi-close" start></v-icon>
             {{ `${validateSeatLabel} seat(s) without label` }}
           </v-chip>
@@ -90,7 +103,7 @@
             {{ 'All seats contain label' }}
           </v-chip>
 
-          <v-chip v-if="validateRowLabel" class="ma-2" color="red" label>
+          <v-chip v-if="validateRowLabel" class="ma-2" color="red" closable label>
             <v-icon icon="mdi-close" start></v-icon>
             {{ `${validateRowLabel} row(s) without label` }}
           </v-chip>
@@ -99,7 +112,8 @@
             {{ 'All rows contain label' }}
           </v-chip>
 
-          <v-chip v-if="validateSeatSection" class="ma-2" color="red" label>
+          <v-chip v-if="validateSeatSection" class="ma-2" color="red" closable
+            label>
             <v-icon icon="mdi-close" start></v-icon>
             {{ `${validateSeatSection} seat(s) duplicate section` }}
           </v-chip>
@@ -196,6 +210,8 @@ const validateSeatSection = computed(() => {
   })
   return nSection;
 })
+
+const validatePosition = computed(() => planstore.validatePosition())
 
 
 const dialog = ref(false);
