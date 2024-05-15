@@ -73,7 +73,9 @@ export default {
     const getCategoryByName = computed(() => planstore.getCategoryByName);
     const cursor = computed(() => store.cursor);
 
-    return { getCategoryByName, cursor };
+    const bValid = computed(() => store.bvalid);
+
+    return { getCategoryByName, cursor, bValid };
   },
   computed: {
     makeTag() {
@@ -141,14 +143,14 @@ export default {
       }
     },
     seatColor() {
-      if (this.seat.valid) {
-        if (this.category) {
-          return this.category.color;
-        } else {
-          return "#fff";
-        }
+      if (this.bValid && !this.seat.valid) {
+        return "#ffcf37";
       }
-      return "#ffcf37";
+      if (this.category) {
+        return this.category.color;
+      } else {
+        return "#fff";
+      }
     },
     textColor() {
       if (this.category) {

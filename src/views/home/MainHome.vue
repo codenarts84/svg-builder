@@ -2,7 +2,6 @@
   <AppToolbar :selectionBoundary="selectionBoundary" />
   <v-layout class="main-container">
     <RightNav :temp_Rotate="temp_Rotate" />
-    <!-- <ValidationPanel /> -->
     <div class="main-pan">
       <HandMenu :selectionBoundary="selectionBoundary"
         :selectionBoxes="selectionBoxes" />
@@ -18,7 +17,6 @@ import { ref, computed, onMounted } from "vue";
 import AppToolbar from "./components/AppToolbar.vue";
 import RightNav from "../layout/right/RightNav.vue";
 import HandMenu from "./components/HandMenu.vue";
-import ValidationPanel from "@/views/layout/right/Context/ValidationPanel.vue"
 import Plan from "./components/canvas/Plan.vue";
 import StatusBar from "./components/StatusBar.vue";
 import sampleplan from "@/sampleplan";

@@ -93,6 +93,7 @@ export const useMainStore = defineStore({
     grid: false,
     snap: true,
     bfocus: false,
+    bvalid: false,
     clipboardAreas: [],
     clipboardRows: [],
     tool: "select",
@@ -150,6 +151,10 @@ export const useMainStore = defineStore({
     },
     set_Oy(v) {
       this.temp_oy = v;
+    },
+
+    setBvalid(valid) {
+      this.bvalid = valid;
     },
 
     loadPlan(plan) {
