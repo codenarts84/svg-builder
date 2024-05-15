@@ -115,11 +115,11 @@
           <v-chip v-if="validateSeatSection" class="ma-2" color="red" closable
             label>
             <v-icon icon="mdi-close" start></v-icon>
-            {{ `${validateSeatSection} seat(s) duplicate section` }}
+            {{ `${validateSeatSection} seat(s) duplicate label` }}
           </v-chip>
           <v-chip v-else class="ma-2" color="green" closable label>
             <v-icon icon="mdi-check" start></v-icon>
-            {{ 'No seats duplicate section' }}
+            {{ 'No seats duplicate label' }}
           </v-chip>
 
 
