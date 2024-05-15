@@ -310,20 +310,21 @@ export default {
     const temp_ox = ref(0);
     const temp_oy = ref(0);
     const tool = computed(() => store.tool);
-    return { cursor, selection, store, getCategoryByName, temp_ox, temp_oy, tool, planStore };
+    const bValid = computed(() => store.bvalid);
+    return { bValid, cursor, selection, store, getCategoryByName, temp_ox, temp_oy, tool, planStore };
   },
   computed: {
     category() {
       return this.getCategoryByName(this.area.category);
     },
     gaColor() {
-      if (this.area.valid) {
-        if (this.category) {
-          return this.category.color;
-        }
-        return '#cccccc'
+      if (this.bValid && !this.area.valid) {
+        return "#ffcf37";
       }
-      return "#ffcf37";
+      if (this.category) {
+        return this.category.color;
+      }
+      return '#cccccc'
     },
     isSelected() {
       // console.log("Check here");
@@ -425,14 +426,14 @@ export default {
     },
 
     seatColor(item) {
-      if (item.valid) {
-        if (item.category) {
-          return this.getCategoryByName(item.category)?.color
-        } else {
-          return '#fff';
-        }
+      if (this.bValid && !item.valid) {
+        return '#ffcf37';
       }
-      return '#ffcf37';
+      if (item.category) {
+        return this.getCategoryByName(item.category)?.color
+      } else {
+        return '#fff';
+      }
     },
     startDragging(uuid, zone, event) {
       this.$emit("startDragging", uuid, zone, event);

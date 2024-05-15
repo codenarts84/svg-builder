@@ -2,6 +2,8 @@
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
 
+    <ValidationPanel v-if="bvalid" />
+
     <RowTools v-if="selectedRows().length" :rows="selectedRows()"
       :seats="selectedSeats()" :temp_Rotate="temp_Rotate" />
 
@@ -32,6 +34,7 @@ import TableTools from './TableTools.vue';
 import AreaTools from './AreaTools.vue';
 import TableSeatTools from './TableSeatTools.vue';
 import TestSelection from './TestSelection.vue';
+import ValidationPanel from './Context/ValidationPanel.vue';
 import InputColor from '@/views/home/components/InputColor.vue'
 
 import { useMainStore } from '@/stores';
@@ -41,6 +44,7 @@ const store = useMainStore();
 const planstore = usePlanStore();
 const selection = ref(computed(() => store.selection));
 const plan = ref(computed(() => planstore.plan));
+const bvalid = computed(() => useMainStore().bvalid);
 
 const props = defineProps({
   temp_Rotate: Function,
