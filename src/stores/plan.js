@@ -203,32 +203,87 @@ export const usePlanStore = defineStore("plan", {
     },
 
     validatePosition() {
-      let res = 0;
+      console.log("here");
       let nSeat = 0;
+      const positions = [];
 
       for (const z of this.plan.zones) {
         for (const r of z.rows) {
-          nSeat += r.seats.length;
-          for (let i = 0; i < r.seats.length; i++) {
-            const s = r.seats[i];
-            const x = r.position.x + s.position.x;
-            const y = r.position.y + s.position.y;
+          for (const s of r.seats) {
+            positions.push({
+              x: s.position.x + r.position.x,
+              y: s.position.y + r.position.y,
+            });
+          }
+        }
+      }
 
-            for (let j = i + 1; j < r.seats.length; j++) {
-              const ss = r.seats[j];
-              const xx = r.position.x + ss.position.x;
-              const yy = r.position.y + ss.position.y;
+      console.log(positions);
 
-              if (Math.sqrt((x - xx) * (x - xx) + (y - yy) * (y - yy)) < 5) {
-                console.log(x, y, xx, yy);
-                res++;
+      const res = this.detectOverlaps(positions, 19);
+      return res;
+    },
+
+    detectOverlaps(positions, threshold) {
+      const cellSize = threshold;
+      const grid = new Map();
+
+      function getGridKey(x, y) {
+        const gridX = Math.floor(x / cellSize);
+        const gridY = Math.floor(y / cellSize);
+        return `${gridX},${gridY}`;
+      }
+
+      // Place each position into the grid
+      for (const { x, y } of positions) {
+        const key = getGridKey(x, y);
+        if (!grid.has(key)) {
+          grid.set(key, []);
+        }
+        grid.get(key).push({ x, y });
+      }
+
+      let overlapCount = 0;
+
+      // Check for overlaps within each cell and adjacent cells
+      for (const [key, points] of grid.entries()) {
+        const [gridX, gridY] = key.split(",").map(Number);
+
+        for (let i = 0; i < points.length; i++) {
+          const { x: x1, y: y1 } = points[i];
+
+          // Check the same cell
+          for (let j = i + 1; j < points.length; j++) {
+            const { x: x2, y: y2 } = points[j];
+            if (
+              Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) <
+              threshold
+            ) {
+              overlapCount++;
+            }
+          }
+
+          // Check the adjacent cells
+          for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+              if (dx === 0 && dy === 0) continue; // Skip the current cell
+              const adjacentKey = `${gridX + dx},${gridY + dy}`;
+              if (grid.has(adjacentKey)) {
+                for (const { x: x2, y: y2 } of grid.get(adjacentKey)) {
+                  if (
+                    Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) <
+                    threshold
+                  ) {
+                    overlapCount++;
+                  }
+                }
               }
             }
           }
         }
       }
 
-      return res;
+      return overlapCount;
     },
 
     validatePlan() {

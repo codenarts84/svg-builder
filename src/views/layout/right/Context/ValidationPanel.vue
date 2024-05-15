@@ -112,11 +112,20 @@
           <v-chip v-if="validateSeatSection" class="ma-2" color="red" closable
             label>
             <v-icon icon="mdi-close" start></v-icon>
-            {{ `${validateSeatSection} seat(s) duplicate section` }}
+            {{ `${validateSeatSection} seat(s) duplicate seat label` }}
           </v-chip>
           <v-chip v-else class="ma-2" color="green" closable label>
             <v-icon icon="mdi-check" start></v-icon>
-            {{ 'No seats duplicate section' }}
+            {{ 'No seats duplicate seat label' }}
+          </v-chip>
+
+          <v-chip v-if="validatePosition" class="ma-2" color="red" closable label>
+            <v-icon icon="mdi-close" start></v-icon>
+            {{ `Some seats are on top of another seat` }}
+          </v-chip>
+          <v-chip v-else class="ma-2" color="green" closable label>
+            <v-icon icon="mdi-check" start></v-icon>
+            {{ 'No seat is on top of another seat' }}
           </v-chip>
         </v-col>
       </v-row>
@@ -137,6 +146,10 @@ const section_label = computed(() => useMainStore().section_label)
 const onClose = () => {
   useMainStore().setBvalid(false);
 }
+
+const validatePosition = computed(() => {
+  return planstore.validatePosition();
+})
 
 const validateCategory = computed(() => {
   return validationErrors.value.category;

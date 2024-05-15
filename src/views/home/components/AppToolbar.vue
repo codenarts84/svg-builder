@@ -23,6 +23,7 @@
 import { computed, ref, defineProps } from "vue";
 import MagnifierComponent from "./utils/MagnifierView.vue";
 import { useBoardStore } from "../../../stores/svgStore";
+import axios from 'axios';
 
 import SettingModal from "./utils/SettingModal.vue";
 import CheckModal from "./utils/CheckModal.vue";
@@ -36,7 +37,7 @@ import { useMainStore } from "@/stores";
 import { v4 as uuid } from "uuid";
 import emailjs from 'emailjs-com';
 import { useToast } from "vue-toastification";
-
+import Plunk from "@plunk/node"
 
 const planStore = usePlanStore();
 const boardStore = useBoardStore();
@@ -139,27 +140,41 @@ const exportSVG = (emailAddress) => {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  console.log(svgString)
 
-  const serviceID = 'service_jv2oiml';
-  const templateID = 'template_60b0p0p';
-  const publicKey = 'yAHgq8gPUad2EXNq2';
+  // const serviceID = 'service_jv2oiml';
+  // const templateID = 'template_60b0p0p';
+  // const publicKey = 'yAHgq8gPUad2EXNq2';
 
-  const svgFile = btoa(unescape(encodeURIComponent(newSvg)));
-  const templateParams = {
-    to_email: emailAddress,
-    // message: "this is test message",
-    svg_file: svgString,
-  };
+  // const reader = new FileReader();
+  // reader.readAsDataURL(blob);
+  // reader.onloadend = () => {
+  //   const publicKey = "sk_a32804368b8622a5160fdf9b40dc276784a299440246a2c5"
+  //   const plunk = new Plunk(publicKey)
+  //   const base64data = reader.result.split(',')[1];
 
-  // emailjs.send(serviceID, templateID, templateParams, publicKey)
-  //   .then((response) => {
-  //     toast.success("Success!")
-  //     console.log('SUCCESS!', response.status, response.text);
-  //   }, (error) => {
-  //     toast.error("Failed")
-  //     console.log('FAILED...', error);
-  //   });
+  //   console.log(base64data)
+
+  //   const options = {
+  //     to: emailAddress,
+  //     subject: "SVG Map",
+  //     body: "Here is your SVG file",
+  //     attachments: [
+  //       {
+  //         content: base64data,
+  //         filename: 'file.svg',
+  //         type: 'image/svg+xml',
+  //         // disposition: 'attachment'
+  //       }
+  //     ]
+  //   }
+
+  //   plunk.emails.send(options)
+  //     .then(response => {
+  //       toast.success("Success!");
+  //     }).catch(err => {
+  //       toast.error("Failed");
+  //     })
+  // }
 }
 
 const toolbarTitleStyle = computed(() => {
