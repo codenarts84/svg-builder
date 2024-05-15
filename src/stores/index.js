@@ -1008,8 +1008,8 @@ export const useMainStore = defineStore({
           .filter((r) => objects.includes(r.uuid))
           .map(clone);
         for (const r of rowsToClip) {
-          r.position.x += z.position.x;
-          r.position.y += z.position.y + offset;
+          r.position.x += z.position.x + offset;
+          r.position.y += z.position.y;
         }
         this.clipboardRows.push(...rowsToClip);
 
@@ -1017,8 +1017,8 @@ export const useMainStore = defineStore({
           .filter((a) => objects.includes(a.uuid))
           .map(clone);
         for (const a of areasToClip) {
-          a.position.x += z.position.x;
-          a.position.y += z.position.y + offset;
+          a.position.x += z.position.x + offset;
+          a.position.y += z.position.y;
         }
         this.clipboardAreas.push(...areasToClip);
       }
