@@ -1,7 +1,7 @@
 <template>
   <v-btn class="btn" @click="onClick">
-    <v-icon v-if="!isValid && !validateSeatSection" color="green"
-      icon="mdi-check-circle" size="large"></v-icon>
+    <v-icon v-if="!isValid && !validateSeatSection && !validatePosition"
+      color="green" icon="mdi-check-circle" size="large"></v-icon>
     <v-icon v-else color="red" icon="mdi-close-circle" size="large"></v-icon>
     <v-tooltip activator="parent" location="bottom">Validation</v-tooltip>
   </v-btn>
@@ -23,6 +23,10 @@ const onClick = () => {
 
 const isValid = computed(() => {
   return validationErrors.value.isValid;
+})
+
+const validatePosition = computed(() => {
+  return usePlanStore().validatePosition();
 })
 
 const validateSeatSection = computed(() => {

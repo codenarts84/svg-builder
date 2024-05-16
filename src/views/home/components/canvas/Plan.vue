@@ -174,16 +174,26 @@ export default {
   computed: {
     metadata() {
       const categoriesXML = this.categories.map(cat =>
-        `<category><name>${cat.name}</name><color>${cat.color}</color></category>`
+        `<category>
+          <name>${cat.name}</name>
+          <color>${cat.color}</color>
+        </category>`
       ).join("");
       const sectionsXML = this.sections.map(sec =>
-        `<section><name>${sec.label}</name><abv>${sec.abv}</abv></section>`
+        `<section>
+          <name>${sec.label}</name>
+          <abv>${sec.abv}</abv>
+        </section>`
       ).join("");
       return `<booktix-data>
                 <chartname>${this.plan.name}</chartname>
                 <categories>${categoriesXML}</categories>
                 <sections>${sectionsXML}</sections>
-              </booktix-data>`;
+              </booktix-data>
+              <booktik-chart-id>
+              </booktik-chart-id>
+              <booktik-chart-sec>
+              </booktik-chart-sec>`;
     },
 
     noTableSelection() {
@@ -1173,7 +1183,8 @@ export default {
           break;
         }
         case "focusPoint":
-          this.focusDragging = true;
+          if (Math.abs(targetPos.x - this.focusPointX) < 30 && Math.abs(targetPos.y - this.focusPointY) < 30)
+            this.focusDragging = true;
           break;
       }
     },
@@ -2403,6 +2414,9 @@ export default {
               this.store.toggleSelection([newId], this.selectedZone, false);
             });
           });
+        this.plan.point.x = this.plan.size.width / 2;
+        this.plan.point.y = 120;
+        usePlanStore().persistPlan();
       }
     },
 
@@ -2808,12 +2822,10 @@ export default {
       <g v-show="tool === 'focusPoint'" class="booktik-focus-point"
         id="booktik-focus-point">
         <circle :cx="focusPointX" :cy="focusPointY" :r="18" fill="none"
-          stroke="#000" stroke-width="8px" :mousedown="mousedown"
-          :mousemove="mousemove" :mouseup="mousedown" cursor="move">
+          stroke="#000" stroke-width="8px" cursor="move">
         </circle>
         <circle :cx="focusPointX" :cy="focusPointY" :r="30" fill="none"
-          stroke="#000" stroke-width="5px" :mousedown="mousedown"
-          :mousemove="mousemove" :mouseup="mousedown" cursor="move">
+          stroke="#000" stroke-width="5px" cursor="move">
         </circle>
         <circle :cx="focusPointX" :cy="focusPointY" :r="100" fill="none"
           stroke="#cccccc" stroke-width="2px"></circle>
