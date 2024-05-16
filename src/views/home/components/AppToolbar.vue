@@ -2,9 +2,25 @@
   <v-toolbar flat class="app-toolbar-container">
     <FileTool :importSVG="importSVG" />
     <MainTools :selectionBoundary="selectionBoundary" />
-    <v-toolbar-title :style="toolbarTitleStyle">{{
-      boardName
-    }}</v-toolbar-title>
+    <v-toolbar-title :style="toolbarTitleStyle">
+      <div style="display: flex; align-items: center; justify-content: center; ">
+        <span>{{ boardName }}</span>
+        <div v-if="mode"
+          style="margin-left: 8px; display: flex; align-items: center;">
+          <v-icon color="yellow">
+            mdi-star
+          </v-icon>
+          <v-tooltip activator="parent" location="bottom">
+            <div class="tooltip-content">
+              This chart only allows updates. No seats or GA sections can be
+              deleted, only edited or moved. Changes here to seats and GA sections
+              WILL impact already sold tickets, so use this feature with extreme
+              caution
+            </div>
+          </v-tooltip>
+        </div>
+      </div>
+    </v-toolbar-title>
     <v-toolbar-items class="border-left">
       <MagnifierComponent />
     </v-toolbar-items>
@@ -45,9 +61,13 @@ const boardName = ref(computed(() => planStore.plan.name));
 const plan = ref(computed(() => planStore.plan))
 const store = useMainStore();
 
+const mode = computed(() => plan.value.mode);
+
 const props = defineProps({
   selectionBoundary: Function
 })
+
+const showYellowIcon = true;
 
 const toast = useToast();
 
@@ -73,14 +93,76 @@ const importSVG = () => {
   input.accept = '.svg'
   input.onchange = (e) => {
     const reader = new FileReader();
-    const file = event.target.files[0];
+    const file = e.target.files[0];
     reader.onload = function (e) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(e.target.result, "image/svg+xml");
+      const svgElement = doc.querySelector('svg');
+      const metadataElement = doc.querySelector('metadata');
+
+      if (!metadataElement) {
+        alert('Sorry, this seating map does not look like it was made with the BookTix Seating Chart tool. Please import another map that was created using the BookTix tool.');
+        return;
+      }
+
+      const booktixDataElement = metadataElement.querySelector('booktix-data');
+
+      if (!booktixDataElement) {
+        alert('Sorry, this seating map does not look like it was made with the BookTix Seating Chart tool. Please import another map that was created using the BookTix tool.');
+        return;
+      }
+
+      // Extract chart name
+      const chartNameElement = booktixDataElement.querySelector('chartname');
+      const chartName = chartNameElement ? chartNameElement.textContent : null;
+
+      // Extract categories
+      const categories = [];
+      const categoryNodes = booktixDataElement.querySelectorAll('categories category');
+      categoryNodes.forEach(category => {
+        const nameElement = category.querySelector('name');
+        const colorElement = category.querySelector('color');
+        if (nameElement && colorElement) {
+          categories.push({
+            name: nameElement.textContent,
+            color: colorElement.textContent
+          });
+        }
+      });
+
+      // Extract sections
+      const sections = [];
+      const sectionNodes = booktixDataElement.querySelectorAll('sections section');
+      sectionNodes.forEach(section => {
+        const nameElement = section.querySelector('name');
+        if (nameElement) {
+          sections.push({
+            name: nameElement.textContent
+          });
+        }
+      });
+
+      // Validate extracted data
+      if (!chartName || categories.length === 0 || sections.length === 0) {
+        alert('Sorry, this seating map does not look like it was made with the BookTix Seating Chart tool. Please import another map that was created using the BookTix tool.');
+        return;
+      }
+
       const planData = doc.querySelector('svg').getAttribute('data-json');
-      console.log(JSON.parse(planData))
       store.loadPlan(JSON.parse(planData))
+      planStore.setMode(false);
       planStore.persistPlan();
+
+      const isNumeric = value => !isNaN(value) && !isNaN(parseInt(value))
+      const chart_id = metadataElement.querySelector('booktik-chart-id')
+      const chart_sec = metadataElement.querySelector('booktik-chart-sec')
+      if (chart_id && chart_sec) {
+        const chartId = chart_id.textContent.trim();
+        const chartSec = chart_sec.textContent.trim();
+        if (chartId !== '' && chartSec !== '' && isNumeric(chartId)) {
+          planStore.setMode(true);
+        }
+      }
     };
     reader.readAsText(file);
   }
@@ -120,8 +202,9 @@ const exportSVG = (emailAddress) => {
   newSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
   newSvg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
   newSvg.setAttribute("version", "1.1");
-  newSvg.setAttribute("width", "900");  // Set as per your requirement
-  newSvg.setAttribute("height", "900"); // Set as per your requirement
+  newSvg.setAttribute("width", "100%");
+  newSvg.setAttribute("height", "100%");
+  newSvg.setAttribute("viewBox", "0 0 900 900");
   newSvg.setAttribute("data-json", JSON.stringify(plan.value));
   for (let i = 0; i < metadata.length; i++) {
     newSvg.appendChild(metadata[i].cloneNode(true));
@@ -181,7 +264,7 @@ const toolbarTitleStyle = computed(() => {
   return {
     fontSize: "16px",
     fontWeight: "bold",
-    lineHeight: "1.2",
+    // lineHeight: "1",
     height: boardName.value.length < 50 ? "20px" : "38.4px",
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -232,5 +315,12 @@ const toolbarTitleStyle = computed(() => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   white-space: normal;
+}
+
+.tooltip-content {
+  max-width: 300px;
+  padding: 10px;
+  white-space: pre-wrap;
+  overflow: auto;
 }
 </style>

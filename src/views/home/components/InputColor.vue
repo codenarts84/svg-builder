@@ -1,7 +1,7 @@
 <template>
   <div>
     <input type="color" class="v-custom-input v-custom-color-input"
-      @click="onClick" @blur="show = false" v-model="color" />
+      @click="onClick" v-model="color" />
     <div class="d-relative">
       <v-color-picker v-show="show" class="v-color-picker" mode="hexa"
         :style="popupStyles" v-model="color" />
@@ -25,8 +25,9 @@ const onClick = (e) => {
       bottom: '38px'
     }
   }
-  show.value = true;
+  show.value = !show.value;
 }
+
 watch(color, (newValue, oldValue) => {
   props.setColor(newValue)
 })

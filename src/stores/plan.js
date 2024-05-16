@@ -22,6 +22,7 @@ export const usePlanStore = defineStore("plan", {
     _plan: {
       zones: [],
       categories: [],
+      sections: [],
       size: {
         width: 0,
         height: 0,
@@ -31,6 +32,7 @@ export const usePlanStore = defineStore("plan", {
         y: 0,
       },
       name: "My Charting Board",
+      mode: false,
     },
     validationErrors: undefined,
     hasUndo: false,
@@ -66,6 +68,11 @@ export const usePlanStore = defineStore("plan", {
         this.validatePlan();
         this.timeoutID = null;
       }, 500);
+    },
+
+    setMode(mode) {
+      this._plan.mode = mode;
+      this.persistPlan();
     },
 
     validationPlan() {
@@ -203,7 +210,6 @@ export const usePlanStore = defineStore("plan", {
     },
 
     validatePosition() {
-      console.log("here");
       let nSeat = 0;
       const positions = [];
 
@@ -217,8 +223,6 @@ export const usePlanStore = defineStore("plan", {
           }
         }
       }
-
-      console.log(positions);
 
       const res = this.detectOverlaps(positions, 19);
       return res;
@@ -498,6 +502,10 @@ export const usePlanStore = defineStore("plan", {
     },
 
     deleteCategory(name) {
+      if (this._plan.mode) {
+        alert("Can not delete category");
+        return;
+      }
       this._plan.categories = this._plan.categories.filter(
         (z) => z.name !== name
       );
@@ -505,6 +513,10 @@ export const usePlanStore = defineStore("plan", {
     },
 
     deleteObjects(objects) {
+      if (this._plan.mode) {
+        alert("Can not delete object");
+        return;
+      }
       objects = useMainStore().selection;
       this._plan.zones = this._plan.zones.filter(
         (z) => !objects.includes(z.uuid)
@@ -1902,6 +1914,7 @@ export const usePlanStore = defineStore("plan", {
 
     createCategory(name, color) {
       this._plan.categories.push({
+        id: uuid(),
         name: name,
         color: color,
       });
