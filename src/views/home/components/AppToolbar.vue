@@ -211,7 +211,9 @@ const exportSVG = (emailAddress) => {
   }
   newSvg.appendChild(svgElement.cloneNode(true));
   newSvg = removeComments(newSvg)
-  const filename = `booktix_name_of_chart_${Date.now()}.svg`
+  const chartName = plan.value.name;
+  console.log(chartName)
+  const filename = `booktix_${chartName.toLowerCase()}_${Date.now()}.svg`
   var serializer = new XMLSerializer();
   var svgString = serializer.serializeToString(newSvg);
   var blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
