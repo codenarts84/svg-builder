@@ -60,8 +60,10 @@ const props = defineProps({
 })
 
 const clip = () => {
-  store.copy(store.selection, props.selectionBoundary().width + 20);
-  store.paste();
+  if (store.selection.length) {
+    store.copy(store.selection, props.selectionBoundary().width + 20);
+    store.paste();
+  }
 }
 
 const selection = computed(() => store.selection());
