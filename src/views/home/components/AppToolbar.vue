@@ -135,9 +135,11 @@ const importSVG = () => {
       const sectionNodes = booktixDataElement.querySelectorAll('sections section');
       sectionNodes.forEach(section => {
         const nameElement = section.querySelector('name');
-        if (nameElement) {
+        const abvElement = section.querySelector('abv');
+        if (nameElement && abvElement) {
           sections.push({
-            name: nameElement.textContent
+            name: nameElement.textContent,
+            abv: abvElement.textContent
           });
         }
       });
@@ -147,6 +149,14 @@ const importSVG = () => {
         alert('Sorry, this seating map does not look like it was made with the BookTix Seating Chart tool. Please import another map that was created using the BookTix tool.');
         return;
       }
+
+      console.log(sections)
+      const sec = sections.map(s => ({
+        label: s.name,
+        abv: s.abv,
+        id: uuid()
+      }))
+      store.setSectionLabel(sec);
 
       const planData = doc.querySelector('svg').getAttribute('data-json');
       store.loadPlan(JSON.parse(planData))
