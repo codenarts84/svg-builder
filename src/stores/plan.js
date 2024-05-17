@@ -290,67 +290,67 @@ export const usePlanStore = defineStore("plan", {
       return overlapCount;
     },
 
-    // validatePlan() {
-    //   const ajv = new Ajv({ allErrors: true, verbose: true });
-    //   const plan = this._plan;
-    //   Promise.resolve(
-    //     ajv.validate(JSON.parse(JSON.stringify(schema)), plan)
-    //   ).then((valid) => {
-    //     if (valid) {
-    //       const errors = [];
-    //       const seatGuids = new Set();
-    //       const seatNames = new Set();
-    //       const errorIds = new Set();
+    validatePlan() {
+      const ajv = new Ajv({ allErrors: true, verbose: true });
+      const plan = this._plan;
+      Promise.resolve(
+        ajv.validate(JSON.parse(JSON.stringify(schema)), plan)
+      ).then((valid) => {
+        if (valid) {
+          const errors = [];
+          const seatGuids = new Set();
+          const seatNames = new Set();
+          const errorIds = new Set();
 
-    //       for (const z of plan.zones) {
-    //         if (errors.length > 50) break;
-    //         for (const r of z.rows) {
-    //           if (errors.length > 50) break;
-    //           for (const s of r.seats) {
-    //             if (errors.length > 50) break;
-    //             const sname = `${z.name}>${r.row_number}>${s.seat_number}`;
-    //             if (!s.seat_guid) {
-    //               errors.push({
-    //                 text: `Seat ${z.name} > ${r.row_number} > ${s.seat_number} has no seat ID.`,
-    //                 uuid: s.uuid,
-    //                 tool: "seatselect",
-    //               });
-    //             } else if (
-    //               seatGuids.has(s.seat_guid) &&
-    //               !errorIds.has(s.seat_guid)
-    //             ) {
-    //               errors.push({
-    //                 text: `Seat ID "${s.seat_guid}" is not unique! This will lead to errors when people try to book these seats. (Seen again in "${z.name}" > "${r.row_number}" > "${s.seat_number}")`,
-    //                 uuid: s.uuid,
-    //                 tool: "seatselect",
-    //               });
-    //               errorIds.add(s.seat_guid);
-    //             } else if (seatNames.has(sname) && !errorIds.has(sname)) {
-    //               errors.push({
-    //                 text: `You have multiple seats with zone "${z.name}", row "${r.row_number}", and seat "${s.seat_number}". This is going to be very confusing.`,
-    //                 uuid: s.uuid,
-    //                 tool: "seatselect",
-    //               });
-    //               errorIds.add(sname);
-    //             }
-    //             seatGuids.add(s.seat_guid);
-    //             seatNames.add(sname);
-    //           }
-    //         }
-    //       }
+          for (const z of plan.zones) {
+            if (errors.length > 50) break;
+            for (const r of z.rows) {
+              if (errors.length > 50) break;
+              for (const s of r.seats) {
+                if (errors.length > 50) break;
+                const sname = `${z.name}>${r.row_number}>${s.seat_number}`;
+                if (!s.seat_guid) {
+                  errors.push({
+                    text: `Seat ${z.name} > ${r.row_number} > ${s.seat_number} has no seat ID.`,
+                    uuid: s.uuid,
+                    tool: "seatselect",
+                  });
+                } else if (
+                  seatGuids.has(s.seat_guid) &&
+                  !errorIds.has(s.seat_guid)
+                ) {
+                  errors.push({
+                    text: `Seat ID "${s.seat_guid}" is not unique! This will lead to errors when people try to book these seats. (Seen again in "${z.name}" > "${r.row_number}" > "${s.seat_number}")`,
+                    uuid: s.uuid,
+                    tool: "seatselect",
+                  });
+                  errorIds.add(s.seat_guid);
+                } else if (seatNames.has(sname) && !errorIds.has(sname)) {
+                  errors.push({
+                    text: `You have multiple seats with zone "${z.name}", row "${r.row_number}", and seat "${s.seat_number}". This is going to be very confusing.`,
+                    uuid: s.uuid,
+                    tool: "seatselect",
+                  });
+                  errorIds.add(sname);
+                }
+                seatGuids.add(s.seat_guid);
+                seatNames.add(sname);
+              }
+            }
+          }
 
-    //       this.setValidationErrors(errors);
-    //     } else {
-    //       this.setValidationErrors([
-    //         {
-    //           text:
-    //             "JSON schema validation error (contact support for help): " +
-    //             ajv.errorsText(ajv.errors),
-    //         },
-    //       ]);
-    //     }
-    //   });
-    // },
+          this.setValidationErrors(errors);
+        } else {
+          this.setValidationErrors([
+            {
+              text:
+                "JSON schema validation error (contact support for help): " +
+                ajv.errorsText(ajv.errors),
+            },
+          ]);
+        }
+      });
+    },
 
     setValidationErrors(errors) {
       this.validationErrors = errors;
@@ -660,6 +660,7 @@ export const usePlanStore = defineStore("plan", {
       });
       this.persistPlan();
     },
+
     modifyRectangleTableHeight(areas, h) {
       areas.forEach((a) => {
         a.rectangleTable.height = h;
