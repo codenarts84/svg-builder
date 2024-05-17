@@ -48,7 +48,7 @@
       :class="tool == 'icon' ? 'current-tool' : ''">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Insert Icon</v-tooltip>
-        <v-icon color="black" icon="mdi-shape-polygon-plus" size="large"></v-icon>
+        <insert-icon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
 
@@ -77,6 +77,7 @@
 <script setup>
 import { defineProps, ref, computed, onMounted } from "vue";
 import { useMainStore } from "@/stores";
+import InsertIcon from "@/assets/svgs/menuIcons/InsertIcon.vue";
 
 const props = defineProps({
   // addRectangle: Function,
