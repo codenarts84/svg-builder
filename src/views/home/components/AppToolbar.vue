@@ -28,7 +28,7 @@
       <GridView />
     </v-toolbar-items>
     <v-toolbar-items class="border-left">
-      <SettingModal />
+      <!-- <SettingModal /> -->
       <CheckModal />
       <ExportModal :export="exportSVG" />
     </v-toolbar-items>

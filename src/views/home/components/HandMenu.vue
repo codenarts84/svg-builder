@@ -31,15 +31,6 @@
         </div>
       </v-list-item-title>
     </v-list-item>
-
-
-    <!-- <v-list-item @click="() => { }">
-      <v-list-item-title>
-        <v-tooltip activator="parent" location="right">Alignment</v-tooltip>
-        <AddAlignTools :textR="textR" :textL="textL" :textC="textC"
-          :onItemToggle="onAlignToggle" />
-      </v-list-item-title>
-    </v-list-item> -->
   </v-list>
   <AddChairTools :opened="seatopened" />
   <AddItemsTools :opened="itemopened" />
