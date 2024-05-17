@@ -13,7 +13,7 @@
   </v-layout>
 </template>
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, provide } from "vue";
 import AppToolbar from "./components/AppToolbar.vue";
 import RightNav from "../layout/right/RightNav.vue";
 import HandMenu from "./components/HandMenu.vue";
@@ -23,7 +23,6 @@ import sampleplan from "@/sampleplan";
 
 import { useMainStore } from "@/stores";
 import { usePlanStore } from "@/stores/plan.js"; // Assuming you've set up a Pinia store in this location
-import { NULL } from "sass";
 
 const store = useMainStore();
 store.loadPlan(
@@ -63,6 +62,7 @@ const temp_Rotate = (v) => planref.value ? planref.value.temp_Rotate(v) : undefi
 const selectionBoundary = () => planref.value ? planref.value.selectionBoundary : undefined;
 const selectionBoxes = () => planref.value ? planref.value.selectionBoxes : undefined;
 
+provide('planRef', planref);
 // const selectionBoundary = () => planref.value ? planref.value.selectionBoundary : null;
 
 // Methods

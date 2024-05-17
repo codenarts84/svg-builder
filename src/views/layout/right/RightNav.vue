@@ -4,6 +4,14 @@
 
     <ValidationPanel v-if="bvalid" />
 
+    <template v-if="!selection.length">
+      <ChartGeneralOption />
+      <ChartCategoryOption />
+      <ChartSectionOption />
+      <ChartUploadBackgroundOption />
+    </template>
+
+
     <RowTools v-if="selectedRows().length" :rows="selectedRows()"
       :seats="selectedSeats()" :temp_Rotate="temp_Rotate" />
 
@@ -26,25 +34,34 @@
 </template>
 
 <script setup>
-import { computed, ref, defineProps } from 'vue'
+import { computed, ref, defineProps, inject, provide } from 'vue'
 import RowTools from './RowTools.vue';
 import SeatTools from './SeatTools.vue';
 import GATools from "./GATools.vue";
 import TableTools from './TableTools.vue';
 import AreaTools from './AreaTools.vue';
 import TableSeatTools from './TableSeatTools.vue';
-import TestSelection from './TestSelection.vue';
 import ValidationPanel from './Context/ValidationPanel.vue';
-import InputColor from '@/views/home/components/InputColor.vue'
+
+import ChartCategoryOption from './Context/ChartCategoryOption.vue';
+import ChartGeneralOption from './Context/ChartGeneralOption.vue';
+import ChartSectionOption from './Context/ChartSectionOption.vue';
+import ChartUploadBackgroundOption from "./Context/ChartUploadBackgroundOption.vue";
+
+import TestSelection from './TestSelection.vue';
 
 import { useMainStore } from '@/stores';
 import { usePlanStore } from '@/stores/plan';
-import ColorPicker from '@/views/home/components/ColorPicker.vue';
+
 const store = useMainStore();
 const planstore = usePlanStore();
 const selection = ref(computed(() => store.selection));
 const plan = ref(computed(() => planstore.plan));
 const bvalid = computed(() => useMainStore().bvalid);
+
+const planRef = inject('planRef');
+
+provide('planRef', planRef)
 
 const props = defineProps({
   temp_Rotate: Function,

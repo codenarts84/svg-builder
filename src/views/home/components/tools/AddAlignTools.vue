@@ -3,7 +3,9 @@
 
     <v-list-item @click="onAlignHorizonCenter">
       <v-list-item-title>
-        <v-tooltip activator="parent" location="right">Center</v-tooltip>
+        <v-tooltip activator="parent" location="right">
+          Horizontal Center
+        </v-tooltip>
         <ObjAlignCenterHorizentalIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
@@ -17,6 +19,24 @@
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Right</v-tooltip>
         <ObjAlignRightIcon width="20px" height="20px" />
+      </v-list-item-title>
+    </v-list-item>
+    <v-list-item @click="onAlignVerticalCenter">
+      <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Vertical Center</v-tooltip>
+        <ObjAlignCenterVerticalIcon width="20px" height="20px" />
+      </v-list-item-title>
+    </v-list-item>
+    <v-list-item @click="onAlignVerticalTop">
+      <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Top</v-tooltip>
+        <ObjAlignTopIcon width="20px" height="20px" />
+      </v-list-item-title>
+    </v-list-item>
+    <v-list-item @click="onAlignVerticalBottom">
+      <v-list-item-title>
+        <v-tooltip activator="parent" location="right">Bottom</v-tooltip>
+        <ObjAlignBottomIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
     <v-list-item @click="onFlipHorizental">
@@ -51,6 +71,9 @@
 
 <script setup>
 import ObjAlignCenterHorizentalIcon from "@/assets/svgs/menuIcons/ObjAlignCenterHorizentalIcon.vue";
+import ObjAlignCenterVerticalIcon from "@/assets/svgs/menuIcons/ObjAlignCenterVertical.vue";
+import ObjAlignTopIcon from "@/assets/svgs/menuIcons/ObjAlignTopIcon.vue";
+import ObjAlignBottomIcon from "@/assets/svgs/menuIcons/ObjAlignBottomIcon.vue";
 import ObjAlignLeftIcon from "@/assets/svgs/menuIcons/ObjAlignLeftIcon.vue";
 import ObjAlignRightIcon from "@/assets/svgs/menuIcons/ObjAlignRightIcon.vue";
 import FlipVertIcon from "@/assets/svgs/menuIcons/FlipVertIcon.vue";
@@ -103,10 +126,10 @@ const onAlignHorizonCenter = () => {
       // row
       for (const r of z.rows) {
         if (selection.value.includes(r.uuid)) {
-          const minx = Math.min(...r.seats.map(s => s.position.x)) + z.position.x + r.position.x
-          const maxx = Math.max(...r.seats.map(s => s.position.x)) + z.position.x + r.position.x
-          const midx = (minx + maxx) / 2;
-          r.position.x += (midX - midx);
+          const miny = Math.min(...r.seats.map(s => s.position.x)) + z.position.x + r.position.x
+          const maxy = Math.max(...r.seats.map(s => s.position.x)) + z.position.x + r.position.x
+          const midy = (miny + maxy) / 2;
+          r.position.x += (midX - midy);
         }
       }
 
@@ -256,7 +279,6 @@ const onAlignHorizonLeft = () => {
     planStore.persistPlan();
   }
 }
-
 
 const onAlignHorizonRight = () => {
   const boundary = props.selectionBoundary();
@@ -654,6 +676,273 @@ const onDistributeVertical = () => {
       planStore.persistPlan();
     }
   }
+}
+
+const onAlignVerticalCenter = () => {
+  const boundary = props.selectionBoundary();
+  if (!boundary) {
+    return;
+  }
+  const startY = boundary.y;
+  const endY = startY + boundary.height;
+  const midY = (startY + endY) / 2;
+  if (selection.value.length) {
+    for (const z of plan.zones) {
+      // row
+      for (const r of z.rows) {
+        if (selection.value.includes(r.uuid)) {
+          const miny = Math.min(...r.seats.map(s => s.position.y)) + z.position.y + r.position.y
+          const maxy = Math.max(...r.seats.map(s => s.position.y)) + z.position.y + r.position.y
+          const midy = (miny + maxy) / 2;
+          r.position.y += (midY - midy);
+        }
+      }
+
+      // shape
+      for (const a of z.areas) {
+        if (selection.value.includes(a.uuid)) {
+          if (a.shape === 'circle') {
+            a.position.y = midY;
+          } else if (a.shape === 'rectangle' || a.shape === 'gaSquare') {
+            if (a.rotation) {
+              let abox = {
+                x: a.position.x,
+                y: a.position.y,
+                width: a.rectangle.width,
+                height: a.rectangle.height
+              }
+              abox = rotateRectangluarBox(a, abox);
+              a.position.y = midY - abox.height / 2;
+            } else {
+              a.position.y = midY - a.rectangle.height / 2;
+            }
+          } else if (a.shape === 'ellipse' || a.shape === 'gaCircle') {
+            a.position.y = midY;
+          } else if (a.shape === 'polygon' || a.shape === 'gaPolygon') {
+            if (a.rotation) {
+              const abox = polygonBBox(a);
+              const dy = midY - (abox.y + abox.height / 2);
+              a.position.y += dy;
+            } else {
+              const points = a.polygon.points;
+              const miny = Math.min(...points.map(s => s.y)) + a.position.y;
+              const maxy = Math.max(...points.map(s => s.y)) + a.position.y;
+              a.position.y += midY - (miny + maxy) / 2;
+            }
+          } else if (a.shape === 'text') {
+            a.position.y = midY;
+          } else if (a.shape === 'roundTable') {
+            //bug fix
+            a.position.y = midY;
+          } else if (a.shape === 'rectangleTable') {
+            //bug fix
+            a.position.y = midY;
+          }
+        }
+      }
+    }
+    planStore.persistPlan();
+  }
+}
+
+const onAlignVerticalTop = () => {
+  const boundary = props.selectionBoundary();
+  if (selection.value.length) {
+    for (const z of plan.zones) {
+      // row
+      for (const r of z.rows) {
+        if (selection.value.includes(r.uuid)) {
+          const miny = Math.min(...r.seats.map(s => s.position.y)) + r.position.y + z.position.y;
+          if (boundary.y < miny - 10) {
+            const dy = miny - 10 - boundary.y;
+            r.position.y -= dy;
+          }
+        }
+      }
+
+      // shape
+      for (const a of z.areas) {
+        if (selection.value.includes(a.uuid)) {
+          if (a.shape === 'circle') {
+            a.position.y = boundary.y + a.circle.radius;
+          } else if (a.shape === 'rectangle' || a.shape === 'gaSquare') {
+            if (a.rotation) {
+              let abox = {
+                x: a.position.x,
+                y: a.position.y,
+                width: a.rectangle.width,
+                height: a.rectangle.height
+              }
+              abox = rotateRectangluarBox(a, abox);
+              a.position.y = boundary.y + (a.position.y - abox.y);
+            } else {
+              a.position.y = boundary.y;
+            }
+          } else if (a.shape === 'ellipse' || a.shape === 'gaCircle') {
+            if (a.rotation) {
+              let abox = ellipseBBox(a);
+              a.position.y = boundary.y + (a.position.y - a.ellipse.radius.y - abox.y) + a.ellipse.radius.y;
+            } else {
+              a.position.y = boundary.y + a.ellipse.radius.y;
+            }
+          } else if (a.shape === 'polygon' || a.shape === 'gaPolygon') {
+            if (a.rotation) {
+              const abox = polygonBBox(a);
+              if (boundary.y < abox.y) {
+                const dy = abox.y - boundary.y;
+                a.position.y -= dy;
+              }
+            } else {
+              const points = a.polygon.points;
+              const miny = Math.min(...points.map(s => s.y)) + a.position.y;
+              const maxy = Math.max(...points.map(s => s.y)) + a.position.y;
+              if (boundary.y < miny) {
+                const dy = miny - boundary.y;
+                a.position.y -= dy;
+              }
+            }
+          } else if (a.shape === 'text') {
+            const size = a.text.size || 16;
+            const width = estimateTextWidth(a.text.text, size);
+            if (a.rotation) {
+              let abox = {
+                x: a.position.x + a.text.position.x - width / 2,
+                y: a.position.y + a.text.position.y - size / 2,
+                width: width,
+                height: size,
+              };
+              abox = rotateRectangluarBox(a, abox);
+              a.position.y = boundary.y + size / 2 - (a.position.y - size / 2 - abox.y);
+            } else {
+              a.position.y = boundary.y + size / 2;
+            }
+          } else if (a.shape === 'roundTable') {
+            //bug fix
+            a.position.y = boundary.y + a.radius + 20;
+          } else if (a.shape === 'rectangleTable') {
+            //bug fix
+            if (a.rotation) {
+              let abox = {
+                x: a.position.x,
+                y: a.position.y,
+                width: a.rectangleTable.width,
+                height: a.rectangleTable.height
+              }
+              abox = rotateRectangluarBox(a, abox);
+              a.position.y = boundary.y + (a.position.y - abox.y) + a.rectangleTable.height / 2;
+            } else {
+              if (a.seats.filter(s => s.special === 'top').length)
+                a.position.y = boundary.y + a.rectangleTable.height / 2 + 20;
+              else
+                a.position.y = boundary.y + a.rectangleTable.height / 2;
+            }
+          }
+        }
+      }
+    }
+    planStore.persistPlan();
+  }
+}
+
+const onAlignVerticalBottom = () => {
+  const boundary = props.selectionBoundary();
+  if (!boundary) return;
+  const startY = boundary.y;
+  const endY = boundary.y + boundary.height;
+  if (selection.value.length) {
+    for (const z of plan.zones) {
+      // row
+      for (const r of z.rows) {
+        if (selection.value.includes(r.uuid)) {
+          const maxy = Math.max(...r.seats.map(s => s.position.y))
+          if (endY > r.position.y + maxy + 10) {
+            r.position.y += (endY - r.position.y - maxy - 10);
+          }
+        }
+      }
+
+      // shape
+      for (const a of z.areas) {
+        if (selection.value.includes(a.uuid)) {
+          if (a.shape === 'circle') {
+            a.position.y = endY - a.circle.radius;
+          } else if (a.shape === 'rectangle' || a.shape === 'gaSquare') {
+            if (a.rotation) {
+              let abox = {
+                x: a.position.x,
+                y: a.position.y,
+                width: a.rectangle.width,
+                height: a.rectangle.height
+              }
+              abox = rotateRectangluarBox(a, abox);
+              a.position.y = endY - abox.height + (a.position.y - abox.y);
+            } else {
+              a.position.y = endY - a.rectangle.height;
+            }
+          } else if (a.shape === 'ellipse' || a.shape === 'gaCircle') {
+            if (a.rotation) {
+              const abox = ellipseBBox(a);
+              a.position.y = endY - a.ellipse.radius.y + (a.position.y + a.ellipse.radius.y - abox.y - abox.height);
+            } else {
+              a.position.y = endY - a.ellipse.radius.y;
+            }
+          } else if (a.shape === 'polygon' || a.shape === 'gaPolygon') {
+
+            if (a.rotation) {
+              const abox = polygonBBox(a);
+              if (endY > abox.y + abox.height) {
+                const dy = endY - (abox.y + abox.height);
+                a.position.y += dy;
+              }
+            } else {
+              const points = a.polygon.points;
+              const miny = Math.min(...points.map(s => s.y)) + a.position.y;
+              const maxy = Math.max(...points.map(s => s.y)) + a.position.y;
+              if (endY > maxy) {
+                const dy = endY - maxy;
+                a.position.y += dy;
+              }
+            }
+
+          } else if (a.shape === 'text') {
+            const size = a.text.size || 16;
+            const width = estimateTextWidth(a.text.text, size);
+            if (a.rotation) {
+              let abox = {
+                x: a.position.x + a.text.position.x - width / 2,
+                y: a.position.y + a.text.position.y - size / 2,
+                width: width,
+                height: size,
+              };
+              abox = rotateRectangluarBox(a, abox);
+              a.position.y = endY - abox.height + (a.position.y - abox.y)
+            } else {
+              a.position.y = endY - size / 2;
+            }
+          } else if (a.shape === 'roundTable') {
+            a.position.y = endY - a.radius - 20;
+          } else if (a.shape === 'rectangleTable') {
+            if (a.rotation) {
+              let abox = {
+                x: a.position.x,
+                y: a.position.y,
+                width: a.rectangleTable.width,
+                height: a.rectangleTable.height
+              }
+              abox = rotateRectangluarBox(a, abox);
+              a.position.y = endY - abox.height + (a.position.y - abox.y);
+            } else {
+              if (a.seats.filter(s => s.special === 'bottom').length)
+                a.position.y = endY - a.rectangleTable.height / 2 - 20;
+              else
+                a.position.y = endY - a.rectangleTable.height / 2;
+            }
+          }
+        }
+      }
+    }
+  }
+  planStore.persistPlan();
 }
 
 
