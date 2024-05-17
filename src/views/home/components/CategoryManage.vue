@@ -61,14 +61,11 @@
 <script setup>
 import { ref, defineProps, computed, defineComponent, nextTick } from "vue";
 import { usePlanStore } from '@/stores/plan.js'
+import { useMainStore } from "@/stores";
 import DropDown from '../../home/components/DropDown.vue';
 import ColorPicker from "./ColorPicker.vue";
 const dialog = ref(false);
 const valid = ref(false)
-
-const components = defineComponent({
-  DropDown
-})
 
 const colors = [
   '#2b68e8',

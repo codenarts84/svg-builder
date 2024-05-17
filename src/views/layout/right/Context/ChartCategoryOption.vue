@@ -1,13 +1,11 @@
 <template>
-  <div
-    style="padding: 15px 10px; text-align: left; display: flex; justify-content: space-between; align-items: center">
-    <h4>Categories</h4>
-    <v-btn class="btn" @click="dialog = true" size="small" variant="flat"
-      style="padding: 0px"><v-icon icon="mdi-cog"></v-icon>Manage
-    </v-btn>
+  <div style="padding: 15px 10px; text-align: left">
+    <CategoryManage />
   </div>
 </template>
 
 <script setup>
-
+import { computed, ref } from "vue";
+import { useMainStore } from "@/stores";
+import CategoryManage from "@/views/home/components/CategoryManage.vue";
 </script>
