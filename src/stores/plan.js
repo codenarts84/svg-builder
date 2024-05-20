@@ -79,7 +79,6 @@ export const usePlanStore = defineStore("plan", {
       let nCategory = 0;
       let nSection = 0;
       const seatIds = [];
-      let nLabel = 0;
       let nTableLabel = 0;
       let nTableAbv = 0;
       let nCapacity = 0;
@@ -1304,6 +1303,13 @@ export const usePlanStore = defineStore("plan", {
               s.section_label = label;
               s.section_abv = abv;
             });
+          } else {
+            r.seats.forEach((s) => {
+              if (rowIds.includes(s.uuid)) {
+                s.section_label = label;
+                s.section_abv = abv;
+              }
+            });
           }
         });
       });
@@ -1330,6 +1336,14 @@ export const usePlanStore = defineStore("plan", {
               s.section_label = label;
               s.section_abv = abv;
             });
+          } else {
+            if (r?.seats?.length)
+              r.seats.forEach((s) => {
+                if (ids.includes(s.uuid)) {
+                  s.section_label = label;
+                  s.section_abv = abv;
+                }
+              });
           }
         });
       });
@@ -1784,6 +1798,7 @@ export const usePlanStore = defineStore("plan", {
     },
 
     loadPlan(plan) {
+      console.log(plan);
       for (const z of plan.zones) {
         if (!z.uuid) z.uuid = uuid();
         if (z._editor_id) {

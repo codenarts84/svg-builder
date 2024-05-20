@@ -17,10 +17,9 @@
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
-          <v-btn text="Close" variant="plain" @click="dialog = false"></v-btn>
+          <v-btn text="Close" @click="dialog = false"></v-btn>
           <v-spacer></v-spacer>
-          <v-btn text="Add" variant="standard" @click="onAdd"
-            color="primary"></v-btn>
+          <v-btn text="Add" @click="onAdd" color="primary"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

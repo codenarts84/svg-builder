@@ -70,8 +70,16 @@
       </span>
 
       <span v-else-if="tool === 'hand'">
-        <span class="hint">You can <code>wheel</code> to zoom in and out.</span>
-        <span class="hint">Drag board</span>
+        <span class="hint">
+          Click and drag the map to move it around. Use your Scroll Wheel to zoom
+          in and out.
+        </span>
+      </span>
+
+      <span v-else-if="tool === 'focusPoint'">
+        <span class="hint">
+          Drag this area to center on the most important area of your chart.
+        </span>
       </span>
 
       <span v-else-if="tool === 'rows'">
@@ -98,35 +106,52 @@
           steps)</span>
       </span>
 
-      <span v-else-if="['rectangle', 'circle', 'ellipse'].includes(tool)">
-        <span v-if="plan.drawing">
-          <span class="hint">Move your mouse to start drawing, release it once
-            you're done</span>
-          <span class="hint">Hold down <code>SHIFT</code> to limit movement to
-            grid
-            positions</span>
-          <span class="hint">Press <code>ESC</code> to abort</span>
+      <span
+        v-else-if="['rectangle', 'circle', 'ellipse', 'gaCircle', 'gaSquare'].includes(tool)">
+        <span v-if="planRef.drawing">
+          <span class="hint">
+            Move your mouse to start drawing, release it once you're done
+          </span>
+          <!-- <span class="hint">Hold down <code>SHIFT</code> to limit movement to
+            grid positions</span> -->
+          <span class="hint">
+            Press <code>ESC</code> to abort
+          </span>
         </span>
         <span v-else>
-          <span class="hint">Click and drag to draw a new shape</span>
-          <span class="hint">Hold down <code>SHIFT</code> to only start at grid
-            positions</span>
+          <span class="hint">
+            Click and drag to draw a new shape
+          </span>
+          <span class="hint">
+            Hold down <code>SHIFT</code> to only start at grid positions
+          </span>
         </span>
       </span>
 
-      <span v-else-if="tool === 'polygon'">
-        <span v-if="plan.polygonDrawing">
+      <span v-else-if="['polygon', 'gaPolygon'].includes(tool)">
+        <span v-if="planRef.polygonDrawing">
+          <span class="hint">
+            Double click when you’re finishedmaking the shape.
+          </span>
+          <span class="hint">
+            Press <code>ENTER</code> or double-click to finish
+          </span>
+          <span class="hint">
+            Press <code>ESC</code> to abort
+          </span>
+          <!-- <span v-if="planRef.polygonDrawing">
           <span class="hint">Click to add another point</span>
-          <span class="hint">Press <code>ENTER</code> or double-click to
-            finish</span>
           <span class="hint">Hold down <code>SHIFT</code> to limit angles to 5°
             steps</span>
-          <span class="hint">Press <code>ESC</code> to abort</span>
+        </span> -->
         </span>
         <span v-else>
-          <span class="hint">Click to add the first point of your polygon</span>
-          <span class="hint">Hold down <code>SHIFT</code> to choose a position on
-            the grid</span>
+          <span class="hint">
+            Click to add the first point of your polygon
+          </span>
+          <span class="hint">
+            Hold down <code>SHIFT</code> to choose a position on the grid
+          </span>
         </span>
       </span>
 
@@ -146,7 +171,7 @@
 <script>
 // import { mapGetters, mapMutations, mapState } from "vuex";
 // import store from "../store";
-import { computed, ref } from "vue";
+import { computed, ref, inject } from "vue";
 import sampleplan from "@/sampleplan";
 import * as d3 from "d3";
 import Ajv from "ajv";
@@ -169,7 +194,9 @@ export default {
 
     const plan = computed(() => planstore.plan);
 
-    return { tool, selection, zoomTransform, dragging, plan };
+    const planRef = inject("planRef");
+
+    return { tool, selection, zoomTransform, dragging, plan, planRef };
   },
   methods: {
     selectionCount(uuids, addition) {
@@ -345,6 +372,7 @@ export default {
   padding: 0 5px;
   max-width: 200px;
   width: 200px;
+  text-wrap: nowrap;
 }
 
 .left-container {

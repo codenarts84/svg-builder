@@ -20,10 +20,11 @@ import { generateID } from "@/lib/numbers";
 import { v4 as uuid } from "uuid";
 import * as d3 from "d3";
 import ZoneComponent from "./ZoneComponent.vue";
+import IconComponent from "./IconComponent.vue";
 import { useToolbarStore } from '@/stores/toolbar';
 import { useSeatFormatStore } from "@/stores/seatFormat";
 import { useBoardStore } from "@/stores/svgStore";
-import { pointBox } from "intersects";
+import { useIconStore } from "@/stores/icon";
 
 const round = (fl, places) => Number(fl.toFixed(places || 0));
 
@@ -34,7 +35,7 @@ const defaultBg = JSON.parse(
 
 export default {
   name: "PlanComponent",
-  components: { ZoneComponent },
+  components: { ZoneComponent, IconComponent },
   setup() {
     const svg = ref(null);
     const zoom = ref(null);
@@ -102,7 +103,12 @@ export default {
     const focusPointX = computed(() => plan.value.point.x);
     const focusPointY = computed(() => plan.value.point.y);
 
+    const mode = computed(() => plan.value.mode);
+
     const getSvgRect = () => svg.value.getBoundingClientRect();
+
+    const iconStore = useIconStore();
+    const selectedIcon = computed(() => iconStore.selectedIcon);
 
     return {
       sections,
@@ -169,6 +175,9 @@ export default {
       focusPointX,
       focusPointY,
       focusDragging,
+      iconStore,
+      selectedIcon,
+      mode
     };
   },
   computed: {
@@ -813,6 +822,19 @@ export default {
 
     mousedown(event) {
       if (!this.svg) return;
+
+      if (this.selectedIcon) {
+        const { offsetX, offsetY } = event;
+        this.iconStore.placeIcon({
+          path: this.selectedIcon.src,
+          transform: `translate(${offsetX}, ${offsetY})`,
+          rotation: 0,
+          scale: 1
+        })
+        this.iconStore.resetSelectedIcon();
+        document.body.style.cursor = 'default';
+        return;
+      }
       const store = useMainStore();
 
       if (event.ctrlKey || event.metaKey) {
@@ -1855,7 +1877,7 @@ export default {
               .createArea(this.selectedZone, {
                 shape: "rectangle",
                 color: "#cccccc", // todo: use previously used color
-                border_color: "#000000", // todo: use previously used color
+                border_color: this.mode ? "#ffcf37" : "#000000", // todo: use previously used color
                 border_width: 2,
                 rotation: 0,
                 uuid: newId,
@@ -1897,6 +1919,7 @@ export default {
             usePlanStore()
               .createArea(this.selectedZone, {
                 shape: "gaSquare",
+                show_label: true,
                 label: gaLabel,
                 abbreviation: gaAbv,
                 section_label: "",
@@ -2027,6 +2050,7 @@ export default {
             usePlanStore()
               .createArea(this.selectedZone, {
                 shape: "gaCircle",
+                show_label: true,
                 label: gaLabel,
                 abbreviation: gaAbv,
                 section_label: "",
@@ -2347,6 +2371,7 @@ export default {
           uuid: newId,
           guid: generateID(),
           capacity: 0,
+          show_label: true,
           label: gaLabel,
           abbreviation: gaAbv,
           section_label: "",
@@ -2415,7 +2440,7 @@ export default {
             });
           });
         this.plan.point.x = this.plan.size.width / 2;
-        this.plan.point.y = 120;
+        this.plan.point.y = this.plan.size.height / 2;
         usePlanStore().persistPlan();
       }
     },
@@ -2567,7 +2592,8 @@ export default {
           this.drawing = false;
           if (
             this.tool === "rowCircle" ||
-            this.tool === "rowCircleFixedCenter"
+            this.tool === "rowCircleFixedCenter" ||
+            this.tool === "focusPoint"
           ) {
             useMainStore().changeTool("select");
           }
@@ -2834,6 +2860,8 @@ export default {
         <circle :cx="focusPointX" :cy="focusPointY" :r="260" fill="none"
           stroke="#cccccc" stroke-width="2px"></circle>
       </g>
+
+      <IconComponent />
 
       <ZoneComponent v-for="z in plan.zones" :zone="z" :key="z.uuid"
         :startDragging="startDragging"
