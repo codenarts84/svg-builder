@@ -41,7 +41,7 @@
     </v-list-item>
     <v-list-item @click="onFlipHorizental">
       <v-list-item-title>
-        <v-tooltip activator="parent" location="right">Flip Horizental</v-tooltip>
+        <v-tooltip activator="parent" location="right">Flip Horizontal</v-tooltip>
         <FlipVertIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>
@@ -55,7 +55,7 @@
     <v-list-item @click="onDistributeHorizental">
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Distribute
-          Horizental</v-tooltip>
+          Horizontal</v-tooltip>
         <DistHoriIcon width="20px" height="20px" />
       </v-list-item-title>
     </v-list-item>

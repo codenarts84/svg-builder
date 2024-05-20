@@ -24,77 +24,72 @@
             @input="setAbbreviation" maxlength="6" />
         </v-col>
 
+        <v-col cols="12" sm="6"> Show Label </v-col>
+        <v-col cols="12" sm="6">
+          <input type="checkbox" name="show_label" :checked="isShow"
+            @change="setShow" />
+        </v-col>
+
       </v-row>
     </v-container>
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, defineProps, ref } from "vue";
 import {
   usePlanStore
 } from '@/stores/plan';
 
-const groupValue = (areas, mapper) => {
-  const uniques = areas.map(mapper).filter((v, i, s) => s.indexOf(v) === i)
-  if (uniques.length === 1) {
-    return uniques[0]
-  } else {
-    return undefined
+import { groupValue } from "@/lib/utils";
+
+const props = defineProps({
+  areas: Array
+});
+
+const planStore = usePlanStore();
+
+const abbreviation = computed(() => groupValue(props.areas, a => a.abbreviation));
+const label = computed(() => groupValue(props.areas, a => a.label));
+const capacity = computed(() => groupValue(props.areas, a => a.capacity));
+const isShow = computed(() => groupValue(props.areas, a => a.show_label));
+
+const setAbbreviation = (e) => {
+  const input = e.target;
+  const value = input.value;
+  const validCharacters = /^[a-zA-Z0-9-]*$/;
+
+  if (!validCharacters.test(e.target.value)) {
+    input.value = value.replace(/[^a-zA-Z0-9-]/g, '');
   }
+
+  planStore.modifyAreas({
+    areaIds: props.areas.map(a => a.uuid),
+    abbreviation: input.value,
+    text__text: input.value
+
+  })
 }
 
-export default {
-  props: {
-    areas: Array,
-  },
-  setup() {
-    const planStore = usePlanStore();
-    return {
-      planStore
-    }
-  },
-
-  computed: {
-    abbreviation() {
-      return groupValue(this.areas, a => a.abbreviation)
-    },
-    label() {
-      return groupValue(this.areas, a => a.label)
-    },
-    capacity() {
-      return groupValue(this.areas, a => a.capacity)
-    }
-  },
-
-  methods: {
-    setAbbreviation(e) {
-      const input = e.target;
-      const value = input.value;
-      const validCharacters = /^[a-zA-Z0-9-]*$/;
-
-      if (!validCharacters.test(e.target.value)) {
-        input.value = value.replace(/[^a-zA-Z0-9-]/g, '');
-      }
-
-      this.planStore.modifyAreas({
-        areaIds: this.areas.map(a => a.uuid),
-        abbreviation: input.value,
-        text__text: input.value
-
-      })
-    },
-    setLabel(e) {
-      this.planStore.modifyAreas({
-        areaIds: this.areas.map(a => a.uuid),
-        label: e.target.value
-      })
-    },
-    setCapacity(e) {
-      this.planStore.modifyAreas({
-        areaIds: this.areas.map(a => a.uuid),
-        capacity: parseInt(e.target.value)
-      })
-    }
-  }
+const setLabel = (e) => {
+  planStore.modifyAreas({
+    areaIds: props.areas.map(a => a.uuid),
+    label: e.target.value
+  })
 }
+
+const setCapacity = (e) => {
+  planStore.modifyAreas({
+    areaIds: props.areas.map(a => a.uuid),
+    capacity: parseInt(e.target.value)
+  })
+}
+
+const setShow = (e) => {
+  planStore.modifyAreas({
+    areaIds: props.areas.map(a => a.uuid),
+    show_label: e.target.checked
+  })
+}
+
 </script>

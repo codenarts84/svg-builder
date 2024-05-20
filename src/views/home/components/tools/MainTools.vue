@@ -11,7 +11,7 @@
       <DirectSelectionArrowIcon width="20px" height="20px" />
     </v-btn>
     <v-btn @click="clip">
-      <v-tooltip activator="parent" location="bottom">Clip</v-tooltip>
+      <v-tooltip activator="parent" location="bottom">Copy</v-tooltip>
       <CloneIcon width="20px" height="20px" />
     </v-btn>
     <v-btn @click="undo" :disabled="hasUndo ? false : true">

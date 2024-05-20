@@ -23,13 +23,21 @@ import sampleplan from "@/sampleplan";
 
 import { useMainStore } from "@/stores";
 import { usePlanStore } from "@/stores/plan.js"; // Assuming you've set up a Pinia store in this location
-
+import { useIconStore } from "@/stores/icon";
 const store = useMainStore();
+const iconStore = useIconStore();
+
 store.loadPlan(
   localStorage.getItem("frontrow2.editor.plan")
     ? JSON.parse(localStorage.getItem("frontrow2.editor.plan"))
     : sampleplan.sampleplan
 );
+
+
+iconStore.loadIcon(
+  localStorage.getItem("frontend2.editor.icon")
+    ? JSON.parse(localStorage.getItem("frontend2.editor.icon")) : []
+)
 
 const WELCOME_VERSION = "1";
 

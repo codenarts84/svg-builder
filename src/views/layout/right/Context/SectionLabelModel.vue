@@ -20,10 +20,9 @@
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
-          <v-btn text="Close" variant="plain" @click="dialog = false"></v-btn>
+          <v-btn text="Close" @click="dialog = false"></v-btn>
           <v-spacer></v-spacer>
-          <v-btn text="Add" variant="standard" @click="onAdd"
-            color="primary"></v-btn>
+          <v-btn text="Add" @click="onAdd" color="primary"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -32,7 +31,6 @@
 <script setup>
 import { ref, defineProps } from "vue";
 import { v4 as uuid } from "uuid";
-import { watch } from "vue";
 const dialog = ref(false);
 const newLabel = ref("");
 const newAbr = ref("");

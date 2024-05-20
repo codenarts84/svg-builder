@@ -43,13 +43,17 @@
                 </td>
                 <td class="delete-container-td">
                   <div class="delete-container-div">
-                    <v-btn v-if="delete_btn(idx)" density="comfortable"
+                    <v-btn v-if="deleteBtnShow(idx)" density="comfortable"
                       icon="$delete" variant="plain"
                       @click="() => handle_delete(idx)"></v-btn>
                   </div>
                 </td>
               </tr>
             </table>
+            <div class="actions">
+              <v-btn color="green" @click="onSave">Submit</v-btn>
+              <v-btn color="red" @click="onDiscard">Discard</v-btn>
+            </div>
           </div>
         </div>
       </v-card>
@@ -59,56 +63,51 @@
 
 
 <script setup>
-import { ref, defineProps, computed, defineComponent, nextTick } from "vue";
+import { ref, defineProps, computed, defineComponent, nextTick, onMounted } from "vue";
 import { usePlanStore } from '@/stores/plan.js'
-import { useMainStore } from "@/stores";
-import DropDown from '../../home/components/DropDown.vue';
+import { categoryColors } from "@/lib/colors";
 import ColorPicker from "./ColorPicker.vue";
 const dialog = ref(false);
 const valid = ref(false)
+const colors = categoryColors;
 
-const colors = [
-  '#2b68e8',
-  '#2144ac',
-  '#646bee',
-  '#21a6e6',
-  '#106a9f',
-  '#1992a1',
-  '#20b6d2',
-  '#25b8a6',
-  '#2fc463',
-  '#1d7f40',
-  '#86ca2e',
-  '#67a221',
-  '#f39d2a',
-  '#d77720',
-  '#f7732a',
-  '#bc173f',
-  '#df224c',
-]
+const planStore = usePlanStore();
+
+const categories = ref(computed(() => planStore.categories));
+const addCategories = ref([]);
+const deleteCategories = ref([]);
 
 const toggle = ref(Array(colors.length).fill(false));
-
 const setToggle = (idx) => {
   const value = toggle.value[idx];
   clearToggle();
   toggle.value[idx] = !value
 }
-
 const clearToggle = () => {
   toggle.value = Array(colors.length).fill(false);
 }
 
-const props = defineProps({
-});
+const assigned_category = (categoryName) => {
+  for (const z of planStore._plan.zones) {
+    for (const r of z.rows) {
+      for (const s of r.seats) {
+        if (s?.category === categoryName) return false;
+      }
+    }
+    for (const a of z.areas) {
+      if (a.seats) {
+        for (const s of a.seats)
+          if (s?.category === categoryName) return false;
+      } else {
+        if (a.category === categoryName) return false;
+      }
+    }
+  }
+  return true;
+}
 
-const planStore = usePlanStore();
-const cates = computed(() => planStore.categories);
 
-const categories = ref(cates);
-
-
-const delete_btn = ((idx) => {
+const deleteBtnShow = ((idx) => {
   const bStatus = assigned_category(categories.value[idx].name);
   return bStatus;
 })
@@ -158,6 +157,7 @@ const onCreate = () => {
   }
   const newName = getUniqueCategoryName('New Category');
   planStore.createCategory(newName, color);
+  addCategories.value.push(newName);
   nextTick(() => {
     const allCategoryInput = document.querySelectorAll('.category-input')
     const cnt = allCategoryInput.length;
@@ -165,23 +165,14 @@ const onCreate = () => {
   })
 }
 
-const assigned_category = (categoryName) => {
-  for (const z of planStore._plan.zones) {
-    for (const r of z.rows) {
-      for (const s of r.seats) {
-        if (s?.category === categoryName) return false;
-      }
-    }
-    for (const a of z.areas) {
-      if (a.seats) {
-        for (const s of a.seats)
-          if (s?.category === categoryName) return false;
-      } else {
-        if (a.category === categoryName) return false;
-      }
-    }
-  }
-  return true;
+const onSave = () => {
+  dialog.value = false;
+}
+
+const onDiscard = () => {
+  // addCategories.value.forEach(cat => planStore.deleteCategory(cat));
+  // addCategories.value = []
+  dialog.value = false;
 }
 </script>
 
@@ -304,5 +295,14 @@ td {
 .close-btn {
   display: flex;
   justify-content: flex-end;
+}
+
+.widget-body>.actions {
+  text-align: center;
+}
+
+.widget-body>.actions>button {
+  text-transform: capitalize !important;
+  margin: 20px 30px 0;
 }
 </style>

@@ -33,4 +33,24 @@ function hex2rgb(hex) {
     : null;
 }
 
-export { contrast, hex2rgb };
+const categoryColors = [
+  "#2b68e8",
+  "#2144ac",
+  "#646bee",
+  "#21a6e6",
+  "#106a9f",
+  "#1992a1",
+  "#20b6d2",
+  "#25b8a6",
+  "#2fc463",
+  "#1d7f40",
+  "#86ca2e",
+  "#67a221",
+  "#f39d2a",
+  "#d77720",
+  "#f7732a",
+  "#bc173f",
+  "#df224c",
+];
+
+export { contrast, hex2rgb, categoryColors };

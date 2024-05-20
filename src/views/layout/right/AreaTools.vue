@@ -20,5 +20,4 @@ const show = () => {
     return filtered.length === props.areas.length;
   }
 }
-
 </script>

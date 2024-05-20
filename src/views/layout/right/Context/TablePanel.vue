@@ -81,12 +81,10 @@
             name="capacity_right" :value="capacityR" @input="setCapacityR" />
         </v-col>
 
-        <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'"> Total
+        <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'"> Total: {{
+          capacityTotal }}
         </v-col>
-        <v-col cols="12" sm="6" v-if="shape === 'rectangleTable'">
-          <input type="number" min="0" class="v-custom-input"
-            name="capacity_total" :value="capacityTotal" readonly disabled />
-        </v-col>
+        <v-col cols="12" sm="6"></v-col>
       </v-row>
     </v-container>
   </div>

@@ -31,7 +31,7 @@
       <v-list-item-title>
         <v-tooltip activator="parent" location="right">Ellipse</v-tooltip>
 
-        <v-icon color="black" icon="mdi-ellipse-outline" size="large"></v-icon>
+        <v-icon color="black" icon="mdi-shape-oval-plus" size="large"></v-icon>
       </v-list-item-title>
     </v-list-item>
 
