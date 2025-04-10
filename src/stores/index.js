@@ -1,18 +1,88 @@
 import Vue from "vue";
-// import Vuex from "vuex";
 
 import { defineStore } from "pinia";
-import { round } from "../lib/numbers";
+import { generateID, round } from "../lib/numbers";
 import * as d3 from "d3";
 import {
-  degreeInCircle,
-  findCircleCenter,
   findClosestGridPoint,
+  findCircleCenter,
+  degreeInCircle,
+  positionInZone,
+  rectangleBBox,
+  polygonBBox,
+  textBBox,
+  ellipseBBox,
+  testOverlap,
+  roundTableBBox,
+  rectangleTableBBox,
+  estimateTextWidth,
+  rotateRectangluarBox,
 } from "../lib/geometry";
 import { v4 as uuid } from "uuid";
 import { usePlanStore } from "./plan";
 
 const planStore = usePlanStore();
+const minimum = 0.0001;
+const nextX = (x0, a, b, R) => {
+  let l = x0;
+  let r = x0 + R;
+  const f = (x) => a * x * x - b;
+
+  let y0 = f(x0);
+
+  const d = (x, y) => {
+    return (x - x0) * (x - x0) + (y - y0) * (y - y0);
+  };
+
+  while (r - l >= minimum) {
+    const x = (l + r) / 2;
+    const y = f(x);
+    if (d(x, y) >= R * R) {
+      r = x;
+    } else {
+      l = x;
+    }
+  }
+  return (r + l) / 2;
+};
+
+const available = (x0, x1, a, b, n, r) => {
+  let x = x0;
+  let i;
+  for (i = 0; i < n - 1; i++) {
+    x = nextX(x, a, b, r);
+    if (x > x1) return false;
+  }
+  return true;
+};
+
+const getPoints = (a, b, n) => {
+  let x0 = -Math.sqrt(b / a);
+  let x1 = -x0;
+  let l = 0,
+    r = Math.sqrt(b * b + 200 * 200),
+    R;
+  while (r - l >= minimum) {
+    R = (r + l) / 2;
+    console.log("LOGTRACE", available(x0, x1, a, b, n, R), R, x0, x1, r, l);
+    if (available(x0, x1, a, b, n, R)) {
+      l = R;
+    } else {
+      r = R;
+    }
+  }
+  R = r;
+
+  const f = (x) => a * x * x - b;
+  let i,
+    x = x0,
+    res = [];
+  for (i = 0; i < n; i++) {
+    res.push({ x, y: f(x) });
+    x = nextX(x, a, b, R);
+  }
+  return res;
+};
 
 export const useMainStore = defineStore({
   id: "main",
@@ -20,8 +90,10 @@ export const useMainStore = defineStore({
     zoomTransform: d3.zoomTransform({ k: 1, x: 0, y: 0 }),
     // grid: (window.localStorage.getItem("grid_enabled") || "false") === "true",
     // snap: (window.localStorage.getItem("snap_enabled") || "false") === "true",
-    grid: true,
+    grid: false,
     snap: true,
+    bfocus: false,
+    bvalid: false,
     clipboardAreas: [],
     clipboardRows: [],
     tool: "select",
@@ -36,6 +108,11 @@ export const useMainStore = defineStore({
     dragStartX: 0,
     dragStartY: 0,
     plan: planStore.plan,
+    section_label: window.localStorage.getItem("section_label")
+      ? JSON.parse(window.localStorage.getItem("section_label"))
+      : [],
+    temp_ox: 0,
+    temp_oy: 0,
   }),
 
   getters: {
@@ -53,6 +130,7 @@ export const useMainStore = defineStore({
         case "rectangleTable":
         case "gaSquare":
         case "gaCircle":
+        case "gaPolygon":
         case "rows":
         case "row":
         case "stgrows":
@@ -68,6 +146,17 @@ export const useMainStore = defineStore({
   },
 
   actions: {
+    set_Ox(v) {
+      this.temp_ox = v;
+    },
+    set_Oy(v) {
+      this.temp_oy = v;
+    },
+
+    setBvalid(valid) {
+      this.bvalid = valid;
+    },
+
     loadPlan(plan) {
       // console.log(plan);
       const temp = usePlanStore();
@@ -83,6 +172,16 @@ export const useMainStore = defineStore({
     toggleSnap() {
       this.snap = !this.snap;
       window.localStorage.setItem("snap_enabled", this.snap ? "true" : "false");
+    },
+
+    setSectionLabel(s) {
+      this.section_label = s;
+      window.localStorage.setItem("section_label", JSON.stringify(s));
+    },
+
+    removeSectionLabel(id) {
+      this.section_label = this.section_label.filter((i) => i.id !== id);
+      window.localStorage.setItem("section_label", this.section_label);
     },
 
     disableGrid() {
@@ -184,12 +283,19 @@ export const useMainStore = defineStore({
       ];
       const keepSelection =
         tool === this.tool ||
-        ((this.tool === "rows" || this.tool === "row" || this.tool === 'stgrows') && tool === "select") ||
+        ((this.tool === "rows" ||
+          this.tool === "row" ||
+          this.tool === "stgrows") &&
+          tool === "select") ||
         (rowTools.includes(this.tool) && rowTools.includes(tool));
       if (!keepSelection) {
         this.selection = [];
       }
       this.tool = tool;
+      this.bfocus = false;
+      if (tool === "focusPoint") {
+        this.bfocus = true;
+      }
       // console.log('changed tool', tool)
     },
     clearSelection() {
@@ -197,7 +303,7 @@ export const useMainStore = defineStore({
     },
 
     startDragging(uuid, addition, x, y, zone) {
-      console.log('selection start here!!!')
+      // console.log('selection start here!!!');
       if (!this.selection.includes(uuid)) {
         if (addition) this.selection.push(uuid);
         else {
@@ -206,7 +312,7 @@ export const useMainStore = defineStore({
         }
         this.ignoreNextSelection = true;
       }
-      // console.log(this.selection)
+      // console.log('selection', this.selection)
       this.dragging = true;
       this.draggingPolygonPoint = false;
       this.dragged = false;
@@ -258,10 +364,136 @@ export const useMainStore = defineStore({
       }
     },
 
+    calculateQuadraticCoefficients(x0, y0, x1, y1, x2, y2) {
+      // Using Cramer's rule to solve the system of equations
+      let denominator = (x0 - x1) * (x0 - x2) * (x1 - x2);
+      let a = (y0 * (x1 - x2) + y1 * (x2 - x0) + y2 * (x0 - x1)) / denominator;
+      let b =
+        (y0 * (x1 * x1 - x2 * x2) +
+          y1 * (x2 * x2 - x0 * x0) +
+          y2 * (x0 * x0 - x1 * x1)) /
+        denominator;
+      let c =
+        (y0 * (x2 - x1) * x1 * x2 +
+          y1 * (x0 - x2) * x0 * x2 +
+          y2 * (x1 - x0) * x0 * x1) /
+        denominator;
+
+      return { a: a, b: b, c: c };
+    },
+
+    calculateCircleCenter(x0, y0, x1, y1, x2, y2) {
+      // Calculate midpoints of line segments
+      const midPointX01 = (x0 + x1) / 2;
+      const midPointY01 = (y0 + y1) / 2;
+      const midPointX12 = (x1 + x2) / 2;
+      const midPointY12 = (y1 + y2) / 2;
+
+      // Calculate slopes of lines passing through the pairs of points
+      const slope01 = (y1 - y0) / (x1 - x0);
+      const slope12 = (y2 - y1) / (x2 - x1);
+
+      // Calculate perpendicular slopes
+      const perpendicularSlope01 = -1 / slope01;
+      const perpendicularSlope12 = -1 / slope12;
+
+      // Calculate y-intercepts of perpendicular bisectors
+      const yIntercept01 = midPointY01 - perpendicularSlope01 * midPointX01;
+      const yIntercept12 = midPointY12 - perpendicularSlope12 * midPointX12;
+
+      // Calculate center coordinates
+      const centerX =
+        (yIntercept12 - yIntercept01) /
+        (perpendicularSlope01 - perpendicularSlope12);
+      const centerY = perpendicularSlope01 * centerX + yIntercept01;
+      // const centerX =
+      //   (yIntercept12 - yIntercept01) /
+      //   (perpendicularSlope01 - perpendicularSlope12);
+      // const centerY = perpendicularSlope01 * centerX + yIntercept01;
+      return { x: centerX, y: centerY };
+    },
+
+    findPointOnLine(x0, y0, x1, y1, d) {
+      // Calculate direction vector from X0 to X1
+      const dx = x1 - x0;
+      const dy = y1 - y0;
+
+      // Calculate distance between X0 and X1
+      const distanceX0X1 = Math.sqrt(dx * dx + dy * dy);
+
+      // Normalize direction vector
+      const nx = dx / distanceX0X1;
+      const ny = dy / distanceX0X1;
+
+      // Calculate perpendicular vector
+      const px = -ny;
+      const py = nx;
+
+      // Scale perpendicular vector by distance 'd'
+      const newX = Math.max(1, (x0 + x1) / 2 + d * px);
+      const newY = Math.max(1, (y0 + y1) / 2 + d * py);
+      return { x: newX, y: newY };
+    },
+
+    curveRows(s) {
+      const temp = usePlanStore();
+      for (const z of temp.plan.zones) {
+        if (this.lockedZones.includes(z.uuid)) continue;
+        for (const r of z.rows) {
+          if (!this.selection.includes(r.uuid) || r.seats.length < 2) {
+            continue;
+          }
+          r.curve = s / 10;
+
+          // Our circle line segment starts with the first seat of the row
+          const x0 = r.seats[0].position.x;
+          const y0 = r.seats[0].position.y;
+
+          // and ends with the last seat of the row (at least in the non-fixedCenter case)
+          const x1 = r.seats[r.seats.length - 1].position.x;
+          const y1 = r.seats[r.seats.length - 1].position.y;
+
+          //
+          if (r.seats.length <= 2) return;
+          if (s === 0) {
+            const dx = (x1 - x0) / (r.seats.length - 1);
+            const dy = (y1 - y0) / (r.seats.length - 1);
+            for (let i = 0; i < r.seats.length; i++) {
+              r.seats[i].position.x = x0 + dx * i;
+              r.seats[i].position.y = y0 + dy * i;
+            }
+          } else {
+            const a = s / 150 / 100;
+            const b = 10000 * a;
+            const positions = getPoints(a, b, r.seats.length);
+            let i;
+            for (i = 0; i < r.seats.length; i++) {
+              let fromX = positions[i].x + 100;
+              let fromY = positions[i].y;
+
+              let a00 = (x1 - x0) / 200;
+              let a01 = (y1 - y0) / 200;
+              let a10 = (y0 - y1) / 200;
+              let a11 = (x1 - x0) / 200;
+
+              let toX = a00 * fromX + a10 * fromY;
+              let toY = a01 * fromX + a11 * fromY;
+
+              r.seats[i].position.x = toX;
+              r.seats[i].position.y = toY;
+            }
+          }
+        }
+      }
+
+      planStore.persistPlan();
+    },
+
     circleRows(tx, ty, fixedCenter) {
       /**
        * Align all currently selected rows along a circle line with radius specified by target position {tx, ty}
        */
+
       const temp = usePlanStore();
       for (const z of temp.plan.zones) {
         if (this.lockedZones.includes(z.uuid)) continue;
@@ -281,7 +513,7 @@ export const useMainStore = defineStore({
           // The distance between those two points is e.g. our minimum diameter
           const distance = Math.sqrt(
             (lastx - firstx) * (lastx - firstx) +
-            (lasty - firsty) * (lasty - firsty)
+              (lasty - firsty) * (lasty - firsty)
           );
 
           // rtx,rty is the position of the mouse which we'll use to compute the circle center
@@ -289,7 +521,7 @@ export const useMainStore = defineStore({
           const rty = ty - r.position.y - z.position.y;
           const sign = Math.sign(
             (rtx - firstx) * (lasty - firsty) -
-            (rty - firsty) * (lastx - firstx)
+              (rty - firsty) * (lastx - firstx)
           );
           let radius, cx, cy;
 
@@ -305,7 +537,7 @@ export const useMainStore = defineStore({
             radius = Math.max(
               Math.abs(
                 (rtx - firstx) * (lasty - firsty) -
-                (rty - firsty) * (lastx - firstx)
+                  (rty - firsty) * (lastx - firstx)
               ) / distance,
               distance / 2
             );
@@ -379,8 +611,6 @@ export const useMainStore = defineStore({
       planStore.persistPlan();
     },
     moveDragging(x, y, snap, zoomLevel) {
-      // console.log('move Dragging HERE?');
-      // console.log(snap)
       if (!this.dragging) return;
       let dx = x - this.dragStartX;
       let dy = y - this.dragStartY;
@@ -400,6 +630,19 @@ export const useMainStore = defineStore({
           if (!this.draggingPolygonPoint) {
             for (const r of z.rows) {
               if (this.selection.includes(r.uuid)) {
+                // const minx = Math.min(...r.seats.map((s) => s.position.x));
+                // const maxx = Math.max(...r.seats.map((s) => s.position.x));
+                // const miny = Math.min(...r.seats.map((s) => s.position.y));
+                // const maxy = Math.max(...r.seats.map((s) => s.position.y));
+                // if (
+                //   r.position.x + minx + dx + 10 < 0 ||
+                //   r.position.y + miny + dy + 10 < 0 ||
+                //   r.position.x + maxx + dx + 10 > temp.plan.size.width ||
+                //   r.position.y + maxy + dy + 10 > temp.plan.size.height
+                // ) {
+                //   return;
+                // }
+
                 r.position.x += dx;
                 r.position.y += dy;
                 if (snap) {
@@ -449,7 +692,7 @@ export const useMainStore = defineStore({
           for (const a of z.areas) {
             if (this.selection.includes(a.uuid)) {
               if (this.draggingPolygonPoint) {
-                if (a.shape !== "polygon") {
+                if (a.shape !== "polygon" && a.shape !== "gaPolygon") {
                   console.warn(
                     "trying to move polygon points, but shape is not a polygon"
                   );
@@ -465,11 +708,12 @@ export const useMainStore = defineStore({
                     y: ppoint.y,
                     zone: z,
                   });
-                  Vue.set(
-                    a.polygon.points,
-                    this.draggingPolygonPointId,
-                    ppoint
-                  );
+                  a.polygon.points[this.draggingPolygonPointId] = ppoint;
+                  // Vue.set(
+                  //   a.polygon.points,
+                  //   this.draggingPolygonPointId,
+                  //   ppoint
+                  // );
                   if (ppoint.x !== oldpos.x || ppoint.y !== oldpos.y) {
                     dx += ppoint.x - oldpos.x;
                     dy += ppoint.y - oldpos.y;
@@ -479,6 +723,101 @@ export const useMainStore = defineStore({
                   snap = false;
                 }
               } else {
+                // let abox;
+                // if (
+                //   a.shape === 'circle' &&
+                //   (a.position.x + dx - a.circle.radius < 0 ||
+                //     a.position.y + dy - a.circle.radius < 0 ||
+                //     a.position.x + dx + a.circle.radius >
+                //       temp.plan.size.width ||
+                //     a.position.y + dy + a.circle.radius > temp.plan.size.height)
+                // )
+                //   return;
+                // if (a.shape === 'ellipse' || a.shape === 'gaCircle') {
+                //   abox = ellipseBBox(a);
+                //   if (
+                //     abox.x + dx < 0 ||
+                //     abox.x + dx + abox.width > temp.plan.size.width ||
+                //     abox.y + dy < 0 ||
+                //     abox.y + dy + abox.height > temp.plan.size.height
+                //   )
+                //     return;
+                // }
+                // if (
+                //   (a.shape === 'rectangle' || a.shape === 'gaSquare') &&
+                //   (a.position.x + dx < 0 ||
+                //     a.position.x + dx + a.rectangle.width >
+                //       temp.plan.size.width ||
+                //     a.position.y + dy < 0 ||
+                //     a.position.y + dy + a.rectangle.height >
+                //       temp.plan.size.height)
+                // )
+                //   return;
+                // if (a.shape === 'polygon' || a.shape === 'gaPolygon') {
+                //   const minx = Math.min(...a.polygon.points.map((p) => p.x));
+                //   const maxx = Math.max(...a.polygon.points.map((p) => p.x));
+                //   const miny = Math.max(...a.polygon.points.map((p) => p.y));
+                //   const maxy = Math.max(...a.polygon.points.map((p) => p.y));
+                //   if (
+                //     a.position.x + minx + dx < 0 ||
+                //     a.position.x + maxx + dx > temp.plan.size.width ||
+                //     a.position.y + miny + dy < 0 ||
+                //     a.position.y + maxy + dy > temp.plan.size.height
+                //   )
+                //     return;
+                // }
+                // if (a.shape === 'text') {
+                //   const width = estimateTextWidth(a.text.text, a.text.size);
+                //   const height = a.text.size;
+                //   if (
+                //     a.position.x + dx - width / 2 < 0 ||
+                //     a.position.x + dx + width / 2 > temp.plan.size.width ||
+                //     a.position.y + dy - height / 2 < 0 ||
+                //     a.position.y + dy + height / 2 > temp.plan.size.height
+                //   )
+                //     return;
+                // }
+                // if (a.shape === 'roundTable') {
+                //   if (
+                //     a.position.x + dx - a.radius - 20 < 0 ||
+                //     a.position.x + dx + a.radius + 20 > temp.plan.size.width ||
+                //     a.position.y + dy - a.radius - 20 < 0 ||
+                //     a.position.y + dy + a.radius + 20 > temp.plan.size.height
+                //   )
+                //     return;
+                // }
+                // if (a.shape === 'rectangleTable') {
+                //   const top =
+                //     a.seats.findIndex((s) => s.special === 'top') > -1 ? 1 : 0;
+                //   const bottom =
+                //     a.seats.findIndex((s) => s.special === 'bottom') > -1
+                //       ? 1
+                //       : 0;
+                //   const left =
+                //     a.seats.findIndex((s) => s.special === 'left') > -1 ? 1 : 0;
+                //   const right =
+                //     a.seats.findIndex((s) => s.special === 'right') > -1
+                //       ? 1
+                //       : 0;
+                //   const minx =
+                //     a.position.x + dx - a.rectangleTable.width / 2 - left * 20;
+                //   const maxx =
+                //     a.position.x + dx + a.rectangleTable.width / 2 + right * 20;
+                //   const miny =
+                //     a.position.y + dy - a.rectangleTable.height / 2 - top * 20;
+                //   const maxy =
+                //     a.position.y +
+                //     dy +
+                //     a.rectangleTable.height / 2 +
+                //     bottom * 20;
+                //   if (
+                //     minx < 0 ||
+                //     miny < 0 ||
+                //     maxx > temp.plan.size.width ||
+                //     maxy > temp.plan.size.height
+                //   )
+                //     return;
+                // }
                 a.position.x += dx;
                 a.position.y += dy;
                 if (snap) {
@@ -559,6 +898,7 @@ export const useMainStore = defineStore({
 
           if (rdx) r.position.x += rdx;
           if (rdy) r.position.y += rdy;
+          r.rotation = Math.round((r.rotation + deg + 360) % 360);
         }
 
         for (const area of z.areas) {
@@ -590,6 +930,18 @@ export const useMainStore = defineStore({
 
         for (const row of z.rows) {
           if (this.selection.includes(row.uuid)) {
+            // if (row.seats.length < 2) return;
+            // const x0 = row.seats[0].position.x;
+            // const y0 = row.seats[0].position.y;
+            // const x1 = row.seats[1].position.x;
+            // const y1 = row.seats[1].position.y;
+            // if (
+            //   Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1)) *
+            //     factor <
+            //   20
+            // )
+            //   return;
+
             row.position.x = lox + (row.position.x - lox) * factor;
             row.position.y = loy + (row.position.y - loy) * factor;
 
@@ -602,6 +954,8 @@ export const useMainStore = defineStore({
 
         for (const area of z.areas) {
           if (this.selection.includes(area.uuid)) {
+            if (area.shape === "roundTable" || area.shape === "rectangleTable")
+              return;
             area.position.x = lox + (area.position.x - lox) * factor;
             area.position.y = loy + (area.position.y - loy) * factor;
 
@@ -610,10 +964,17 @@ export const useMainStore = defineStore({
                 area.rectangle.width *= factor;
                 area.rectangle.height *= factor;
                 break;
+              case "gaSquare":
+                area.rectangle.width *= factor;
+                area.rectangle.height *= factor;
+                area.text.position.x = round(area.rectangle.width / 2, 4);
+                area.text.position.y = round(area.rectangle.height / 2, 4);
+                break;
               case "circle":
                 area.circle.radius *= factor;
                 break;
               case "ellipse":
+              case "gaCircle":
                 area.ellipse.radius.x *= factor;
                 area.ellipse.radius.y *= factor;
                 break;
@@ -622,12 +983,6 @@ export const useMainStore = defineStore({
                   p.x *= factor;
                   p.y *= factor;
                 }
-                break;
-              case "gaSquare":
-                area.gaSquare.scale *= factor;
-                break;
-              case "gaCircle":
-                area.gaCircle.scale *= factor;
                 break;
               case "text":
                 area.text.size =
@@ -646,7 +1001,7 @@ export const useMainStore = defineStore({
     },
 
     copy(objects, offset) {
-      offset = offset === undefined ? 10 : offset;
+      offset = offset === undefined ? 100 : offset;
       this.clipboardAreas = [];
       this.clipboardRows = [];
       const clone = (o) => JSON.parse(JSON.stringify(o));
@@ -659,7 +1014,7 @@ export const useMainStore = defineStore({
           .map(clone);
         for (const r of rowsToClip) {
           r.position.x += z.position.x + offset;
-          r.position.y += z.position.y + offset;
+          r.position.y += z.position.y;
         }
         this.clipboardRows.push(...rowsToClip);
 
@@ -668,7 +1023,7 @@ export const useMainStore = defineStore({
           .map(clone);
         for (const a of areasToClip) {
           a.position.x += z.position.x + offset;
-          a.position.y += z.position.y + offset;
+          a.position.y += z.position.y;
         }
         this.clipboardAreas.push(...areasToClip);
       }
@@ -683,12 +1038,15 @@ export const useMainStore = defineStore({
     paste() {
       const temp = usePlanStore();
       const z = temp.plan.zones.find((z) => z.uuid === this.selectedZone);
+      let uid;
       const select = [];
       for (let r of this.clipboardRows) {
         r = JSON.parse(JSON.stringify(r));
-        r.uuid = uuid();
+        uid = uuid();
+        r.uuid = uid;
         for (const s of r.seats) {
           s.uuid = uuid();
+          s.guid = generateID();
           s.seat_guid =
             z.zone_id +
             "-" +
@@ -703,12 +1061,21 @@ export const useMainStore = defineStore({
       }
       for (let a of this.clipboardAreas) {
         a = JSON.parse(JSON.stringify(a));
-        a.uuid = uuid();
+        uid = uuid();
+        a.uuid = uid;
+        a.guid = generateID();
         a.position.x -= z.position.x;
         a.position.y -= z.position.y;
+        if (a.shape === "roundTable" || a.shape === "rectangleTable") {
+          for (const s of a.seats) {
+            s.uuid = uuid();
+            s.guid = generateID();
+          }
+        }
         z.areas.push(a);
-        select.push(a.uuid);
+        select.push(uid);
       }
+      this.ignoreNextSelection = false;
       this.toggleSelection(select, false, z.uuid);
       planStore.persistPlan();
     },

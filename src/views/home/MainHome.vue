@@ -1,85 +1,45 @@
 <template>
-  <AppToolbar :importSVG="importSVG" :zoomIn="zoomIn" :setTransfrom="setTransfrom"
-    :zoomOut="zoomOut" :zoomTo="zoomTo" :textL="textL" :textR="textR"
-    :textC="textC" :addTextField="addTextField" :addRectangle="addRectangle"
-    :addEllipse="addEllipse" :removeItem="removeItem"
-    :downloadSVG="handleDownloadSVG" :onImportClick="onImportClick" />
-  <v-layout style="
-      height: calc(100vh - 50px);
-      /* top: 50px; */
-      /* position: absolute; */
-      width: calc(100% - 300px);
-    ">
-    <RightNav />
+  <AppToolbar :selectionBoundary="selectionBoundary" />
+  <v-layout class="main-container">
+    <RightNav :temp_Rotate="temp_Rotate" />
     <div class="main-pan">
-      <HandMenu :addTextField="addTextField" :addEllipse="addEllipse"
-        :addRectangle="addRectangle" :textR="textR" :textL="textL"
-        :textC="textC" />
+      <HandMenu :selectionBoundary="selectionBoundary"
+        :selectionBoxes="selectionBoxes" />
       <!-- <MainZone style="padding: 100px"></MainZone> -->
       <!-- <Toolbar></Toolbar> -->
       <Plan ref="planref"></Plan>
       <StatusBar></StatusBar>
-      <!-- <TestEditor ref="TestEdt" /> -->
     </div>
   </v-layout>
 </template>
 <script setup>
-import * as d3 from "d3";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, provide } from "vue";
 import AppToolbar from "./components/AppToolbar.vue";
-// import TestEditor from "./components/TestEditor.vue";
-import RightNav from "../layout/rightnav/RightNav.vue";
+import RightNav from "../layout/right/RightNav.vue";
 import HandMenu from "./components/HandMenu.vue";
-import MainZone from "./MainZone.vue";
-
-import { useMainStore } from "@/stores";
+import Plan from "./components/canvas/Plan.vue";
+import StatusBar from "./components/StatusBar.vue";
 import sampleplan from "@/sampleplan";
 
+import { useMainStore } from "@/stores";
+import { usePlanStore } from "@/stores/plan.js"; // Assuming you've set up a Pinia store in this location
+import { useIconStore } from "@/stores/icon";
 const store = useMainStore();
+const iconStore = useIconStore();
+
 store.loadPlan(
   localStorage.getItem("frontrow2.editor.plan")
     ? JSON.parse(localStorage.getItem("frontrow2.editor.plan"))
     : sampleplan.sampleplan
 );
 
-const planref = ref(null);
-const TestEdt = ref(null);
 
-// const zoomIn = () => {
-//   TestEdt.value.zoomIn();
-// };
-
-const removeItem = () => {
-  TestEdt.value.deleteItem();
-};
-
-const textL = () => TestEdt.value.textAlign("start");
-const textC = () => TestEdt.value.textAlign("middle");
-const textR = () => TestEdt.value.textAlign("end");
-const importSVG = () => TestEdt.value.importSVG();
-const addEllipse = () => TestEdt.value.addEllipse();
-const addRectangle = () => TestEdt.value.addRectangle();
-const addTextField = () => TestEdt.value.addTextField();
-// const zoomOut = () => TestEdt.value.zoomOut();
-const onImportClick = () => TestEdt.value.onImportClick();
-const handleDownloadSVG = () => {
-  if (TestEdt.value) {
-    // console.log(TestEdt.value);
-    TestEdt.value.downloadSVG();
-  } else {
-    console.error("TestEdt component is not yet mounted or available.");
-  }
-};
-
-import { usePlanStore } from "@/stores/plan.js"; // Assuming you've set up a Pinia store in this location
-import Toolbar from "./components/Toolbar.vue";
-import Plan from "./components/canvas/Plan.vue";
-import StatusBar from "./components/StatusBar.vue";
+iconStore.loadIcon(
+  localStorage.getItem("frontend2.editor.icon")
+    ? JSON.parse(localStorage.getItem("frontend2.editor.icon")) : []
+)
 
 const WELCOME_VERSION = "1";
-
-// Using Pinia store
-const planStore = usePlanStore();
 
 // Data properties as refs
 const showCreateZonePrompt = ref(false);
@@ -90,18 +50,28 @@ const cmdOtherwiseCtrl = ref(
   window.navigator.platform.toLowerCase().startsWith("mac") ? "CMD" : "CTRL"
 );
 
+const planStore = usePlanStore();
 const plan = computed(() => planStore.plan);
-const setTransfrom = (v) => planref.value.setTransfrom(v);
 
-const zoomIn = () => {
-  planref.value.scaleBy(planref.value, 1.1);
-};
-const zoomOut = () => {
-  // planref.value.scaleTo(planref.value, 1);
-  planref.value.scaleBy(planref.value, 0.9);
-};
+// const planref = ref(null)
+// const temp_Rotate = ref(null)
 
-const zoomTo = (v) => planref.value.scaleTo(planref.value, v);
+// onMounted(() => {
+//   if (planref.value && planref.value.temp_Rotate) {
+//     temp_Rotate.value = planref.value.temp_Rotate;
+//   }
+// })
+// const planref = ref(null)
+// const temp_Rotate = (v) => planref.value.temp_Rotate(v);
+// const selectionBoundary = () => planref.value.selectionBoundary;
+const planref = ref(null);
+// Dynamically assign functions if ref is available
+const temp_Rotate = (v) => planref.value ? planref.value.temp_Rotate(v) : undefined;
+const selectionBoundary = () => planref.value ? planref.value.selectionBoundary : undefined;
+const selectionBoxes = () => planref.value ? planref.value.selectionBoxes : undefined;
+
+provide('planRef', planref);
+// const selectionBoundary = () => planref.value ? planref.value.selectionBoundary : null;
 
 // Methods
 const hideWelcomePrompt = () => {
@@ -117,5 +87,10 @@ const hideWelcomePrompt = () => {
   /* display: flex; */
   /* align-items: center; */
   /* justify-content: center; */
+}
+
+.main-container {
+  height: calc(100vh - 41px);
+  width: calc(100% - 300px);
 }
 </style>

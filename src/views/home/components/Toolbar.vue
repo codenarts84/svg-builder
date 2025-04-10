@@ -42,7 +42,7 @@
       >
         circle
       </v-btn> -->
-      <!-- 
+      <!--
       <v-btn
         @click="changeTool('ellipse')"
         :class="tool == 'ellipse' ? 'current-tool' : ''"
@@ -73,16 +73,12 @@
     <div class="group">
       <v-btn @click="cut" :disabled="!selection.length"> cut </v-btn>
       <v-btn @click="copy" :disabled="!selection.length"> copy </v-btn>
-      <v-btn
-        @click="paste"
-        :disabled="!clipboardAreas.length && !clipboardRows.length"
-      >
+      <v-btn @click="paste"
+        :disabled="!clipboardAreas.length && !clipboardRows.length">
         paste
       </v-btn>
-      <v-btn
-        @click.prevent="deleteObjects"
-        :disabled="!clipboardAreas.length && !clipboardRows.length"
-      >
+      <v-btn @click.prevent="deleteObjects"
+        :disabled="!clipboardAreas.length && !clipboardRows.length">
         del
       </v-btn>
     </div>
@@ -158,9 +154,9 @@ export default {
   // },
 
   watch: {},
-  created() {},
-  mounted() {},
-  unmounted() {},
+  created() { },
+  mounted() { },
+  unmounted() { },
   methods: {
     zoomIn() {
       d3.select(this.$parent.$refs.plan.$refs.svg)
@@ -216,6 +212,7 @@ export default {
       }
       this.$store.commit("copy", { objects: this.selection });
     },
+
     paste() {
       this.$store.commit("paste");
     },
@@ -245,12 +242,14 @@ export default {
 }
 
 .current-tool {
-  border: 1px solid var(--clr-primary); /* Assuming clr-primary is a CSS variable */
+  border: 1px solid var(--clr-primary);
+  /* Assuming clr-primary is a CSS variable */
 }
 
 .mdi {
   color: black;
-  opacity: 0.735; /* yields almost the same color as the native icons */
+  opacity: 0.735;
+  /* yields almost the same color as the native icons */
 }
 
 .validation .mdi {

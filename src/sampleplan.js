@@ -1,28 +1,8 @@
 export default {
   sampleplan: {
     name: "My Seating Chart",
-    categories: [
-      {
-        name: "Category I",
-        color: "#F44336",
-      },
-      {
-        name: "Category II",
-        color: "#9C27B0",
-      },
-      {
-        name: "Category III",
-        color: "#4CAF50",
-      },
-      {
-        name: "Category IV",
-        color: "#2196F3",
-      },
-      {
-        name: "Category V",
-        color: "#8BC34A",
-      },
-    ],
+    categories: [],
+    sections: [],
     zones: [
       {
         name: "Ground floor",
@@ -38,5 +18,10 @@ export default {
       width: 900,
       height: 900,
     },
+    point: {
+      x: 0,
+      y: 0,
+    },
+    mode: false,
   },
 };

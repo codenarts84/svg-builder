@@ -13,14 +13,18 @@ import {
   textBBox,
   roundTableBBox,
   rectangleTableBBox,
-  gaSquareBBox,
-  gaCircleBBox,
+  rotateRectangluarBox,
+  estimateTextWidth
 } from "@/lib/geometry";
+import { generateID } from "@/lib/numbers";
 import { v4 as uuid } from "uuid";
 import * as d3 from "d3";
 import ZoneComponent from "./ZoneComponent.vue";
+import IconComponent from "./IconComponent.vue";
 import { useToolbarStore } from '@/stores/toolbar';
 import { useSeatFormatStore } from "@/stores/seatFormat";
+import { useBoardStore } from "@/stores/svgStore";
+import { useIconStore } from "@/stores/icon";
 
 const round = (fl, places) => Number(fl.toFixed(places || 0));
 
@@ -30,8 +34,8 @@ const defaultBg = JSON.parse(
 );
 
 export default {
-  name: "ZoneComp",
-  components: { ZoneComponent },
+  name: "PlanComponent",
+  components: { ZoneComponent, IconComponent },
   setup() {
     const svg = ref(null);
     const zoom = ref(null);
@@ -47,6 +51,9 @@ export default {
     const rotating = ref(false);
     const rotatingOriginX = ref(0);
     const rotatingOriginY = ref(0);
+    const moveDirection = ref(-1);
+    const temp_ox = ref(0);
+    const temp_oy = ref(0);
     const rotatingHandleX = ref(0);
     const rotatingHandleY = ref(0);
     const rotatingStartAngle = ref(0);
@@ -64,6 +71,8 @@ export default {
     const drawingStartY = ref(0);
     const drawingCurrentX = ref(100);
     const drawingCurrentY = ref(100);
+    const rowCurrentX = ref(100);
+    const rowCurrentY = ref(100);
     const polygonDrawing = ref(false);
     const polygonPoints = ref([]);
     const rowBlockDrawing = ref(false);
@@ -71,6 +80,9 @@ export default {
     const rowDrawing = ref(false);
     const rowSpacing = ref(25);
     const rowSeatSpacing = ref(25);
+    const mouseStatus = ref(false);
+
+    const focusDragging = ref(false)
 
     const store = useMainStore();
     const planstore = usePlanStore();
@@ -83,23 +95,26 @@ export default {
     const selectedZone = computed(() => store.selectedZone);
     const lockedZones = computed(() => store.lockedZones);
     const grid = computed(() => store.grid);
-    const planSize = computed(() => planstore.planSize);
-
-    const toolbarStore = useToolbarStore();
-
-    const seatStore = useSeatFormatStore();
-    const nseat = computed(() => seatStore.nseat);
 
     const bSnap2Grid = computed(() => store.snap);
+    const sections = computed(() => store.section_label)
+    const categories = computed(() => planstore.categories)
 
-    onMounted(() => {
-      console.log("SVG Element:", svg.value.getBoundingClientRect());
-    });
+    const focusPointX = computed(() => plan.value.point.x);
+    const focusPointY = computed(() => plan.value.point.y);
+
+    const mode = computed(() => plan.value.mode);
 
     const getSvgRect = () => svg.value.getBoundingClientRect();
 
+    const iconStore = useIconStore();
+    const selectedIcon = computed(() => iconStore.selectedIcon);
+
     return {
+      sections,
+      categories,
       bSnap2Grid,
+      planstore,
       plan,
       validationErrors,
       selection,
@@ -109,6 +124,8 @@ export default {
       selectedZone,
       lockedZones,
       grid,
+      temp_ox,
+      temp_oy,
       // unwatch,
       // unwatchTool,
       // createZoom,
@@ -151,11 +168,54 @@ export default {
       rowDrawing,
       rowSpacing,
       rowSeatSpacing,
+      rowCurrentX,
+      rowCurrentY,
+      mouseStatus,
       getSvgRect,
-      nseat
+      focusPointX,
+      focusPointY,
+      focusDragging,
+      iconStore,
+      selectedIcon,
+      mode
     };
   },
   computed: {
+    metadata() {
+      const categoriesXML = this.categories.map(cat =>
+        `<category>
+          <name>${cat.name}</name>
+          <color>${cat.color}</color>
+        </category>`
+      ).join("");
+      const sectionsXML = this.sections.map(sec =>
+        `<section>
+          <name>${sec.label}</name>
+          <abv>${sec.abv}</abv>
+        </section>`
+      ).join("");
+      return `<booktix-data>
+                <chartname>${this.plan.name}</chartname>
+                <categories>${categoriesXML}</categories>
+                <sections>${sectionsXML}</sections>
+              </booktix-data>
+              <booktik-chart-id>
+              </booktik-chart-id>
+              <booktik-chart-sec>
+              </booktik-chart-sec>`;
+    },
+
+    noTableSelection() {
+      if (this.selection.length === 1) {
+        for (const z of this.plan.zones) {
+          for (const a of z.areas) {
+            if ((a.shape === 'roundTable' || a.shape === 'rectangleTable') && this.selection.includes(a.uuid)) return false;
+          }
+        }
+      }
+      return true;
+    },
+
     mainclasses() {
       return {
         // move cursor
@@ -180,12 +240,14 @@ export default {
       }
       return true;
     },
+
     polygonPreviewPoints() {
       return this.polygonPoints
         .concat([{ x: this.drawingCurrentX, y: this.drawingCurrentY }])
         .map((point) => `${point.x},${point.y}`)
         .join(" ");
     },
+
     rowBlockPosition() {
       const x =
         this.drawingCurrentX > this.drawingStartX
@@ -372,10 +434,11 @@ export default {
     },
     stgrowBlockSeats1() {
       if (this.stgrowBlockDrawing) {
-        return Math.ceil(
+        const res = Math.ceil(
           Math.abs(this.drawingCurrentX - this.drawingStartX) /
           this.rowSeatSpacing
-        ) - 1;
+        )
+        return res > 0 ? res - 1 : 0;
       } else {
         return 0;
       }
@@ -402,7 +465,6 @@ export default {
                 ...r.seats.map((s) => s.position.y + (s.radius || 10))
               );
               res.push({
-                bStatus: false,
                 visible: false,
                 x: z.position.x + r.position.x + minx,
                 y: z.position.y + r.position.y + miny,
@@ -413,7 +475,6 @@ export default {
             for (const s of r.seats) {
               if (this.selection.includes(s.uuid)) {
                 res.push({
-                  bStatus: false,
                   visible: true,
                   x:
                     z.position.x +
@@ -442,12 +503,11 @@ export default {
                   width: 2 * a.circle.radius,
                   height: 2 * a.circle.radius,
                 };
-              } else if (a.shape === "ellipse") {
-
+              } else if (a.shape === "ellipse" || a.shape === "gaCircle") {
                 abox = ellipseBBox(a);
-              } else if (a.shape === "rectangle") {
+              } else if (a.shape === "rectangle" || a.shape === "gaSquare") {
                 abox = rectangleBBox(a);
-              } else if (a.shape === "polygon") {
+              } else if (a.shape === "polygon" || a.shape === "gaPolygon") {
                 abox = polygonBBox(a);
               } else if (a.shape === "text") {
                 const s = a.text.size || 16;
@@ -456,17 +516,48 @@ export default {
                 abox = roundTableBBox(a);
               } else if (a.shape === 'rectangleTable') {
                 abox = rectangleTableBBox(a);
-              } else if (a.shape === 'gaSquare') {
-                abox = gaSquareBBox(a);
-              } else if (a.shape === 'gaCircle') {
-                abox = gaCircleBBox(a);
               }
               //COME HERE
               abox.x += z.position.x;
               abox.y += z.position.y;
               abox.visible = true;
-              abox.bStatus = true;
               res.push(abox);
+            } else if (a.shape === 'roundTable') {
+              for (const s of a.seats) {
+                if (this.selection.includes(s.uuid)) {
+                  let abox = {
+                    x: a.position.x + s.position.x - (s.radius || 10),
+                    y: a.position.y + s.position.y - (s.radius || 10),
+                    width: 2 * (s.radius || 10),
+                    height: 2 * (s.radius || 10)
+                  }
+                  if (a.rotation) {
+                    abox = rotateRectangluarBox(a, abox);
+                  }
+                  abox.x += z.position.x;
+                  abox.y += z.position.y;
+                  abox.visible = true;
+                  res.push(abox);
+                }
+              }
+            } else if (a.shape === 'rectangleTable') {
+              for (const s of a.seats) {
+                if (this.selection.includes(s.uuid)) {
+                  let abox = {
+                    x: a.position.x + s.position.x - (s.radius || 10) - a.rectangleTable.width / 2,
+                    y: a.position.y + s.position.y - (s.radius || 10) - a.rectangleTable.height / 2,
+                    width: 2 * (s.radius || 10),
+                    height: 2 * (s.radius || 10)
+                  }
+                  if (a.rotation) {
+                    abox = rotateRectangluarBox(a, abox);
+                  }
+                  abox.x += z.position.x;
+                  abox.y += z.position.y;
+                  abox.visible = true;
+                  res.push(abox);
+                }
+              }
             }
           }
         }
@@ -474,8 +565,8 @@ export default {
       return res;
     },
     selectionBoundary() {
+      // console.log('selectionBoundary')
       const bboxes = this.selectionBoxes;
-      // console.log('selectionBoundary??', bboxes);
       if (bboxes.length === 0) return null;
       const minx = Math.min(...bboxes.map((s) => s.x));
       const miny = Math.min(...bboxes.map((s) => s.y));
@@ -508,46 +599,105 @@ export default {
     // window.addEventListener("keydown", this.hotkey);
     window.localStorage.setItem('snap_enabled', true);
     window.localStorage.setItem('grid_enabled', true);
-    this.unwatch = watch(this.planSize, (newValue, oldValue) => {
-      if (
-        !oldValue ||
-        newValue.width !== oldValue.width ||
-        newValue.height !== oldValue.height
-      ) {
-        nextTick(() => {
-          this.createStage();
-          this.createZoom(); // Make sure this.createZoom() is compatible with the composition API
-        });
-      }
-    });
-    this.unwatchTool = watch(
-      () => this.tool,
-      (newValue, oldValue) => {
-        if (!oldValue || newValue !== oldValue) {
-          // console.log("This is the tool", this.tool, oldValue, newValue);
-          this.drawing = false;
-          this.selecting = false;
-          this.rowBlockDrawing = false;
-          this.polygonDrawing = false;
-          this.polygonPoints = [];
-        }
-      }
-    );
+    // this.unwatch = watch(this.planSize, (newValue, oldValue) => {
+    //   if (
+    //     !oldValue ||
+    //     newValue.width !== oldValue.width ||
+    //     newValue.height !== oldValue.height
+    //   ) {
+    //     nextTick(() => {
+    //       this.createStage();
+    //       this.createZoom(); // Make sure this.createZoom() is compatible with the composition API
+    //     });
+    //   }
+    // });
+    // this.unwatchTool = watch(
+    //   () => this.tool,
+    //   (newValue, oldValue) => {
+    //     if (!oldValue || newValue !== oldValue) {
+    //       // console.log("This is the tool", this.tool, oldValue, newValue);
+    //       this.drawing = false;
+    //       this.selecting = false;
+    //       this.rowBlockDrawing = false;
+    //       this.polygonDrawing = false;
+    //       this.polygonPoints = [];
+    //     }
+    //   }
+    // );
   },
 
   unmounted() {
     // window.removeEventListener("resize", this.createZoom);
     window.removeEventListener("keydown", this.hotkey);
     // console.log("unMounted");
-    this.unwatch();
-    this.unwatchTool();
+    // this.unwatch();
+    // this.unwatchTool();
   },
 
   methods: {
+    getUniqueTableName() {
+      const tableNames = []
+      const tableAbvs = []
+      for (const z of this.plan.zones) {
+        for (const area of z.areas) {
+          if (area.shape === 'roundTable' || area.shape === 'rectangleTable') {
+            if (area.label && area.label.name)
+              tableNames.push(area.label.name)
+            if (area.label && area.label.abv)
+              tableAbvs.push(area.label.abv)
+          }
+        }
+      }
+      let nName = 1;
+      let nAbv = 1;
+      let labelName = 'Table 1';
+      let abvName = 'T1'
+      while (tableNames.some(name => name === labelName)) {
+        nName++;
+        labelName = `Table ${nName}`;
+      }
+
+      while (tableAbvs.some(name => name === abvName)) {
+        nAbv++;
+        abvName = `T${nAbv}`
+      }
+      return { labelName, abvName }
+    },
+
+    getUniqueGAName() {
+      const gaLabels = []
+      const gaAbvs = []
+      for (const z of this.plan.zones) {
+        for (const area of z.areas) {
+          if (area.shape === 'gaCircle' || area.shape === 'gaSquare' || area.shape === 'gaPolygon') {
+            if (area.label)
+              gaLabels.push(area.label)
+            if (area.abbreviation)
+              gaAbvs.push(area.abbreviation)
+          }
+        }
+      }
+      let nName = 1;
+      let nAbv = 1;
+      let gaLabel = 'General Admission 1';
+      let gaAbv = 'GA1'
+      while (gaLabels.some(name => name === gaLabel)) {
+        nName++;
+        gaLabel = `General Admission ${nName}`;
+      }
+
+      while (gaAbvs.some(name => name === gaAbv)) {
+        nAbv++;
+        gaAbv = `GA${nAbv}`
+      }
+      return { gaLabel, gaAbv }
+    },
+
     setZoomTransform(t) {
       const store = useMainStore();
       store.setZoomTransform(t);
     },
+
 
     startRotating(event) {
       if (!this.svg) return;
@@ -567,6 +717,11 @@ export default {
         this.selectionBoundary.x + this.selectionBoundary.width / 2;
       this.rotatingOriginY =
         this.selectionBoundary.y + this.selectionBoundary.height / 2;
+      useMainStore().set_Ox(this.rotatingOriginX);
+      useMainStore().set_Oy(this.rotatingOriginY);
+      // this.temp_ox = this.selectionBoundary.x + this.selectionBoundary.width / 2;
+      // this.temp_oy = this.selectionBoundary.y + this.selectionBoundary.height / 2;
+      // console.log('When', this.rotatingOriginX)
       this.rotatingStartAngle = 0;
       this.rotatingHandleX = drawPos.x;
       this.rotatingHandleY = drawPos.y;
@@ -590,22 +745,26 @@ export default {
       );
       switch (node) {
         case "nw":
+          this.moveDirection = 1;
           this.resizingOriginX =
             this.selectionBoundary.x + this.selectionBoundary.width;
           this.resizingOriginY =
             this.selectionBoundary.y + this.selectionBoundary.height;
           break;
         case "ne":
+          this.moveDirection = 2;
           this.resizingOriginX = this.selectionBoundary.x;
           this.resizingOriginY =
             this.selectionBoundary.y + this.selectionBoundary.height;
           break;
         case "sw":
+          this.moveDirection = 4;
           this.resizingOriginX =
             this.selectionBoundary.x + this.selectionBoundary.width;
           this.resizingOriginY = this.selectionBoundary.y;
           break;
         case "se":
+          this.moveDirection = 3;
           this.resizingOriginX = this.selectionBoundary.x;
           this.resizingOriginY = this.selectionBoundary.y;
           break;
@@ -641,6 +800,7 @@ export default {
     },
 
     startDraggingPolygonPoint(uuid, pid, zone, event) {
+      console.log('startDragging')
       if (!this.svg) return;
       const svgbox = this.getSvgRect();
       const pos = positionInZone(
@@ -656,13 +816,25 @@ export default {
         event.shiftKey,
         pos.x,
         pos.y,
-        zone.uuid
+        zone
       );
     },
 
     mousedown(event) {
       if (!this.svg) return;
 
+      if (this.selectedIcon) {
+        const { offsetX, offsetY } = event;
+        this.iconStore.placeIcon({
+          path: this.selectedIcon.src,
+          transform: `translate(${offsetX}, ${offsetY})`,
+          rotation: 0,
+          scale: 1
+        })
+        this.iconStore.resetSelectedIcon();
+        document.body.style.cursor = 'default';
+        return;
+      }
       const store = useMainStore();
 
       if (event.ctrlKey || event.metaKey) {
@@ -673,9 +845,18 @@ export default {
         return;
       }
       const svgbox = this.getSvgRect(); //this.getSvgRect();
+      const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
       // console.log(svgbox);
 
-      const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
+      let targetPos = positionInZone(
+        event.clientX - svgbox.x,
+        event.clientY - svgbox.y,
+        this.zoomTransform,
+        zone
+      );
+
+      if (targetPos.x < 0 || targetPos.y < 0 || targetPos.x > this.plan.size.width || targetPos.y > this.plan.size.height) return;
+
       switch (this.tool) {
         // case "hand":
         //   console.log("changed to handon");
@@ -694,8 +875,17 @@ export default {
           this.selectingStartY = selPos.y;
           this.selectingCurrentX = selPos.x;
           this.selectingCurrentY = selPos.y;
+
+          // this.rotatingOriginX =
+          //   this.selectionBoundary.x + this.selectionBoundary.width / 2;
+          // this.rotatingOriginY =
+          //   this.selectionBoundary.y + this.selectionBoundary.height / 2;
+          // console.log('Here?')
+          // console.log(this.rotatingOriginX);
           break;
         }
+        case "gaCircle":
+        case "gaSquare":
         case "rectangle":
         case "circle":
         case "ellipse": {
@@ -726,12 +916,17 @@ export default {
             this.zoomTransform,
             zone
           );
+          const width = estimateTextWidth('Text', 32);
+          const height = 32;
           if (event.shiftKey || this.bSnap2Grid) {
             targetPos = findClosestGridPoint({
               x: targetPos.x,
               y: targetPos.y,
             });
           }
+
+          if (targetPos.x - width / 2 < 0 || targetPos.x + width / 2 > this.plan.size.width || targetPos.y - height / 2 < 0 || targetPos.y + height / 2 > this.plan.size.height)
+            return;
           const newId = uuid();
           usePlanStore()
             .createArea(this.selectedZone, {
@@ -746,6 +941,7 @@ export default {
                 position: { x: 0, y: 0 },
                 color: "#333333",
                 text: "Text",
+                size: 32,
               },
             })
             .then(() => {
@@ -762,45 +958,57 @@ export default {
             this.zoomTransform,
             zone
           );
+          // if (targetPos.x < 35 || targetPos.y < 35 || targetPos.x > this.plan.size.width - 35 || targetPos.y > this.plan.size.height - 35) return;
           if (event.shiftKey || this.bSnap2Grid) {
             targetPos = findClosestGridPoint({
               x: targetPos.x,
               y: targetPos.y,
             });
           }
+          if (targetPos.x - 45 < 0 || targetPos.x + 45 > this.plan.size.width || targetPos.y - 42 < 0 || targetPos.y + 42 > this.plan.size.height)
+            return;
           const arr = []
-          for (let i = 0; i < this.nseat; i++) {
+          for (let i = 0; i < 6; i++) {
             arr.push(i);
           }
+
+          const { labelName, abvName } = this.getUniqueTableName();
           const newId = uuid();
           usePlanStore()
             .createArea(this.selectedZone, {
               shape: "roundTable",
+              space: 0,
               rotation: 0,
               uuid: newId,
+              label: {
+                position: {
+                  x: 0,
+                  y: 0,
+                },
+                name: labelName,
+                abv: abvName,
+                color: "#333333",
+                size: 16,
+              },
               position: {
                 x: targetPos.x,
                 y: targetPos.y,
-                r: 35
               },
-              text: {
-                position: { x: 0, y: 0 },
-                color: "#333333",
-                text: "",
-              },
-              roundTable: {
-                seats: arr.map((item, idx, arr) => {
-                  const degree = 2 * Math.PI / arr.length * idx;
-                  const uid = uuid();
-                  return {
-                    text: (idx + 1).toString(),
-                    x: 40 * Math.cos(degree),
-                    y: 40 * Math.sin(degree),
-                    r: 10,
-                    uid
-                  }
-                })
-              }
+              radius: 25,
+              capacity: 6,
+              seats: arr.map((item, idx, arr) => {
+                const degree = 2 * Math.PI / arr.length * idx;
+                return {
+                  seat_number: (idx + 1).toString(),
+                  position: {
+                    x: 35 * Math.cos(degree),
+                    y: 35 * Math.sin(degree),
+                  },
+                  r: 10,
+                  guid: generateID(),
+                  uuid: uuid()
+                }
+              })
             })
             .then(() => {
               this.$nextTick(() => {
@@ -823,134 +1031,71 @@ export default {
               y: targetPos.y,
             });
           }
-          const arr = []
-          for (let i = 0; i < this.nseat; i++) {
-            arr.push(i);
-          }
+          if (targetPos.x - 70 < 0 || targetPos.x + 70 > this.plan.size.width || targetPos.y - 50 < 0 || targetPos.y + 50 > this.plan.size.width)
+            return;
+          const dx = 120 / 3;
+          let top = []
+          for (let i = 0; i < 4; i++) top.push(i)
+          top = top.map((item, idx) => {
+            return {
+              position: {
+                x: idx * dx + 10,
+                y: -10
+              },
+              seat_number: (idx + 1).toString(),
+              color: "#333333",
+              uuid: uuid(),
+              guid: generateID(),
+              radius: 10,
+              special: 'top'
+            }
+          })
+          let bottom = []
+          for (let i = 0; i < 4; i++) bottom.push(i)
+          bottom = bottom.map((item, idx) => {
+            return {
+              position: {
+                x: idx * dx + 10,
+                y: 70
+              },
+              radius: 10,
+              seat_number: (idx + 5).toString(),
+              color: "#333333",
+              uuid: uuid(),
+              guid: generateID(),
+              special: 'bottom'
+            }
+          })
+          const { labelName, abvName } = this.getUniqueTableName();
           const newId = uuid();
           usePlanStore()
             .createArea(this.selectedZone, {
               shape: "rectangleTable",
-              rotation: 0,
-              uuid: newId,
-              position: {
-                x: targetPos.x - 40,
-                y: targetPos.y - 20,
-                width: 140,
-                height: 60
-              },
-              text: {
-                position: { x: 0, y: 0 },
-                color: "#333333",
-                text: "",
+              capacity: {
+                top: 4,
+                bottom: 4,
+                left: 0,
+                right: 0,
               },
               rectangleTable: {
-                seats: arr.map((item, idx, arr) => {
-                  const len = arr.length;
-                  const mid = Math.ceil(len / 2);
-                  const width = 140 - 30;
-                  const height = 60;
-                  // console.log('sdh,', idx)
-                  let x;
-                  // if (len % 2 === 0) {
-                  x = (width / (mid - 1)) * (idx % mid);
-                  // }
-                  // else {
-                  //   x = (width / (mid - 1 - Math.floor(idx / mid))) * (idx % mid);
-                  // }
-                  const y = idx < mid ? -5 : 65;
-                  // console.log('width, height', x, y)
-
-                  const uid = uuid();
-                  return {
-                    text: (idx + 1).toString(),
-                    x: x + 15,
-                    y,
-                    r: 10,
-                    uid
-                  }
-                })
-              }
-            })
-            .then(() => {
-              this.$nextTick(() => {
-                store.toggleSelection([newId], this.selectedZone, false);
-              });
-            });
-          break;
-        }
-
-        case "gaSquare": {
-          let targetPos = positionInZone(
-            event.clientX - svgbox.x,
-            event.clientY - svgbox.y,
-            this.zoomTransform,
-            zone
-          );
-          if (event.shiftKey || this.bSnap2Grid) {
-            targetPos = findClosestGridPoint({
-              x: targetPos.x,
-              y: targetPos.y,
-            });
-          }
-          const newId = uuid();
-          usePlanStore()
-            .createArea(this.selectedZone, {
-              shape: "gaSquare",
+                width: 140,
+                height: 60,
+              },
               rotation: 0,
               uuid: newId,
               position: {
-                x: targetPos.x - 40,
-                y: targetPos.y - 40
+                x: targetPos.x,
+                y: targetPos.y,
               },
-              text: {
+              label: {
+                name: labelName,
+                abv: abvName,
                 position: { x: 0, y: 0 },
                 color: "#333333",
                 text: "",
+                size: 16
               },
-              gaSquare: {
-                scale: 4
-              }
-            })
-            .then(() => {
-              this.$nextTick(() => {
-                store.toggleSelection([newId], this.selectedZone, false);
-              });
-            });
-          break;
-        }
-
-        case "gaCircle": {
-          let targetPos = positionInZone(
-            event.clientX - svgbox.x,
-            event.clientY - svgbox.y,
-            this.zoomTransform,
-            zone
-          );
-          if (event.shiftKey || this.bSnap2Grid) {
-            targetPos = findClosestGridPoint({
-              x: targetPos.x,
-              y: targetPos.y,
-            });
-          }
-          const newId = uuid();
-          usePlanStore()
-            .createArea(this.selectedZone, {
-              shape: "gaCircle",
-              rotation: 0,
-              uuid: newId,
-              position: {
-                x: targetPos.x - 40,
-                y: targetPos.y - 40
-              },
-              text: {
-                position: { x: 0, y: 0 },
-                color: "#333333",
-                text: "",
-              },
-              gaCircle: {
-                scale: 4
-              }
+              seats: [...top, ...bottom]
             })
             .then(() => {
               this.$nextTick(() => {
@@ -1011,6 +1156,8 @@ export default {
           this.drawingStartY = rowPos.y;
           this.drawingCurrentX = rowPos.x;
           this.drawingCurrentY = rowPos.y;
+          this.rowCurrentX = rowPos.x;
+          this.rowCurrentY = rowPos.y;
           break;
         }
         case "rows": {
@@ -1031,6 +1178,8 @@ export default {
           this.drawingStartY = pos.y;
           this.drawingCurrentX = pos.x;
           this.drawingCurrentY = pos.y;
+          this.rowCurrentX = pos.x;
+          this.rowCurrentY = pos.y;
           break;
         }
         case "stgrows": {
@@ -1051,10 +1200,34 @@ export default {
           this.drawingStartY = pos.y;
           this.drawingCurrentX = pos.x;
           this.drawingCurrentY = pos.y;
+          this.rowCurrentX = pos.x;
+          this.rowCurrentY = pos.y;
           break;
         }
+        case "focusPoint":
+          if (Math.abs(targetPos.x - this.focusPointX) < 30 && Math.abs(targetPos.y - this.focusPointY) < 30)
+            this.focusDragging = true;
+          break;
       }
     },
+    temp_Rotate(val) {
+      const store = useMainStore();
+      store.moveRotating(
+        store.temp_ox,
+        store.temp_oy,
+        val * Math.PI / 180
+      );
+    },
+
+    // Curve() {
+    //   const store = useMainStore();
+    //   store.circleRows(
+    //     10,
+    //     10,
+    //     false
+    //   );
+    // },
+
     mousemove(event) {
       if (!this.svg) return;
       const store = useMainStore();
@@ -1073,18 +1246,26 @@ export default {
       );
       const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
 
+      if (pos.x < 0 || pos.y < 0 || pos.x > this.plan.size.width || pos.y > this.plan.size.height) {
+        this.mouseStatus = false;
+        return;
+      }
+
+      this.mouseStatus = true;
+
       if (this.rotating && this.tool !== "seatselect") {
         let angle = -Math.atan(
           (this.rotatingOriginX - pos.x) / (this.rotatingOriginY - pos.y)
         );
 
+
+        console.log(this.bSnap2Grid)
         // rotate-setting
-        // if (event.shiftKey || this.bSnap2Grid) {
-        // console.log('rotating')
-        // Snap to 5° intervals
-        if (angle < 0) angle += 2 * Math.PI;
-        angle -= angle % ((5 / 180) * Math.PI);
-        // }
+        if (event.shiftKey || this.bSnap2Grid) {
+          // Snap to 5° intervals
+          if (angle < 0) angle += 2 * Math.PI;
+          angle -= angle % ((5 / 180) * Math.PI);
+        }
         if (pos.y > this.rotatingOriginY) angle += Math.PI;
         const store = useMainStore();
         store.moveRotating(
@@ -1092,6 +1273,8 @@ export default {
           this.rotatingOriginY,
           angle - this.rotatingStartAngle
         );
+
+        // console.log('sec', angle, this.rotatingStartAngle);
         this.rotatingStartAngle = angle;
         this.rotatingHandleX = pos.x;
         this.rotatingHandleY = pos.y;
@@ -1102,10 +1285,27 @@ export default {
           (pos.x - this.resizingOriginX) * (pos.x - this.resizingOriginX) +
           (pos.y - this.resizingOriginY) * (pos.y - this.resizingOriginY)
         );
+        for (const z of this.plan.zones) {
+          for (const row of z.rows) {
+            if (this.selection.includes(row.uuid)) {
+              if (row.seats.length < 2) return;
+              const x0 = row.seats[0].position.x;
+              const y0 = row.seats[0].position.y;
+              const x1 = row.seats[1].position.x;
+              const y1 = row.seats[1].position.y;
+              if (
+                Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1)) *
+                (distance / this.resizingStartDistance) <
+                20
+              )
+                return;
+            }
+          }
+        }
         store.moveResizing(
           this.resizingOriginX,
           this.resizingOriginY,
-          distance / this.resizingStartDistance
+          distance / this.resizingStartDistance,
         );
         this.resizingStartDistance = distance;
       }
@@ -1113,12 +1313,20 @@ export default {
       switch (this.tool) {
         case "select":
           if (store.dragging) {
+            // if (this.selectionBoundary.x < 0 || this.selectionBoundary.y < 0 || this.selectionBoundary.x + this.selectionBoundary.width > (this.plan.size.width + 10) ||
+            //   this.selectionBoundary.y + this.selectionBoundary.height > this.plan.size.height) return;
             store.moveDragging(
               pos.x,
               pos.y,
               event.shiftKey || this.bSnap2Grid,
               this.zoomTransform.k
             );
+            // console.log('akfAjej', this.selectionBoundary)
+            if (this.selectionBoundary) {
+              useMainStore().set_Ox(this.selectionBoundary.x + this.selectionBoundary.width / 2);
+              useMainStore().set_Oy(this.selectionBoundary.y + this.selectionBoundary.height / 2);
+            }
+
           } else if (this.selecting) {
             this.selectingCurrentX = pos.x;
             this.selectingCurrentY = pos.y;
@@ -1171,13 +1379,20 @@ export default {
             }
 
             // console.log(this.selectedZone)
+            //Edit Here plz
+
+            if (this.selectionBoundary) {
+              useMainStore().set_Ox(this.selectionBoundary.x + this.selectionBoundary.width / 2);
+              useMainStore().set_Oy(this.selectionBoundary.y + this.selectionBoundary.height / 2);
+            }
             store.setSelection(uuids, this.selectedZone, event.shiftKey);
+
           } else {
             return false;
           }
+
           break;
         case "seatselect":
-          // console.log('plan mousemove')
           if (store.dragging) {
             store.moveDragging(
               pos.x,
@@ -1228,6 +1443,62 @@ export default {
                   }
                 }
               }
+
+              for (const a of z.areas) {
+                if (a.shape === 'roundTable') {
+                  for (const s of a.seats) {
+                    let abox = {
+                      x: a.position.x + s.position.x - (s.radius || 10),
+                      y: a.position.y + s.position.y - (s.radius || 10),
+                      width: 2 * (s.radius || 10),
+                      height: 2 * (s.radius || 10)
+                    }
+                    if (a.rotation) {
+                      abox = rotateRectangluarBox(a, abox);
+                    }
+                    abox.x += z.position.x;
+                    abox.y += z.position.y;
+                    if (
+                      (abox.x + abox.width) >=
+                      xmin &&
+                      abox.x <=
+                      xmax &&
+                      (abox.y + abox.height) >=
+                      ymin &&
+                      abox.y <=
+                      ymax
+                    ) {
+                      uuids.push(s.uuid);
+                    }
+                  }
+                } else if (a.shape === 'rectangleTable') {
+                  for (const s of a.seats) {
+                    let abox = {
+                      x: a.position.x + s.position.x - (s.radius || 10) - a.rectangleTable.width / 2,
+                      y: a.position.y + s.position.y - (s.radius || 10) - a.rectangleTable.height / 2,
+                      width: 2 * (s.radius || 10),
+                      height: 2 * (s.radius || 10)
+                    }
+                    if (a.rotation) {
+                      abox = rotateRectangluarBox(a, abox);
+                    }
+                    abox.x += z.position.x;
+                    abox.y += z.position.y;
+                    if (
+                      (abox.x + abox.width) >=
+                      xmin &&
+                      abox.x <=
+                      xmax &&
+                      (abox.y + abox.height) >=
+                      ymin &&
+                      abox.y <=
+                      ymax
+                    ) {
+                      uuids.push(s.uuid);
+                    }
+                  }
+                }
+              }
             }
             // console.log(this.selectedZone)
 
@@ -1236,10 +1507,20 @@ export default {
             return false;
           }
           break;
+        case "gaCircle":
+        case "gaSquare":
         case "rectangle":
         case "circle":
         case "ellipse":
           if (!this.drawing) return false;
+          if (event.shiftKey || this.bSnap2Grid) {
+            pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
+          }
+          this.drawingCurrentX = pos.x;
+          this.drawingCurrentY = pos.y;
+          break;
+        case "roundTable":
+        case "rectangleTable":
           if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
           }
@@ -1257,38 +1538,42 @@ export default {
           this.drawingCurrentY = pos.y;
           break;
         case "row":
+          this.rowCurrentX = pos.x;
+          this.rowCurrentY = pos.y;
           if (!this.rowDrawing) return false;
           // rotate-setting
-          // if (event.shiftKey || this.bSnap2Grid) {
-          // Snap to 5° intervals
-          {
-            const dx = pos.x - this.drawingStartX;
-            const dy = pos.y - this.drawingStartY;
-            let angle = (-Math.atan(dx / dy) / Math.PI) * 180;
-            let distance = Math.sqrt(dx * dx + dy * dy);
-            if (angle < 0) angle += 360;
-            angle -= angle % 5;
-            if (
-              Math.round(Math.abs(angle)) === 90 ||
-              Math.round(Math.abs(angle)) === 0 ||
-              Math.round(Math.abs(angle)) === 180 ||
-              Math.round(Math.abs(angle)) === 270
-            ) {
-              distance = Math.round(distance / 10) * 10;
+          if (event.shiftKey || this.bSnap2Grid) {
+            // Snap to 5° intervals
+            {
+              const dx = pos.x - this.drawingStartX;
+              const dy = pos.y - this.drawingStartY;
+              let angle = (-Math.atan(dx / dy) / Math.PI) * 180;
+              let distance = Math.sqrt(dx * dx + dy * dy);
+              if (angle < 0) angle += 360;
+              angle -= angle % 5;
+              if (
+                Math.round(Math.abs(angle)) === 90 ||
+                Math.round(Math.abs(angle)) === 0 ||
+                Math.round(Math.abs(angle)) === 180 ||
+                Math.round(Math.abs(angle)) === 270
+              ) {
+                distance = Math.round(distance / 10) * 10;
+              }
+              this.drawingCurrentX =
+                this.drawingStartX -
+                Math.sign(dy) * distance * Math.sin((angle / 180) * Math.PI);
+              this.drawingCurrentY =
+                this.drawingStartY +
+                Math.sign(dy) * distance * Math.cos((angle / 180) * Math.PI);
             }
-            this.drawingCurrentX =
-              this.drawingStartX -
-              Math.sign(dy) * distance * Math.sin((angle / 180) * Math.PI);
-            this.drawingCurrentY =
-              this.drawingStartY +
-              Math.sign(dy) * distance * Math.cos((angle / 180) * Math.PI);
+          } else {
+            this.drawingCurrentX = pos.x;
+            this.drawingCurrentY = pos.y;
           }
-          // } else {
-          //   this.drawingCurrentX = pos.x;
-          //   this.drawingCurrentY = pos.y;
-          // }
           break;
         case "rows":
+          this.rowCurrentX = pos.x;
+          this.rowCurrentY = pos.y;
           if (!this.rowBlockDrawing) return false;
           if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
@@ -1297,7 +1582,8 @@ export default {
           this.drawingCurrentY = pos.y;
           break;
         case "stgrows":
-          console.log('stgrows')
+          this.rowCurrentX = pos.x;
+          this.rowCurrentY = pos.y;
           if (!this.stgrowBlockDrawing) return false;
           if (event.shiftKey || this.bSnap2Grid) {
             pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
@@ -1306,6 +1592,7 @@ export default {
           this.drawingCurrentY = pos.y;
           break;
         case "polygon":
+        case "gaPolygon":
           if (store.dragging) {
             store.moveDragging(
               pos.x,
@@ -1348,6 +1635,13 @@ export default {
           //   this.drawingCurrentX = pos.x;
           //   this.drawingCurrentY = pos.y;
           // }
+          break;
+        case "focusPoint":
+          if (this.focusDragging) {
+            this.planstore.setFocusPoint(pos.x, pos.y)
+            // this.focusPointX = pos.x;
+            // this.focusPointY = pos.y;
+          }
           break;
       }
     },
@@ -1440,6 +1734,61 @@ export default {
                   }
                 }
               }
+              for (const a of z.areas) {
+                if (a.shape === 'roundTable') {
+                  for (const s of a.seats) {
+                    let abox = {
+                      x: a.position.x + s.position.x - (s.radius || 10),
+                      y: a.position.y + s.position.y - (s.radius || 10),
+                      width: 2 * (s.radius || 10),
+                      height: 2 * (s.radius || 10)
+                    }
+                    if (a.rotation) {
+                      abox = rotateRectangluarBox(a, abox);
+                    }
+                    abox.x += z.position.x;
+                    abox.y += z.position.y;
+                    if (
+                      (abox.x + abox.width) >=
+                      xmin &&
+                      abox.x <=
+                      xmax &&
+                      (abox.y + abox.height) >=
+                      ymin &&
+                      abox.y <=
+                      ymax
+                    ) {
+                      uuids.push(s.uuid);
+                    }
+                  }
+                } else if (a.shape === 'rectangleTable') {
+                  for (const s of a.seats) {
+                    let abox = {
+                      x: a.position.x + s.position.x - (s.radius || 10) - a.rectangleTable.width / 2,
+                      y: a.position.y + s.position.y - (s.radius || 10) - a.rectangleTable.height / 2,
+                      width: 2 * (s.radius || 10),
+                      height: 2 * (s.radius || 10)
+                    }
+                    if (a.rotation) {
+                      abox = rotateRectangluarBox(a, abox);
+                    }
+                    abox.x += z.position.x;
+                    abox.y += z.position.y;
+                    if (
+                      (abox.x + abox.width) >=
+                      xmin &&
+                      abox.x <=
+                      xmax &&
+                      (abox.y + abox.height) >=
+                      ymin &&
+                      abox.y <=
+                      ymax
+                    ) {
+                      uuids.push(s.uuid);
+                    }
+                  }
+                }
+              }
             }
 
             // console.log('SeatSelect', uuids, this.selectedZone);
@@ -1503,10 +1852,13 @@ export default {
             // console.log(uuids, this.selectedZone);
             // console.log("Select", uuids, this.selectedZone, event.shiftKey);
             // console.log(this.selectedZone);
+
             store.setSelection(uuids, this.selectedZone, event.shiftKey);
             return true;
           }
           return false;
+        case "gaCircle":
+        case "gaSquare":
         case "rectangle":
         case "circle":
         case "ellipse":
@@ -1517,7 +1869,7 @@ export default {
           if (this.tool === "rectangle") {
             const w = Math.abs(pos.x - this.drawingStartX);
             const h = Math.abs(pos.y - this.drawingStartY);
-            if (w < 1 || h < 1) {
+            if (w < 5 || h < 5) {
               this.drawing = false;
               return; // probably a misclick
             }
@@ -1525,7 +1877,8 @@ export default {
               .createArea(this.selectedZone, {
                 shape: "rectangle",
                 color: "#cccccc", // todo: use previously used color
-                border_color: "#000000", // todo: use previously used color
+                border_color: this.mode ? "#ffcf37" : "#000000", // todo: use previously used color
+                border_width: 2,
                 rotation: 0,
                 uuid: newId,
                 position: {
@@ -1555,6 +1908,54 @@ export default {
                   store.toggleSelection([newId], this.selectedZone, false);
                 });
               });
+          } else if (this.tool === "gaSquare") {
+            const w = Math.abs(pos.x - this.drawingStartX);
+            const h = Math.abs(pos.y - this.drawingStartY);
+            if (w < 5 || h < 5) {
+              this.drawing = false;
+              return; // probably a misclick
+            }
+            const { gaLabel, gaAbv } = this.getUniqueGAName();
+            usePlanStore()
+              .createArea(this.selectedZone, {
+                shape: "gaSquare",
+                show_label: true,
+                label: gaLabel,
+                abbreviation: gaAbv,
+                section_label: "",
+                section_abv: "",
+                color: "#cccccc", // todo: use previously used color
+                border_color: "#000000", // todo: use previously used color
+                border_width: 2,
+                rotation: 0,
+                uuid: newId,
+                guid: generateID(),
+                capacity: 0,
+                position: {
+                  x: round(
+                    Math.min(pos.x, this.drawingStartX) - zone.position.x,
+                    4
+                  ),
+                  y: round(
+                    Math.min(pos.y, this.drawingStartY) - zone.position.y,
+                    4
+                  ),
+                },
+                text: {
+                  position: { x: round(w / 2, 4), y: round(h / 2, 4) },
+                  color: "#333333",
+                  text: gaAbv,
+                },
+                rectangle: {
+                  width: round(w, 4),
+                  height: round(h, 4),
+                },
+              })
+              .then(() => {
+                this.$nextTick(() => {
+                  store.toggleSelection([newId], this.selectedZone, false);
+                });
+              });
           } else if (this.tool === "circle") {
             if (event.shiftKey || this.bSnap2Grid) {
               pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
@@ -1575,6 +1976,7 @@ export default {
                 shape: "circle",
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
+                border_width: 2,
                 rotation: 0,
                 uuid: newId,
                 position: {
@@ -1601,7 +2003,7 @@ export default {
             }
             const w = Math.abs(pos.x - this.drawingStartX);
             const h = Math.abs(pos.y - this.drawingStartY);
-            if (w < 1 || h < 1) {
+            if (w < 5 || h < 5) {
               this.drawing = false;
               return; // probably a misclick
             }
@@ -1610,6 +2012,7 @@ export default {
                 shape: "ellipse",
                 color: "#cccccc", // todo: use previously used color
                 border_color: "#000000", // todo: use previously used color
+                border_width: 2,
                 rotation: 0,
                 uuid: newId,
                 position: {
@@ -1620,6 +2023,53 @@ export default {
                   position: { x: 0, y: 0 },
                   color: "#333333",
                   text: "",
+                },
+                ellipse: {
+                  radius: {
+                    x: round(w, 4),
+                    y: round(h, 4),
+                  },
+                },
+              })
+              .then(() => {
+                this.$nextTick(() => {
+                  store.toggleSelection([newId], this.selectedZone, false);
+                });
+              });
+          } else if (this.tool === "gaCircle") {
+            if (event.shiftKey || this.bSnap2Grid) {
+              pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
+            }
+            const w = Math.abs(pos.x - this.drawingStartX);
+            const h = Math.abs(pos.y - this.drawingStartY);
+            if (w < 5 || h < 5) {
+              this.drawing = false;
+              return; // probably a misclick
+            }
+            const { gaLabel, gaAbv } = this.getUniqueGAName();
+            usePlanStore()
+              .createArea(this.selectedZone, {
+                shape: "gaCircle",
+                show_label: true,
+                label: gaLabel,
+                abbreviation: gaAbv,
+                section_label: "",
+                section_abv: "",
+                color: "#cccccc", // todo: use previously used color
+                border_color: "#000000", // todo: use previously used color
+                border_width: 2,
+                rotation: 0,
+                capacity: 0,
+                uuid: newId,
+                guid: generateID(),
+                position: {
+                  x: round(this.drawingStartX - zone.position.x, 4),
+                  y: round(this.drawingStartY - zone.position.y, 4),
+                },
+                text: {
+                  position: { x: 0, y: 0 },
+                  color: "#333333",
+                  text: gaAbv,
                 },
                 ellipse: {
                   radius: {
@@ -1675,14 +2125,80 @@ export default {
                 comparepos = polysnap(pos, 2);
               }
             }
+            // if (
+            //   comparepos.x ===
+            //   this.polygonPoints[this.polygonPoints.length - 1].x &&
+            //   comparepos.y ===
+            //   this.polygonPoints[this.polygonPoints.length - 1].y
+            // )
             if (
-              comparepos.x ===
-              this.polygonPoints[this.polygonPoints.length - 1].x &&
-              comparepos.y ===
-              this.polygonPoints[this.polygonPoints.length - 1].y
+              Math.abs(comparepos.x - this.polygonPoints[this.polygonPoints.length - 1].x) < 5
+              && Math.abs(comparepos.y - this.polygonPoints[this.polygonPoints.length - 1].y) < 5
             ) {
               // "Double click"
               this.finishPolygon();
+            } else {
+              this.polygonPoints.push(pos);
+            }
+          } else {
+            this.polygonDrawing = true;
+            if (event.shiftKey || this.bSnap2Grid) {
+              pos = findClosestGridPoint({ x: pos.x, y: pos.y, zone: zone });
+            }
+            this.polygonPoints = [pos];
+          }
+          break;
+        case "gaPolygon":
+          if (store.dragging) {
+            store.stopDragging();
+            break;
+          }
+          if (this.polygonDrawing) {
+            const pp = this.polygonPoints;
+            const polysnap = (pos, offset) => {
+              // Snap to 5° intervals, and snap to grid length when at x*90°
+              const dx = pos.x - pp[pp.length - offset].x;
+              const dy = pos.y - pp[pp.length - offset].y;
+              let angle = (-Math.atan(dx / dy) / Math.PI) * 180;
+              let distance = Math.sqrt(dx * dx + dy * dy);
+              if (angle < 0) angle += 360;
+              angle -= angle % 5;
+              if (
+                Math.round(Math.abs(angle)) === 90 ||
+                Math.round(Math.abs(angle)) === 0 ||
+                Math.round(Math.abs(angle)) === 180 ||
+                Math.round(Math.abs(angle)) === 270
+              ) {
+                distance = Math.round(distance / 10) * 10;
+              }
+              return {
+                x:
+                  pp[pp.length - offset].x -
+                  Math.sign(dy) * distance * Math.sin((angle / 180) * Math.PI),
+                y:
+                  pp[pp.length - offset].y +
+                  Math.sign(dy) * distance * Math.cos((angle / 180) * Math.PI),
+              };
+            };
+            let comparepos = pos;
+            if (event.shiftKey || this.bSnap2Grid) {
+              pos = polysnap(pos, 1);
+              if (pp.length > 1) {
+                comparepos = polysnap(pos, 2);
+              }
+            }
+            // if (
+            //   comparepos.x ===
+            //   this.polygonPoints[this.polygonPoints.length - 1].x &&
+            //   comparepos.y ===
+            //   this.polygonPoints[this.polygonPoints.length - 1].y
+            // )
+            if (
+              Math.abs(comparepos.x - this.polygonPoints[this.polygonPoints.length - 1].x) < 5
+              && Math.abs(comparepos.y - this.polygonPoints[this.polygonPoints.length - 1].y) < 5
+            ) {
+              // "Double click"
+              this.finishGAPolygon();
             } else {
               this.polygonPoints.push(pos);
             }
@@ -1786,8 +2302,13 @@ export default {
             this.rowDrawing = false;
           }
           break;
+        case "focusPoint":
+          this.focusDragging = false;
+          break;
       }
     },
+
+
     finishPolygon() {
       const newId = uuid();
       const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
@@ -1802,6 +2323,7 @@ export default {
           shape: "polygon",
           color: "#cccccc", // todo: use previously used color
           border_color: "#000001", // todo: use previously used color
+          border_width: 2,
           rotation: 0,
           uuid: newId,
           position: {
@@ -1812,6 +2334,56 @@ export default {
             position: { x: (maxx - minx) / 2, y: (maxy - miny) / 2 },
             color: "#333333",
             text: "",
+          },
+          polygon: {
+            points: this.polygonPoints.map((p) => ({
+              x: p.x - minx,
+              y: p.y - miny,
+            })),
+          },
+        })
+        .then(() => {
+          this.$nextTick(() => {
+            const store = useMainStore();
+            store.toggleSelection([newId], this.selectedZone, false);
+          });
+        });
+    },
+
+
+    finishGAPolygon() {
+      const newId = uuid();
+      const zone = this.plan.zones.find((z) => z.uuid === this.selectedZone);
+      this.polygonDrawing = false;
+
+      const minx = Math.min(...this.polygonPoints.map((p) => p.x));
+      const miny = Math.min(...this.polygonPoints.map((p) => p.y));
+      const maxx = Math.max(...this.polygonPoints.map((p) => p.x));
+      const maxy = Math.max(...this.polygonPoints.map((p) => p.y));
+      const { gaLabel, gaAbv } = this.getUniqueGAName();
+      usePlanStore()
+        .createArea(this.selectedZone, {
+          shape: "gaPolygon",
+          color: "#cccccc", // todo: use previously used color
+          border_color: "#000001", // todo: use previously used color
+          border_width: 2,
+          rotation: 0,
+          uuid: newId,
+          guid: generateID(),
+          capacity: 0,
+          show_label: true,
+          label: gaLabel,
+          abbreviation: gaAbv,
+          section_label: "",
+          section_abv: "",
+          position: {
+            x: minx - zone.position.x,
+            y: miny - zone.position.y,
+          },
+          text: {
+            position: { x: (maxx - minx) / 2, y: (maxy - miny) / 2 },
+            color: "#333333",
+            text: gaAbv,
           },
           polygon: {
             points: this.polygonPoints.map((p) => ({
@@ -1843,7 +2415,7 @@ export default {
     },
 
     createStage() {
-      console.log('createStage')
+      // console.log('createStage')
       const newId = 'b6ea4e4c-4bbc-45eb-ab8d-53fae88c5363#';
       if (this.plan.zones[0].areas.findIndex(item => item.uuid === newId) === -1) {
         usePlanStore()
@@ -1867,11 +2439,27 @@ export default {
               this.store.toggleSelection([newId], this.selectedZone, false);
             });
           });
+        this.plan.point.x = this.plan.size.width / 2;
+        this.plan.point.y = this.plan.size.height / 2;
+        usePlanStore().persistPlan();
       }
     },
 
+    wheel(event) {
+      if (event.ctrlKey) return;
+      const width = window.innerWidth - 300;
+      const height = window.innerHeight - 40;
+      const boxWidth = this.zoomTransform.k * this.plan.size.width;
+      const boxHeight = this.zoomTransform.k * this.plan.size.height;
+      if (event.deltaY > 0 && this.zoomTransform.y < -boxHeight + 100) return;
+      if (event.deltaY < 0 && (this.zoomTransform.y + boxHeight) > (height + boxHeight - 100)) return;
+      if (event.deltaX > 0 && this.zoomTransform.x < -boxWidth + 100) return;
+      if (event.deltaX < 0 && (this.zoomTransform.x + boxWidth) > (width + boxWidth - 100)) return;
+      this.zoomTransform.x -= event.deltaX / 10;
+      this.zoomTransform.y -= event.deltaY / 10;
+    },
+
     createZoom() {
-      console.log('createZoom')
       if (!this.svg) return;
 
       const viewportHeight = this.svg.clientHeight;
@@ -1883,7 +2471,6 @@ export default {
           (viewportHeight - 130) / this.plan.size.height
         )
         : 1;
-      // console.log("here`````````````````");
       this.zoom = d3
         .zoom()
         .scaleExtent([
@@ -1925,11 +2512,12 @@ export default {
           );
         })
         .wheelDelta((event) => {
-          // In contrast to default implementation, do not use a factor 10 if ctrl is pressed
-          return (
-            -event.deltaY *
-            (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002)
-          );
+          if (event.ctrlKey) {
+            return (
+              -event.deltaY *
+              (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002)
+            );
+          } else return 0;
         })
         .on("zoom", (event) => {
           const scale = event.transform.k;
@@ -1963,6 +2551,7 @@ export default {
         .on("wheel", function (event) {
           // Prevent scrolling when the min/max of the zoom extent is reached
           event.preventDefault();
+
         });
 
       const svg = d3.select(this.svg).call(this.zoom);
@@ -1972,6 +2561,10 @@ export default {
     },
 
     hotkey(event) {
+      const width = window.innerWidth - 300;
+      const height = window.innerHeight - 40;
+      const boxWidth = this.zoomTransform.k * this.plan.size.width;
+      const boxHeight = this.zoomTransform.k * this.plan.size.height;
       if (
         event.target !== document.body &&
         !event.target.matches(".c-toolbar *")
@@ -1999,42 +2592,64 @@ export default {
           this.drawing = false;
           if (
             this.tool === "rowCircle" ||
-            this.tool === "rowCircleFixedCenter"
+            this.tool === "rowCircleFixedCenter" ||
+            this.tool === "focusPoint"
           ) {
             useMainStore().changeTool("select");
           }
           event.preventDefault();
           event.stopPropagation();
           return;
+
         case "ArrowUp":
-          useMainStore().moveSelected(
-            0,
-            -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-          );
+          if (this.selection.length) {
+            useMainStore().moveSelected(
+              0,
+              -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+            );
+          } else {
+            if ((this.zoomTransform.y + boxHeight) > (height + boxHeight - 100)) return;
+            this.zoomTransform.y += 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10);
+          }
           event.preventDefault();
           event.stopPropagation();
           return;
         case "ArrowDown":
-          useMainStore().moveSelected(
-            0,
-            1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-          );
+          if (this.selection.length) {
+            useMainStore().moveSelected(
+              0,
+              1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+            );
+          } else {
+            if (this.zoomTransform.y < -boxHeight + 100) return;
+            this.zoomTransform.y -= 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10);
+          }
           event.preventDefault();
           event.stopPropagation();
           return;
         case "ArrowLeft":
-          useMainStore().moveSelected(
-            0,
-            -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-          );
+          if (this.selection.length) {
+            useMainStore().moveSelected(
+              -1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10),
+              0
+            );
+          } else {
+            if ((this.zoomTransform.x + boxWidth) > (width + boxWidth - 100)) return;
+            this.zoomTransform.x += 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+          }
           event.preventDefault();
           event.stopPropagation();
           return;
         case "ArrowRight":
-          useMainStore().moveSelected(
-            0,
-            1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
-          );
+          if (this.selection.length) {
+            useMainStore().moveSelected(
+              1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10),
+              0
+            );
+          } else {
+            if (this.zoomTransform.x < -boxWidth + 100) return;
+            this.zoomTransform.x -= 1 * (event.shiftKey ? 100 : event.altKey ? 1 : 10)
+          }
           event.preventDefault();
           event.stopPropagation();
           return;
@@ -2161,7 +2776,7 @@ export default {
     getTransform() {
       return this.zoomTransform.k;
     },
-    setTransfrom(v) {
+    setTransform(v) {
       this.zoomTransform.k = v;
     },
 
@@ -2194,15 +2809,21 @@ export default {
 };
 </script>
 <template>
-  <svg :width="plan.size.width" :height="plan.size.height" v-if="plan.size"
-    ref="svg" @mousemove="mousemove" @mouseup="mouseup" @mousedown="mousedown"
-    style="
+  <svg id="svg" :width="plan.size.width" :height="plan.size.height"
+    v-if="plan.size" @mousemove="mousemove" @mousedown="mousedown"
+    @mouseup="mouseup" @wheel="wheel" ref="svg" style="
       width: 100%;
       height: 100%;
       background-color: rgb(151, 162, 182);
-      user-select: none;
-    ">
-    <g :class="mainclasses" :transform="zoomTransform.toString()">
+      user-select: none;">
+    <metadata v-html="metadata"></metadata>
+    <defs>
+      <clipPath id="clip">
+        <rect :width="plan.size.width" :height="plan.size.height" />
+      </clipPath>
+    </defs>
+    <g :class="mainclasses" :transform="zoomTransform.toString()"
+      clip-path="url(#clip)">
       <rect :width="plan.size.width" :height="plan.size.height" fill="#fcfcfc"
         :cursor="cursor"></rect>
       <image v-if="background" :width="backgroundWidth" :height="backgroundHeight"
@@ -2223,25 +2844,34 @@ export default {
       <rect v-if="grid" :width="plan.size.width" :height="plan.size.height"
         fill="url(#grid)" :cursor="cursor">
       </rect>
+
+      <g v-show="tool === 'focusPoint'" class="booktik-focus-point"
+        id="booktik-focus-point">
+        <circle :cx="focusPointX" :cy="focusPointY" :r="18" fill="none"
+          stroke="#000" stroke-width="8px" cursor="move">
+        </circle>
+        <circle :cx="focusPointX" :cy="focusPointY" :r="30" fill="none"
+          stroke="#000" stroke-width="5px" cursor="move">
+        </circle>
+        <circle :cx="focusPointX" :cy="focusPointY" :r="100" fill="none"
+          stroke="#cccccc" stroke-width="2px"></circle>
+        <circle :cx="focusPointX" :cy="focusPointY" :r="180" fill="none"
+          stroke="#cccccc" stroke-width="2px"></circle>
+        <circle :cx="focusPointX" :cy="focusPointY" :r="260" fill="none"
+          stroke="#cccccc" stroke-width="2px"></circle>
+      </g>
+
+      <IconComponent />
+
       <ZoneComponent v-for="z in plan.zones" :zone="z" :key="z.uuid"
         :startDragging="startDragging"
-        :startDraggingPolygonPoint="startDraggingPolygonPoint"></ZoneComponent>
+        :startDraggingPolygonPoint="startDraggingPolygonPoint" :ox="temp_ox"
+        :oy="temp_oy" :selectionBoundary="selectionBoundary">
+      </ZoneComponent>
 
-      <!-- <g v-for="b in selectionBoxesVisible" :key="b">
-        <rect class="selection-box" v-if="b.bStatus" :x="b.x - 1.5" :y="b.y - 1.5"
-          :width="b.width + 3" :height="b.height + 3" :key="b" fill="none"></rect>
-
-        <circle class="selection-box" :key="b" v-if="!b.bStatus" :cx="b.x + 10"
-          :cy="b.y + 10" fill="none" r="10">
-        </circle>
-      </g> -->
       <rect class="selection-box" v-for="b in selectionBoxesVisible"
         :x="b.x - 1.5" :y="b.y - 1.5" :width="b.width + 3" :height="b.height + 3"
         :key="b" fill="none"></rect>
-
-      <!-- <circle class="selection-box" v-for="b in selectionBoxesVisible" :key="b"
-        :cx="b.x + 10" :cy="b.y + 10" fill="none" r="10">
-      </circle> -->
 
       <line class="selection-rotate-handle-connector"
         v-if="selection.length && selectionBoundary && currentToolStatus"
@@ -2270,50 +2900,91 @@ export default {
         :width="selectionBoundary.width + 3"
         :height="selectionBoundary.height + 3" fill="none"></rect>
       <rect class="selection-resize-handle-nw"
-        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
+        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats && noTableSelection"
         :x="selectionBoundary.x - 4.5" :y="selectionBoundary.y - 4.5" :width="6"
         :height="6" @mousedown="startResizing($event, 'nw')"></rect>
       <rect class="selection-resize-handle-ne"
-        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
+        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats && noTableSelection"
         :x="selectionBoundary.x + selectionBoundary.width - 1.5"
         :y="selectionBoundary.y - 4.5" :width="6" :height="6"
         @mousedown="startResizing($event, 'ne')"></rect>
       <rect class="selection-resize-handle-sw"
-        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
+        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats && noTableSelection"
         :x="selectionBoundary.x - 4.5"
         :y="selectionBoundary.y + selectionBoundary.height - 1.5" :width="6"
         :height="6" @mousedown="startResizing($event, 'sw')"></rect>
       <rect class="selection-resize-handle-se"
-        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats"
+        v-if="selection.length && selectionBoundary && selectionIncludesNoSeats && noTableSelection"
         :x="selectionBoundary.x + selectionBoundary.width - 1.5"
         :y="selectionBoundary.y + selectionBoundary.height - 1.5" :width="6"
         :height="6" fill="none" @mousedown="startResizing($event, 'se')"></rect>
-      <rect class="preview" v-if="tool == 'rectangle' && drawing"
+      <rect class="preview"
+        v-if="(tool == 'rectangle' || tool == 'gaSquare') && drawing"
         :x="Math.min(drawingStartX, drawingCurrentX)"
         :y="Math.min(drawingStartY, drawingCurrentY)"
         :width="Math.abs(drawingStartX - drawingCurrentX)"
         :height="Math.abs(drawingStartY - drawingCurrentY)"></rect>
-      <circle class="preview" v-if="tool == 'circle' && drawing"
+      <circle class="preview" v-else-if="tool == 'circle' && drawing"
         :cx="drawingStartX" :cy="drawingStartY" :r="Math.sqrt(
           Math.pow(drawingStartX - drawingCurrentX, 2) +
           Math.pow(drawingStartY - drawingCurrentY, 2)
         )
           "></circle>
-      <ellipse class="preview" v-if="tool == 'ellipse' && drawing"
+      <ellipse class="preview"
+        v-else-if="(tool == 'ellipse' || tool == 'gaCircle') && drawing"
         :cx="drawingStartX" :cy="drawingStartY"
         :rx="Math.abs(drawingStartX - drawingCurrentX)"
         :ry="Math.abs(drawingStartY - drawingCurrentY)"></ellipse>
-      <polygon class="preview" v-if="tool === 'polygon' && polygonDrawing" x="0"
-        y="0" :points="polygonPreviewPoints"></polygon>
+
+      <polygon class="preview" v-else-if="tool === 'polygon' && polygonDrawing"
+        x="0" y="0" :points="polygonPreviewPoints"></polygon>
+
+      <polygon class="preview" v-else-if="tool === 'gaPolygon' && polygonDrawing"
+        x="0" y="0" :points="polygonPreviewPoints"></polygon>
+
       <g class="row-circle-preview"
-        v-if="tool === 'rowCircle' || tool === 'rowCircleFixedCenter'">
+        v-else-if="tool === 'rowCircle' || tool === 'rowCircleFixedCenter'">
         <circle class="preview" v-for="circ in rowCirclePreviews" :r="circ.radius"
           :cx="circ.cx" :cy="circ.cy" :key="circ"></circle>
         <circle class="preview-center" v-for="circ in rowCirclePreviews" :r="2"
           :cx="circ.cx" :cy="circ.cy" :key="circ"></circle>
       </g>
 
-      <g class="row-preview" v-if="tool === 'row' && rowDrawing">
+      <g class="preview" v-else-if="(tool === 'roundTable') && mouseStatus">
+        <circle class="seat-preview" :cx="drawingCurrentX" :cy="drawingCurrentY"
+          :r="25">
+        </circle>
+        <circle class="seat-preview" v-for="index in 6" :key="index"
+          :cx="drawingCurrentX + 35 * Math.cos(2 * Math.PI / 6 * index)"
+          :cy="drawingCurrentY + 35 * Math.sin(2 * Math.PI / 6 * index)" :r="10">
+        </circle>
+      </g>
+
+      <g class="preview" v-else-if="(tool === 'rectangleTable') && mouseStatus"
+        :transform="`translate(-70, -30)`">
+        <rect class="seat-preview" :x="drawingCurrentX" :y="drawingCurrentY"
+          :width="140" :height="60">
+        </rect>
+        <circle class="seat-preview" v-for="index in 4" :key="index"
+          :cx="drawingCurrentX + 40 * (index - 1) + 10" :cy="drawingCurrentY - 10"
+          :r="10">
+        </circle>
+        <circle class="seat-preview" v-for="index in 4" :key="index"
+          :cx="drawingCurrentX + 40 * (index - 1) + 10" :cy="drawingCurrentY + 70"
+          :r="10">
+        </circle>
+      </g>
+
+      <circle class="seat-preview"
+        v-else-if="tool === 'row' && !rowDrawing && mouseStatus" :cx="rowCurrentX"
+        :cy="rowCurrentY" :r="10"></circle>
+      <circle class="seat-preview"
+        v-else-if="tool === 'rows' && !rowBlockDrawing && mouseStatus"
+        :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
+      <circle class="seat-preview"
+        v-else-if="tool === 'stgrows' && !stgrowBlockDrawing && mouseStatus"
+        :cx="rowCurrentX" :cy="rowCurrentY" :r="10"></circle>
+      <g class="row-preview" v-else-if="tool === 'row' && rowDrawing">
         <line class="preview" :x1="drawingStartX" :y1="drawingStartY"
           :x2="drawingCurrentX" :y2="drawingCurrentY"></line>
         <line class="auxline"
@@ -2331,13 +3002,13 @@ export default {
     rowDrawingSeats.length +
     rowDrawPosition.y -
     30
-    " text-anchor="middle" fill="black" dy=".3em" style="z-index: 99">
+    " text-anchor="middle" fill="black" dy=".35em" style="z-index: 99">
           {{ rowDrawingSeats.length }} Seats
         </text>
         <circle class="seat-preview" v-for="(s, sid) in rowDrawingSeats"
           :key="sid" :cx="s.x" :cy="s.y" r="10"></circle>
       </g>
-      <g class="rows-preview" v-if="tool === 'rows' && rowBlockDrawing"
+      <g class="rows-preview" v-else-if="tool === 'rows' && rowBlockDrawing"
         :transform="rowBlockTransform">
         <g v-for="rid in rowBlockRows" :key="rid">
           <circle class="seat-preview" v-for="sid in rowBlockSeats" :key="sid"
@@ -2345,25 +3016,12 @@ export default {
           </circle>
         </g>
         <text v-if="rowBlockRows * rowBlockSeats > 0" :x="10" :y="-30"
-          fill="black" dy=".3em" style="z-index: 99">
+          fill="black" dy=".35em" style="z-index: 99">
           {{ rowBlockRows }} × {{ rowBlockSeats }} Seats
         </text>
-        <!-- <text v-if="rowBlockRows * rowBlockSeats > 0" :x="10" :y="-30"
-          fill="black" dy=".3em" style="z-index: 99">
-          {{ rowBlockRows * rowBlockSeats }} Seats
-        </text> -->
-        <!-- <rect v-if="rowBlockSeats + rowBlockRows >= 7"
-          :x="(rowSeatSpacing * rowBlockSeats) / 2 - 25 - 12.5"
-          :y="(rowSpacing * rowBlockRows) / 2 - 25" width="50" height="25"
-          fill="#00c"></rect>
-        <text v-if="rowBlockSeats + rowBlockRows >= 7"
-          :x="(rowSeatSpacing * rowBlockSeats) / 2 - 12.5"
-          :y="(rowSpacing * rowBlockRows) / 2 - 12.5" text-anchor="middle"
-          fill="#fff" dy=".3em">
-          {{ rowBlockRows }} × {{ rowBlockSeats }}
-        </text> -->
+
       </g>
-      <g class="rows-preview" v-if="tool === 'stgrows' && stgrowBlockDrawing"
+      <g class="rows-preview" v-else-if="tool === 'stgrows' && stgrowBlockDrawing"
         :transform="rowBlockTransform">
         <!-- //change here -->
         <g v-for="rid in stgrowBlockRows" :key="rid">
@@ -2374,42 +3032,23 @@ export default {
               :cy="rowSpacing * (rid - 1)" r="10">
             </circle>
           </g>
-          <g v-else>
+          <g v-if="rid % 2 === 0">
             <circle class="seat-preview" v-for="sid in stgrowBlockSeats1"
               :key="sid"
               :cx="rid % 2 ? rowSeatSpacing * (sid - 1) : rowSeatSpacing * (sid - 1) + rowSeatSpacing / 2"
               :cy="rowSpacing * (rid - 1)" r="10">
             </circle>
           </g>
-          <!-- <rect v-if="stgrowBlockSeats + stgrowBlockRows >= 7"
-            :x="(rowSeatSpacing * stgrowBlockSeats) / 2 - 25 - 12.5"
-            :y="(rowSpacing * stgrowBlockRows) / 2 - 25" width="50" height="25"
-            fill="#00c"></rect>
-          <text v-if="stgrowBlockSeats + stgrowBlockRows >= 7"
-            :x="(rowSeatSpacing * stgrowBlockSeats) / 2 - 12.5"
-            :y="(rowSpacing * stgrowBlockRows) / 2 - 12.5" text-anchor="middle"
-            fill="#fff" dy=".3em">
-            {{ stgrowBlockRows }} × {{ stgrowBlockSeats }}
-          </text> -->
         </g>
-        <!-- <text v-if="stgrowBlockRows * stgrowBlockSeats > 0" :x="10" :y="-30"
-          fill="black" dy=".3em" style="z-index: 99">
-          {{ stgrowBlockRows * stgrowBlockSeats }} Seats
-        </text> -->
-        <!-- <rect v-if="stgrowBlockSeats + stgrowBlockRows > 0" :x="10" :y="-50"
-          width="50" height="25" fill="#00c"></rect>
-        <text v-if="stgrowBlockSeats + stgrowBlockRows > 0" :x="33"
-          :y="-50 + 12.5" text-anchor="middle" fill="#fff" dy=".3em">
-          {{ stgrowBlockRows }} × {{ stgrowBlockSeats }}
-        </text> -->
+
         <text v-if="stgrowBlockRows * stgrowBlockSeats > 0" :x="10" :y="-30"
-          fill="black" dy=".3em" style="z-index: 99">
+          fill="black" dy=".35em" style="z-index: 99">
           {{ stgrowBlockRows }} × {{ stgrowBlockSeats }} Seats
         </text>
       </g>
 
       <rect class="selection-area"
-        v-if="(tool == 'select' || tool == 'seatselect') && selecting"
+        v-else-if="(tool == 'select' || tool == 'seatselect') && selecting"
         :x="Math.min(selectingStartX, selectingCurrentX)"
         :y="Math.min(selectingStartY, selectingCurrentY)"
         :width="Math.abs(selectingStartX - selectingCurrentX)"
@@ -2501,7 +3140,7 @@ svg .selection-boundary {
 svg .preview {
   stroke: #0064d0;
   stroke-width: 2px;
-  fill: rgba(0, 0, 204, 0.3);
+  fill: #8fc8f3;
 }
 
 svg .auxline {

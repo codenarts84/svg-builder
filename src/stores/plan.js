@@ -4,7 +4,13 @@ import Vue, { ref } from "vue";
 import { v4 as uuid } from "uuid";
 import Ajv from "ajv";
 import schema from "../schema/seating-plan.schema.json";
-import { letterCounter, reverse, SEAT_NUMBERINGS } from "@/lib/numbering";
+import {
+  letterCounter,
+  skipLetterCounter,
+  reverse,
+  SEAT_NUMBERINGS,
+} from "@/lib/numbering";
+import { generateID } from "@/lib/numbers";
 import { useMainStore } from ".";
 
 // This is certainly not a best practice, but we don't want these two reactive for performance reasons
@@ -16,10 +22,17 @@ export const usePlanStore = defineStore("plan", {
     _plan: {
       zones: [],
       categories: [],
+      sections: [],
       size: {
         width: 0,
         height: 0,
       },
+      point: {
+        x: 0,
+        y: 0,
+      },
+      name: "My Charting Board",
+      mode: false,
     },
     validationErrors: undefined,
     hasUndo: false,
@@ -34,6 +47,7 @@ export const usePlanStore = defineStore("plan", {
     getCategoryByName: (state) => (category) => {
       return state._plan.categories.find((c) => c.name === category);
     },
+    categories: (state) => state._plan.categories,
   },
   actions: {
     persistPlan(skipHistory = false) {
@@ -54,6 +68,225 @@ export const usePlanStore = defineStore("plan", {
         this.validatePlan();
         this.timeoutID = null;
       }, 500);
+    },
+
+    setMode(mode) {
+      this._plan.mode = mode;
+      this.persistPlan();
+    },
+
+    validationPlan() {
+      let nCategory = 0;
+      let nSection = 0;
+      const seatIds = [];
+      let nTableLabel = 0;
+      let nTableAbv = 0;
+      let nCapacity = 0;
+      let nSectionLabel = 0;
+      let nSectionAbv = 0;
+      let nSeatLabel = 0;
+      let nRowLabel = 0;
+
+      for (const z of this.plan.zones) {
+        for (const r of z.rows) {
+          for (const s of r.seats) {
+            if (!s.category || !s.section_label || !s.seat_number) {
+              s.valid = false;
+              if (!s.category) {
+                nCategory++;
+              }
+              if (!s.section_label) {
+                nSection++;
+              }
+              if (!s.seat_number) {
+                nSeatLabel++;
+              }
+            } else {
+              s.valid = true;
+            }
+            seatIds.push(s.guid);
+          }
+          if (!r.row_number) nRowLabel++;
+        }
+        for (const a of z.areas) {
+          if (
+            a.shape === "gaCircle" ||
+            a.shape === "gaSquare" ||
+            a.shape === "gaPolygon"
+          ) {
+            if (
+              !a.category ||
+              !a.section_label ||
+              a.capacity < 1 ||
+              !a.label ||
+              !a.abbreviation
+            ) {
+              a.valid = false;
+              if (!a.category) {
+                nCategory++;
+              }
+              if (!a.section_label) {
+                nSection++;
+              }
+              if (a.capacity <= 0) {
+                nCapacity++;
+              }
+              if (!a.label) {
+                nSectionLabel++;
+              }
+              if (!a.abbreviation) {
+                nSectionAbv++;
+              }
+            } else a.valid = true;
+            seatIds.push(a.guid);
+          }
+          if (a.shape === "roundTable" || a.shape === "rectangleTable") {
+            for (const s of a.seats) {
+              if (
+                !s.category ||
+                !s.section_label ||
+                !s.seat_number ||
+                !a.label.name ||
+                !a.label.abv
+              ) {
+                s.valid = false;
+                if (!s.category) {
+                  nCategory++;
+                }
+                if (!s.section_label) {
+                  nSection++;
+                }
+                if (!s.seat_number) nSeatLabel++;
+              } else s.valid = true;
+              seatIds.push(s.guid);
+            }
+            if (!a.label.name) {
+              nTableLabel += a.seats.length;
+            }
+            if (!a.label.abv) {
+              nTableAbv += a.seats.length;
+            }
+          }
+        }
+      }
+
+      const temp = [...new Set(seatIds)];
+      const nSeat = seatIds.length - temp.length;
+      const isValid =
+        nCategory ||
+        nSection ||
+        nSeat ||
+        nTableLabel ||
+        nTableAbv ||
+        nCapacity ||
+        nSectionLabel ||
+        nSectionAbv ||
+        nSeatLabel ||
+        nRowLabel;
+
+      return {
+        category: nCategory,
+        section: nSection,
+        seatId: nSeat,
+        tableLabel: nTableLabel,
+        tableAbv: nTableAbv,
+        capacity: nCapacity,
+        sectionLabel: nSectionLabel,
+        sectionAbv: nSectionAbv,
+        seatLabel: nSeatLabel,
+        rowLabel: nRowLabel,
+        isValid,
+      };
+
+      // return {
+      //   category: nCategory
+      //     ? `${nCategory} element(s) without category.`
+      //     : "All elements contain category.",
+      //   section: nSection
+      //     ? `${nSection} element(s) without section.`
+      //     : "All elements contain section.",
+      // };
+    },
+
+    validatePosition() {
+      let nSeat = 0;
+      const positions = [];
+
+      for (const z of this.plan.zones) {
+        for (const r of z.rows) {
+          for (const s of r.seats) {
+            positions.push({
+              x: s.position.x + r.position.x,
+              y: s.position.y + r.position.y,
+            });
+          }
+        }
+      }
+
+      const res = this.detectOverlaps(positions, 19);
+      return res;
+    },
+
+    detectOverlaps(positions, threshold) {
+      const cellSize = threshold;
+      const grid = new Map();
+
+      function getGridKey(x, y) {
+        const gridX = Math.floor(x / cellSize);
+        const gridY = Math.floor(y / cellSize);
+        return `${gridX},${gridY}`;
+      }
+
+      // Place each position into the grid
+      for (const { x, y } of positions) {
+        const key = getGridKey(x, y);
+        if (!grid.has(key)) {
+          grid.set(key, []);
+        }
+        grid.get(key).push({ x, y });
+      }
+
+      let overlapCount = 0;
+
+      // Check for overlaps within each cell and adjacent cells
+      for (const [key, points] of grid.entries()) {
+        const [gridX, gridY] = key.split(",").map(Number);
+
+        for (let i = 0; i < points.length; i++) {
+          const { x: x1, y: y1 } = points[i];
+
+          // Check the same cell
+          for (let j = i + 1; j < points.length; j++) {
+            const { x: x2, y: y2 } = points[j];
+            if (
+              Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) <
+              threshold
+            ) {
+              overlapCount++;
+            }
+          }
+
+          // Check the adjacent cells
+          for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+              if (dx === 0 && dy === 0) continue; // Skip the current cell
+              const adjacentKey = `${gridX + dx},${gridY + dy}`;
+              if (grid.has(adjacentKey)) {
+                for (const { x: x2, y: y2 } of grid.get(adjacentKey)) {
+                  if (
+                    Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) <
+                    threshold
+                  ) {
+                    overlapCount++;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return overlapCount;
     },
 
     validatePlan() {
@@ -77,8 +310,7 @@ export const usePlanStore = defineStore("plan", {
                 const sname = `${z.name}>${r.row_number}>${s.seat_number}`;
                 if (!s.seat_guid) {
                   errors.push({
-                    text: `Seat ${(z.name)} > ${r.row_number} > ${s.seat_number
-                      } has no seat ID.`,
+                    text: `Seat ${z.name} > ${r.row_number} > ${s.seat_number} has no seat ID.`,
                     uuid: s.uuid,
                     tool: "seatselect",
                   });
@@ -132,16 +364,19 @@ export const usePlanStore = defineStore("plan", {
             const row = {
               position: { x: position.x, y: position.y + rix * row_spacing },
               // row_number: (rix + 1).toString(),
-              row_number: letterCounter(rix + 1, 'A'),
+              row_number: letterCounter(rix + 1, "A"),
               row_number_position: "both",
               seats: [],
               uuid: uuid(),
+              guid: generateID(),
+              rotation: 0,
             };
             for (const six of [...Array(seats).keys()]) {
               row.seats.push({
                 seat_number: (six + 1).toString(),
                 seat_guid: uuid(),
                 uuid: uuid(),
+                guid: generateID(),
                 position: { x: six * seat_spacing, y: 0 },
                 category: "",
               });
@@ -170,11 +405,13 @@ export const usePlanStore = defineStore("plan", {
               row = {
                 position: { x: position.x, y: position.y + rix * row_spacing },
                 // row_number: (rix + 1).toString(),
-                row_number: letterCounter(rix + 1, 'A'),
+                row_number: letterCounter(rix + 1, "A"),
                 row_number_position: "both",
                 seats: [],
+                guid: generateID(),
                 uuid: uuid(),
-              }
+                rotation: 0,
+              };
 
               for (const six of [...Array(seats).keys()]) {
                 row.seats.push({
@@ -182,24 +419,31 @@ export const usePlanStore = defineStore("plan", {
                   // row_number: letterCounter(rix + 1, 'A'),
                   seat_guid: uuid(),
                   uuid: uuid(),
+                  guid: generateID(),
                   position: { x: six * seat_spacing, y: 0 },
                   category: "",
                 });
               }
             } else {
               row = {
-                position: { x: position.x + 10, y: position.y + rix * row_spacing },
+                position: {
+                  x: position.x + 10,
+                  y: position.y + rix * row_spacing,
+                },
                 // row_number: (rix + 1).toString(),
-                row_number: letterCounter(rix + 1, 'A'),
+                row_number: letterCounter(rix + 1, "A"),
                 row_number_position: "both",
                 seats: [],
                 uuid: uuid(),
+                guid: generateID(),
+                rotation: 0,
               };
               for (const six of [...Array(seats - 1).keys()]) {
                 row.seats.push({
                   seat_number: (six + 1).toString(),
                   seat_guid: uuid(),
                   uuid: uuid(),
+                  guid: generateID(),
                   position: { x: six * seat_spacing, y: 0 },
                   category: "",
                 });
@@ -218,12 +462,12 @@ export const usePlanStore = defineStore("plan", {
     },
 
     undo() {
-      if (this.undoStack.length >= 2) {
+      if (this.undoStack.length > 2) {
         const plan = this.undoStack.pop();
         this.redoStack.push(plan);
         this._plan = JSON.parse(this.undoStack[this.undoStack.length - 1]);
         this.hasRedo = true;
-        this.hasUndo = this.undoStack.length >= 2;
+        this.hasUndo = this.undoStack.length > 2;
         this.persistPlan({ skipHistory: true });
       }
     },
@@ -257,6 +501,10 @@ export const usePlanStore = defineStore("plan", {
     },
 
     deleteCategory(name) {
+      if (this._plan.mode) {
+        alert("Can not delete category");
+        return;
+      }
       this._plan.categories = this._plan.categories.filter(
         (z) => z.name !== name
       );
@@ -264,6 +512,10 @@ export const usePlanStore = defineStore("plan", {
     },
 
     deleteObjects(objects) {
+      if (this._plan.mode) {
+        alert("Can not delete object");
+        return;
+      }
       objects = useMainStore().selection;
       this._plan.zones = this._plan.zones.filter(
         (z) => !objects.includes(z.uuid)
@@ -274,11 +526,15 @@ export const usePlanStore = defineStore("plan", {
         for (const r of z.rows) {
           r.seats = r.seats.filter((s) => !objects.includes(s.uuid));
         }
+        for (const a of z.areas) {
+          if (a.shape === "roundTable" || a.shape === "rectangleTable") {
+            a.seats = a.seats.filter((s) => !objects.includes(s.uuid));
+          }
+        }
       }
       // Assume there's an `unselect` action
       // this.unselect(objects);
       useMainStore().unselect(objects);
-      console.log('delete Obejct', useMainStore().selection);
       this.persistPlan();
     },
 
@@ -299,7 +555,34 @@ export const usePlanStore = defineStore("plan", {
       this.hasRedo = false;
     },
 
-    modifyRows(rowIds, args) {
+    setTableCategory(tables, val) {
+      tables.forEach((t) => {
+        for (const s of t.seats) {
+          s.category = val;
+        }
+      });
+      this.persistPlan();
+    },
+
+    setTableSeatCategory(seats, val) {
+      for (const s of seats) {
+        s.category = val;
+      }
+      this.persistPlan();
+    },
+
+    setGACategory(areas, val) {
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((a) => {
+          if (areas.includes(a.uuid)) {
+            a.category = val;
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+    modifyRows({ rowIds, ...args }) {
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid)) {
@@ -324,7 +607,7 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
-    modifySeats(seatIds, args) {
+    modifySeats({ seatIds, ...args }) {
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           r.seats.forEach((s) => {
@@ -351,7 +634,538 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
-    modifyAreas(areaIds, args) {
+    modifyRectangleTableWidth(areas, w) {
+      areas.forEach((a) => {
+        a.rectangleTable.width = w;
+        let top = a.seats.filter((item) => item.special === "top");
+        let bottom = a.seats.filter((item) => item.special === "bottom");
+        let left = a.seats.filter((item) => item.special === "left");
+        let right = a.seats.filter((item) => item.special === "right");
+        const dt = (w - 20) / (top.length - 1);
+        const db = (w - 20) / (bottom.length - 1);
+        top = top.map((item, idx) => {
+          item.position.x = dt * idx + 10;
+          return item;
+        });
+        bottom = bottom.map((item, idx) => {
+          item.position.x = db * idx + 10;
+          return item;
+        });
+        right = right.map((item, idx) => {
+          item.position.x = w + 10;
+          return item;
+        });
+        a.seats = [...top, ...bottom, ...left, ...right];
+      });
+      this.persistPlan();
+    },
+
+    modifyRectangleTableHeight(areas, h) {
+      areas.forEach((a) => {
+        a.rectangleTable.height = h;
+        let top = a.seats.filter((item) => item.special === "top");
+        let bottom = a.seats.filter((item) => item.special === "bottom");
+        let left = a.seats.filter((item) => item.special === "left");
+        let right = a.seats.filter((item) => item.special === "right");
+        const dl = (h - 20) / (left.length - 1);
+        const dr = (h - 20) / (right.length - 1);
+        bottom = bottom.map((item, idx) => {
+          item.position.y = h + 10;
+          return item;
+        });
+        left = left.map((item, idx) => {
+          item.position.y = idx * dl + 10;
+          return item;
+        });
+        right = right.map((item, idx) => {
+          item.position.y = idx * dr + 10;
+          return item;
+        });
+        a.seats = [...top, ...bottom, ...left, ...right];
+      });
+      this.persistPlan();
+    },
+
+    modifyRectangleTableCapacityT(areas, val) {
+      areas.forEach((r) => {
+        const width = r.rectangleTable.width;
+        let top = r.seats.filter((item) => item.special === "top");
+        const category = r.seats[r.seats.length - 1].category;
+        const dt = (width - 20) / (val - 1);
+        let numbers = [];
+        for (let numbering of SEAT_NUMBERINGS) {
+          try {
+            let guessedStartAt = numbering.findStartAt(r.seats[0].seat_number);
+
+            let guessedNumbers = numbering.compute(r.seats, guessedStartAt);
+            if (
+              r.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx])
+                .length === r.seats.length
+            ) {
+              const temp = [];
+              for (let i = 0; i < 500; i++) {
+                temp.push({});
+              }
+              numbers = numbering.compute(r.seats.concat(temp), guessedStartAt);
+
+              break;
+            }
+
+            let seatsReversed = [...r.seats].reverse();
+            let guessedStartAtRev = numbering.findStartAt(
+              seatsReversed[0].seat_number
+            );
+            let guessedNumbersRev = numbering.compute(
+              seatsReversed,
+              guessedStartAtRev
+            );
+            if (
+              seatsReversed.filter(
+                (s, idx) => s.seat_number === guessedNumbersRev[idx]
+              ).length === r.seats.length
+            ) {
+              numbers = numbering.compute(
+                seatsReversed.concat([{}]),
+                guessedStartAtRev
+              );
+              // for (const s of r.seats) {
+              //   s.seat_number = newNumbers.pop();
+              //   // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+              //   s.seat_guid = uuid();
+              // }
+              break;
+            }
+          } catch (e) {
+            console.warn(
+              "Crash while trying to test seat numbering schema",
+              numbering,
+              e
+            );
+          }
+        }
+
+        if (val > 1) {
+          top = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: idx * dt + 10,
+                  y: -10,
+                },
+                radius: 10,
+                seat_number: numbers[idx],
+                color: "#333333",
+                guid: generateID(),
+                uuid: uuid(),
+                special: "top",
+                category,
+              };
+            });
+        } else {
+          top = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: width / 2,
+                  y: -10,
+                },
+                radius: 10,
+                seat_number: numbers[idx],
+                color: "#333333",
+                uuid: uuid(),
+                guid: generateID(),
+                special: "top",
+                category,
+              };
+            });
+        }
+
+        const ss = r.seats.filter((item) => item.special !== "top");
+        ss.forEach((item, idx) => (item.seat_number = numbers[idx + val]));
+        r.seats = [...top, ...ss];
+      });
+      this.persistPlan();
+    },
+
+    modifyRectangleTableCapacityB(areas, val) {
+      areas.forEach((r) => {
+        const width = r.rectangleTable.width;
+        const height = r.rectangleTable.height;
+        let bottom = r.seats.filter((item) => item.special === "bottom");
+        const category = r.seats[r.seats.length - 1].category;
+        const dt = (width - 20) / (val - 1);
+        let numbers = [];
+        for (let numbering of SEAT_NUMBERINGS) {
+          try {
+            let guessedStartAt = numbering.findStartAt(r.seats[0].seat_number);
+
+            let guessedNumbers = numbering.compute(r.seats, guessedStartAt);
+            if (
+              r.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx])
+                .length === r.seats.length
+            ) {
+              const temp = [];
+              for (let i = 0; i < 500; i++) {
+                temp.push({});
+              }
+              numbers = numbering.compute(r.seats.concat(temp), guessedStartAt);
+
+              break;
+            }
+
+            let seatsReversed = [...r.seats].reverse();
+            let guessedStartAtRev = numbering.findStartAt(
+              seatsReversed[0].seat_number
+            );
+            let guessedNumbersRev = numbering.compute(
+              seatsReversed,
+              guessedStartAtRev
+            );
+            if (
+              seatsReversed.filter(
+                (s, idx) => s.seat_number === guessedNumbersRev[idx]
+              ).length === r.seats.length
+            ) {
+              numbers = numbering.compute(
+                seatsReversed.concat([{}]),
+                guessedStartAtRev
+              );
+              // for (const s of r.seats) {
+              //   s.seat_number = newNumbers.pop();
+              //   // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+              //   s.seat_guid = uuid();
+              // }
+              break;
+            }
+          } catch (e) {
+            console.warn(
+              "Crash while trying to test seat numbering schema",
+              numbering,
+              e
+            );
+          }
+        }
+
+        const top = r.seats.filter((item) => item.special === "top");
+        const right = r.seats.filter((item) => item.special === "right");
+        const left = r.seats.filter((item) => item.special === "left");
+
+        let st = top.length + right.length;
+
+        if (val > 1) {
+          bottom = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: idx * dt + 10,
+                  y: height + 10,
+                },
+                radius: 10,
+                seat_number: numbers[st + idx],
+                color: "#333333",
+                uuid: uuid(),
+                guid: generateID(),
+                special: "bottom",
+                category,
+              };
+            });
+        } else {
+          bottom = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: width / 2,
+                  y: height + 10,
+                },
+                radius: 10,
+                seat_number: numbers[st + idx],
+                color: "#333333",
+                uuid: uuid(),
+                guid: generateID(),
+                special: "bottom",
+                category,
+              };
+            });
+        }
+
+        st += val;
+
+        left.forEach((i, idx) => {
+          i.seat_number = numbers[st + idx];
+        });
+        r.seats = [...top, ...right, ...bottom, ...left];
+      });
+      this.persistPlan();
+    },
+
+    modifyRectangleTableCapacityR(areas, val) {
+      areas.forEach((r) => {
+        const width = r.rectangleTable.width;
+        const height = r.rectangleTable.height;
+        let right = r.seats.filter((item) => item.special === "right");
+        const category = r.seats[r.seats.length - 1].category;
+        const dt = (height - 20) / (val - 1);
+        let numbers = [];
+        for (let numbering of SEAT_NUMBERINGS) {
+          try {
+            let guessedStartAt = numbering.findStartAt(r.seats[0].seat_number);
+
+            let guessedNumbers = numbering.compute(r.seats, guessedStartAt);
+            if (
+              r.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx])
+                .length === r.seats.length
+            ) {
+              const temp = [];
+              for (let i = 0; i < 500; i++) {
+                temp.push({});
+              }
+              numbers = numbering.compute(r.seats.concat(temp), guessedStartAt);
+
+              break;
+            }
+
+            let seatsReversed = [...r.seats].reverse();
+            let guessedStartAtRev = numbering.findStartAt(
+              seatsReversed[0].seat_number
+            );
+            let guessedNumbersRev = numbering.compute(
+              seatsReversed,
+              guessedStartAtRev
+            );
+            if (
+              seatsReversed.filter(
+                (s, idx) => s.seat_number === guessedNumbersRev[idx]
+              ).length === r.seats.length
+            ) {
+              numbers = numbering.compute(
+                seatsReversed.concat([{}]),
+                guessedStartAtRev
+              );
+              // for (const s of r.seats) {
+              //   s.seat_number = newNumbers.pop();
+              //   // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+              //   s.seat_guid = uuid();
+              // }
+              break;
+            }
+          } catch (e) {
+            console.warn(
+              "Crash while trying to test seat numbering schema",
+              numbering,
+              e
+            );
+          }
+        }
+
+        const top = r.seats.filter((item) => item.special === "top");
+        const bottom = r.seats.filter((item) => item.special === "bottom");
+        const left = r.seats.filter((item) => item.special === "left");
+
+        let st = top.length;
+        if (val > 1) {
+          right = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: width + 10,
+                  y: idx * dt + 10,
+                },
+                radius: 10,
+                seat_number: numbers[idx + st],
+                color: "#333333",
+                uuid: uuid(),
+                guid: generateID(),
+                special: "right",
+                category,
+              };
+            });
+        } else {
+          right = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: width + 10,
+                  y: height / 2,
+                },
+                radius: 10,
+                seat_number: numbers[idx + st],
+                color: "#333333",
+                uuid: uuid(),
+                guid: generateID(),
+                special: "right",
+                category,
+              };
+            });
+        }
+
+        st += val;
+        bottom.forEach((i, idx) => {
+          i.seat_number = numbers[st + idx];
+        });
+        st += bottom.length;
+        left.forEach((i, idx) => {
+          i.seat_number = numbers[st + idx];
+        });
+        r.seats = [...top, ...right, ...bottom, ...left];
+      });
+      this.persistPlan();
+    },
+
+    modifyRectangleTableCapacityL(areas, val) {
+      areas.forEach((r) => {
+        const width = r.rectangleTable.width;
+        const height = r.rectangleTable.height;
+        let left = r.seats.filter((item) => item.special === "left");
+        const category = r.seats[r.seats.length - 1].category;
+        const dt = (height - 20) / (val - 1);
+        let numbers = [];
+        for (let numbering of SEAT_NUMBERINGS) {
+          try {
+            let guessedStartAt = numbering.findStartAt(r.seats[0].seat_number);
+
+            let guessedNumbers = numbering.compute(r.seats, guessedStartAt);
+            if (
+              r.seats.filter((s, idx) => s.seat_number === guessedNumbers[idx])
+                .length === r.seats.length
+            ) {
+              const temp = [];
+              for (let i = 0; i < 500; i++) {
+                temp.push({});
+              }
+              numbers = numbering.compute(r.seats.concat(temp), guessedStartAt);
+
+              break;
+            }
+
+            let seatsReversed = [...r.seats].reverse();
+            let guessedStartAtRev = numbering.findStartAt(
+              seatsReversed[0].seat_number
+            );
+            let guessedNumbersRev = numbering.compute(
+              seatsReversed,
+              guessedStartAtRev
+            );
+            if (
+              seatsReversed.filter(
+                (s, idx) => s.seat_number === guessedNumbersRev[idx]
+              ).length === r.seats.length
+            ) {
+              numbers = numbering.compute(
+                seatsReversed.concat([{}]),
+                guessedStartAtRev
+              );
+              // for (const s of r.seats) {
+              //   s.seat_number = newNumbers.pop();
+              //   // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+              //   s.seat_guid = uuid();
+              // }
+              break;
+            }
+          } catch (e) {
+            console.warn(
+              "Crash while trying to test seat numbering schema",
+              numbering,
+              e
+            );
+          }
+        }
+
+        const top = r.seats.filter((item) => item.special === "top");
+        const right = r.seats.filter((item) => item.special === "right");
+        const bottom = r.seats.filter((item) => item.special === "bottom");
+        const st = top.length + right.length + bottom.length;
+
+        if (val > 1) {
+          left = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: -10,
+                  y: idx * dt + 10,
+                },
+                radius: 10,
+                seat_number: numbers[st + idx],
+                color: "#333333",
+                uuid: uuid(),
+                guid: generateID(),
+                special: "left",
+                category,
+              };
+            });
+        } else {
+          left = Array(val)
+            .fill(0)
+            .map((item, idx) => {
+              return {
+                position: {
+                  x: -10,
+                  y: height / 2,
+                },
+                radius: 10,
+                seat_number: numbers[st + idx],
+                color: "#333333",
+                uuid: uuid(),
+                guid: generateID(),
+                special: "left",
+                category,
+              };
+            });
+        }
+        r.seats = [...top, ...right, ...bottom, ...left];
+      });
+      this.persistPlan();
+    },
+
+    modifyRoundTableRadius(areas, r) {
+      areas.forEach((a) => {
+        a.radius = r;
+        const total = a.seats.length + a?.space;
+        a.seats.forEach((s, idx, arr) => {
+          const degree = ((2 * Math.PI) / total) * idx;
+          s.position.x = (r + 10) * Math.cos(degree);
+          s.position.y = (r + 10) * Math.sin(degree);
+        });
+      });
+      this.persistPlan();
+    },
+
+    modifyRoundTableSpace(areas, value) {
+      areas.forEach((a) => {
+        a.space = value;
+        const total = value + a.capacity;
+        const r = a.radius;
+        a.seats.forEach((s, idx, arr) => {
+          const degree = ((2 * Math.PI) / total) * idx;
+          s.position.x = (r + 10) * Math.cos(degree);
+          s.position.y = (r + 10) * Math.sin(degree);
+        });
+      });
+      this.persistPlan();
+    },
+
+    modifyTableSeatLabel(seatId, seat_number) {
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((a) => {
+          if (a.shape === "roundTable" || a.shape === "rectangleTable") {
+            const seat = a.seats.find((s) => s.uuid === seatId);
+            if (seat) {
+              seat.seat_number = seat_number;
+            }
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+    modifyAreas({ areaIds, ...args }) {
+      // console.log(areaIds, args)
       this._plan.zones.forEach((z) => {
         z.areas.forEach((a) => {
           if (areaIds.includes(a.uuid)) {
@@ -376,6 +1190,16 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
+    addPolygonPoint(area, pid, point) {
+      area.polygon.points.splice(pid, 0, point);
+      this.persistPlan();
+    },
+
+    removePolygonPoint(area, pid) {
+      area.polygon.points.splice(area, pid);
+      this.persistPlan();
+    },
+
     addSeat(rowIds) {
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
@@ -384,7 +1208,10 @@ export const usePlanStore = defineStore("plan", {
 
             // Figure out new position
             if (r.seats.length === 1) {
-              newposition = { x: r.seats[0].x + 25, y: r.seats[0].y };
+              newposition = {
+                x: r.seats[0].position.x + 25,
+                y: r.seats[0].position.y,
+              };
             } else {
               const dx =
                 r.seats[r.seats.length - 1].position.x -
@@ -403,7 +1230,6 @@ export const usePlanStore = defineStore("plan", {
             let newnumber = "?";
             for (let numbering of SEAT_NUMBERINGS) {
               try {
-                numbering = SEAT_NUMBERINGS.find((n) => n.id === "alpha");
                 let guessedStartAt = numbering.findStartAt(
                   r.seats[0].seat_number
                 );
@@ -456,11 +1282,68 @@ export const usePlanStore = defineStore("plan", {
 
             r.seats.push({
               seat_number: newnumber,
-              seat_guid: `${z.zone_id}-${r.row_number}-${newnumber}`,
+              // seat_guid: `${z.zone_id}-${r.row_number}-${newnumber}`,
+              seat_guid: uuid(),
               uuid: uuid(),
+              guid: generateID(),
               position: newposition,
               category: r.seats[r.seats.length - 1].category,
             });
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+    addSectionLabel(rowIds, label, abv) {
+      this._plan.zones.forEach((z) => {
+        z.rows.forEach((r) => {
+          if (rowIds.includes(r.uuid) && r.seats.length) {
+            r.seats.forEach((s) => {
+              s.section_label = label;
+              s.section_abv = abv;
+            });
+          } else {
+            r.seats.forEach((s) => {
+              if (rowIds.includes(s.uuid)) {
+                s.section_label = label;
+                s.section_abv = abv;
+              }
+            });
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+    addGASectionLabel(areaIds, label, abv) {
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((r) => {
+          if (areaIds.includes(r.uuid)) {
+            r.section_label = label;
+            r.section_abv = abv;
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+    addTableSectionLabel(ids, label, abv) {
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((r) => {
+          if (ids.includes(r.uuid) && r.seats.length) {
+            r.seats.forEach((s) => {
+              s.section_label = label;
+              s.section_abv = abv;
+            });
+          } else {
+            if (r?.seats?.length)
+              r.seats.forEach((s) => {
+                if (ids.includes(s.uuid)) {
+                  s.section_label = label;
+                  s.section_abv = abv;
+                }
+              });
           }
         });
       });
@@ -490,7 +1373,6 @@ export const usePlanStore = defineStore("plan", {
     },
 
     renumberSeats(rowIds, numbering, startAt, reversed) {
-      // console.log('aaaaaaaaaaaaa')
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid) && r.seats.length) {
@@ -506,58 +1388,290 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
-    renumberCircleSeats(rowIds, count) {
+    skipLetterSeats(rowIds, numbering, startAt, reversed, skip_letter) {
       this._plan.zones.forEach((z) => {
-        z.areas.forEach((r) => {
-          if (rowIds.includes(r.uuid)) {
-            const res = [];
-            // if (shape === 'roundTable') {
-            for (let si = 0; si < count; si++) {
-              const uid = uuid();
-              const degree = 2 * Math.PI / count * si;
-              res.push({
-                text: (si + 1).toString(),
-                x: 40 * Math.cos(degree),
-                y: 40 * Math.sin(degree),
-                r: 10,
-                uid
-              })
-            }
-            r.roundTable.seats = res;
-            // }
-            // } else if (shape === 'rectangleTable') {
-            //   for (let idx = 0; idx < count; idx++) {
-            //     const len = count;
-            //     const mid = Math.ceil(len / 2);
-            //     const width = 120 - 10;
-            //     const height = 40;
-            //     console.log('sdh,', idx)
-            //     let x;
-            //     // if (len % 2 === 0) {
-            //     x = (width / (mid - 1)) * (idx % mid);
-            //     // }
-            //     // else {
-            //     //   x = (width / (mid - 1 - Math.floor(idx / mid))) * (idx % mid);
-            //     // }
-            //     const y = idx < mid ? -20 : 60;
-            //     console.log('width, height', x, y)
-
-            //     const uid = uuid();
-            //     return {
-            //       text: (idx + 1).toString(),
-            //       x: x + 5,
-            //       y,
-            //       r: 10,
-            //       uid
-            //     }
-            //   }
-            //   r.rectangleTable.seats = res;
+        z.rows.forEach((r) => {
+          if (rowIds.includes(r.uuid) && r.seats.length) {
+            const numbers = numbering.skip(r.seats, startAt, skip_letter);
+            // console.log(r.seats, numbers);
+            r.seats.forEach((s) => {
+              s.skip_number = reversed ? numbers.pop() : numbers.shift();
+            });
           }
         });
       });
       this.persistPlan();
     },
 
+    skipLetterRows(rowIds, numbering, startAt, reversed, skip_letter) {
+      const numbers = numbering.skip(rowIds, startAt, skip_letter);
+      this._plan.zones.forEach((z) => {
+        z.rows.forEach((r) => {
+          if (rowIds.includes(r.uuid) && r.seats.length) {
+            r.skip_number = reversed ? numbers.pop() : numbers.shift();
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+    renumberTableSeats(areaIds, numbering, startAt, reversed) {
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((r) => {
+          if (areaIds.includes(r.uuid) && r.seats.length) {
+            const numbers = numbering.compute(r.seats, startAt);
+            // console.log(r.seats, numbers);
+            r.seats.forEach((s) => {
+              s.seat_number = reversed ? numbers.pop() : numbers.shift();
+              s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+            });
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+    skipLetterTableSeats(areaIds, numbering, startAt, reversed, skip_letter) {
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((r) => {
+          if (areaIds.includes(r.uuid) && r.seats.length) {
+            const numbers = numbering.skip(r.seats, startAt, skip_letter);
+            r.seats.forEach((s) => {
+              s.skip_number = reversed ? numbers.pop() : numbers.shift();
+              // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+            });
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+    changeNumberSeats(rowIds, value) {
+      value = Math.max(1, value);
+      this._plan.zones.forEach((z) => {
+        z.rows.forEach((r) => {
+          if (rowIds.includes(r.uuid) && r.seats.length) {
+            // add seats
+            if (r.seats.length === value) return;
+            const cnt = Math.abs(r.seats.length - value);
+
+            let newnumber = [];
+            if (r.seats.length < value) {
+              let newPositions = [];
+              if (r.seats.length === 1) {
+                for (let i = 0; i < cnt; i++) {
+                  newPositions.push({
+                    x: r.seats[0].position.x + 25 * (i + 1),
+                    y: r.seats[0].position.y,
+                  });
+                }
+              } else {
+                const dx =
+                  r.seats[r.seats.length - 1].position.x -
+                  r.seats[r.seats.length - 2].position.x;
+                const dy =
+                  r.seats[r.seats.length - 1].position.y -
+                  r.seats[r.seats.length - 2].position.y;
+
+                for (let i = 0; i < cnt; i++) {
+                  newPositions.push({
+                    x: r.seats[r.seats.length - 1].position.x + dx * (i + 1),
+                    y: r.seats[r.seats.length - 1].position.y + dy * (i + 1),
+                  });
+                }
+              }
+
+              for (let numbering of SEAT_NUMBERINGS) {
+                try {
+                  let guessedStartAt = numbering.findStartAt(
+                    r.seats[0].seat_number
+                  );
+
+                  let guessedNumbers = numbering.compute(
+                    r.seats,
+                    guessedStartAt
+                  );
+                  if (
+                    r.seats.filter(
+                      (s, idx) => s.seat_number === guessedNumbers[idx]
+                    ).length === r.seats.length
+                  ) {
+                    const temp = [];
+                    for (let i = 0; i < cnt; i++) {
+                      temp.push({});
+                    }
+                    let newNumbers = numbering.compute(
+                      r.seats.concat(temp),
+                      guessedStartAt
+                    );
+
+                    newnumber = newNumbers.slice(
+                      r.seats.length,
+                      r.seats.length + cnt + 1
+                    );
+                    break;
+                  }
+
+                  let seatsReversed = [...r.seats].reverse();
+                  let guessedStartAtRev = numbering.findStartAt(
+                    seatsReversed[0].seat_number
+                  );
+                  let guessedNumbersRev = numbering.compute(
+                    seatsReversed,
+                    guessedStartAtRev
+                  );
+                  if (
+                    seatsReversed.filter(
+                      (s, idx) => s.seat_number === guessedNumbersRev[idx]
+                    ).length === r.seats.length
+                  ) {
+                    let newNumbers = numbering.compute(
+                      seatsReversed.concat([{}]),
+                      guessedStartAtRev
+                    );
+                    for (const s of r.seats) {
+                      s.seat_number = newNumbers.pop();
+                      // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+                      s.seat_guid = uuid();
+                    }
+                    newnumber = newNumbers.slice(0, cnt);
+                    break;
+                  }
+                } catch (e) {
+                  console.warn(
+                    "Crash while trying to test seat numbering schema",
+                    numbering,
+                    e
+                  );
+                }
+              }
+
+              for (let i = 0; i < cnt; i++) {
+                r.seats.push({
+                  seat_number: newnumber[i],
+                  // seat_guid: `${z.zone_id}-${r.row_number}-${newnumber[i]}`,
+                  uuid: uuid(),
+                  guid: generateID(),
+                  position: newPositions[i],
+                  category: r.seats[r.seats.length - 1].category,
+                });
+              }
+            }
+            // remove seats
+            else {
+              // r.seats = r.seats.slice(0, cnt);
+              for (let i = 0; i < cnt; i++) {
+                r.seats.pop();
+              }
+            }
+            this.persistPlan();
+          }
+        });
+      });
+    },
+
+    renumberCircleSeats(rowIds, count) {
+      count = Math.max(1, count);
+      this._plan.zones.forEach((z) => {
+        z.areas.forEach((r) => {
+          if (rowIds.includes(r.uuid)) {
+            const res = [];
+            r.capacity = count;
+            let numbers = [];
+            for (let numbering of SEAT_NUMBERINGS) {
+              try {
+                let guessedStartAt = numbering.findStartAt(
+                  r.seats[0].seat_number
+                );
+
+                let guessedNumbers = numbering.compute(r.seats, guessedStartAt);
+                if (
+                  r.seats.filter(
+                    (s, idx) => s.seat_number === guessedNumbers[idx]
+                  ).length === r.seats.length
+                ) {
+                  const temp = [];
+                  for (let i = 0; i < 500; i++) {
+                    temp.push({});
+                  }
+                  numbers = numbering.compute(
+                    r.seats.concat(temp),
+                    guessedStartAt
+                  );
+
+                  break;
+                }
+
+                let seatsReversed = [...r.seats].reverse();
+                let guessedStartAtRev = numbering.findStartAt(
+                  seatsReversed[0].seat_number
+                );
+                let guessedNumbersRev = numbering.compute(
+                  seatsReversed,
+                  guessedStartAtRev
+                );
+                if (
+                  seatsReversed.filter(
+                    (s, idx) => s.seat_number === guessedNumbersRev[idx]
+                  ).length === r.seats.length
+                ) {
+                  numbers = numbering.compute(
+                    seatsReversed.concat([{}]),
+                    guessedStartAtRev
+                  );
+                  // for (const s of r.seats) {
+                  //   s.seat_number = newNumbers.pop();
+                  //   // s.seat_guid = `${z.zone_id}-${r.row_number}-${s.seat_number}`;
+                  //   s.seat_guid = uuid();
+                  // }
+                  break;
+                }
+              } catch (e) {
+                console.warn(
+                  "Crash while trying to test seat numbering schema",
+                  numbering,
+                  e
+                );
+              }
+            }
+
+            const total = count + (r.space || 0);
+            for (let i = 0; i < count; i++) {
+              const degree = ((2 * Math.PI) / total) * i;
+              res.push({
+                seat_number: numbers[i],
+                position: {
+                  x: (r.radius + 10) * Math.cos(degree),
+                  y: (r.radius + 10) * Math.sin(degree),
+                },
+                category: r.seats[r.seats.length - 1].category,
+                r: 10,
+                guid: generateID(),
+                uuid: uuid(),
+              });
+            }
+
+            r.seats = res;
+
+            // for (let si = 0; si < count; si++) {
+            //   const degree = ((2 * Math.PI) / count) * si;
+            //   res.push({
+            //     text: (si + 1).toString(),
+            //     position: {
+            //       x: (r.radius + 10) * Math.cos(degree),
+            //       y: (r.radius + 10) * Math.sin(degree),
+            //     },
+            //     category: r.seats[r.seats.length - 1].category,
+            //     r: 10,
+            //     uuid: uuid(),
+            //   });
+            // }
+            // r.seats = res;
+          }
+        });
+      });
+      this.persistPlan();
+    },
 
     respaceRows(rowIds, spacing) {
       spacing = Math.max(spacing, 1); // Ensure spacing is at least 1
@@ -595,21 +1709,20 @@ export const usePlanStore = defineStore("plan", {
     createRow(zone, position, seats) {
       return new Promise((res, rej) => {
         try {
-          const rowids = [];
-
           zone = this._plan.zones.find((z) => z.uuid === zone);
           const row = {
             position: { x: position.x, y: position.y },
             row_number: "A",
             row_number_position: "both",
             seats: [],
+            guid: generateID(),
             uuid: uuid(),
+            rotation: 0,
           };
           for (const [six, spos] of seats.entries()) {
-            // console.log(six, spos);
             row.seats.push({
               seat_number: (six + 1).toString(),
-              seat_guid: uuid(),
+              guid: generateID(),
               uuid: uuid(),
               position: { x: spos.x, y: spos.y },
               category: "",
@@ -657,8 +1770,9 @@ export const usePlanStore = defineStore("plan", {
         }
       });
     },
+
     respaceSeats(rowIds, spacing) {
-      spacing = Math.max(spacing, 1); // Ensure minimum spacing is at least 1
+      spacing = Math.max(spacing, 20); // Ensure minimum spacing is at least 1
       this._plan.zones.forEach((z) => {
         z.rows.forEach((r) => {
           if (rowIds.includes(r.uuid) && r.seats.length > 1) {
@@ -684,6 +1798,7 @@ export const usePlanStore = defineStore("plan", {
     },
 
     loadPlan(plan) {
+      console.log(plan);
       for (const z of plan.zones) {
         if (!z.uuid) z.uuid = uuid();
         if (z._editor_id) {
@@ -714,10 +1829,71 @@ export const usePlanStore = defineStore("plan", {
       this._plan.name = name;
       this.persistPlan();
     },
+
     setPlanSize(width, height) {
       if (width) this._plan.size.width = width;
       if (height) this._plan.size.height = height;
       window.dispatchEvent(new Event("resize"));
+      this.persistPlan();
+    },
+
+    setFocusPoint(x, y) {
+      this._plan.point.x = x;
+      this._plan.point.y = y;
+      this.persistPlan();
+    },
+
+    setTag(rowIds, value) {
+      this._plan.zones.forEach((z) => {
+        z.rows.forEach((r) => {
+          if (rowIds.includes(r.uuid) && r.seats.length > 0) {
+            r.seats.forEach((s) => {
+              s.tag_name = value;
+            });
+          } else {
+            r.seats.forEach((s) => {
+              if (rowIds.includes(s.uuid)) {
+                s.tag_name = value;
+              }
+            });
+          }
+        });
+
+        z.areas.forEach((r) => {
+          if (r.shape === "roundTable" || r.shape === "rectangleTable") {
+            if (rowIds.includes(r.uuid) && r.seats.length > 0) {
+              r.seats.forEach((s) => {
+                s.tag_name = value;
+              });
+            } else {
+              r.seats.forEach((s) => {
+                if (rowIds.includes(s.uuid)) {
+                  s.tag_name = value;
+                }
+              });
+            }
+          } else if (
+            r.shape === "gaCircle" ||
+            r.shape === "gaSquare" ||
+            r.shape === "gaPolygon"
+          ) {
+            if (rowIds.includes(r.uuid)) {
+              r.tag_name = value;
+            }
+          }
+        });
+      });
+      this.persistPlan();
+    },
+
+    setRotateLabel(rowIds, value) {
+      this._plan.zones.forEach((z) => {
+        z.rows.forEach((r) => {
+          if (rowIds.includes(r.uuid)) {
+            r.rotate_label = value;
+          }
+        });
+      });
       this.persistPlan();
     },
 
@@ -729,14 +1905,6 @@ export const usePlanStore = defineStore("plan", {
         position: { x: 0, y: 0 },
         rows: [],
         areas: [],
-      });
-      this.persistPlan();
-    },
-
-    createCategory(name, color) {
-      this._plan.categories.push({
-        name: name,
-        color: color,
       });
       this.persistPlan();
     },
@@ -760,25 +1928,53 @@ export const usePlanStore = defineStore("plan", {
       this.persistPlan();
     },
 
+    createCategory(name, color) {
+      this._plan.categories.push({
+        id: uuid(),
+        name: name,
+        color: color,
+      });
+      this.persistPlan();
+    },
+
     changeCategory(oldname, newname, color) {
       const cat = this._plan.categories.find((c) => c.name === oldname);
       if (oldname !== newname) {
         if (this._plan.categories.filter((c) => c.name === newname).length) {
           // duplicate name, ignore
           // todo: error message
-        }
-        cat.name = newname;
-        for (const z of this._plan.zones) {
-          for (const r of z.rows) {
-            for (const s of r.seats) {
-              if (s.category === oldname) {
-                s.category = newname;
+        } else {
+          cat.name = newname;
+          for (const z of this._plan.zones) {
+            for (const r of z.rows) {
+              for (const s of r.seats) {
+                if (s.category === oldname) {
+                  s.category = newname;
+                }
+              }
+            }
+            for (const a of z.areas) {
+              if (
+                a.shape === "gaCircle" ||
+                a.shape === "gaSquare" ||
+                a.shape === "gaPolygon"
+              )
+                if (a.category === oldname) {
+                  a.category = newname;
+                }
+              if (a.shape === "roundTable" || a.shape === "rectanlgeTable") {
+                for (const s of a.seats) {
+                  if (s.category === oldname) {
+                    s.category = newname;
+                  }
+                }
               }
             }
           }
         }
+      } else {
+        cat.color = color;
       }
-      cat.color = color;
       this.persistPlan();
     },
   },

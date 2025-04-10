@@ -1,4 +1,4 @@
-import { circleBox, polygonBox, polygonEllipse } from "intersects";
+import { circleBox, polygonBox, polygonEllipse } from 'intersects';
 
 const positionInZone = (x, y, zoomTransform, zone) => {
   x = (x - zoomTransform.x) / zoomTransform.k - (zone ? zone.position.x : 0);
@@ -12,9 +12,9 @@ const estimateTextWidth = (text, size) => {
   case turned out to be unfeasibly complex due to the rendering cycle of vue. So we just use HTML5 canvas to get a
   rough idea. In our experiments, this works perfectly fine in Chrome and Firefox.
   */
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
-  context.font = size + "px " + "sans-serif";
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  context.font = size + 'px ' + 'sans-serif';
   return context.measureText(text).width;
 };
 
@@ -23,31 +23,31 @@ const rotateRectangluarBox = (area, abox) => {
   let oy = area.position.y;
   const rotated_points_x = [
     Math.cos((area.rotation / 180) * Math.PI) * (abox.x - ox) -
-    Math.sin((area.rotation / 180) * Math.PI) * (abox.y - oy) +
-    ox,
+      Math.sin((area.rotation / 180) * Math.PI) * (abox.y - oy) +
+      ox,
     Math.cos((area.rotation / 180) * Math.PI) * (abox.x + abox.width - ox) -
-    Math.sin((area.rotation / 180) * Math.PI) * (abox.y - oy) +
-    ox,
+      Math.sin((area.rotation / 180) * Math.PI) * (abox.y - oy) +
+      ox,
     Math.cos((area.rotation / 180) * Math.PI) * (abox.x - ox) -
-    Math.sin((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
-    ox,
+      Math.sin((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
+      ox,
     Math.cos((area.rotation / 180) * Math.PI) * (abox.x + abox.width - ox) -
-    Math.sin((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
-    ox,
+      Math.sin((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
+      ox,
   ];
   const rotated_points_y = [
     Math.sin((area.rotation / 180) * Math.PI) * (abox.x - ox) +
-    Math.cos((area.rotation / 180) * Math.PI) * (abox.y - oy) +
-    oy,
+      Math.cos((area.rotation / 180) * Math.PI) * (abox.y - oy) +
+      oy,
     Math.sin((area.rotation / 180) * Math.PI) * (abox.x + abox.width - ox) +
-    Math.cos((area.rotation / 180) * Math.PI) * (abox.y - oy) +
-    oy,
+      Math.cos((area.rotation / 180) * Math.PI) * (abox.y - oy) +
+      oy,
     Math.sin((area.rotation / 180) * Math.PI) * (abox.x - ox) +
-    Math.cos((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
-    oy,
+      Math.cos((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
+      oy,
     Math.sin((area.rotation / 180) * Math.PI) * (abox.x + abox.width - ox) +
-    Math.cos((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
-    oy,
+      Math.cos((area.rotation / 180) * Math.PI) * (abox.y + abox.height - oy) +
+      oy,
   ];
   const minx = Math.min(...rotated_points_x);
   const miny = Math.min(...rotated_points_y);
@@ -76,56 +76,40 @@ const rectangleBBox = (area) => {
 
 const roundTableBBox = (area) => {
   let abox = {
-    x: area.position.x - 50,
-    y: area.position.y - 50,
-    width: 100,
-    height: 100,
+    x: area.position.x - area.radius - 20,
+    y: area.position.y - area.radius - 20,
+    width: (area.radius + 20) * 2,
+    height: (area.radius + 20) * 2,
   };
   if (area.rotation) {
-    abox = rotateRectangluarBox(area, abox);
+    // abox = {
+    //   x: (area.position.x - area.radius - 20) * Math.cos(area.rotation / 180 * Math.PI),
+    //   y: (area.position.y - area.radius - 20) * Math.sin(area.rotation / 180 * Math.PI),
+    //   width: (area.radius + 20) * 2,
+    // height: (area.radius + 20) * 2
+    // }
   }
   return abox;
-}
+};
 
 const rectangleTableBBox = (area) => {
+  const top = area.seats.some((i) => i.special === 'top') ? 1 : 0;
+  const bottom = area.seats.some((i) => i.special === 'bottom') ? 1 : 0;
+  const left = area.seats.some((i) => i.special === 'left') ? 1 : 0;
+  const right = area.seats.some((i) => i.special === 'right') ? 1 : 0;
+  const width = area.rectangleTable.width + 20 * (left + right);
+  const height = area.rectangleTable.height + 20 * (top + bottom);
   let abox = {
-    x: area.position.x,
-    y: area.position.y - 40,
-    width: 120,
-    height: 100,
+    x: area.position.x - area.rectangleTable.width / 2 - left * 20,
+    y: area.position.y - area.rectangleTable.height / 2 - top * 20,
+    width: width,
+    height: height,
   };
   if (area.rotation) {
     abox = rotateRectangluarBox(area, abox);
   }
   return abox;
-}
-
-const gaSquareBBox = (area) => {
-  let abox = {
-    x: area.position.x,
-    y: area.position.y,
-    width: 80 * area.gaSquare.scale / 4,
-    height: 80 * area.gaSquare.scale / 4,
-  };
-  if (area.rotation) {
-    abox = rotateRectangluarBox(area, abox);
-  }
-  return abox;
-}
-
-const gaCircleBBox = (area) => {
-  let abox = {
-    x: area.position.x,
-    y: area.position.y,
-    width: 80 * area.gaCircle.scale / 4,
-    height: 80 * area.gaCircle.scale / 4,
-  };
-  if (area.rotation) {
-    abox = rotateRectangluarBox(area, abox);
-  }
-  return abox;
-}
-
+};
 
 const textBBox = (area, text, size) => {
   const width = estimateTextWidth(text, size);
@@ -144,13 +128,13 @@ const textBBox = (area, text, size) => {
 const polygonBBox = (area) => {
   const points = area.rotation
     ? area.polygon.points.map((p) => ({
-      x:
-        Math.cos((area.rotation / 180) * Math.PI) * p.x -
-        Math.sin((area.rotation / 180) * Math.PI) * p.y,
-      y:
-        Math.sin((area.rotation / 180) * Math.PI) * p.x +
-        Math.cos((area.rotation / 180) * Math.PI) * p.y,
-    }))
+        x:
+          Math.cos((area.rotation / 180) * Math.PI) * p.x -
+          Math.sin((area.rotation / 180) * Math.PI) * p.y,
+        y:
+          Math.sin((area.rotation / 180) * Math.PI) * p.x +
+          Math.cos((area.rotation / 180) * Math.PI) * p.y,
+      }))
     : area.polygon.points;
   const minx = Math.min(...points.map((s) => s.x));
   const miny = Math.min(...points.map((s) => s.y));
@@ -208,15 +192,15 @@ const findClosestGridPoint = ({ x, y, zone }) => {
 const rotatePolygon = (points, rotation, ox, oy) => {
   return rotation
     ? points.map((p) => ({
-      x:
-        Math.cos((rotation / 180) * Math.PI) * (p.x - ox) -
-        Math.sin((rotation / 180) * Math.PI) * (p.y - oy) +
-        ox,
-      y:
-        Math.sin((rotation / 180) * Math.PI) * (p.x - ox) +
-        Math.cos((rotation / 180) * Math.PI) * (p.y - oy) +
-        oy,
-    }))
+        x:
+          Math.cos((rotation / 180) * Math.PI) * (p.x - ox) -
+          Math.sin((rotation / 180) * Math.PI) * (p.y - oy) +
+          ox,
+        y:
+          Math.sin((rotation / 180) * Math.PI) * (p.x - ox) +
+          Math.cos((rotation / 180) * Math.PI) * (p.y - oy) +
+          oy,
+      }))
     : points;
 };
 
@@ -228,7 +212,7 @@ const testOverlap = (area, zone, xmin, ymin, xmax, ymax) => {
   // are very commonly used as "background" objects (e.g. to mark an area of the plan) and it would be absolutely
   // annoying if you'd always select them when selecting any seats within them. Also, intersection of arbitrary
   // non-convex polygons is really hard.
-  if (area.shape === "circle") {
+  if (area.shape === 'circle') {
     return circleBox(
       zone.position.x + area.position.x,
       zone.position.y + area.position.y,
@@ -238,7 +222,7 @@ const testOverlap = (area, zone, xmin, ymin, xmax, ymax) => {
       xmax - xmin,
       ymax - ymin
     );
-  } else if (area.shape === "ellipse") {
+  } else if (area.shape === 'ellipse' || area.shape === 'gaCircle') {
     // the intersection library only does axis-oriented ellipses… so what do we do? we rotate our rectangle instead…
     return polygonEllipse(
       rotatePolygon(
@@ -257,7 +241,7 @@ const testOverlap = (area, zone, xmin, ymin, xmax, ymax) => {
       area.ellipse.radius.x,
       area.ellipse.radius.y
     );
-  } else if (area.shape === "rectangle") {
+  } else if (area.shape === 'rectangle' || area.shape === 'gaSquare') {
     return rotatePolygon(
       [
         {
@@ -281,7 +265,7 @@ const testOverlap = (area, zone, xmin, ymin, xmax, ymax) => {
       zone.position.x + area.position.x,
       zone.position.y + area.position.y
     ).some((p) => p.x >= xmin && p.x <= xmax && p.y >= ymin && p.y <= ymax);
-  } else if (area.shape === "polygon") {
+  } else if (area.shape === 'polygon' || area.shape === 'gaPolygon') {
     return rotatePolygon(
       area.polygon.points.map((p) => ({
         x: zone.position.x + area.position.x + p.x,
@@ -291,7 +275,7 @@ const testOverlap = (area, zone, xmin, ymin, xmax, ymax) => {
       zone.position.x + area.position.x,
       zone.position.y + area.position.y
     ).some((p) => p.x >= xmin && p.x <= xmax && p.y >= ymin && p.y <= ymax);
-  } else if (area.shape === "text") {
+  } else if (area.shape === 'text') {
     const s = area.text.size || 16;
     const width = estimateTextWidth(area.text.text, s);
     return polygonBox(
@@ -323,6 +307,48 @@ const testOverlap = (area, zone, xmin, ymin, xmax, ymax) => {
       xmax - xmin,
       ymax - ymin
     );
+  } else if (area.shape === 'roundTable') {
+    return circleBox(
+      zone.position.x + area.position.x,
+      zone.position.y + area.position.y,
+      area.radius + 20,
+      xmin,
+      ymin,
+      xmax - xmin,
+      ymax - ymin
+    );
+  } else if (area.shape === 'rectangleTable') {
+    const top = area.seats.some((i) => i.special === 'top') ? 1 : 0;
+    const bottom = area.seats.some((i) => i.special === 'bottom') ? 1 : 0;
+    const left = area.seats.some((i) => i.special === 'left') ? 1 : 0;
+    const right = area.seats.some((i) => i.special === 'right') ? 1 : 0;
+    const width = area.rectangleTable.width + 20 * (left + right);
+    const height = area.rectangleTable.height + 20 * (top + bottom);
+    const stX = area.position.x - area.rectangleTable.width / 2 - left * 20;
+    const stY = area.position.y - area.rectangleTable.height / 2 - top * 20;
+    return rotatePolygon(
+      [
+        {
+          x: zone.position.x + stX,
+          y: zone.position.y + stY,
+        },
+        {
+          x: zone.position.x + stX + width,
+          y: zone.position.y + stY,
+        },
+        {
+          x: zone.position.x + stX + width,
+          y: zone.position.y + stY + height,
+        },
+        {
+          x: zone.position.x + stX,
+          y: zone.position.y + stY + height,
+        },
+      ],
+      area.rotation,
+      zone.position.x + area.position.x,
+      zone.position.y + area.position.y
+    ).some((p) => p.x >= xmin && p.x <= xmax && p.y >= ymin && p.y <= ymax);
   }
 };
 
@@ -360,6 +386,6 @@ export {
   testOverlap,
   roundTableBBox,
   rectangleTableBBox,
-  gaSquareBBox,
-  gaCircleBBox
+  estimateTextWidth,
+  rotateRectangluarBox,
 };

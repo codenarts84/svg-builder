@@ -1,18 +1,19 @@
 <template>
   <g :transform="transform" @mousedown="mousedown" @mouseup="mouseup"
     :class="classObject">
-    <g id="unique-id" class="row_group" data-row-label="">
+    <g :id="row.guid" class="row_group" :data-row-label="row.row_number"
+      text-anchor="middle">
       <text class="row_lable" v-if="rowNumberStart" :x="rowNumberStart.x"
-        :y="rowNumberStart.y" dy=".3em" :font-size="rowNumberStart.fontSize"
-        :text-anchor="rowNumberStart.textAnchor"
-        :transform="rowNumberStart.transform" fill="#888">{{ row.row_number
+        :y="rowNumberStart.y" dy=".35em" :font-size="rowNumberStart.fontSize"
+        :transform="rotate ? rowNumberStart.transform : ''" fill="#888">{{
+          row.skip ? row.skip_number : row.row_number
         }}</text>
       <text class="row_lable" v-if="rowNumberEnd" :x="rowNumberEnd.x"
-        :y="rowNumberEnd.y" dy=".3em" :font-size="rowNumberEnd.fontSize"
-        :text-anchor="rowNumberEnd.textAnchor" :transform="rowNumberEnd.transform"
-        fill="#888">{{ row.row_number }}</text>
-      <Seat class="seat_group" v-for="s in row.seats" :seat="s" :key="s.uuid"
-        :zone="zone" @startDragging="startDragging" :row_number="row.row_number">
+        :y="rowNumberEnd.y" dy=".35em" :font-size="rowNumberEnd.fontSize"
+        :transform="rotate ? rowNumberEnd.transform : ''" fill="#888">{{
+          row.skip ? row.skip_number : row.row_number }}</text>
+      <Seat v-for="s in row.seats" :row="row" :seat="s" :key="s.uuid" :zone="zone"
+        @startDragging="startDragging" :row_number="row.row_number">
       </Seat>
       <path class="selection-line" v-if="selection.includes(row.uuid)"
         :d="selectionLinePath"></path>
@@ -22,14 +23,14 @@
 <script>
 import Seat from "./Seat";
 import { useMainStore } from "@/stores";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { letterCounter } from "@/lib/numbering";
 import { useSeatFormatStore } from "@/stores/seatFormat";
 
 // import { mapState } from "vuex";
 // import { positionInZone } from "../../lib/geometry";
-
 const round = (fl, places) => Number(fl.toFixed(places ? places : 0));
+
 
 export default {
   name: "SeatComp",
@@ -37,16 +38,23 @@ export default {
   props: {
     row: Object,
     zone: Object,
+    ox: Number,
+    oy: Number,
+    selectionBoundary: Object
   },
   setup() {
     const store = useMainStore();
     const selection = computed(() => store.selection);
     const storeSeatFormat = useSeatFormatStore();
+    const temp_ox = ref(0);
+    const temp_oy = ref(0);
 
     return {
       tool: store.tool,
       selection,
-      seatCur: storeSeatFormat.seatCur
+      seatCur: storeSeatFormat.seatCur,
+      temp_ox,
+      temp_oy,
     };
   },
   data() {
@@ -88,6 +96,9 @@ export default {
     },
     transform() {
       return `translate(${this.row.position.x}, ${this.row.position.y})`;
+    },
+    rotate() {
+      return this.row.rotate_label;
     },
     rowNumberStart() {
       const temp = this.getRowNumber(this.row, false);
@@ -256,6 +267,21 @@ export default {
         // this is a panning event
         return false;
       }
+
+      setTimeout(() => {
+        if (this.selectionBoundary) {
+
+          // const temp = this.selectionBoundary;
+          this.temp_ox = this.selectionBoundary.x + this.selectionBoundary.width / 2;
+          this.temp_oy = this.selectionBoundary.y + this.selectionBoundary.height / 2;
+          const store = useMainStore();
+          store.set_Ox(this.temp_ox);
+          store.set_Oy(this.temp_oy);
+          // console.log('Aha', temp)
+        }
+      }, 100);
+
+
       const interval = new Date().getTime() - this.lastMouseUp;
       this.lastMouseUp = new Date().getTime();
       if (useMainStore().tool === "select") {
@@ -265,6 +291,7 @@ export default {
             event.shiftKey,
             this.zone.uuid
           );
+
         }
         if (useMainStore().dragging) {
           useMainStore().stopDragging();
@@ -275,6 +302,19 @@ export default {
     },
     mousedown(event) {
       // console.log('row mousedown')
+      setTimeout(() => {
+        if (this.selectionBoundary) {
+
+          // const temp = this.selectionBoundary;
+          this.temp_ox = this.selectionBoundary.x + this.selectionBoundary.width / 2;
+          this.temp_oy = this.selectionBoundary.y + this.selectionBoundary.height / 2;
+          const store = useMainStore();
+          store.set_Ox(this.temp_ox);
+          store.set_Oy(this.temp_oy);
+          // console.log('Aha', temp)
+        }
+      }, 100);
+
       if (event.ctrlKey || event.metaKey) {
         // this is a panning event
         return false;

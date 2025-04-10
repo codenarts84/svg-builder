@@ -1,3 +1,5 @@
 const round = (fl, places) => Number(fl.toFixed(places ? places : 0));
 
-export { round };
+const generateID = () => Math.random().toString(36).substring(2, 9);
+
+export { round, generateID };

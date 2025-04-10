@@ -1,58 +1,53 @@
 <template>
-  <v-btn class="btn" @click="dialog = true"
-    ><v-icon
-      v-if="status == true"
-      color="green"
-      icon="mdi-check-circle"
-      size="large"
-    ></v-icon>
-    <v-icon
-      v-if="status == false"
-      color="red"
-      icon="mdi-close-circle"
-      size="large"
-    ></v-icon>
+  <v-btn class="btn" @click="onClick">
+    <v-icon v-if="!isValid && !validateSeatSection && !validatePosition"
+      color="green" icon="mdi-check-circle" size="large"></v-icon>
+    <v-icon v-else color="red" icon="mdi-close-circle" size="large"></v-icon>
     <v-tooltip activator="parent" location="bottom">Validation</v-tooltip>
   </v-btn>
-  <div class="text-center">
-    <v-dialog v-model="dialog" width="400">
-      <v-card title="Chart Validation">
-        <v-card-text>
-          <v-chip class="ma-2" color="red" label>
-            <v-icon icon="mdi-close" start></v-icon>
-            280 element(s) without category.
-          </v-chip>
-          <v-chip class="ma-2" color="red" label>
-            <v-icon icon="mdi-close" start></v-icon>
-            280 element(s) without section.
-          </v-chip>
-
-          <v-chip class="ma-2" color="green" closable label>
-            <v-icon icon="mdi-check" start></v-icon>
-            All elements contain label
-          </v-chip>
-          <v-chip class="ma-2" color="green" closable label>
-            <v-icon icon="mdi-check" start></v-icon>
-            All elements contain abbreviation
-          </v-chip>
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-
-          <v-btn text="Close" variant="plain" @click="dialog = false"></v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </div>
 </template>
 <script setup>
-import { ref } from "vue";
-// import { useBoardStore } from "../../../../stores/svgStore";
+import { ref, computed } from "vue";
+import { useMainStore } from "@/stores";
+import { usePlanStore } from "@/stores/plan";
 
-// const boardStore = useBoardStore();
+const plan = computed(() => usePlanStore().plan)
+const validationErrors = computed(() => usePlanStore().validationPlan());
+const section_label = computed(() => useMainStore().section_label)
+const bvalid = computed(() => useMainStore().bvalid);
+const mainStore = useMainStore();
+
+const onClick = () => {
+  mainStore.setBvalid(!bvalid.value);
+}
+
+const isValid = computed(() => {
+  return validationErrors.value.isValid;
+})
+
+const validatePosition = computed(() => {
+  return usePlanStore().validatePosition();
+})
+
+const validateSeatSection = computed(() => {
+  let nSection = 0;
+  section_label.value.forEach(section => {
+    for (const z of plan.value.zones) {
+      const temp = []
+      for (const r of z.rows) {
+        for (const s of r.seats) {
+          if (s.section_label === section.label)
+            temp.push(`${r.row_number}${s.seat_number}`)
+        }
+      }
+      const tt = [...new Set(temp)];
+      nSection += (temp.length - tt.length);
+    }
+  })
+  return nSection;
+})
+
 const dialog = ref(false);
 const status = ref(false);
+
 </script>
