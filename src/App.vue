@@ -31,11 +31,12 @@
   }
 }
 
+* {
+  font-family: Poppins;
+}
+
 nav {
   transform: none !important;
 }
 
-* {
-  font-family: Poppins;
-}
 </style>
