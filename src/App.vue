@@ -8,9 +8,9 @@
 
 <style>
 #app {
-  font-family: Poppins, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: Poppins, Helvetica, Arial, sans-serif;
   text-align: center;
   height: 100vh;
   font-size: 14px;
