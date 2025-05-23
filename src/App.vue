@@ -16,7 +16,6 @@
   font-size: 14px;
 }
 
-
 #nav {
   display: none;
   padding: 30px;
