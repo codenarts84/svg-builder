@@ -16,7 +16,6 @@
   font-size: 14px;
 }
 
-
 #nav {
   display: none;
   padding: 30px;
@@ -31,11 +30,12 @@
   }
 }
 
+* {
+  font-family: Poppins;
+}
+
 nav {
   transform: none !important;
 }
 
-* {
-  font-family: Poppins;
-}
 </style>
