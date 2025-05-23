@@ -16,9 +16,6 @@
   font-size: 14px;
 }
 
-nav {
-  transform: none !important;
-}
 
 #nav {
   display: none;
@@ -32,6 +29,10 @@ nav {
       color: #42b983;
     }
   }
+}
+
+nav {
+  transform: none !important;
 }
 
 * {
