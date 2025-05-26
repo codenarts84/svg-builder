@@ -28,6 +28,12 @@
     <AreaTools v-if="isSelectedShapesOnly" :areas="selectedAreas()"
       :temp_Rotate="temp_Rotate" />
 
+    <template v-if="selection.length">
+      <CategoryComponent :set-category="setCategory"
+        :selected-category="selectedCategory" />
+      <v-divider></v-divider>
+    </template>
+
   </v-navigation-drawer>
 </template>
 
