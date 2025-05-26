@@ -65,4 +65,11 @@ const onAdd = () => {
 </script>
 
 <style>
+.add-button {
+  background-color: transparent;
+  color: #3d9ffb;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+}
 </style>
