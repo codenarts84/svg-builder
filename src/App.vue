@@ -7,15 +7,9 @@
 </template>
 
 <style>
-#app {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-family: Poppins, Helvetica, Arial, sans-serif;
-  text-align: center;
-  height: 100vh;
-  font-size: 14px;
+* {
+  font-family: Poppins;
 }
-
 
 #nav {
   display: none;
@@ -35,7 +29,13 @@ nav {
   transform: none !important;
 }
 
-* {
-  font-family: Poppins;
+#app {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: Poppins, Helvetica, Arial, sans-serif;
+  text-align: center;
+  height: 100vh;
+  font-size: 14px;
 }
+
 </style>
