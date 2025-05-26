@@ -7,6 +7,10 @@
 </template>
 
 <style>
+* {
+  font-family: Poppins;
+}
+
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -15,7 +19,6 @@
   height: 100vh;
   font-size: 14px;
 }
-
 
 #nav {
   display: none;
@@ -35,7 +38,4 @@ nav {
   transform: none !important;
 }
 
-* {
-  font-family: Poppins;
-}
 </style>
