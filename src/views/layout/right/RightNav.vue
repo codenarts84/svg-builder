@@ -2,6 +2,7 @@
   <v-navigation-drawer location="right"
     style="top: 51px; width: 300px; padding-bottom: 50px; bottom: 50px">
 
+
     <ValidationPanel v-if="bvalid" />
 
     <template v-if="!selection.length">
