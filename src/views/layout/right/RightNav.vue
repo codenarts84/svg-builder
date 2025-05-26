@@ -32,6 +32,7 @@
       <CategoryComponent :set-category="setCategory"
         :selected-category="selectedCategory" />
       <v-divider></v-divider>
+      <SectionLabel :section="section" :set-section="setSection" />
     </template>
 
   </v-navigation-drawer>
