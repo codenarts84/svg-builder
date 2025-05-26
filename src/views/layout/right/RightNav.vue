@@ -14,6 +14,8 @@
     <RowTools v-if="isSelectedRowsOnly" :rows="selectedRows()"
       :seats="selectedSeats()" :temp_Rotate="temp_Rotate" />
 
+    <SeatTools v-if="isSelectedSeatsOnly" :seats="selectedSeats()" />
+
     <GATools v-if="isSelectedGAOnly" :areas="selectedGA()"
       :temp_Rotate="temp_Rotate" />
 
