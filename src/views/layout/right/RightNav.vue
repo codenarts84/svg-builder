@@ -32,9 +32,6 @@
       <CategoryComponent :set-category="setCategory"
         :selected-category="selectedCategory" />
       <v-divider></v-divider>
-      <SectionLabel :section="section" :set-section="setSection" />
-      <v-divider></v-divider>
-      <TagsPanel :set-tag="setTag" :selected-tag="selectedTag" />
     </template>
 
   </v-navigation-drawer>
